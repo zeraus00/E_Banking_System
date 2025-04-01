@@ -1,4 +1,4 @@
-﻿namespace E_Banking.Models.Authentication
+﻿namespace E_BankingSystem.Data.Models.Authentication
 {
     // EmployeesAuth Table
     public class EmployeeAuth

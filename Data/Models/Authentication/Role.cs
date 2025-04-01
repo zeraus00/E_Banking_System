@@ -1,4 +1,4 @@
-﻿namespace E_Banking.Models.Authentication
+﻿namespace E_BankingSystem.Data.Models.Authentication
 {
     // Roles Table
     // Roles are used to group users with similar access rights

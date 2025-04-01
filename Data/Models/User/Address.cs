@@ -1,6 +1,6 @@
-﻿namespace E_Banking.Models.User
+﻿namespace E_BankingSystem.Data.Models.User
 {
-    using E_Banking.Models.Place;
+    using E_BankingSystem.Data.Models.Place;
     // Addresses Table
     public class Address
     {

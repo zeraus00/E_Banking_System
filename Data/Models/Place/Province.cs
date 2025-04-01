@@ -1,4 +1,4 @@
-﻿namespace E_Banking.Models.Place
+﻿namespace E_BankingSystem.Data.Models.Place
 {
     // Provinces Table
     public class Province

@@ -1,7 +1,7 @@
-﻿namespace E_Banking.Models.Authentication
+﻿namespace E_BankingSystem.Data.Models.Authentication
 {
-    using E_Banking.Models.Finance;
-    using E_Banking.Models.User;
+    using E_BankingSystem.Data.Models.Finance;
+    using E_BankingSystem.Data.Models.User;
 
 
     // AccountsAuth Table

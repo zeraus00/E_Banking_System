@@ -1,10 +1,10 @@
-﻿namespace E_Banking.Data
+﻿namespace E_BankingSystem.Data
 {
     using Microsoft.EntityFrameworkCore;
-    using E_Banking.Models.User;
-    using E_Banking.Models.Place;
-    using E_Banking.Models.Authentication;
-    using E_Banking.Models.Finance;
+    using E_BankingSystem.Data.Models.User;
+    using E_BankingSystem.Data.Models.Place;
+    using E_BankingSystem.Data.Models.Authentication;
+    using E_BankingSystem.Data.Models.Finance;
 
     public class EBankingContext : DbContext
     {
