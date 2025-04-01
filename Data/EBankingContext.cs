@@ -1,11 +1,5 @@
 ﻿namespace E_BankingSystem.Data
 {
-    using Microsoft.EntityFrameworkCore;
-    using E_BankingSystem.Data.Models.User;
-    using E_BankingSystem.Data.Models.Place;
-    using E_BankingSystem.Data.Models.Authentication;
-    using E_BankingSystem.Data.Models.Finance;
-
     public class EBankingContext : DbContext
     {
         public EBankingContext(DbContextOptions<EBankingContext> options) : base(options)
@@ -21,46 +15,9 @@
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            /*  AccountsAuth Table  */
-            var AccountsAuth = modelBuilder.Entity<AccountAuth>();
-            AccountsAuth.ToTable("AccountsAuth");
+            // Configure AccountAuth Table
+            modelBuilder.ApplyConfiguration(new AccountAuthConfiguration());
 
-            // Define primary key
-            AccountsAuth
-                .HasKey(au => au.AccountAuthId);
-            AccountsAuth
-                .Property(au => au.AccountAuthId)
-                .ValueGeneratedOnAdd();
-
-            // Define foreign key to Accounts (many-to-one)
-            AccountsAuth
-                .HasOne(au => au.Account)
-                .WithMany(a => a.AccountsAuth)
-                .HasForeignKey(au => au.AccountId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            // Define foreign key to UsersInfo (many-to-one)
-            AccountsAuth
-                .HasOne(au => au.User)
-                .WithMany(u => u.AccountsAuth)
-                .HasForeignKey(au => au.UserId)
-                .OnDelete(DeleteBehavior.SetNull);
-
-            // Define required and unique constraint for UserName
-            AccountsAuth
-                .Property(au => au.UserName)
-                .IsRequired();
-            AccountsAuth
-                .HasIndex(au => au.UserName)
-                .IsUnique();
-
-            // Define required and unique constraint for Email
-            AccountsAuth
-                .Property(au => au.Email)
-                .IsRequired();
-            AccountsAuth
-                .HasIndex(au => au.Email)
-                .IsUnique();
             /*  Accounts Table  */
             var Accounts = modelBuilder.Entity<Account>();
             Accounts.ToTable("Accounts");

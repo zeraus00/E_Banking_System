@@ -1,6 +1,5 @@
 ﻿namespace E_BankingSystem.Data.Models.User
 {
-    using E_BankingSystem.Data.Models.Authentication;
     // UsersInfo Table
     public class UserInfo
     {

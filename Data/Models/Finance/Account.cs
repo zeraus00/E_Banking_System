@@ -1,6 +1,5 @@
 ﻿namespace E_BankingSystem.Data.Models.Finance
 {
-    using E_BankingSystem.Data.Models.Authentication;
 
     // Accounts Table
     public class Account
