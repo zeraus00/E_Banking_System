@@ -8,10 +8,4 @@
     <AssemblyName>$(AssemblyName.Replace(' ', '_'))</AssemblyName>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Content Include="Components\Utilities\bank-background.png" />
-    <Content Include="Components\Utilities\favicon.png" />
-    <Content Include="Components\Utilities\profile.png" />
-  </ItemGroup>
-
 </Project>
