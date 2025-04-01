@@ -1,0 +1,19 @@
+﻿namespace E_Banking.Models.Finance
+{
+    using E_Banking.Models.Authentication;
+
+    // Accounts Table
+    public class Account
+    {
+        public int AccountId { get; set; }                          // Primary Key
+        public string AccountType { get; set; } = string.Empty;     // Required; Checking, Savings, etc.
+        public string AccountNumber { get; set; } = string.Empty;   // Required
+        public string AccountStatus { get; set; } = string.Empty;   // Required; Open, Closed, Suspended
+        public decimal Balance { get; set; } = 0.0m;                // Required; Default 0.0
+        public DateTime DateOpened { get; set; } = DateTime.UtcNow; // Required; Default DateTime.UtcNow
+        public DateTime? DateClosed { get; set; }
+
+
+        public ICollection<AccountAuth> AccountsAuth { get; set; } = null!; // Navigation Property
+    }
+}
