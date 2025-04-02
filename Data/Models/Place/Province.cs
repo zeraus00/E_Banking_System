@@ -9,5 +9,8 @@
 
         public int RegionId { get; set; }   // Foreign Key to Region
         public Region Region { get; set; } = null!; // Navigation Property
+
+
+        public ICollection<City> Cities { get; set; } = null!; // Navigation Property
     }
 }
