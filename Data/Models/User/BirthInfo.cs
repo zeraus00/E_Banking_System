@@ -4,12 +4,6 @@
     public class BirthInfo
     {
         public int BirthInfoId { get; set; }    // Primary Key
-
-        
-        public int UserId { get; set; } // Foreign Key to User
-        public CustomerAuth User { get; set; } = null!;
-
-
         public DateTime BirthDate { get; set; } // Required
 
 
@@ -23,5 +17,8 @@
         
         public int RegionId { get; set; }   // Foreign Key to Region
         public Region Region { get; set; } = null!; // Navigation Property
+
+
+        public ICollection<UserInfo> UserInfos { get; set; } = null!; // Navigation Property
     }
 }
