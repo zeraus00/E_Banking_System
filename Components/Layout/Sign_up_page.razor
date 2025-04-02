@@ -6,7 +6,7 @@
 	<main>
 
 		<div class="login_container">
-			<button type="button" class="btn-close mb-3" aria-label="Close" onclick="#"></button>
+			<button type="button" class="btn-close mb-5" aria-label="Close" onclick="#"></button>
 
 			<h2 class="fw-bold mb-5">User Registration</h2>
 
@@ -19,24 +19,45 @@
 			}
 
 			<div class="container">
-				<div class="row g-2">
-					<div class="col-md-4">First Name
+				<div class="row g-3 mb-2">
+					<div class="col-3">
+						First Name
 						<input class="form-control" @bind="firstName" placeholder="First Name">
 					</div>
-					<div class="col-md-4">Middle Name
+					<div class="col-3">
+						Middle Name
 						<input class="form-control" @bind="middleName" placeholder="Middle Name">
 					</div>
-					<div class="col-md-4">Last Name
+					<div class="col-3">
+						Last Name
 						<input class="form-control" @bind="lastName" placeholder="Last Name">
+					</div>
+					<div class="col-1">
+						Suffix
+						<input class="form-control" placeholder="Suffix">
 					</div>
 				</div>
 
-				<div class="row g-2">
-					<div class="col-md-6">Age
+				<div class="row g-3 mb-2">
+					<div class="col-1">
+						Age
 						<input class="form-control" placeholder="Age">
 					</div>
-					<div class="col-md-6">Sex
+					<div class="col-2">
+						Birth Date
+						<input class="form-control" placeholder="mm/dd/yyyy">
+					</div>
+					<div class="col-5">
+						Birth Place
+						<input class="form-control" placeholder="Full Address">
+					</div>
+					<div class="col-1">
+						Sex
 						<input class="form-control" placeholder="Sex">
+					</div>
+					<div class="col-2">
+						Civil Status
+						<input class="form-control" placeholder="Civil Status">
 					</div>
 				</div>
 
