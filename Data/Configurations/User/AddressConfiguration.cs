@@ -57,7 +57,7 @@
 
             // Define Relationship to UserInfo
             Addresses
-                .HasMany(a => a.UserInfos)
+                .HasMany(a => a.UsersInfo)
                 .WithOne(ui => ui.Address)
                 .HasForeignKey(a => a.AddressId)
                 .OnDelete(DeleteBehavior.SetNull);
