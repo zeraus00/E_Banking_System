@@ -7,50 +7,65 @@
         {
             CustomersAuth.ToTable("CustomersAuth", "Authentication");
 
-            // Define primary key
+            /*  Configure Table Properties  */
+
+            // CustomersAuthId (Primary Key)
             CustomersAuth
                 .HasKey(ca => ca.CustomerAuthId);
             CustomersAuth
                 .Property(ca => ca.CustomerAuthId)
                 .ValueGeneratedOnAdd();
 
-            // Define foreign key to Accounts (many-to-one)
+            // AccountId (Foreign Key to Accounts Table)
             CustomersAuth
                 .Property(ca => ca.AccountId)
                 .IsRequired();
+
+            // UserInfoId (Foreign Key to UsersInfo Table)
+            CustomersAuth
+                .Property(ca => ca.UserInfoId)
+                .IsRequired();
+
+            // UserName (Required; MaxLength=20 ; Unique)
+            CustomersAuth
+                .Property(ca => ca.UserName)
+                .IsRequired()
+                .HasMaxLength(20);
+            CustomersAuth
+                .HasIndex(ca => ca.UserName)
+                .IsUnique();
+
+            // Email (Required; Maxlength=254; Unique
+            CustomersAuth
+                .Property(ca => ca.Email)
+                .IsRequired()
+                .HasMaxLength(254);
+            CustomersAuth
+                .HasIndex(ca => ca.Email)
+                .IsUnique();
+
+            // Define required constraint for Password
+            CustomersAuth
+                .Property(ca => ca.Password)
+                .IsRequired()
+                .HasMaxLength(60)
+                .IsFixedLength();
+
+            /*  
+             *  Configure Relationships
+             *  Accounts (many-to-one)
+             *  UsersInfo (many-to-one)
+             */
             CustomersAuth
                 .HasOne(ca => ca.Account)
                 .WithMany(a => a.CustomersAuth)
                 .HasForeignKey(ca => ca.AccountId)
                 .OnDelete(DeleteBehavior.Cascade);
-
-            // Define foreign key to UsersInfo (many-to-one)
             CustomersAuth
                 .HasOne(ca => ca.UserInfo)
                 .WithMany(u => u.CustomersAuth)
                 .HasForeignKey(ca => ca.UserInfoId)
                 .OnDelete(DeleteBehavior.SetNull);
-
-            // Define required and unique constraint for UserName
-            CustomersAuth
-                .Property(ca => ca.UserName)
-                .IsRequired();
-            CustomersAuth
-                .HasIndex(ca => ca.UserName)
-                .IsUnique();
-
-            // Define required and unique constraint for Email
-            CustomersAuth
-                .Property(ca => ca.Email)
-                .IsRequired();
-            CustomersAuth
-                .HasIndex(ca => ca.Email)
-                .IsUnique();    
-
-            // Define required constraint for Password
-            CustomersAuth
-                .Property(ca => ca.Password)
-                .IsRequired();
         }
     }
 }

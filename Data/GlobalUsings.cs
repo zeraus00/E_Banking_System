@@ -15,7 +15,7 @@ namespace E_BankingSystem.Data
 {
     
     public class GlobalUsings
-{
+    {
         
-}
+    }
 }
