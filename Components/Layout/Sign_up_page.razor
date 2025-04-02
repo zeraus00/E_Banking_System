@@ -1,5 +1,198 @@
-﻿<h3>Sign_up_page</h3>
+﻿@page "/Sign_up_page"
+
+@inject NavigationManager NavigationManager
+
+<div class="page">
+	<main>
+
+		<div class="card p-4 shadow-lg">
+			<div class="d-flex justify-content-between align-items-center">
+				<h3 class="fw-bold text-light">User Registration</h3>
+				<button class="btn-close" aria-label="Close"></button>
+			</div>
+
+			<div class="information_box">
+
+				<div class="row g-2">
+					<div class="col-3">
+						<label class="text-light">First Name</label>
+						<input class="form-control" @bind="firstName" placeholder="First Name">
+					</div>
+					<div class="col-3">
+						 <label class="text-light">Middle Name</label>
+						<input class="form-control" @bind="middleName" placeholder="Middle Name">
+					</div>
+					<div class="col-3">
+						<label class="text-light">Last Name</label>
+						<input class="form-control" @bind="lastName" placeholder="Last Name">
+					</div>
+					<div class="col-1">
+						<label class="text-light">Suffix</label>
+						<input class="form-control" placeholder="Suffix">
+					</div>
+				</div>
+
+				<div class="row g-2 mt-2">
+					<div class="col-1">
+						<label class="text-light">Age</label>
+						<input class="form-control" type="number" placeholder="Age">
+					</div>
+					<div class="col-3">
+						<label class="text-light">Birth Date</label>
+						<input class="form-control" type="date" placeholder="mm/dd/yyyy">
+					</div>
+					<div class="col-4">
+						<label class="text-light">Birth Place</label>
+						<input class="form-control" placeholder="Full Address">
+					</div>
+					<div class="col-2">
+						<label class="text-light">Sex</label>
+						<select class="form-select">
+							<option>Male</option>
+							<option>Female</option>
+						</select>
+					</div>
+
+					<div class="col-2">
+						<label class="text-light">Civil Status</label>
+						<select class="form-select">
+							<option>Single</option>
+							<option>Married</option>
+							<option>Separated</option>
+							<option>Widowed</option>
+						</select>
+					</div>
+				</div>
+
+				<div class="row g-2 mt-2">
+					<div class="col-3">
+						<label class="text-light">Religion</label>
+						<input class="form-control" placeholder="Religion">
+					</div>
+					<div class="col-3">
+						<label class="text-light">Province</label>
+						<input class="form-control" placeholder="Province">
+					</div>
+					<div class="col-3">
+						<label class="text-light">Municipality</label>
+						<input class="form-control" placeholder="Municipality">
+					</div>
+					<div class="col-3">
+						<label class="text-light">Barangay</label>
+						<input class="form-control" placeholder="Barangay">
+					</div>
+				</div>
+
+				<div class="row g-2 mt-2">
+					<div class="col-3">
+						<label class="text-light">Street No.</label>
+						<input class="form-control" placeholder="Religion">
+					</div>
+					<div class="col-3">
+						<label class="text-light">House No.</label>
+						<input class="form-control" placeholder="Province">
+					</div>
+				</div>
+
+				<div class="row g-2 mt-2">
+					<div class="col-12">
+						<label class="text-light">Father's Name</label>
+						<div class="row g-2">
+							<div class="col-3">
+								<input class="form-control" placeholder="First Name">
+							</div>
+							<div class="col-3">
+								<input class="form-control" placeholder="Middle Name">
+							</div>
+							<div class="col-3">
+								<input class="form-control" placeholder="Last Name">
+							</div>
+							<div class="col-1">
+								<input class="form-control" placeholder="Suffix">
+							</div>
+						</div>
+					</div>
+
+					<div class="col-12">
+						<label class="text-light">Mother's Name</label>
+						<div class="row g-2">
+							<div class="col-3">
+								<input class="form-control" placeholder="First Name">
+							</div>
+							<div class="col-3">
+								<input class="form-control" placeholder="Middle Name">
+							</div>
+							<div class="col-3">
+								<input class="form-control" placeholder="Last Name">
+							</div>
+							<div class="col-1">
+								<input class="form-control" placeholder="Suffix">
+							</div>
+						</div>
+					</div>
+
+					<div class="col-12">
+						<label class="text-light">Beneficiary's Name</label>
+						<div class="row g-2">
+							<div class="col-3">
+								<input class="form-control" placeholder="First Name">
+							</div>
+							<div class="col-3">
+								<input class="form-control" placeholder="Middle Name">
+							</div>
+							<div class="col-3">
+								<input class="form-control" placeholder="Last Name">
+							</div>
+							<div class="col-1">
+								<input class="form-control" placeholder="Suffix">
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div  class="row g-2 mt-3">
+					<div class="col-6">
+						<label class="text-light">UUpload Government Valid ID (Front & Back)</label>
+						<div class="d-flex gap-2">
+							<button class="btn btn-light">Upload</button>
+							<button class="btn btn-outline-light">View Atttachment</button>
+						</div>
+					</div>
+
+				</div>
+
+				<div class="form-check d-flex justify-content-end mt-3">
+					<input class="form-check-input mx-2" type="checkbox" id="termsAndConditions">
+					<label class="form-check-label text-light" for="termsAndConditions">
+						I accept the terms and conditions
+					</label>
+				</div>
+
+				<div class="text-end mt-3">
+					<button class="btn btn-primary" @onclick="LoginAsync"> Register</button>
+				</div>
+
+			</div>
+		</div>
+	</main>
+</div>
+
 
 @code {
+	public string firstName = "";
+	public string middleName = "";
+	public string lastName = "";
+	public string error = "";
 
+	private void LoginAsync()
+	{
+		if (string.IsNullOrEmpty(firstName) || string.IsNullOrEmpty(lastName))
+		{
+			error = "Please fill in both the email and password.";
+			return;
+		}
+
+		error = "";
+		NavigationManager.NavigateTo("/Client_home_page");
+	}
 }

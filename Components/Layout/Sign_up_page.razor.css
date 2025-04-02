@@ -1,0 +1,28 @@
+﻿body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+.page {
+    margin-top: 5%;
+    margin-right: 5%;
+    margin-left: 5%;
+}
+
+.btn-close {
+    float: right;
+    background-color: white;
+    padding-block: 12px;
+    padding-inline: 12px;
+}
+
+.card {
+    text-align: left;
+    border: 2px solid white;
+    border-radius: 12px;
+    color: white;
+    background-color: rgba(10,15,58,0.8);
+    padding: 30px;
+    padding-top: 20px;
+}

@@ -1,2 +1,35 @@
 ﻿body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+.page {
+    margin-top: 5%;
+    margin-right: 35%;
+    margin-left: 35%;
+}
+
+.btn-close {
+    justify-content: flex-end;
+    background-color: white;
+    padding-block: 12px;
+    padding-inline: 12px;
+}
+
+.card {
+    padding: 30px;
+    padding-top: 20px;
+    background-color: rgba(10,15,58,0.9) !important;
+    border: 2px solid white;
+    border-radius: 12px;
+    color: white;
+}
+
+
+.loginform{
+    margin-top: 30px;
+    margin-bottom: 30px;
+    padding-left: 10px;
+    padding-right: 10px;
 }
