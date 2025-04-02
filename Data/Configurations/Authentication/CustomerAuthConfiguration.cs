@@ -16,6 +16,9 @@
 
             // Define foreign key to Accounts (many-to-one)
             CustomersAuth
+                .Property(ca => ca.AccountId)
+                .IsRequired();
+            CustomersAuth
                 .HasOne(ca => ca.Account)
                 .WithMany(a => a.CustomersAuth)
                 .HasForeignKey(ca => ca.AccountId)
