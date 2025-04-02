@@ -1,13 +1,23 @@
 ﻿@inherits LayoutComponentBase
 
 <div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-
     <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+
+        <div class="nav-horizontal">
+            <nav class="nav-container">
+                <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                    <span class="bi bi-house-door-fill"></span> Home
+                </NavLink>
+                <NavLink class="nav-link" href="counter">
+                    <span class="bi bi-person-lines-fill"></span> Contact
+                </NavLink>
+                <NavLink class="nav-link" href="weather">
+                    <span class="bi bi-info-circle-fill"></span> About
+                </NavLink>
+                <NavLink class="nav-link" href="login">
+                    <span class="bi bi-box-arrow-in-right"></span> Login
+                </NavLink>
+            </nav>
         </div>
 
         <article class="content px-4">
