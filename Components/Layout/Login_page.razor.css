@@ -11,17 +11,17 @@
 }
 
 .btn-close {
+    justify-content: flex-end;
     background-color: white;
     padding-block: 12px;
     padding-inline: 12px;
 }
 
-.login_container {
+.card {
     border: 2px solid white;
-    border-radius: 5%;
+    border-radius: 12px;
     color: white;
-    background-color: #21325B;
-    background-blend-mode: multiply;
+    background-color: rgba(10,15,58,0.8)#21325B;
     padding: 30px;
     padding-top: 20px;
 }
