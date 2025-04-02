@@ -15,34 +15,17 @@
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Configure AccountsAuth Table
+            //  Configure AccountsAuth Table
             modelBuilder.ApplyConfiguration(new CustomerAuthConfiguration());
 
-            // Configure EmployeesAuth Table
+            //  Configure EmployeesAuth Table
             modelBuilder.ApplyConfiguration(new EmployeeAuthConfiguration());
 
-            //Configure Roles Table
+            //  Configure Roles Table
             modelBuilder.ApplyConfiguration(new RoleConfiguration());
 
-            /*  Accounts Table  */
-            var Accounts = modelBuilder.Entity<Account>();
-            Accounts.ToTable("Accounts");
-
-            Accounts.HasKey(a => a.AccountId);
-            Accounts.Property(a => a.AccountId).ValueGeneratedOnAdd();
-
-            Accounts.Property(a => a.AccountType).IsRequired()
-                .HasMaxLength(20);
-
-            Accounts.Property(a => a.AccountNumber).IsRequired()
-                .HasMaxLength(12)
-                .IsFixedLength();
-
-            Accounts.Property(a => a.AccountStatus).IsRequired()
-                .HasMaxLength(10);
-
-            Accounts.Property(a => a.Balance).IsRequired()
-                .HasDefaultValue(0);
+            //  Configure Accounts Table
+            modelBuilder.ApplyConfiguration(new AccountConfiguration());
 
 
             base.OnModelCreating(modelBuilder);
