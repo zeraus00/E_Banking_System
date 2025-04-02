@@ -12,5 +12,7 @@
 
 
         public ICollection<City> Cities { get; set; } = null!; // Navigation Property
+        public ICollection<Address> Addresses { get; set; } = null!; // Navigation Property
+        public ICollection<BirthInfo> BirthsInfo { get; set; } = null!; // Navigation Property  
     }
 }
