@@ -3,7 +3,7 @@ global using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 global using E_BankingSystem.Data.Configurations.Authentication;
 global using E_BankingSystem.Data.Configurations.Finance;
-
+global using E_BankingSystem.Data.Configurations.Place;
 
 global using E_BankingSystem.Data.Models.User;
 global using E_BankingSystem.Data.Models.Place;
