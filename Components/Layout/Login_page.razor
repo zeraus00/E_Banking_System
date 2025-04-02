@@ -6,25 +6,6 @@
 <div class="page">
 	<main>
 
-		<div class="nav-horizontal">
-			<nav class="nav-container">
-				<NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-					<span class="bi bi-house-door-fill"></span> Home
-				</NavLink>
-				<NavLink class="nav-link" href="counter">
-					<span class="bi bi-person-lines-fill"></span> Contact
-				</NavLink>
-				<NavLink class="nav-link" href="weather">
-					<span class="bi bi-info-circle-fill"></span> About
-				</NavLink>
-				<NavLink href="Login_page">
-					<button type="button" class="nav-link button">
-						<span class="bi bi-box-arrow-in-right"></span> Login
-					</button>
-				</NavLink>
-			</nav>
-		</div>
-
 		<div class="mx-auto rounded border p-4" style="width: 400px;margin: 60px;">
 			<h3 class="text-center mb-3">Login</h3>
 
@@ -57,17 +38,9 @@
 			</div>
 
 		</div>
-		@* <article class="content px-4">
-			@Body
-		</article> *@
 	</main>
 </div>
 
-<div id="blazor-error-ui">
-	An unhandled error has occurred.
-	<a href="" class="reload">Reload</a>
-	<a class="dismiss">🗙</a>
-</div>
 
 @code {
 	public string email = "";
