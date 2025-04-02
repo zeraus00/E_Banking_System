@@ -36,6 +36,9 @@
             //  Configure Barangays Table
             modelBuilder.ApplyConfiguration(new BarangayConfiguration());
 
+            //  Configure Cities Table
+            modelBuilder.ApplyConfiguration(new CityConfiguration());
+
 
             base.OnModelCreating(modelBuilder);
         }
