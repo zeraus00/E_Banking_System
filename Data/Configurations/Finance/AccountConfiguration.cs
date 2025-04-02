@@ -37,11 +37,12 @@ namespace E_BankingSystem.Data.Configurations.Finance
                 .IsRequired()
                 .HasMaxLength(10);
 
-            //  Balance (Required; Default 0)
+            //  Balance (Required; DECIMAL(18,2); Default 0.0m)
             Accounts
                 .Property(a => a.Balance)
                 .IsRequired()
-                .HasDefaultValue(0);
+                .HasColumnType("DECIMAL(18,2)")
+                .HasDefaultValue(0.0m);
 
             //  DateOpened (Required; Default DateTime.UtcNow)
             Accounts
