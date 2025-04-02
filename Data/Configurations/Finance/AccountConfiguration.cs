@@ -8,44 +8,57 @@ namespace E_BankingSystem.Data.Configurations.Finance
         public void Configure(EntityTypeBuilder<Account> Accounts)
         {
             Accounts.ToTable("Accounts", "Finance");
-            // Define Primary Key
+
+            /*  Configure Table Properties  */
+
+            //  AccountId (Primary Key)
             Accounts
                 .HasKey(a => a.AccountId);
             Accounts
                 .Property(a => a.AccountId)
                 .ValueGeneratedOnAdd();
-            // Define Required Constraint for AccountType
+
+            //  AccountType (Required; MaxLength=20)
             Accounts
                 .Property(a => a.AccountType)
                 .IsRequired()
                 .HasMaxLength(20);
-            // Define Required Constraint for AccountNumber
+
+            //  AccountNumber (Required; MaxLength=12; FixedLength)
             Accounts
                 .Property(a => a.AccountNumber)
                 .IsRequired()
                 .HasMaxLength(12)
                 .IsFixedLength();
-            // Define Required Constraint for AccountStatus
+
+            //  AccountStatus (Required; MaxLength=10)
             Accounts
                 .Property(a => a.AccountStatus)
                 .IsRequired()
                 .HasMaxLength(10);
-            // Define Required Constraint for Balance
+
+            //  Balance (Required; Default 0)
             Accounts
                 .Property(a => a.Balance)
                 .IsRequired()
                 .HasDefaultValue(0);
-            // Define Required Constraint for DateOpened
+
+            //  DateOpened (Required; Default DateTime.UtcNow)
             Accounts
                 .Property(a => a.DateOpened)
                 .IsRequired()
                 .HasDefaultValueSql("NOW()");
-            // Define Optional Constraint for DateClosed
+
+            //  DateClosed (Optional)
             Accounts
                 .Property(a => a.DateClosed)
                 .IsRequired(false);
 
-            // Configure Relationship
+            /*
+             *  Configure Relationships
+             *  CustomersAuth (one-to-many)
+             *  Transactions (one-to-many)
+             */
             Accounts
                 .HasMany(a => a.CustomersAuth)
                 .WithOne(ca => ca.Account)
