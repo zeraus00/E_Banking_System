@@ -3,7 +3,7 @@
     // Transactions Table
     public class Transaction
     {
-        public int TransactionId { get; set; }          // Primary Key
+        public int TransactionId { get; private set; }          // Primary Key
 
 
         public int AccountId { get; set; }              // Foreign Key to Accounts Table
