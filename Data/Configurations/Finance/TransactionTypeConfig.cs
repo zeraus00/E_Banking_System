@@ -6,19 +6,25 @@
         public void Configure(EntityTypeBuilder<TransactionType> TransactionTypes)
         {
             TransactionTypes.ToTable("TransactionTypes", "Finance");
-            // Define Primary Key
+
+            /*  Configure Table Properties  */
+
+            //  TransactionTypeId (Primary Key)
             TransactionTypes
                 .HasKey(tt => tt.TransactionTypeId);
             TransactionTypes
                 .Property(tt => tt.TransactionTypeId)
                 .ValueGeneratedOnAdd();
-            // Define Required Constraint for TransactionTypeName
+            //  TransactionTypeName (Required; MaxLength=50)
             TransactionTypes
                 .Property(tt => tt.TransactionTypeName)
                 .IsRequired()
                 .HasMaxLength(50);
 
-            // Define one-to-many relationship with Transactions
+            /*
+             *  Configure Relationships
+             *  Transactions (one-to-many)
+             */
             TransactionTypes
                 .HasMany(tt => tt.Transactions)
                 .WithOne(t => t.TransactionType)
