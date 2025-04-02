@@ -6,13 +6,17 @@
         public void Configure(EntityTypeBuilder<Role> Roles)
         {
             Roles.ToTable("Roles", "Authentication");
-            // Define primary key
+
+            /*  Configure Table Properties  */
+
+            //  RoleId (Primary Key)
             Roles
                 .HasKey(r => r.RoleId);
             Roles
                 .Property(r => r.RoleId)
                 .ValueGeneratedOnAdd();
-            // Define required constraint for RoleName
+
+            //  RoleName (Required; MaxLength=50)
             Roles
                 .Property(r => r.RoleName)
                 .IsRequired()
