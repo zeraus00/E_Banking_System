@@ -33,6 +33,9 @@
             //  Configure TransactionTypes Table
             modelBuilder.ApplyConfiguration(new TransactionTypeConfig());
 
+            //  Configure Barangays Table
+            modelBuilder.ApplyConfiguration(new BarangayConfiguration());
+
 
             base.OnModelCreating(modelBuilder);
         }
