@@ -18,13 +18,14 @@
 }
 
 .card {
+    padding: 30px;
+    padding-top: 20px;
+    background-color: rgba(10,15,58,0.9) !important;
     border: 2px solid white;
     border-radius: 12px;
     color: white;
-    background-color: rgba(10,15,58,0.8)#21325B;
-    padding: 30px;
-    padding-top: 20px;
 }
+
 
 .loginform{
     margin-top: 30px;

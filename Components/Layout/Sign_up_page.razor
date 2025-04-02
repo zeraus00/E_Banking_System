@@ -64,24 +64,115 @@
 					</div>
 				</div>
 
-				<div class="col d-flex align-items-center">
-					<div class="form-check">
-						<input class="form-check-input" type="checkbox" id="rememberMe">
-						<label class="form-check-label" for="termsAndConditions">
-							I agree to the terms and conditions
-						</label>
-
+				<div class="row g-2 mt-2">
+					<div class="col-3">
+						<label class="text-light">Religion</label>
+						<input class="form-control" placeholder="Religion">
+					</div>
+					<div class="col-3">
+						<label class="text-light">Province</label>
+						<input class="form-control" placeholder="Province">
+					</div>
+					<div class="col-3">
+						<label class="text-light">Municipality</label>
+						<input class="form-control" placeholder="Municipality">
+					</div>
+					<div class="col-3">
+						<label class="text-light">Barangay</label>
+						<input class="form-control" placeholder="Barangay">
 					</div>
 				</div>
-			</div>
 
+				<div class="row g-2 mt-2">
+					<div class="col-3">
+						<label class="text-light">Street No.</label>
+						<input class="form-control" placeholder="Religion">
+					</div>
+					<div class="col-3">
+						<label class="text-light">House No.</label>
+						<input class="form-control" placeholder="Province">
+					</div>
+				</div>
 
-			<div class="rpw mb-2">
-				<div class="col d-grid">
+				<div class="row g-2 mt-2">
+					<div class="col-12">
+						<label class="text-light">Father's Name</label>
+						<div class="row g-2">
+							<div class="col-3">
+								<input class="form-control" placeholder="First Name">
+							</div>
+							<div class="col-3">
+								<input class="form-control" placeholder="Middle Name">
+							</div>
+							<div class="col-3">
+								<input class="form-control" placeholder="Last Name">
+							</div>
+							<div class="col-1">
+								<input class="form-control" placeholder="Suffix">
+							</div>
+						</div>
+					</div>
+
+					<div class="col-12">
+						<label class="text-light">Mother's Name</label>
+						<div class="row g-2">
+							<div class="col-3">
+								<input class="form-control" placeholder="First Name">
+							</div>
+							<div class="col-3">
+								<input class="form-control" placeholder="Middle Name">
+							</div>
+							<div class="col-3">
+								<input class="form-control" placeholder="Last Name">
+							</div>
+							<div class="col-1">
+								<input class="form-control" placeholder="Suffix">
+							</div>
+						</div>
+					</div>
+
+					<div class="col-12">
+						<label class="text-light">Beneficiary's Name</label>
+						<div class="row g-2">
+							<div class="col-3">
+								<input class="form-control" placeholder="First Name">
+							</div>
+							<div class="col-3">
+								<input class="form-control" placeholder="Middle Name">
+							</div>
+							<div class="col-3">
+								<input class="form-control" placeholder="Last Name">
+							</div>
+							<div class="col-1">
+								<input class="form-control" placeholder="Suffix">
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div  class="row g-2 mt-3">
+					<div class="col-6">
+						<label class="text-light">UUpload Government Valid ID (Front & Back)</label>
+						<div class="d-flex gap-2">
+							<button class="btn btn-light">Upload</button>
+							<button class="btn btn-outline-light">View Atttachment</button>
+						</div>
+					</div>
+
+				</div>
+
+				<div class="form-check d-flex justify-content-end mt-3">
+					<input class="form-check-input mx-2" type="checkbox" id="termsAndConditions">
+					<label class="form-check-label text-light" for="termsAndConditions">
+						I accept the terms and conditions
+					</label>
+				</div>
+
+				<div class="text-end mt-3">
 					<button class="btn btn-primary" @onclick="LoginAsync"> Register</button>
 				</div>
-			</div>
 
+			</div>
 		</div>
 	</main>
 </div>
