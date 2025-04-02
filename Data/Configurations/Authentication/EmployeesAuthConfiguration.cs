@@ -1,6 +1,6 @@
 ﻿namespace E_BankingSystem.Data.Configurations.Authentication
 {
-    public class EmployeeAuthConfiguration : IEntityTypeConfiguration<EmployeeAuth>
+    public class EmployeesAuthConfiguration : IEntityTypeConfiguration<EmployeeAuth>
     {
         // Configure EmployeesAuth Table
         public void Configure(EntityTypeBuilder<EmployeeAuth> EmployeesAuth)

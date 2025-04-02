@@ -1,6 +1,6 @@
 ﻿namespace E_BankingSystem.Data.Configurations.Authentication
 {
-    public class CustomerAuthConfiguration : IEntityTypeConfiguration<CustomerAuth>
+    public class CustomersAuthConfiguration : IEntityTypeConfiguration<CustomerAuth>
     {
         // Configure CustomersAuth Table
         public void Configure(EntityTypeBuilder<CustomerAuth> CustomersAuth)
