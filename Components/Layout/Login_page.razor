@@ -6,8 +6,12 @@
 <div class="page">
 	<main>
 
-		<div class="mx-auto rounded border p-4" style="width: 400px;margin: 60px;">
-			<h3 class="text-center mb-3">Login</h3>
+		<div class="login_container">
+			<button type="button" class="btn-close" aria-label="Close" onclick="#"></button>
+
+			<br>
+			<h2 class="text-center fw-bold">User Login</h2>
+			<br>
 
 			@if (error.Length > 0)
 			{
@@ -17,23 +21,39 @@
 				</div>
 			}
 
-			<div class="mb-3">
-				<label class="Form-label">Email</label>
-				<input class="form-control" @bind="email">
+			<div class="loginform">
+				<input class="form-control form-control-lg mb-3" @bind="email" placeholder="Email">
+				<input class="form-control form-control-lg" type="password" @bind="password" placeholder="Password">
+				
+				<div class="col d-flex align-items-center">
+
+					<div class="form-check">
+						<input class="form-check-input" type="checkbox" id="rememberMe">
+						<label class="form-check-label" for="rememberMe">
+							Remember me
+						</label>
+					</div>
+
+					<NavLink class="nav-link ms-auto" href="#">
+						<span class="bi bi-info-circle-fill"></span> Forget Password?
+					</NavLink>
+
+				</div>
 			</div>
 
-			<div class="mb-3">
-				<label class="form-label">Password</label>
-				<input class="form-control" type="password" @bind="password">
-			</div>
 
-			<div class="rpw">
+			<div class="rpw mb-2">
 				<div class="col d-grid">
 					<button class="btn btn-primary" @onclick="LoginAsync"> Log in</button>
 				</div>
+			</div>
 
-				<div class="col d-grid">
-					<button class="btn btn-outline-primary" href="Sign_up_page.razor" role="button">Sign up</button>
+			<div class="rpw">
+				<div class="col d-flex align-items-center">
+					<p class="mb-0">Do not have an account?</p>
+					<NavLink class="nav-link ms-auto" href="#">
+						<span class="bi bi-info-circle-fill"></span> Register
+					</NavLink>
 				</div>
 			</div>
 

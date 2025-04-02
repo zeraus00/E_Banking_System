@@ -1,2 +1,34 @@
 ﻿body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+.page {
+    margin-top: 5%;
+    margin-right: 35%;
+    margin-left: 35%;
+}
+
+.btn-close {
+    background-color: white;
+    padding-block: 12px;
+    padding-inline: 12px;
+}
+
+.login_container {
+    border: 2px solid white;
+    border-radius: 5%;
+    color: white;
+    background-color: #21325B;
+    background-blend-mode: multiply;
+    padding: 30px;
+    padding-top: 20px;
+}
+
+.loginform{
+    margin-top: 30px;
+    margin-bottom: 30px;
+    padding-left: 10px;
+    padding-right: 10px;
 }
