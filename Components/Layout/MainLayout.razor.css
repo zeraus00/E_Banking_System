@@ -44,12 +44,26 @@ main {
             text-overflow: ellipsis;
         }
 
+.button {
+    background-color: green;
+    border: thin;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 25%;
+    display: inline-block;
+    font-size: 16px;
+}
+
 /* Horizontal Navigation Styles */
 .nav-horizontal {
-    background: #2554C7;
-    padding: 10px 0;
+    background: #152576;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-right: 50px;
     display: flex;
-    justify-content: center;
+    justify-content: right;
 }
 
 .nav-container {
