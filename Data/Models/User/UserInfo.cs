@@ -12,6 +12,10 @@
         public char Sex { get; set; }   // Required
 
 
+        public int BirthInfoId { get; set; } // Foreign Key to BirthInfo
+        public BirthInfo BirthInfo { get; set; } = null!;   // Navigation Property
+
+
         public int AddressId { get; set; }  // Foreign Key to Address
         public Address Address { get; set; } = null!;   // Navigation Property
 
