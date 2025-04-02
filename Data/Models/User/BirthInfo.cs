@@ -19,6 +19,6 @@
         public Region Region { get; set; } = null!; // Navigation Property
 
 
-        public ICollection<UserInfo> UserInfos { get; set; } = null!; // Navigation Property
+        public ICollection<UserInfo> UsersInfo { get; set; } = null!; // Navigation Property
     }
 }

@@ -46,11 +46,12 @@
 
             /*  Configure User Schema
              *  Configure Address Table
-             *  Configure BirthRecords Table
-             *  Configure Users Table
-             *  Configure UsersDetail Table
+             *  Configure BirthsInfo Table
+             *  Configure UsersInfo Table
              */
             modelBuilder.ApplyConfiguration(new AddressConfiguration());
+            modelBuilder.ApplyConfiguration(new BirthInfoConfiguration());
+            modelBuilder.ApplyConfiguration(new UserInfoConfiguration());
 
 
             base.OnModelCreating(modelBuilder);
