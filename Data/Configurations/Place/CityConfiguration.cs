@@ -5,7 +5,7 @@
         // Configure Cities Table
         public void Configure(EntityTypeBuilder<City> Cities)
         {
-            Cities.ToTable("Cities");
+            Cities.ToTable("Cities", "Place");
             // Define Primary Key
             Cities
                 .HasKey(c => c.CityId);

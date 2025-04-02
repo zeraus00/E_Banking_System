@@ -5,7 +5,7 @@
         // Configure CustomersAuth Table
         public void Configure(EntityTypeBuilder<CustomerAuth> CustomersAuth)
         {
-            CustomersAuth.ToTable("CustomersAuth");
+            CustomersAuth.ToTable("CustomersAuth", "Authentication");
 
             // Define primary key
             CustomersAuth

@@ -7,7 +7,7 @@ namespace E_BankingSystem.Data.Configurations.Finance
         // Configure Accounts Table
         public void Configure(EntityTypeBuilder<Account> Accounts)
         {
-            Accounts.ToTable("Accounts");
+            Accounts.ToTable("Accounts", "Finance");
             // Define Primary Key
             Accounts
                 .HasKey(a => a.AccountId);

@@ -5,7 +5,7 @@
         // Configure Barangays Table
         public void Configure(EntityTypeBuilder<Barangay> Barangays)
         {
-            Barangays.ToTable("Barangays");
+            Barangays.ToTable("Barangays", "Place");
             // Define Primary Key
             Barangays
                 .HasKey(b => b.BarangayId);

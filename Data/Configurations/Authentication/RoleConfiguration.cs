@@ -5,7 +5,7 @@
         // Configure Roles Table
         public void Configure(EntityTypeBuilder<Role> Roles)
         {
-            Roles.ToTable("Roles");
+            Roles.ToTable("Roles", "Authentication");
             // Define primary key
             Roles
                 .HasKey(r => r.RoleId);

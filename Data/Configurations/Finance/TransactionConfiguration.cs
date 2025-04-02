@@ -5,7 +5,7 @@
         // Configure Transactions Table
         public void Configure(EntityTypeBuilder<Transaction> Transactions)
         {
-            Transactions.ToTable("Transactions");
+            Transactions.ToTable("Transactions", "Finance");
             // Define Primary Key
             Transactions
                 .HasKey(t => t.TransactionId);

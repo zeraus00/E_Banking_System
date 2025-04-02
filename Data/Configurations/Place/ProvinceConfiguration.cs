@@ -5,7 +5,7 @@
         // Configure Provinces Table
         public void Configure(EntityTypeBuilder<Province> Provinces)
         {
-            Provinces.ToTable("Provinces");
+            Provinces.ToTable("Provinces", "Place");
             // Define Primary Key
             Provinces
                 .HasKey(p => p.ProvinceId);

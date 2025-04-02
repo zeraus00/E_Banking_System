@@ -15,31 +15,32 @@
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //  Configure AccountsAuth Table
+            /*  Configure Authentication Schema
+             *  Configure CustomerAuth Table
+             *  Configure EmployeeAuthTable
+             *  Configure Roles Table
+             */
             modelBuilder.ApplyConfiguration(new CustomerAuthConfiguration());
-
-            //  Configure EmployeesAuth Table
             modelBuilder.ApplyConfiguration(new EmployeeAuthConfiguration());
-
-            //  Configure Roles Table
             modelBuilder.ApplyConfiguration(new RoleConfiguration());
 
-            //  Configure Accounts Table
+            /*  Configure Finance Schema
+             *  Configure Accounts Table
+             *  Configure Transactions Table
+             *  Configure TransactionTypes Table 
+             */
             modelBuilder.ApplyConfiguration(new AccountConfiguration());
-
-            //  Configure Transactions Table
             modelBuilder.ApplyConfiguration(new TransactionConfiguration());
-
-            //  Configure TransactionTypes Table
             modelBuilder.ApplyConfiguration(new TransactionTypeConfig());
 
-            //  Configure Barangays Table
+            /*  Configure Place Schema
+             *  Configure Barangays Table
+             *  Configure Cities Table
+             *  Configure Provinces Table
+             *  Configure Regions Table
+             */
             modelBuilder.ApplyConfiguration(new BarangayConfiguration());
-
-            //  Configure Cities Table
             modelBuilder.ApplyConfiguration(new CityConfiguration());
-
-            //  Configure Provinces Table
             modelBuilder.ApplyConfiguration(new ProvinceConfiguration());
 
 
