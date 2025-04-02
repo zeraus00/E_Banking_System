@@ -13,7 +13,7 @@
 
 
         public int UserId { get; set; }                     // Foreign Key to UsersInfo Table
-        public UserInfo? User { get; set; }                 // Navigation Property
+        public UserInfo User { get; set; } = null!;                 // Navigation Property
 
 
         public string UserName { get; set; } = string.Empty;// Required; Unique
