@@ -4,8 +4,8 @@
     public class Address
     {
         public int AddressId { get; set; }  // Primary Key
-        public int HouseNumber { get; set; }
-        public string? Street { get; set; }
+        public string House { get; set; } = string.Empty;
+        public string Street { get; set; } = string.Empty;
 
 
         public int BarangayId { get; set; } // Foreign Key to Barangay
@@ -25,5 +25,8 @@
 
 
         public int PostalCode { get; set; }
+
+        public ICollection<UserInfo> UserInfos { get; set; } = null!; // Navigation Property
+
     }
 }
