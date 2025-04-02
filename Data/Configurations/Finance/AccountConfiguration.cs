@@ -51,6 +51,11 @@ namespace E_BankingSystem.Data.Configurations.Finance
                 .WithOne(ca => ca.Account)
                 .HasForeignKey(a => a.AccountId)
                 .OnDelete(DeleteBehavior.Restrict);
+            Accounts
+                .HasMany(a => a.Transactions)
+                .WithOne(t => t.Account)
+                .HasForeignKey(a => a.AccountId)
+                .OnDelete(DeleteBehavior.Restrict);
 
         }
 

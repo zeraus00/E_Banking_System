@@ -3,22 +3,22 @@
     // Transactions Table
     public class Transaction
     {
-        public int TransactionId { get; set; }  // Primary Key
+        public int TransactionId { get; set; }          // Primary Key
 
 
-        public int AccountId { get; set; }  // Foreign Key to Accounts Table
+        public int AccountId { get; set; }              // Foreign Key to Accounts Table
         public Account Account { get; set; } = null!;   // Navigation Property
 
 
-        public int TransactionTypeId { get; set; }  // Foreign Key to TransactionTypes Table
+        public int TransactionTypeId { get; set; }      // Foreign Key to TransactionTypes Table
         public TransactionType TransactionType { get; set; } = null!;    // Navigation Property
         
 
-        public decimal Amount { get; set; }    // Required; Amount of money involved in transaction
+        public decimal Amount { get; set; }             // Required; Amount of money involved in transaction
         public decimal PreviousBalance { get; set; }    // Required; Balance before transaction
-        public decimal NewBalance { get; set; }    // Required; Balance after transaction
-        public DateTime TransactionDate { get; set; } = DateTime.UtcNow.Date; // Required; Date of transaction
-        public DateTime TransactionTime { get; set; } = DateTime.UtcNow.ToLocalTime();   // Required; Default DateTime.UtcNow
-        public decimal TransactionFee { get; set; } = 0.0m;    // Required; Default 0.0
+        public decimal NewBalance { get; set; }         // Required; Balance after transaction
+        public DateTime TransactionDate { get; set; }   // Required; Date of transaction
+        public TimeSpan TransactionTime { get; set; }   // Required; Default DateTime.UtcNow
+        public decimal TransactionFee { get; set; }     // Required; Default 0.0
     }
 }

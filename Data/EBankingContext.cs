@@ -27,6 +27,9 @@
             //  Configure Accounts Table
             modelBuilder.ApplyConfiguration(new AccountConfiguration());
 
+            //  Configure Transactions Table
+            modelBuilder.ApplyConfiguration(new TransactionConfiguration());
+
 
             base.OnModelCreating(modelBuilder);
         }
