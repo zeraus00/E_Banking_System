@@ -6,30 +6,40 @@
         public void Configure(EntityTypeBuilder<EmployeeAuth> EmployeesAuth)
         {
             EmployeesAuth.ToTable("EmployeesAuth", "Authentication");
-            // Define primary key
+
+            /*  Configure Table Properties  */
+
+            //  EmployeeAuthId (Primary Key)
             EmployeesAuth
                 .HasKey(ea => ea.EmployeeAuthId);
             EmployeesAuth
                 .Property(ea => ea.EmployeeAuthId)
                 .ValueGeneratedOnAdd();
-            // Define required and unique constraint for Username
+
+            //  UserName (Required; MaxLength=20; Unique)
             EmployeesAuth
-                .Property(ea => ea.Username)
-                .IsRequired();
+                .Property(ea => ea.UserName)
+                .IsRequired()
+                .HasMaxLength(20);
             EmployeesAuth
-                .HasIndex(ea => ea.Username)
+                .HasIndex(ea => ea.UserName)
                 .IsUnique();
-            // Define required and unique constraint for Email
+
+            //  Email (Required; MaxLength=254; Unique)
             EmployeesAuth
                 .Property(ea => ea.Email)
-                .IsRequired();
+                .IsRequired()
+                .HasMaxLength(254);
             EmployeesAuth
                 .HasIndex(ea => ea.Email)
                 .IsUnique();
-            // Define required constraint for Password
+
+            //  Password (Required; MaxLength = 60; FixedLength)
             EmployeesAuth
                 .Property(ea => ea.Password)
-                .IsRequired();
+                .IsRequired()
+                .HasMaxLength(60)
+                .IsFixedLength();
         }
     }
 }

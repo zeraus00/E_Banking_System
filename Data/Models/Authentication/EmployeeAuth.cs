@@ -3,9 +3,9 @@
     // EmployeesAuth Table
     public class EmployeeAuth
     {
-        public int EmployeeAuthId { get; set; }                 // Primary Key
-        public string Username { get; set; } = string.Empty;    // Required; Unique
+        public int EmployeeAuthId { get; private set; }         // Primary Key
+        public string UserName { get; set; } = string.Empty;    // Required; Unique
         public string Email { get; set; } = string.Empty;       // Required; Unique
-        public string Password { get; set; } = string.Empty;    // Required
+        public string Password { get; set; } = string.Empty;    // Hashed password; Required
     }
 }

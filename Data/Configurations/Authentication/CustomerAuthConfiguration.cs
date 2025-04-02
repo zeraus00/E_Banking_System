@@ -44,7 +44,7 @@
                 .HasIndex(ca => ca.Email)
                 .IsUnique();
 
-            // Define required constraint for Password
+            // Password (Required; MaxLength=60; FixedLength)
             CustomersAuth
                 .Property(ca => ca.Password)
                 .IsRequired()
