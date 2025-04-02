@@ -7,7 +7,7 @@
 
         
         public int UserId { get; set; } // Foreign Key to User
-        public AccountAuth User { get; set; } = null!;
+        public CustomerAuth User { get; set; } = null!;
 
 
         public DateTime BirthDate { get; set; } // Required

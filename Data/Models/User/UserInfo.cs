@@ -22,6 +22,6 @@
         public string Religion { get; set; } = string.Empty;    // Required
 
 
-        public ICollection<AccountAuth> AccountsAuth { get; set; } = null!; // Navigation Property
+        public ICollection<CustomerAuth> CustomersAuth { get; set; } = null!; // Navigation Property
     }
 }

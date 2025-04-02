@@ -16,7 +16,7 @@
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Configure AccountAuth Table
-            modelBuilder.ApplyConfiguration(new AccountAuthConfiguration());
+            modelBuilder.ApplyConfiguration(new CustomerAuthConfiguration());
 
             /*  Accounts Table  */
             var Accounts = modelBuilder.Entity<Account>();
@@ -44,7 +44,7 @@
 
         // Add DbSet for each model
         public DbSet<Account> Accounts { get; set; }
-        public DbSet<AccountAuth> Users { get; set; }
+        public DbSet<CustomerAuth> Users { get; set; }
         public DbSet<UserInfo> UsersDetail { get; set; }
         public DbSet<Address> Addresses { get; set; }
         public DbSet<BirthInfo> BirthRecords { get; set; }

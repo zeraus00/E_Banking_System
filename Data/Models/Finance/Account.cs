@@ -13,6 +13,6 @@
         public DateTime? DateClosed { get; set; }
 
 
-        public ICollection<AccountAuth> AccountsAuth { get; set; } = null!; // Navigation Property
+        public ICollection<CustomerAuth> CustomersAuth { get; set; } = null!; // Navigation Property
     }
 }

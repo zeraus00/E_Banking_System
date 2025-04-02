@@ -2,10 +2,10 @@
 {
 
 
-    // AccountsAuth Table
-    public class AccountAuth
+    // CustomersAuth Table
+    public class CustomerAuth
     {
-        public int AccountAuthId { get; set; }              // Primary Key
+        public int CustomerAuthId { get; set; }             // Primary Key
 
 
         public int AccountId { get; set; }                  // Foreign Key to Accounts Table

@@ -1,48 +1,53 @@
 ﻿namespace E_BankingSystem.Data.Configurations.Authentication
 {
-    public class AccountAuthConfiguration : IEntityTypeConfiguration<AccountAuth>
+    public class CustomerAuthConfiguration : IEntityTypeConfiguration<CustomerAuth>
     {
-        // Configure AccountAuth Table
-        public void Configure(EntityTypeBuilder<AccountAuth> AccountsAuth)
+        // Configure CustomersAuth Table
+        public void Configure(EntityTypeBuilder<CustomerAuth> CustomersAuth)
         {
-            AccountsAuth.ToTable("AccountsAuth");
+            CustomersAuth.ToTable("CustomersAuth");
 
             // Define primary key
-            AccountsAuth
-                .HasKey(au => au.AccountAuthId);
-            AccountsAuth
-                .Property(au => au.AccountAuthId)
+            CustomersAuth
+                .HasKey(au => au.CustomerAuthId);
+            CustomersAuth
+                .Property(au => au.CustomerAuthId)
                 .ValueGeneratedOnAdd();
 
             // Define foreign key to Accounts (many-to-one)
-            AccountsAuth
+            CustomersAuth
                 .HasOne(au => au.Account)
-                .WithMany(a => a.AccountsAuth)
+                .WithMany(a => a.CustomersAuth)
                 .HasForeignKey(au => au.AccountId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // Define foreign key to UsersInfo (many-to-one)
-            AccountsAuth
+            CustomersAuth
                 .HasOne(au => au.User)
-                .WithMany(u => u.AccountsAuth)
+                .WithMany(u => u.CustomersAuth)
                 .HasForeignKey(au => au.UserId)
                 .OnDelete(DeleteBehavior.SetNull);
 
             // Define required and unique constraint for UserName
-            AccountsAuth
+            CustomersAuth
                 .Property(au => au.UserName)
                 .IsRequired();
-            AccountsAuth
+            CustomersAuth
                 .HasIndex(au => au.UserName)
                 .IsUnique();
 
             // Define required and unique constraint for Email
-            AccountsAuth
+            CustomersAuth
                 .Property(au => au.Email)
                 .IsRequired();
-            AccountsAuth
+            CustomersAuth
                 .HasIndex(au => au.Email)
                 .IsUnique();
+
+            // Define required constraint for Password
+            CustomersAuth
+                .Property(au => au.Password)
+                .IsRequired();
         }
     }
 }
