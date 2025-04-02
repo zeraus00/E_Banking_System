@@ -26,9 +26,9 @@
 
             // Define foreign key to UsersInfo (many-to-one)
             CustomersAuth
-                .HasOne(ca => ca.User)
+                .HasOne(ca => ca.UserInfo)
                 .WithMany(u => u.CustomersAuth)
-                .HasForeignKey(ca => ca.UserId)
+                .HasForeignKey(ca => ca.UserInfoId)
                 .OnDelete(DeleteBehavior.SetNull);
 
             // Define required and unique constraint for UserName
