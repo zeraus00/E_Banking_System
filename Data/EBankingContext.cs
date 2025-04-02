@@ -39,6 +39,9 @@
             //  Configure Cities Table
             modelBuilder.ApplyConfiguration(new CityConfiguration());
 
+            //  Configure Provinces Table
+            modelBuilder.ApplyConfiguration(new ProvinceConfiguration());
+
 
             base.OnModelCreating(modelBuilder);
         }
