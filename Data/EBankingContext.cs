@@ -44,6 +44,14 @@
             modelBuilder.ApplyConfiguration(new ProvinceConfiguration());
             modelBuilder.ApplyConfiguration(new RegionConfiguration());
 
+            /*  Configure User Schema
+             *  Configure Address Table
+             *  Configure BirthRecords Table
+             *  Configure Users Table
+             *  Configure UsersDetail Table
+             */
+            modelBuilder.ApplyConfiguration(new AddressConfiguration());
+
 
             base.OnModelCreating(modelBuilder);
         }

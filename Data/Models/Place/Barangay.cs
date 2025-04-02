@@ -9,5 +9,8 @@
 
         public int CityId { get; set; } // Foreign Key to City
         public City City { get; set; } = null!; // Navigation Property
+
+
+        public ICollection<Address> Addresses { get; set; } = null!; // Navigation Property
     }
 }
