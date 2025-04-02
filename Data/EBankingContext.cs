@@ -42,6 +42,7 @@
             modelBuilder.ApplyConfiguration(new BarangayConfiguration());
             modelBuilder.ApplyConfiguration(new CityConfiguration());
             modelBuilder.ApplyConfiguration(new ProvinceConfiguration());
+            modelBuilder.ApplyConfiguration(new RegionConfiguration());
 
 
             base.OnModelCreating(modelBuilder);
