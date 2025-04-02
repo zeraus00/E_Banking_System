@@ -14,5 +14,6 @@
 
 
         public ICollection<CustomerAuth> CustomersAuth { get; set; } = null!; // Navigation Property
+        public ICollection<Transaction> Transactions { get; set; } = null!;  // Navigation Property
     }
 }

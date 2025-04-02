@@ -9,44 +9,47 @@
 
             // Define primary key
             CustomersAuth
-                .HasKey(au => au.CustomerAuthId);
+                .HasKey(ca => ca.CustomerAuthId);
             CustomersAuth
-                .Property(au => au.CustomerAuthId)
+                .Property(ca => ca.CustomerAuthId)
                 .ValueGeneratedOnAdd();
 
             // Define foreign key to Accounts (many-to-one)
             CustomersAuth
-                .HasOne(au => au.Account)
+                .Property(ca => ca.AccountId)
+                .IsRequired();
+            CustomersAuth
+                .HasOne(ca => ca.Account)
                 .WithMany(a => a.CustomersAuth)
-                .HasForeignKey(au => au.AccountId)
+                .HasForeignKey(ca => ca.AccountId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // Define foreign key to UsersInfo (many-to-one)
             CustomersAuth
-                .HasOne(au => au.User)
+                .HasOne(ca => ca.User)
                 .WithMany(u => u.CustomersAuth)
-                .HasForeignKey(au => au.UserId)
+                .HasForeignKey(ca => ca.UserId)
                 .OnDelete(DeleteBehavior.SetNull);
 
             // Define required and unique constraint for UserName
             CustomersAuth
-                .Property(au => au.UserName)
+                .Property(ca => ca.UserName)
                 .IsRequired();
             CustomersAuth
-                .HasIndex(au => au.UserName)
+                .HasIndex(ca => ca.UserName)
                 .IsUnique();
 
             // Define required and unique constraint for Email
             CustomersAuth
-                .Property(au => au.Email)
+                .Property(ca => ca.Email)
                 .IsRequired();
             CustomersAuth
-                .HasIndex(au => au.Email)
-                .IsUnique();
+                .HasIndex(ca => ca.Email)
+                .IsUnique();    
 
             // Define required constraint for Password
             CustomersAuth
-                .Property(au => au.Password)
+                .Property(ca => ca.Password)
                 .IsRequired();
         }
     }
