@@ -21,6 +21,9 @@
             // Configure EmployeesAuth Table
             modelBuilder.ApplyConfiguration(new EmployeeAuthConfiguration());
 
+            //Configure Roles Table
+            modelBuilder.ApplyConfiguration(new RoleConfiguration());
+
             /*  Accounts Table  */
             var Accounts = modelBuilder.Entity<Account>();
             Accounts.ToTable("Accounts");
