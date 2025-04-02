@@ -30,6 +30,9 @@
             //  Configure Transactions Table
             modelBuilder.ApplyConfiguration(new TransactionConfiguration());
 
+            //  Configure TransactionTypes Table
+            modelBuilder.ApplyConfiguration(new TransactionTypeConfig());
+
 
             base.OnModelCreating(modelBuilder);
         }
