@@ -14,3 +14,4 @@
         public ICollection<Barangay> Barangays { get; set; } = null!; // Navigation Property
     }
 }
+    

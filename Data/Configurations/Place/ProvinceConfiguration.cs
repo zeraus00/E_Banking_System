@@ -21,6 +21,12 @@
                 .HasOne(p => p.Region)
                 .WithMany(r => r.Provinces)
                 .HasForeignKey(p => p.RegionId);
+
+            // Define Relationship to Cities
+            Provinces
+                .HasMany(p => p.Cities)
+                .WithOne(c => c.Province)
+                .HasForeignKey(c => c.ProvinceId);
         }
     }
 }
