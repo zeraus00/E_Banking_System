@@ -15,8 +15,14 @@
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Configure AccountAuth Table
+            // Configure AccountsAuth Table
             modelBuilder.ApplyConfiguration(new CustomerAuthConfiguration());
+
+            // Configure EmployeesAuth Table
+            modelBuilder.ApplyConfiguration(new EmployeeAuthConfiguration());
+
+            //Configure Roles Table
+            modelBuilder.ApplyConfiguration(new RoleConfiguration());
 
             /*  Accounts Table  */
             var Accounts = modelBuilder.Entity<Account>();
