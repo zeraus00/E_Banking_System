@@ -1,0 +1,60 @@
+﻿body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+.btn-close {
+    justify-content: flex-end;
+    background-color: white;
+    padding-block: 12px;
+    padding-inline: 12px;
+}
+
+.card {
+    background-color: rgba(10,15,58,0.9);
+    border: 2px solid white;
+    border-radius: 12px;
+    color: white;
+}
+
+    .card.login {
+        margin-top: 5%;
+        margin-right: 35%;
+        margin-left: 35%;
+    }
+
+    .card.registration {
+        text-align: left;
+        margin-right: 5%;
+        margin-left: 5%;
+    }
+
+    .card.forget_password {
+        text-align: left;
+        margin-top: 5%;
+        margin-right: 20%;
+        margin-left: 20%;
+    }
+
+.indent{
+    padding-left: 50px;
+}
+
+.loginform {
+    margin-top: 30px;
+    margin-bottom: 30px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.loginform.sm{
+    margin-left: 15%;
+    margin-right: 15%;
+}
+
+custom_btn{
+    margin-left: 50px;
+    background-color: transparent;;
+    font-size: medium;
+}
