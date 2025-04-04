@@ -1,4 +1,6 @@
-﻿namespace E_BankingSystem.Data.Configurations.Place
+﻿using Data.Models.Place;
+
+namespace E_BankingSystem.Data.Configurations.Place
 {
     public class BarangayConfiguration : IEntityTypeConfiguration<Barangay>
     {
