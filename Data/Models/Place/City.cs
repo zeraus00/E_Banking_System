@@ -1,6 +1,4 @@
-﻿using Data.Models.Place;
-
-namespace E_BankingSystem.Data.Models.Place
+﻿namespace Data.Models.Place
 {
     // Cities Table
     public class City
@@ -12,10 +10,9 @@ namespace E_BankingSystem.Data.Models.Place
 
 
         /*  Navigation Properties    */
-        public Province Province { get; set; } = null!;                 
-        public ICollection<Barangay> Barangays { get; set; } = null!;   
-        public ICollection<Address> Addresses { get; set; } = null!;    
-        public ICollection<BirthInfo> BirthInfos { get; set; } = null!; 
+        public Province Province { get; set; } = null!;
+        public ICollection<Barangay> Barangays { get; set; } = null!;
+        public ICollection<Address> Addresses { get; set; } = null!;
+        public ICollection<BirthInfo> BirthInfos { get; set; } = null!;
     }
 }
-    
