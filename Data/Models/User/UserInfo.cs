@@ -1,4 +1,4 @@
-﻿namespace E_BankingSystem.Data.Models.User
+﻿namespace Data.Models.User
 {
     // UsersInfo Table
     public class UserInfo
