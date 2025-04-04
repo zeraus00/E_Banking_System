@@ -1,4 +1,6 @@
-﻿namespace E_BankingSystem.Data
+﻿using Data.Models.Place;
+
+namespace Data
 {
     public class EBankingContext : DbContext
     {

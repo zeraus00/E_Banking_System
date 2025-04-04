@@ -1,4 +1,6 @@
-﻿namespace E_BankingSystem.Data.Models.User
+﻿using Data.Models.Place;
+
+namespace Data.Models.User
 {
     // BirthsInfo Table
     public class BirthInfo

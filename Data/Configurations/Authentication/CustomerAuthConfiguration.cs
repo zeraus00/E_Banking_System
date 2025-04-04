@@ -1,4 +1,4 @@
-﻿namespace E_BankingSystem.Data.Configurations.Authentication
+﻿namespace Data.Configurations.Authentication
 {
     public class CustomerAuthConfiguration : IEntityTypeConfiguration<CustomerAuth>
     {

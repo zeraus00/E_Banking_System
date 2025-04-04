@@ -1,4 +1,4 @@
-﻿namespace E_BankingSystem.Data.Configurations.Finance
+﻿namespace Data.Configurations.Finance
 {
     public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
     {

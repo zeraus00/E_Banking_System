@@ -1,4 +1,4 @@
-﻿namespace E_BankingSystem.Data.Models.Finance
+﻿namespace Data.Models.Finance
 {
 
     // Accounts Table

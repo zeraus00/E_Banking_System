@@ -1,4 +1,4 @@
-﻿namespace E_BankingSystem.Data.Models.Finance
+﻿namespace Data.Models.Finance
 {
     // Transactions Table
     public class Transaction

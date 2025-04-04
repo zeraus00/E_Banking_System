@@ -1,4 +1,4 @@
-﻿namespace E_BankingSystem.Data.Configurations.User
+﻿namespace Data.Configurations.User
 {
     public class UserInfoConfiguration : IEntityTypeConfiguration<UserInfo>
     {

@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace E_BankingSystem.Data.Configurations.Finance
+namespace Data.Configurations.Finance
 {
     public class AccountConfiguration : IEntityTypeConfiguration<Account>
     {
