@@ -1,4 +1,6 @@
-﻿namespace Data.Configurations.Place
+﻿using Data.Models.Place;
+
+namespace Data.Configurations.Place
 {
     public class ProvinceConfiguration : IEntityTypeConfiguration<Province>
     {
