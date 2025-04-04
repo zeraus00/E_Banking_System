@@ -6,58 +6,84 @@
         public void Configure(EntityTypeBuilder<UserInfo> UsersInfo)
         {
             UsersInfo.ToTable("UsersInfo", "User");
-            // Define Primary Key
+
+            /*  Configure Table Properties  */
+
+            //  UserInfoId (Primary Key)
             UsersInfo
                 .HasKey(ui => ui.UserInfoId);
             UsersInfo
                 .Property(ui => ui.UserInfoId)
                 .ValueGeneratedOnAdd();
-            // Define Required and MaxLength Constraints for FirstName
+
+            //  FirstName (Required; MaxLength=50)
             UsersInfo
                 .Property(ui => ui.FirstName)
                 .HasMaxLength(50)
                 .IsRequired();
-            // Define MaxLength for MiddleName
+
+            //  MiddleName (Optional; MaxLength=50)
             UsersInfo
                 .Property(ui => ui.MiddleName)
                 .HasMaxLength(50)
                 .IsRequired(false);
-            // Define Required and MaxLength Constraints for LastName
+
+            //  LastName (Required; MaxLength=50)
             UsersInfo
                 .Property(ui => ui.LastName)
                 .HasMaxLength(50)
                 .IsRequired();
-            // Define MaxLength for Suffix
+
+            //  Suffix (Optional; MaxLength=10)
             UsersInfo
                 .Property(ui => ui.Suffix)
                 .HasMaxLength(10)
                 .IsRequired(false);
-            // Define Required Constraint for Age
+
+            //  Age (Required)
             UsersInfo
                 .Property(ui => ui.Age)
-                .IsRequired();
-            // Define Required Constraint for Sex
-            UsersInfo
-                .Property(ui => ui.Age)
-                .IsRequired();
-            // Define Required Constraint for ContactNumber
-            UsersInfo
-                .Property(ui => ui.ContactNumber)
-                .IsRequired();
-            // Define Required Constraint for TaxIdentificationNumber
-            UsersInfo
-                .Property(ui => ui.TaxIdentificationNumber)
-                .IsRequired();
-            // Define Required Constraint for CivilStatus
-            UsersInfo
-                .Property(ui => ui.CivilStatus)
-                .IsRequired();
-            // Define Required Constraint for Religion
-            UsersInfo
-                .Property(ui => ui.Religion)
                 .IsRequired();
 
-            // Define Foreign Key to BirthInfo
+            //  Sex (Required)
+            UsersInfo
+                .Property(ui => ui.Sex)
+                .IsRequired()
+                .HasMaxLength(10);
+
+            //  ContactNumber (Required; Field Length=11)
+            UsersInfo
+                .Property(ui => ui.ContactNumber)
+                .IsRequired()
+                .HasMaxLength(11)
+                .IsFixedLength();
+
+            //  TaxIdentificationNumber (Required; MaxLength=12)
+            UsersInfo
+                .Property(ui => ui.TaxIdentificationNumber)
+                .IsRequired()
+                .HasMaxLength(12);
+
+            //  CivilStatus (Required; MaxLength=20)
+            UsersInfo
+                .Property(ui => ui.CivilStatus)
+                .IsRequired()
+                .HasMaxLength(20);
+
+            //  Religion (Required; MaxLength=50)
+            UsersInfo
+                .Property(ui => ui.Religion)
+                .IsRequired()
+                .HasMaxLength(50);
+
+
+
+            /*  
+             *  Configure Relationships  
+             *  BirthInfo (many-to-one)
+             *  Address (many-to-one)
+             *  CustomersAuth (one-to-many)
+             */
             UsersInfo
                 .HasOne(ui => ui.BirthInfo)
                 .WithMany(bi => bi.UsersInfo)
