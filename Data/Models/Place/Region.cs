@@ -1,14 +1,15 @@
-﻿namespace E_BankingSystem.Data.Models.Place
+﻿namespace Data.Models.Place
 {
     // Regions Table
     public class Region
     {
-        public int RegionId { get; set; }   // Primary Key
+        public int RegionId { get; set; }                       // Primary Key
         public string RegionName { get; set; } = string.Empty;  // Required
 
 
-        public ICollection<Province> Provinces { get; set; } = null!; // Navigation Property
-        public ICollection<Address> Addresses { get; set; } = null!; // Navigation Property
-        public ICollection<BirthInfo> BirthsInfo { get; set; } = null!; // Navigation Property
+        /*  Navigation Properties   */
+        public ICollection<Province> Provinces { get; set; } = null!; 
+        public ICollection<Address> Addresses { get; set; } = null!; 
+        public ICollection<BirthInfo> BirthsInfo { get; set; } = null!;
     }
 }
