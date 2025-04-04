@@ -1,19 +1,21 @@
-﻿namespace E_BankingSystem.Data.Models.Place
+﻿using Data.Models.Place;
+
+namespace E_BankingSystem.Data.Models.Place
 {
     // Cities Table
     public class City
     {
-        public int CityId { get; set; } // Primary Key
-        public string CityName { get; set; } = string.Empty; // Required
+        /*  Properties    */
+        public int CityId { get; set; }                         // Primary Key
+        public string CityName { get; set; } = string.Empty;    // Required; Max Length: 50
+        public int ProvinceId { get; set; }                     // Foreign Key to Province
 
 
-        public int ProvinceId { get; set; } // Foreign Key to Province
-        public Province Province { get; set; } = null!; // Navigation Property
-    
-    
-        public ICollection<Barangay> Barangays { get; set; } = null!; // Navigation Property
-        public ICollection<Address> Addresses { get; set; } = null!; // Navigation Property
-        public ICollection<BirthInfo> BirthInfos { get; set; } = null!; // Navigation Property
+        /*  Navigation Properties    */
+        public Province Province { get; set; } = null!;                 
+        public ICollection<Barangay> Barangays { get; set; } = null!;   
+        public ICollection<Address> Addresses { get; set; } = null!;    
+        public ICollection<BirthInfo> BirthInfos { get; set; } = null!; 
     }
 }
     
