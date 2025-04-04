@@ -6,33 +6,38 @@
         public void Configure(EntityTypeBuilder<BirthInfo> BirthInfos)
         {
             BirthInfos.ToTable("BirthsInfo", "User");
-            // Define Primary Key
+
+            /*  Configure Table Properties  */
+
+            //  BirthInfoId (Primary Key)
             BirthInfos
                 .HasKey(b => b.BirthInfoId);
             BirthInfos
                 .Property(b => b.BirthInfoId)
                 .ValueGeneratedOnAdd();
 
-            // Define Required Constraint for BirthDate
+            //  BirthDate (Required)
             BirthInfos
                 .Property(b => b.BirthDate)
                 .IsRequired();
 
-            // Define Foreign Key to Cities
+
+            /*  
+             *  Configure Relationships
+             *  Cities (many-to-one)
+             *  Provinces (many-to-one)
+             *  Regions (many-to-one)
+             */
             BirthInfos
                 .HasOne(b => b.City)
                 .WithMany(c => c.BirthInfos)
                 .HasForeignKey(b => b.CityId)
                 .OnDelete(DeleteBehavior.SetNull);
-
-            // Define Foreign Key to Provinces
             BirthInfos
                 .HasOne(b => b.Province)
                 .WithMany(p => p.BirthsInfo)
                 .HasForeignKey(b => b.ProvinceId)
                 .OnDelete(DeleteBehavior.SetNull);
-
-            // Define Foreign Key to Regions
             BirthInfos
                 .HasOne(b => b.Region)
                 .WithMany(r => r.BirthsInfo)
