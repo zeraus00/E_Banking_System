@@ -22,11 +22,16 @@
             /*
              *  Configure Relationships
              *  Cities (many-to-one)
+             *  Addresses (one-to-many)
              */
             Barangays
                 .HasOne(b => b.City)
                 .WithMany(c => c.Barangays)
                 .HasForeignKey(b => b.CityId);
+            Barangays
+                .HasMany(b => b.Addresses)
+                .WithOne(a => a.Barangay)
+                .HasForeignKey(a => a.BarangayId);
         }
     }
 }
