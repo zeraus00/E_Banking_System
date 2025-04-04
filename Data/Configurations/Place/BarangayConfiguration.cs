@@ -6,17 +6,23 @@
         public void Configure(EntityTypeBuilder<Barangay> Barangays)
         {
             Barangays.ToTable("Barangays", "Place");
-            // Define Primary Key
+            /*  Configure Table Properties  */
+
+            // BarangayId (Primary Key)
             Barangays
                 .HasKey(b => b.BarangayId);
             Barangays
                 .Property(b => b.BarangayId)
                 .ValueGeneratedOnAdd();
-            // Define Required Constraint for BarangayName
+            // BarangayName (Required, MaxLength=50) 
             Barangays
                 .Property(b => b.BarangayName)
-                .IsRequired();
-            // Define Foreign Key to City
+                .IsRequired()
+                .HasMaxLength(50);
+            /*
+             *  Configure Relationships
+             *  Cities (many-to-one)
+             */
             Barangays
                 .HasOne(b => b.City)
                 .WithMany(c => c.Barangays)
