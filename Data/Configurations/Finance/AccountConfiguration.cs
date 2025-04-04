@@ -31,6 +31,12 @@ namespace Data.Configurations.Finance
                 .HasMaxLength(12)
                 .IsFixedLength();
 
+            //  AccountName (Required; MaxLength=30)
+            Accounts
+                .Property(a => a.AccountName)
+                .IsRequired()
+                .HasMaxLength(30);
+
             //  AccountStatus (Required; MaxLength=10)
             Accounts
                 .Property(a => a.AccountStatus)
