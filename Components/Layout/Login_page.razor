@@ -1,5 +1,6 @@
 ﻿@page "/Login_page"
 @inject NavigationManager NavigationManager
+@inject NavigationManager Navigation
 
 <div class="page">
 	<main>
@@ -41,16 +42,16 @@
 			</div>
 
 			<div class="rpw mb-2 px-4">
-				<div class="col d-grid">
+				<NavLink class="d-grid" href="/Client_home">
 					<button class="btn btn-primary" @onclick="LoginAsync"> Log in</button>
-				</div>
+				</NavLink>
 			</div>
 
 			<div class="rpw px-4">
 				<div class="col d-flex align-items-center">
 					<p class="mb-0">Do not have an account?</p>
 					<NavLink class="nav-link ms-auto" href="Sign_up_page">
-						<span class="bi bi-info-circle-fill"></span> Register
+						Register
 					</NavLink>
 				</div>
 			</div>
@@ -65,7 +66,34 @@
 	public string password = "";
 	public string error = "";
 
-	private void LoginAsync()
+	@code {
+		private async Task LoginAsync()
+		{
+			// Perform login logic here, such as checking credentials
+			bool isLoginSuccessful = await AuthenticateUserAsync();
+
+			if (isLoginSuccessful)
+			{
+				// Navigate to the homepage (or any page after login)
+				Navigation.NavigateTo("/Client_home");
+			}
+			else
+			{
+				// Handle failed login attempt (e.g., show error message)
+			}
+		}
+
+		private Task<bool> AuthenticateUserAsync()
+		{
+			// Add your authentication logic here.
+			// Return true if the login is successful, otherwise false.
+			return Task.FromResult(true); // For demo purposes, assume the login is always successful
+		}
+	}
+}
+
+
+@* 	private void LoginAsync()
 	{
 		if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
 		{
@@ -75,5 +103,4 @@
 
 		error = "";
 		NavigationManager.NavigateTo("/Client_home_page");
-	}
-}
+	} *@
