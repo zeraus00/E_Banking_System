@@ -51,14 +51,27 @@ main {
     padding-bottom: 10px;
     padding-right: 50px;
     display: flex;
-    justify-content: right;
-    align-items: center;
+    justify-content: space-between; 
+    align-items: center; 
 }
+
+
+.logo {
+    height: 50px;
+    max-width: auto;
+    margin: 0;
+    display: flex;
+    justify-content: start;
+}
+
 
 .nav-container {
     display: flex;
     gap: 20px;
+    justify-content: flex-end;
+    align-items: center;
 }
+
 
 .nav-link {
     color: white;
