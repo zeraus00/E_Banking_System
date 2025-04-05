@@ -6,7 +6,9 @@
 
 		<div class="card login p-4 shadow-lg">
 			<div class="d-flex justify-content-end">
-				<button type="button" class="btn-close" aria-label="Close" onclick="#"></button>
+				<NavLink href="/">
+					<button type="button" class="btn-close" aria-label="Close"></button>
+				</NavLink>
 			</div>
 			<h2 class="text-center fw-bold">User Login</h2>
 
@@ -18,11 +20,11 @@
 				</div>
 			}
 
-			<div class="loginform">
-				<input class="form-control form-control-lg mb-3" @bind="email" placeholder="Email">
-				<input class="form-control form-control-lg" type="password" @bind="password" placeholder="Password">
+			<div class="loginform px-4">
+				<input class="form-control form-control-custom form-control-lg mb-3" @bind="email" placeholder="Email">
+				<input class="form-control form-control-custom form-control-lg" type="password" @bind="password" placeholder="Password">
 				
-				<div class="col d-flex align-items-center">
+				<div class="col d-flex align-items-center mt-1">
 
 					<div class="form-check">
 						<input class="form-check-input" type="checkbox" id="rememberMe">
@@ -38,14 +40,13 @@
 				</div>
 			</div>
 
-
-			<div class="rpw mb-2">
+			<div class="rpw mb-2 px-4">
 				<div class="col d-grid">
 					<button class="btn btn-primary" @onclick="LoginAsync"> Log in</button>
 				</div>
 			</div>
 
-			<div class="rpw">
+			<div class="rpw px-4">
 				<div class="col d-flex align-items-center">
 					<p class="mb-0">Do not have an account?</p>
 					<NavLink class="nav-link ms-auto" href="Sign_up_page">

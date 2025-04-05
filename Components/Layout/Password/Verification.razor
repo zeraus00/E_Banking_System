@@ -1,0 +1,45 @@
+﻿@page "/Verification"
+@inject NavigationManager NavigationManager
+
+<div class="page">
+	<main>
+		<div class="card forget_password shadow-lg">
+			<h3 class="fw-bold text-light mt-5 mx-5">Enter Verification Pin</h3>
+
+			<h5 class="indent fw-light text-light my-3 mx-5">
+				A one-time password (OTP) has been sent to your registered mobile number/email. 
+				Enter the code to continue.
+			</h5>
+
+			<div class="otp-container mt-3 mb-3">
+				@for (int i = 0; i < 6; i++)
+				{
+					<input 
+						type="text" 
+						class="otp-input" 
+						maxlength="1" 
+						id="otp-@i" 
+						/>
+				}
+			</div>
+
+			<NavLink class="btn btn-primary btn-lg d-grid col-4 mx-auto mt-3" href="/New_password">
+				Continue
+			</NavLink>
+
+			<NavLink class="nav-link custom-nav-link-2 fw-lighter mx-auto mt-1" href="#">
+				Resend pin
+			</NavLink>
+
+			<NavLink class="nav-link custom-nav-link-2 fw-lighter mx-auto mb-2" href="#">
+				Try another way
+			</NavLink>
+
+			<NavLink class="nav-link custom-nav-link" href="/Login_page">
+				← Go Back
+			</NavLink>
+
+		</div>
+
+	</main>
+</div>

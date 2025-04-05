@@ -1,0 +1,29 @@
+﻿@page "/Bank_number"
+@inject NavigationManager NavigationManager
+
+<div class="page">
+	<main>
+		<div class="card forget_password shadow-lg">
+			<h3 class="fw-bold text-light mt-5 mx-5">Forget Password</h3>
+			
+			<h5 class="indent fw-light text-light my-3 mx-5"> 
+				Please enter your bank account number to proceed.
+			</h5>
+
+			<div class="loginform loginform sm">
+				<input class="form-control form-control-custom form-control-lg mb-3" placeholder="Bank number">
+			</div>
+
+			<NavLink class="btn btn-primary btn-lg d-grid col-4 mx-auto mb-3" href="/Verification">
+				Continue
+			</NavLink>
+
+			<NavLink class="nav-link custom-nav-link" href="/Forgot_password">
+				← Go Back
+			</NavLink>
+
+
+		</div>
+
+	</main>
+</div>
