@@ -1,4 +1,6 @@
-﻿namespace Data.Configurations.Authentication
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace Data.Configurations.Authentication
 {
     public class CustomerAuthConfiguration : IEntityTypeConfiguration<CustomerAuth>
     {
@@ -65,7 +67,13 @@
                 .HasOne(ca => ca.UserInfo)
                 .WithMany(u => u.CustomersAuth)
                 .HasForeignKey(ca => ca.UserInfoId)
-                .OnDelete(DeleteBehavior.SetNull);
+            .OnDelete(DeleteBehavior.SetNull);
+            CustomersAuth
+               .HasOne(ca => ca.ActiveLoan)
+               .WithMany(al => al.CustomersAuth)
+               .HasForeignKey(ca => ca.LoanId)
+               .OnDelete(DeleteBehavior.Cascade);
+
         }
     }
 }
