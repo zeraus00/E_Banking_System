@@ -32,9 +32,9 @@
                 .OnDelete(DeleteBehavior.Restrict);
 
             LoanTransactions
-                .HasOne(lt => lt.LoanTransactionType)
+                .HasOne(lt => lt.LoanType)
                 .WithMany()
-                .HasForeignKey(lt => lt.LoanTransactionTypeId)
+                .HasForeignKey(lt => lt.LoanTypeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
 

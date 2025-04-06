@@ -10,8 +10,8 @@
         public ActiveLoan ActiveLoans { get; set; } = null!; //navigation property
 
 
-        public int LoanTransactionTypeId { get; set; } // foreign key to TransactionType table
-        public LoanTransactionType LoanTransactionType  { get; set; } = null!; //navigation property
+        public int LoanTypeId { get; set; } // foreign key to TransactionType table
+        public LoanType LoanType  { get; set; } = null!; //navigation property
         
 
         public decimal Amount { get; set; } // total amount paid in this transaction
