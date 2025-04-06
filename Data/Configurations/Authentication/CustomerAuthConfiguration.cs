@@ -68,11 +68,6 @@ namespace Data.Configurations.Authentication
                 .WithMany(u => u.CustomersAuth)
                 .HasForeignKey(ca => ca.UserInfoId)
             .OnDelete(DeleteBehavior.SetNull);
-            CustomersAuth
-               .HasOne(ca => ca.ActiveLoan)
-               .WithMany(al => al.CustomersAuth)
-               .HasForeignKey(ca => ca.LoanId)
-               .OnDelete(DeleteBehavior.Cascade);
 
         }
     }

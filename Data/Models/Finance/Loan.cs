@@ -20,8 +20,7 @@
 
         /*  Navigation Properties   */
 
-        public Account Account { get; set; } = null!;
-        public ICollection<CustomerAuth> CustomerAuth { get; private set; } = null!; 
+        public Account Account { get; set; } = null!; 
         public ICollection<LoanTransaction> Loantransactions { get; set; } = null!; 
         public ICollection<Account> Accounts { get; set; } = null!;
     }
