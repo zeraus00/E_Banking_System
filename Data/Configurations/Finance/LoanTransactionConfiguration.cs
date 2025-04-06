@@ -13,11 +13,15 @@
             //  LoanTransactionId (Primary Key)
             LoanTransactions
                 .HasKey(lt => lt.LoanTransactionId);
-
             LoanTransactions
-                .Property(lt => lt.LoanTransactionId).IsRequired();
+                .Property(lt => lt.LoanTransactionId)
+                .ValueGeneratedOnAdd();
 
             //  AmountPaid (Required; Decimal(18,2))
+            LoanTransactions
+                .Property(lt => lt.AmountPaid)
+                .IsRequired()
+                .HasColumnType("DECIMAL (18, 2)");
 
             //  RemainingLoanBalance (Required; Decimal(18,2))
             LoanTransactions
@@ -34,7 +38,22 @@
                 .Property(lt => lt.PrincipalAmount).IsRequired()
                 .HasColumnType("DECIMAL (18, 2)");
 
+            //  DueDate (Required; DateTime)
+            LoanTransactions
+                .Property(lt => lt.DueDate)
+                .IsRequired();
 
+            //  TransactionDate (Required; DateTime)
+            LoanTransactions
+                .Property(lt => lt.TransactionDate)
+                .IsRequired()
+                .HasDefaultValueSql("CURDATE()");
+
+            //  TransactionTime (Required; TimeSpan)
+            LoanTransactions
+                .Property(lt => lt.TransactionTime)
+                .IsRequired()
+                .HasDefaultValueSql("CURTIME()");
 
             /*
              * Configure Relationships
@@ -44,10 +63,16 @@
              */
 
             LoanTransactions
+                .HasOne(lt => lt.Account)
+                .WithMany(a => a.LoanTransactions)
+                .HasForeignKey(lt => lt.AccountId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            LoanTransactions
                 .HasOne(lt => lt.ActiveLoans)
                 .WithMany(lt => lt.Loantransactions)
                 .HasForeignKey(lt => lt.LoanId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.SetNull);
 
             LoanTransactions
                 .HasOne(lt => lt.LoanType)
