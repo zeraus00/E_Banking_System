@@ -12,7 +12,7 @@
         public DateTime EndDate { get; set; } // when the loan ends
 
         public ICollection<CustomerAuth> CustomerAuth { get; private set; } = null!; // navigation property
-        public ICollection<LoanTransactions> Loantransactions { get; set; } = null!; //navigation property
+        public ICollection<LoanTransaction> Loantransactions { get; set; } = null!; //navigation property
         public ICollection<Account> Accounts { get; set; } = null!;
     }
 }

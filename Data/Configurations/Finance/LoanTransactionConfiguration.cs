@@ -1,8 +1,8 @@
 ﻿namespace Data.Configurations.Finance
 {
-    public class LoanTransactionConfiguration : IEntityTypeConfiguration<LoanTransactions>
+    public class LoanTransactionConfiguration : IEntityTypeConfiguration<LoanTransaction>
     {
-        public void Configure (EntityTypeBuilder<LoanTransactions> LoanTransactions) 
+        public void Configure (EntityTypeBuilder<LoanTransaction> LoanTransactions) 
         {
             LoanTransactions
                 .ToTable("LoanTransactions", "Finance");
