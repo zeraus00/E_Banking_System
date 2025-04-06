@@ -20,7 +20,7 @@
 
         /*  Navigation Properties   */
         public Account Account { get; set; } = null!;
-        public ActiveLoan ActiveLoans { get; set; } = null!;
+        public Loan ActiveLoans { get; set; } = null!;
         public LoanType LoanType { get; set; } = null!;
     }
 }

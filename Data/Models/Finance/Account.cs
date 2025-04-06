@@ -18,6 +18,6 @@
         public ICollection<CustomerAuth> CustomersAuth { get; private set; } = null!; // Navigation Property
         public ICollection<Transaction> Transactions { get; private set; } = null!;  // Navigation Property
         public ICollection<LoanTransaction> LoanTransactions { get; set; } = null!; // Navigation Property
-        public ICollection<ActiveLoan> ActiveLoans { get; private set; } = null!; // Navigation Property
+        public ICollection<Loan> ActiveLoans { get; private set; } = null!; // Navigation Property
     }
 }
