@@ -22,6 +22,6 @@
 
         public Account Account { get; set; } = null!;
         public LoanType LoanType { get; set; } = null!;     
-        public ICollection<LoanTransaction> Loantransactions { get; set; } = null!;
+        public ICollection<LoanTransaction> LoanTransactions { get; set; } = null!;
     }
 }
