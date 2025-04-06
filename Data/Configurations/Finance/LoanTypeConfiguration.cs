@@ -24,8 +24,14 @@ namespace Data.Configurations.Finance
 
             /*
              *  Configure Relationships
+             *  Loans (one-to-many)
              *  LoanTransactions (one-to-many)
              */
+            LoanTypes
+                .HasMany(lt => lt.Loans)
+                .WithOne(l => l.LoanType)
+                .HasForeignKey(l => l.LoanTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
             LoanTypes
                 .HasMany(lt => lt.LoanTransactions)
                 .WithOne(lt => lt.LoanType)

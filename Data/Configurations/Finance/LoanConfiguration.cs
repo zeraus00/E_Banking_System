@@ -90,12 +90,18 @@
             /*  Configure Relationships  
              *  Accounts (many-to-one)
              *  LoanTypes (many-to-one)
-             *  
+             *  LoanTransactions (one-to-many)
              */
 
-            Loans.HasOne(l => l.Account)
+            Loans
+                .HasOne(l => l.Account)
                 .WithMany(a => a.Loans)
                 .HasForeignKey(l => l.AccountId)
+                .OnDelete(DeleteBehavior.Restrict);
+            Loans
+                .HasOne(l => l.LoanType)
+                .WithMany(lt => lt.Loans)
+                .HasForeignKey(l => l.LoanTypeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
         }
