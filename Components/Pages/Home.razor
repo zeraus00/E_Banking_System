@@ -1,7 +1,24 @@
 ﻿@page "/"
 
-@* <PageTitle>Home</PageTitle>
+<main>
+	<div class="homepage">
+		<div class="text-center">
+			<h1 class="fw-bolder mb-3"> Sample Bank System Management </h1>
+			<h4 class="fw-lighter">C# System Project</h4>
+		</div>
+		
+		<div class="button-container d-flex justify-content-center mx-auto">
+			<NavLink class="nav-link" href="/Login_page">
+				<button type="button" class="nav-link button btn-lg">
+					Login
+				</button>
+			</NavLink>
 
-<h1>Hello, world!</h1>
-<h2>Helloooo </h2>
-Welcome to your new app. *@
+			<NavLink class="nav-link" href="/Sign_up_page">
+				<button type="button" class="btn btn-primary button btn-lg">
+					Sign-Up
+				</button>
+			</NavLink>
+		</div>
+	</div>
+</main>

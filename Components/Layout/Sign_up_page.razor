@@ -7,7 +7,10 @@
 		<div class="card registration p-4 shadow-lg">
 			<div class="d-flex justify-content-between align-items-center">
 				<h3 class="fw-bold text-light">User Registration</h3>
-				<button class="btn-close" aria-label="Close" onclick="#"></button>
+				<NavLink href="/">
+					<button class="btn-close" aria-label="Close"></button> 
+				</NavLink>
+				
 			</div>
 
 			<div class="information_box">
@@ -15,7 +18,7 @@
 				<div class="row g-2">
 					<div class="col-3">
 						<label class="text-light">First Name</label>
-						<input class="form-control" @bind="firstName" placeholder="First Name">
+						<input class="form-control" @bind="firstName" placeholder="First Name" required>
 					</div>
 					<div class="col-3">
 						 <label class="text-light">Middle Name</label>
@@ -23,7 +26,7 @@
 					</div>
 					<div class="col-3">
 						<label class="text-light">Last Name</label>
-						<input class="form-control" @bind="lastName" placeholder="Last Name">
+						<input class="form-control" @bind="lastName" placeholder="Last Name" required>
 					</div>
 					<div class="col-1">
 						<label class="text-light">Suffix</label>
@@ -34,19 +37,19 @@
 				<div class="row g-2 mt-2">
 					<div class="col-1">
 						<label class="text-light">Age</label>
-						<input class="form-control" type="number" placeholder="Age">
+						<input class="form-control" type="number" placeholder="Age" required>
 					</div>
 					<div class="col-3">
 						<label class="text-light">Birth Date</label>
-						<input class="form-control" type="date" placeholder="mm/dd/yyyy">
+						<input class="form-control" type="date" placeholder="mm/dd/yyyy" required>
 					</div>
 					<div class="col-4">
 						<label class="text-light">Birth Place</label>
-						<input class="form-control" placeholder="Full Address">
+						<input class="form-control" placeholder="Full Address" required>
 					</div>
 					<div class="col-2">
 						<label class="text-light">Sex</label>
-						<select class="form-select">
+						<select class="form-select" required>
 							<option>Male</option>
 							<option>Female</option>
 						</select>
@@ -54,7 +57,7 @@
 
 					<div class="col-2">
 						<label class="text-light">Civil Status</label>
-						<select class="form-select">
+						<select class="form-select" required>
 							<option>Single</option>
 							<option>Married</option>
 							<option>Separated</option>
@@ -70,26 +73,26 @@
 					</div>
 					<div class="col-3">
 						<label class="text-light">Province</label>
-						<input class="form-control" placeholder="Province">
+						<input class="form-control" placeholder="Province" required>
 					</div>
 					<div class="col-3">
 						<label class="text-light">Municipality</label>
-						<input class="form-control" placeholder="Municipality">
+						<input class="form-control" placeholder="Municipality" required>
 					</div>
 					<div class="col-3">
 						<label class="text-light">Barangay</label>
-						<input class="form-control" placeholder="Barangay">
+						<input class="form-control" placeholder="Barangay" required>
 					</div>
 				</div>
 
 				<div class="row g-2 mt-2">
 					<div class="col-3">
 						<label class="text-light">Street No.</label>
-						<input class="form-control" placeholder="Religion">
+						<input class="form-control" placeholder="Religion" required>
 					</div>
 					<div class="col-3">
 						<label class="text-light">House No.</label>
-						<input class="form-control" placeholder="Province">
+						<input class="form-control" placeholder="Province" required>
 					</div>
 				</div>
 
@@ -113,7 +116,7 @@
 					</div>
 
 					<div class="col-12">
-						<label class="text-light">Mother's Name</label>
+						<label class="text-light">Mother's Maiden Name</label>
 						<div class="row g-2">
 							<div class="col-3">
 								<input class="form-control" placeholder="First Name">
@@ -151,9 +154,9 @@
 
 				<div  class="row g-2 mt-3">
 					<div class="col-6">
-						<label class="text-light">UUpload Government Valid ID (Front & Back)</label>
+						<label class="text-light">Upload Government Valid ID (Front & Back)</label>
 						<div class="d-flex gap-2">
-							<button class="btn btn-light">Upload</button>
+							<input type="file" class="btn btn-light" required>
 							<button class="btn btn-outline-light">View Atttachment</button>
 						</div>
 					</div>
@@ -161,7 +164,7 @@
 				</div>
 
 				<div class="form-check d-flex justify-content-end mt-3">
-					<input class="form-check-input mx-2" type="checkbox" id="termsAndConditions">
+					<input class="form-check-input mx-2" type="checkbox" id="termsAndConditions required">
 					<label class="form-check-label text-light" for="termsAndConditions">
 						I accept the terms and conditions
 					</label>

@@ -37,9 +37,30 @@
         margin-left: 20%;
     }
 
+    .card.new_password {
+        margin-top: 5%;
+        margin-left: 33%;
+        margin-right: 33%;
+    }
+
 .indent{
     padding-left: 50px;
 }
+
+.form-control-custom {
+    background-color: transparent !important;
+    border: 2px solid rgba(10,15,58,0.9);
+    border-bottom-color: white;
+    color: white;
+}
+
+    .form-control-custom:focus {
+        outline: none;
+        box-shadow: none;
+        border-color: #007BFF;
+        border-bottom-color: white;
+        color: white;
+    }
 
 .loginform {
     margin-top: 30px;
@@ -53,8 +74,43 @@
     margin-right: 15%;
 }
 
-custom_btn{
+.custom-nav-link {
+    color: white !important;
+    text-decoration: none;
     margin-left: 50px;
-    background-color: transparent;;
-    font-size: medium;
+    margin-bottom: 40px;
 }
+
+    .custom-nav-link:hover {
+        color: grey !important;
+    }
+
+.custom-nav-link-2 {
+    color: white !important;
+    text-decoration: none;
+}
+
+    .custom-nav-link-2:hover {
+        color: grey !important;
+    }
+
+.otp-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.otp-input {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+    text-align: center;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+}
+
+    .otp-input:focus {
+        border-color: #007BFF;
+        outline: none;
+    }
+

@@ -10,11 +10,13 @@
         public string AccountName { get; private set; } = string.Empty;     // Required; MaxLength=30
         public string AccountStatus { get; private set; } = string.Empty;   // Required; Open, Closed, Suspended
         public decimal Balance { get; private set; } = 0.0m;                // Required; Default 0.0
+
         public DateTime DateOpened { get; private set; } = DateTime.UtcNow; // Required; Default DateTime.UtcNow
         public DateTime? DateClosed { get; private set; }
 
 
         public ICollection<CustomerAuth> CustomersAuth { get; private set; } = null!; // Navigation Property
         public ICollection<Transaction> Transactions { get; private set; } = null!;  // Navigation Property
+        public ICollection<ActiveLoan> ActiveLoans { get; private set; } = null!; // Navigation Property
     }
 }
