@@ -65,6 +65,7 @@ namespace Data.Configurations.Finance
              *  Configure Relationships
              *  CustomersAuth (one-to-many)
              *  Transactions (one-to-many)
+             *  Loans (one-to-many)
              *  LoanTransactions (one-to-many)
              */
             Accounts
@@ -76,6 +77,11 @@ namespace Data.Configurations.Finance
                 .HasMany(a => a.Transactions)
                 .WithOne(t => t.Account)
                 .HasForeignKey(t => t.AccountId)
+                .OnDelete(DeleteBehavior.Restrict);
+            Accounts
+                .HasMany(a => a.Loans)
+                .WithOne(l => l.Account)
+                .HasForeignKey(l => l.AccountId)
                 .OnDelete(DeleteBehavior.Restrict);
             Accounts
                 .HasMany(a => a.LoanTransactions)

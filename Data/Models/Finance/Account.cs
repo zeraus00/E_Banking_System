@@ -15,9 +15,10 @@
         public DateTime? DateClosed { get; private set; }
 
 
-        public ICollection<CustomerAuth> CustomersAuth { get; private set; } = null!; // Navigation Property
-        public ICollection<Transaction> Transactions { get; private set; } = null!;  // Navigation Property
-        public ICollection<LoanTransaction> LoanTransactions { get; set; } = null!; // Navigation Property
-        public ICollection<Loan> ActiveLoans { get; private set; } = null!; // Navigation Property
+        public ICollection<CustomerAuth> CustomersAuth { get; private set; } = null!; 
+        public ICollection<Transaction> Transactions { get; private set; } = null!;  
+        public ICollection<Loan> Loans { get; private set; } = null!; 
+        public ICollection<LoanTransaction> LoanTransactions { get; set; } = null!; 
     }
+        
 }

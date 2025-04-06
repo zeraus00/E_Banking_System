@@ -94,7 +94,7 @@
              */
 
             Loans.HasOne(l => l.Account)
-                .WithMany(a => a.ActiveLoans)
+                .WithMany(a => a.Loans)
                 .HasForeignKey(l => l.AccountId)
                 .OnDelete(DeleteBehavior.Restrict);
 
