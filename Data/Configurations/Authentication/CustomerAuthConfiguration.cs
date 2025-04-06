@@ -67,7 +67,7 @@ namespace Data.Configurations.Authentication
                 .HasOne(ca => ca.UserInfo)
                 .WithMany(u => u.CustomersAuth)
                 .HasForeignKey(ca => ca.UserInfoId)
-            .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.SetNull);
 
         }
     }
