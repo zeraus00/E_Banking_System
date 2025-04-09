@@ -22,6 +22,16 @@
             text-overflow: ellipsis;
         }
 
+.body-wrapper {
+    display: flex;
+    flex-grow: 1;
+    height: calc(100vh - 3.5rem);
+}
+
+.main-content{
+    width: 100%;
+}
+
 .nav-horizontal {
     background: #152576;
     padding-top: 10px;

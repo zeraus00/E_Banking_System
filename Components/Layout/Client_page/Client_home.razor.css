@@ -1,0 +1,35 @@
+﻿.custom-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+}
+
+    .custom-card.client {
+        background-color: #1A449F;
+        border: none;
+        border-radius: 0;
+        border-bottom-right-radius: 50px;
+    }
+
+.custom-card.balance{
+    background-color: white;
+
+}
+
+.account-number{
+    display: flex;
+    font-weight: lighter;
+}
+
+.notification {
+    display: flex;
+    align-items: center;
+    padding-right: 20px;
+}
+
+    .notification img {
+        height: 35px;
+        width: 35px;
+        object-fit: contain;
+    }
