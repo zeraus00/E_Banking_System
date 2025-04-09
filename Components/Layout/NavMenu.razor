@@ -1,7 +1,29 @@
-﻿<nav class="sidebar">
-    <div class="top-row ps-3 navbar navbar-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="">E-BankingSystem</a>
+﻿@layout MainLayout
+@inject IWebHostEnvironment Env
+
+<nav class="sidebar">
+    <div class="top-row navbar">
+        @* draft *@
+        <div class="top-row container">
+            <div class="profile-picture_container">
+                <label for="fileInput">
+                    @if (previewImage != null)
+                    {
+                        <img src="@previewImage" class="profile-picture" />
+                    }
+                    else
+                    {
+                        <div class="profile-placeholder">
+                            <span>No Image</span>
+                        </div>
+                    }
+
+                </label>
+                    <div class="edit-overlay">
+                        <i class="fas fa-camera"></i> <!-- Uses FontAwesome -->
+                    </div>
+                <InputFile id="fileInput" style="display: none;" OnChange="HandleSelected" accept="image/*" />
+            </div>
         </div>
     </div>
 
@@ -10,22 +32,44 @@
     <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
         <nav class="flex-column">
             <div class="nav-item px-3">
-                <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <NavLink class="nav-link" href="/Client_home" Match="NavLinkMatch.All">
                     <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
                 </NavLink>
             </div>
 
             <div class="nav-item px-3">
-                <NavLink class="nav-link" href="counter">
-                    <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
+                <NavLink class="nav-link" href="/WithdrawDeposit">
+                    <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Withdraw / Deposit
                 </NavLink>
             </div>
 
             <div class="nav-item px-3">
-                <NavLink class="nav-link" href="weather">
-                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
+                <NavLink class="nav-link" href="/Transactions">
+                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Transactions History
                 </NavLink>
             </div>
         </nav>
     </div>
 </nav> 
+
+@*draft code*@
+@code {
+    private string? previewImage;
+
+    private async Task HandleSelected(InputFileChangeEventArgs e)
+    {
+        var imageFile = e.File;
+
+        var buffer = new byte[imageFile.Size];
+        await imageFile.OpenReadStream(5 * 1024 * 1024).ReadAsync(buffer);
+        previewImage = $"data:image/png;base64,{Convert.ToBase64String(buffer)}";
+
+        // Save to wwwroot/uploads (optional)
+        var uploadsPath = Path.Combine(Env.WebRootPath, "uploads");
+        Directory.CreateDirectory(uploadsPath);
+
+        var filePath = Path.Combine(uploadsPath, imageFile.Name);
+        using var fs = new FileStream(filePath, FileMode.Create);
+        await imageFile.OpenReadStream().CopyToAsync(fs);
+    }
+}
