@@ -28,10 +28,16 @@ namespace Data
 
             /*  Configure Finance Schema
              *  Configure Accounts Table
+             *  Configure Loans Table
+             *  Configure LoanTransactions Table
+             *  Configure LoanTypes Table
              *  Configure Transactions Table
              *  Configure TransactionTypes Table 
              */
             modelBuilder.ApplyConfiguration(new AccountConfiguration());
+            modelBuilder.ApplyConfiguration(new LoanConfiguration());
+            modelBuilder.ApplyConfiguration(new LoanTransactionConfiguration());
+            modelBuilder.ApplyConfiguration(new LoanTypeConfiguration());
             modelBuilder.ApplyConfiguration(new TransactionConfiguration());
             modelBuilder.ApplyConfiguration(new TransactionTypeConfig());
 
