@@ -28,8 +28,8 @@
     padding-bottom: 10px;
     padding-right: 50px;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    justify-content: space-between; 
+    align-items: center; 
     border-bottom: 5px solid white;
     box-shadow: rgba(0, 0, 0, 0.9);
 }

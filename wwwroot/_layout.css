@@ -1,7 +1,23 @@
-﻿body {
+﻿body, html {
     margin: 0;
     padding: 0;
     height: 100%;
+}
+
+.page {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+main {
+    flex: 1;
+    background-image: url('/bootstrap/Utilities/bank-background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
 }
 
 .btn-close {
