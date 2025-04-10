@@ -1,6 +1,4 @@
-﻿using Data.Models.Place;
-
-namespace Data
+﻿namespace Data
 {
     public class EBankingContext : DbContext
     {
@@ -10,8 +8,11 @@ namespace Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            //optionsBuilder.UseMySql();
-            optionsBuilder.UseInMemoryDatabase("EBankingDb");
+            optionsBuilder.UseMySql(
+                "server=localhost;database=eBankingDb;user=user;password=password",
+                new MySqlServerVersion(new Version(8, 0, 41))
+                );
+            //optionsBuilder.UseInMemoryDatabase("EBankingDb");
             base.OnConfiguring(optionsBuilder);
         }
 
