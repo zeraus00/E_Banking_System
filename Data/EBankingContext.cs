@@ -1,6 +1,4 @@
-﻿using Data.Models.Place;
-
-namespace Data
+﻿namespace Data
 {
     public class EBankingContext : DbContext
     {
@@ -10,8 +8,11 @@ namespace Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            //optionsBuilder.UseMySql();
-            optionsBuilder.UseInMemoryDatabase("EBankingDb");
+            optionsBuilder.UseMySql(
+                "server=localhost;database=eBankingDb;user=user;password=password",
+                new MySqlServerVersion(new Version(8, 0, 41))
+                );
+            //optionsBuilder.UseInMemoryDatabase("EBankingDb");
             base.OnConfiguring(optionsBuilder);
         }
 
@@ -65,20 +66,32 @@ namespace Data
             base.OnModelCreating(modelBuilder);
         }
 
-        // Add DbSet for each model
-        public DbSet<Account> Accounts { get; set; }
-        public DbSet<CustomerAuth> Users { get; set; }
-        public DbSet<UserInfo> UsersDetail { get; set; }
-        public DbSet<Address> Addresses { get; set; }
-        public DbSet<BirthInfo> BirthRecords { get; set; }
+        /*  Add DbSet for each model    */
 
+        //  Authentication
+        public DbSet<CustomerAuth> CustomerAuths { get; set; }
+        public DbSet<EmployeeAuth> EmployeeAuths { get; set; }
+        public DbSet<Role> Roles { get; set; }
+
+        //  Finance
+        public DbSet<Account> Accounts { get; set; }
+        public DbSet<Loan> Loans { get; set; }
+        public DbSet<LoanTransaction> LoanTransactions { get; set; }
+        public DbSet<LoanType> LoanTypes { get; set; }
+        public DbSet<Transaction> Transactions { get; set; }
+        public DbSet<TransactionType> TransactionTypes { get; set; }
+
+        //  Place
         public DbSet<Region> Regions { get; set; }
         public DbSet<Province> Provinces { get; set; }
         public DbSet<City> Cities { get; set; }
         public DbSet<Barangay> Barangays { get; set; }
 
-        public DbSet<Transaction> Transactions { get; set; }
-        public DbSet<TransactionType> TransactionTypes { get; set; }
+        //  User
+        public DbSet<Address> Addresses { get; set; }
+        public DbSet<BirthInfo> BirthInfos { get; set; }
+        public DbSet<UserInfo> UserInfos { get; set; }
+
     }
 
 }
