@@ -4,10 +4,10 @@
     {
         DbContext _context = context;
 
-        public void AddCustomerAuth(CustomerAuth customerAuth)
+        public async Task AddCustomerAuth(CustomerAuth customerAuth)
         {
-            _context.Set<CustomerAuth>().Add(customerAuth);
-            _context.SaveChanges();
+            await _context.Set<CustomerAuth>().AddAsync(customerAuth);
+            await _context.SaveChangesAsync();
         }
     }
 
