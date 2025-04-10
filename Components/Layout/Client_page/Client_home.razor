@@ -1,18 +1,17 @@
 ﻿@page "/Client_home"
 @inject NavigationManager NavigationManager
-@layout MainLayout
 
 <div class="page">
     <main>
         <header class="custom-card client px-4 pt-4 pb-4">
-            <div class="align-items-start">
+            <div class="align-items-start mx-5">
                 <h5>Welcome Back</h5>
                 <div class="d-flex align-items-center gap-3">
                     <h1>clientName</h1>
                     <h4 class="account-number">accountNumber</h4>
                 </div>
             </div>
-            <div class="notification img align-items-end">
+            <div class="notification img align-items-end mx-5">
                 <img src="/bootstrap/Utilities/Bell.png" alt="Notification Bell" />
             </div>
         </header>
@@ -31,25 +30,25 @@
             <!-- Navigation Buttons -->
             <section>
                 <nav class="nav-container">
-                    <NavLink class="nav-link button" href="/Login_page">
+                    <NavLink class="nav-link button" href="/Withdraw_amount">
                         <button type="button" class="nav-link button d-flex justify-content-between align-items-center">
                             Withdraw
                             <img src="/bootstrap/Utilities/withdraw.png" alt="Button Icon" style="width: 30px; height: 30px;" />
                         </button>
                     </NavLink>
-                    <NavLink class="nav-link button" href="/Login_page">
+                    <NavLink class="nav-link button" href="/Deposit_amount">
                         <button type="button" class="nav-link button d-flex justify-content-between align-items-center">
                             Deposit
                             <img src="/bootstrap/Utilities/deposit.png" alt="Button Icon" style="width: 30px; height: 30px;" />
                         </button>
                     </NavLink>
-                    <NavLink class="nav-link button" href="/Login_page">
+                    <NavLink class="nav-link button" href="/Transfer_page">
                         <button type="button" class="nav-link button d-flex justify-content-between align-items-center">
                             Transfer
                             <img src="/bootstrap/Utilities/transfer.png" alt="Button Icon" style="width: 20px; height: 20px;" />
                         </button>
                     </NavLink>
-                    <NavLink class="nav-link button" href="/Login_page">
+                    <NavLink class="nav-link button" href="/Loan_page">
                         <button type="button" class="nav-link button d-flex justify-content-between align-items-center">
                             Loan Payment
                             <img src="/bootstrap/Utilities/loan.png" alt="Button Icon" style="width: 20px; height: 20px;" />
@@ -60,7 +59,7 @@
         </div>
 
         <!-- Transactions Section -->
-        <section class="custom-card transactions mx-3 mt-5">
+        <section class="custom-card transactions ">
             <div class="custom-card balance lg text-black">
                 <label class="custom-card sm bg-transparent border-bottom justify-content-between fs-4">
                     Recent Transactions

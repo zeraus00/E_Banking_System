@@ -1,0 +1,42 @@
+﻿@* @inherits LayoutComponentBase
+
+<div class="navbar">
+    @if (CurrentPage == "/")
+    {
+        <span>Home Page</span>
+    }
+    else if (CurrentPage == "/about")
+    {
+        <span>About Us</span>
+    }
+    else if (CurrentPage == "/contact")
+    {
+        <span>Contact</span>
+    }
+    else
+    {
+        <span>Welcome</span>
+    }
+</div>
+
+<body>
+    <header class="custom-card client px-4 pt-4 pb-4">
+        <div class="align-items-start">
+            <h5>Welcome Back</h5>
+            <div class="d-flex align-items-center gap-3">
+                <h1>clientName</h1>
+                <h4 class="account-number">accountNumber</h4>
+            </div>
+        </div>
+        <div class="notification img align-items-end">
+            <img src="/bootstrap/Utilities/Bell.png" alt="Notification Bell" />
+        </div>
+    </header>
+</body>
+
+@inject NavigationManager Navigation
+
+@code {
+    private string CurrentPage => Navigation.Uri.Split('/').Last();
+}
+ *@

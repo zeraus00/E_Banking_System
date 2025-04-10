@@ -1,0 +1,33 @@
+﻿@page "/Withdraw_amount"
+@inject NavigationManager NavigationManager
+
+
+<div class="page">
+    <main>
+        <header class="custom-card client px-4 pt-4 pb-4">
+            <div class="align-items-start">
+                <NavLink class="nav-link custom-nav-link-2" href="/Client_home">
+                    ← Go Back
+                </NavLink>
+                <div class="d-flex align-items-center gap-3 mx-5">
+                    <h1>Withdraw</h1>
+                </div>
+            </div>
+            <section class="d-flex justify-content-end align-items-end mx-5 gap-2">
+                <p class="fs-6 fw-lighter align-text-bottom">Current Balance: </p>
+                <div class="custom-card current-balance d-flex align-items-center justify-content-center">
+                    currentBalance
+                </div>
+            </section>
+        </header>
+
+        <section class="card registration shadow-lg mt-4">
+            <h3 class="mx-3 my-3 ">Enter Withdrawal Amount</h3>
+            <div class="loginform lg input-group px-4">
+                <span class="fs-2">$</span>
+                <input type="number" class="form-control form-control-custom form-control-lg mb-3 fs-2 placeholder=" 000-000"">
+            </div>
+        </section>
+
+    </main>
+</div>

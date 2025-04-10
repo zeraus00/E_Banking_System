@@ -102,6 +102,10 @@ main {
     margin-right: 15%;
 }
 
+.loginform.lg {
+    width: 30%;
+}
+
 .custom-nav-link {
     color: white !important;
     text-decoration: none;

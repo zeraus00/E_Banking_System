@@ -1,0 +1,48 @@
+﻿.custom-card {
+    background-color: white;
+    display: flex;
+    align-items: center;
+    width: contain;
+}
+
+    .custom-card.client {
+        color: white;
+        justify-content: space-between;
+        background-color: #1A449F;
+        border: none;
+        border-radius: 0;
+        border-bottom-right-radius: 50px;
+    }
+
+    .custom-card.sm {
+        background-color: gray;
+        font-weight: lighter;
+        width: 100%;
+        padding: 0.5rem;
+        border-radius: 5px;
+    }
+
+    .custom-card.transactions {
+        height: 300px;
+        color: white;
+        background-color: #069DEC;
+        border: 2px solid white;
+        border-radius: 20px;
+    }
+
+.account-number {
+    display: flex;
+    font-weight: lighter;
+}
+
+.notification {
+    display: flex;
+    align-items: center;
+    padding-right: 20px;
+}
+
+    .notification img {
+        height: 35px;
+        width: 35px;
+        object-fit: contain;
+    }
