@@ -1,43 +1,44 @@
 ﻿@inject IWebHostEnvironment Env
-
-<nav class="sidebar">
-    <div class="top-row navbar">
-        <div class="top-row container">
-            <div class="profile-picture_container">
-                <label for="fileInput">
-                    @if (previewImage != null)
-                    {
-                        <img src="@previewImage" class="profile-picture" />
-                    }
-                    else
-                    {
-                        <div class="profile-placeholder">
-                            <span>No Image</span>
-                        </div>
-                    }
-                </label>
-                <div class="edit-overlay">
-                    <i class="fas fa-camera"></i>
+<body>
+    <nav class="sidebar">
+        <div class="top-row navbar">
+            <div class="top-row container">
+                <div class="profile-picture_container">
+                    <label for="fileInput">
+                        @if (previewImage != null)
+                        {
+                            <img src="@previewImage" class="profile-picture" />
+                        }
+                        else
+                        {
+                            <div class="profile-placeholder">
+                                <span>No Image</span>
+                            </div>
+                        }
+                    </label>
+                    <div class="edit-overlay">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <InputFile id="fileInput" style="display: none;" OnChange="HandleSelected" accept="image/*" />
                 </div>
-                <InputFile id="fileInput" style="display: none;" OnChange="HandleSelected" accept="image/*" />
             </div>
         </div>
-    </div>
 
-    <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-        <nav class="flex-column">
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="/Client_home" Match="NavLinkMatch.All">Home</NavLink>
-            </div>
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="/WithdrawDeposit">Withdraw / Deposit</NavLink>
-            </div>
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="/Transactions">Transactions History</NavLink>
-            </div>
-        </nav>
-    </div>
-</nav>
+        <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+            <nav class="flex-column">
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="/Client_home" Match="NavLinkMatch.All">Home</NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="/WithdrawDeposit">Withdraw / Deposit</NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="/Transactions">Transactions History</NavLink>
+                </div>
+            </nav>
+        </div>
+    </nav>
+</body>
 
 @code {
     private string? previewImage;

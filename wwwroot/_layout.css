@@ -1,7 +1,12 @@
 ﻿body, html {
     margin: 0;
     padding: 0;
-    height: 100%;
+    width: 100vw;
+    background-image: url('/bootstrap/Utilities/bank-background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: scroll;
 }
 
 .page {
@@ -9,15 +14,20 @@
     display: flex;
     flex-direction: column;
     height: 100vh;
+/*    background-color: blue; (layouting issues)*/ 
 }
 
 main {
-    flex: 1;
-    background-image: url('/bootstrap/Utilities/bank-background.jpg');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
+    margin: 0;
+    padding: 0;
+}
+
+.information-box {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; 
+    align-items: center;
+    width: 100%;
 }
 
 .btn-close {
@@ -28,6 +38,7 @@ main {
 }
 
 .card {
+    flex-wrap: wrap;
     background-color: rgba(10,15,58,0.9);
     border: 2px solid white;
     border-radius: 12px;
@@ -35,9 +46,10 @@ main {
 }
 
     .card.login {
-        margin-top: 5%;
-        margin-right: 35%;
-        margin-left: 35%;
+        margin-top: 0;
+        margin-right: auto;
+        margin-left: auto;
+        max-width: 400px;
     }
 
     .card.registration {
@@ -130,3 +142,8 @@ main {
         outline: none;
     }
 
+@media (max-width: 768px){
+    .main {
+        background-attachment: scroll;
+    }
+}
