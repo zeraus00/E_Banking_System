@@ -1,11 +1,8 @@
 .sidebar {
     width: 250px;
+    min-height: 100vh;
+    height: auto;
     background: #212B5E;
-}
-
-.main-content {
-    flex-grow: 1;
-    background: white;
 }
 
 .profile-picture-container {

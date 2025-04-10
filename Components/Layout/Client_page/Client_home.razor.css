@@ -1,21 +1,68 @@
-﻿.custom-card {
+﻿.body-wrapper {
     display: flex;
-    justify-content: space-between;
+    align-content: space-between;
     align-items: center;
-    color: white;
+    gap: 20px;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.custom-card {
+    background-color: white;
+    display: flex;
+    align-items: center;
 }
 
     .custom-card.client {
+        color: white;
+        justify-content: space-between;
         background-color: #1A449F;
         border: none;
         border-radius: 0;
         border-bottom-right-radius: 50px;
     }
 
-.custom-card.balance{
-    background-color: white;
+    .custom-card.balance {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin: 1rem;
+        padding: 1rem;
+        border-radius: 10px;
+        box-sizing: border-box;
+    }
 
-}
+        .custom-card.balance.md {
+            height: auto;
+            min-height: 200px;
+            width: 35%;
+            max-width: 100%;
+        }
+
+        .custom-card.balance.lg {
+            height: 250px;
+            width: 100%;
+            max-width: 100%;
+            border-radius: 20px;
+            justify-content: normal;
+        }
+
+    .custom-card.sm {
+        background-color: gray;
+        font-weight: lighter;
+        width: 100%;
+        padding: 0.5rem;
+        border-radius: 5px;
+    }
+
+    .custom-card.transactions {
+        height: 300px;
+        color: white;
+        background-color: #069DEC;
+        border: 2px solid white;
+        border-radius: 20px;
+    }
 
 .account-number{
     display: flex;
@@ -33,3 +80,45 @@
         width: 35px;
         object-fit: contain;
     }
+
+
+.nav-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, auto);
+    gap: 20px;
+    width: max-content;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-link.button {
+    background-color: #41C1D8;
+    border: 2px solid white;
+    color: black;
+    font-size: 20px;
+    border-radius: 10px;
+    width: 100%;
+    text-align: left;
+    padding: 12px 30px;
+    width: 100%;
+}
+
+    .nav-link.button:hover {
+        background-color: white;
+        color: #41C1D8;
+    }
+
+@media (max-width: 600px) {
+    .custom-card-wrapper {
+        max-width: 100%;
+    }
+
+    .custom-card.balance {
+        padding: 0.75rem;
+    }
+
+    .custom-card.bottom h6 {
+        font-size: 0.85rem;
+    }
+}

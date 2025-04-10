@@ -1,8 +1,7 @@
 ﻿@inherits LayoutComponentBase
 @inject NavigationManager NavManager
 @inject IWebHostEnvironment Env
-
-<main>
+<body>
     <div class="nav-horizontal">
         <div class="logo mx-5">
             <img src="/nexus_banking.png" alt="Logo" />
@@ -16,17 +15,16 @@
             </NavLink>
         </nav>
     </div>
-    <div class="body-wrapper"> 
-        <NavMenu />
+    <div class="body-wrapper">
+    <NavMenu />
         <div class="main-content">
             @Body
         </div>
     </div>
-    
-</main>
 
-<div id="blazor-error-ui">
-    An unhandled error has occurred.
-    <a href="" class="reload">Reload</a>
-    <a class="dismiss">🗙</a>
-</div>
+    <div id="blazor-error-ui">
+        An unhandled error has occurred.
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
+</body>
