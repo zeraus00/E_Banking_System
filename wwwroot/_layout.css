@@ -71,6 +71,31 @@ main {
         margin-right: 33%;
     }
 
+.custom-card-clientpage {
+    background-color: white;
+    display: flex;
+    align-items: center;
+}
+
+    .custom-card-clientpage.clientheader {
+        color: white;
+        height: 100%;
+        max-height: 140px;
+        justify-content: space-between;
+        background-color: #1A449F;
+        border: none;
+        border-radius: 0;
+        border-bottom-right-radius: 50px;
+    }
+
+    .custom-card-clientpage.current-balance {
+        background-color: rgba(56, 56, 56, 0.22);
+        border: 2px solid white;
+        border-radius: 10px;
+        width: 180px;
+        height: 80px;
+    }
+
 .indent{
     padding-left: 50px;
 }
