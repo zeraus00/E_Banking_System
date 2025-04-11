@@ -7,7 +7,7 @@ namespace Service
         private readonly DbContext _context = context;
         // create a passwordhasher object here!
 
-        public async Task<bool> IsAuthenticated(string Email, string Password)
+        public async Task<bool> IsAuthenticatedAsync(string Email, string Password)
         {
             try
             {
