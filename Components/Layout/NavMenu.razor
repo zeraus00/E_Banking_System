@@ -1,9 +1,14 @@
 ﻿@inject IWebHostEnvironment Env
 <body>
+    <!-- Side NavBar Layout -->
     <nav class="sidebar">
         <div class="top-row navbar">
             <div class="top-row container">
+
+                <!-- Profile Picture Container -->
                 <div class="profile-picture_container">
+
+                    <!-- Draft -->
                     <label for="fileInput">
                         @if (previewImage != null)
                         {
@@ -16,14 +21,17 @@
                             </div>
                         }
                     </label>
+
                     <div class="edit-overlay">
                         <i class="fas fa-camera"></i>
                     </div>
                     <InputFile id="fileInput" style="display: none;" OnChange="HandleSelected" accept="image/*" />
                 </div>
+
             </div>
         </div>
 
+        <!-- Sidebar Navigation Links -->
         <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
             <nav class="flex-column">
                 <div class="nav-item px-3">
@@ -40,6 +48,7 @@
                 </div>
             </nav>
         </div>
+
     </nav>
 </body>
 
