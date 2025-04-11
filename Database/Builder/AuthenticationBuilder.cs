@@ -1,6 +1,6 @@
 ﻿namespace Database.Builder
 {
-    public class AuthenticationService(DbContext context)
+    public class AuthenticationBuilder(DbContext context)
     {
         DbContext _context = context;
 

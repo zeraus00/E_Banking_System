@@ -1,6 +1,6 @@
 ﻿namespace Database.Builder
 {
-    public class FinanceService(DbContext context)
+    public class FinanceBuilder(DbContext context)
     {
         DbContext _context = context;
 

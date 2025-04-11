@@ -69,8 +69,8 @@
         /*  Add DbSet for each model    */
 
         //  Authentication
-        public DbSet<CustomerAuth> CustomerAuths { get; set; }
-        public DbSet<EmployeeAuth> EmployeeAuths { get; set; }
+        public DbSet<CustomerAuth> CustomersAuth { get; set; }
+        public DbSet<EmployeeAuth> EmployeesAuth { get; set; }
         public DbSet<Role> Roles { get; set; }
 
         //  Finance
