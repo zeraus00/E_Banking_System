@@ -4,9 +4,11 @@ namespace Data
 {
     public class EBankingContext : DbContext
     {
+        /*
         public EBankingContext(DbContextOptions<EBankingContext> options) : base(options)
         {
         }
+        */
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
