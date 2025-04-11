@@ -21,12 +21,16 @@ namespace Service
                 bool passwordIsCorrect = await this.PasswordIsCorrect(Email, Password);
                 if (!passwordIsCorrect)
                 {
-                    throw new UserNotFoundException();
+                    throw new IncorrectPasswordException();
                 }
 
                 return true;
             }
             catch (UserNotFoundException)
+            {
+                return false;
+            }
+            catch (IncorrectPasswordException)
             {
                 return false;
             }
