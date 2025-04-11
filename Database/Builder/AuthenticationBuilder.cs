@@ -9,7 +9,12 @@
             _context = context;
         }
 
-        public async Task AddCustomerAuth(CustomerAuth customerAuth)
+        public void AddCustomerAuth(CustomerAuth customerAuth)
+        {
+            _context.Set<CustomerAuth>().Add(customerAuth);
+            _context.SaveChanges();
+        }
+        public async Task AddCustomerAuthAsync(CustomerAuth customerAuth)
         {
             await _context.Set<CustomerAuth>().AddAsync(customerAuth);
             await _context.SaveChangesAsync();
