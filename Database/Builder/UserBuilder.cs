@@ -1,6 +1,6 @@
 ﻿namespace Database.Builder
 {
-    public class UserService(DbContext context)
+    public class UserBuilder(DbContext context)
     {
         private readonly DbContext _context = context;
 
