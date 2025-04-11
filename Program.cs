@@ -1,8 +1,10 @@
 using E_BankingSystem.Components;
+using Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddDbContext<EBankingContext>();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
