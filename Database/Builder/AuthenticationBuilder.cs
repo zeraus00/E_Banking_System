@@ -1,8 +1,13 @@
 ﻿namespace Database.Builder
 {
-    public class AuthenticationBuilder(DbContext context)
+    public class AuthenticationBuilder
     {
-        DbContext _context = context;
+
+        private readonly DbContext _context;
+        public AuthenticationBuilder(DbContext context)
+        {
+            _context = context;
+        }
 
         public async Task AddCustomerAuth(CustomerAuth customerAuth)
         {
