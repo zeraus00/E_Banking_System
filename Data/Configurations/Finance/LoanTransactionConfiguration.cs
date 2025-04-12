@@ -55,6 +55,12 @@
                 .IsRequired()
                 .HasDefaultValueSql("CAST(GETDATE() AS TIME)");
 
+            //  Notes (Optional; Max Length: 100)
+            LoanTransactions
+                .Property(lt => lt.Notes)
+                .IsRequired(false)
+                .HasMaxLength(100);
+
             /*
              * Configure Relationships
              * Accounts (many-to-one)
