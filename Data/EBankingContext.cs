@@ -13,7 +13,7 @@ namespace Data
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder
-                .UseMySql("server=localhost;database=eBankingDb;user=user;password=password", new MySqlServerVersion(new Version(8, 0, 41)))
+                .UseMySql("Server=localhost;Port=3306;Database=ebankingDB;User Id=root;Password=admin1234;", new MySqlServerVersion(new Version(8, 0, 41)))
                 .UseSeeding((context, _) =>
                 {
                     var testAuth  = context.Set<CustomerAuth>().FirstOrDefault(ca => ca.Email == "testemail@gmail.com");
@@ -21,7 +21,7 @@ namespace Data
                     {
                         var customerAuthBuilder = new CustomerAuthBuilder();
                         customerAuthBuilder
-                            .WithEmail("testmail@gmail.com")
+                            .WithEmail("testemail@gmail.com")
                             .WithUserName("testuser")
                             .WithPassword("testpassword");
 
@@ -38,7 +38,7 @@ namespace Data
                     {
                         var customerAuthBuilder = new CustomerAuthBuilder();
                         customerAuthBuilder
-                            .WithEmail("testmail@gmail.com")
+                            .WithEmail("testemail@gmail.com")
                             .WithUserName("testuser")
                             .WithPassword("testpassword");
 
