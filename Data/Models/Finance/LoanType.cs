@@ -8,7 +8,6 @@
 
 
         /*  Navigation Properties   */
-        public ICollection<Loan> Loans { get; set; } = null!;
-        public ICollection<LoanTransaction> LoanTransactions { get; set; } = null!;
+        public ICollection<Loan> Loans { get; set; } = new List<Loan>();
     }
 }

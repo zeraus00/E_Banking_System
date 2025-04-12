@@ -55,32 +55,29 @@
                 .IsRequired()
                 .HasDefaultValueSql("CAST(GETDATE() AS TIME)");
 
+            //  Notes (Optional; Max Length: 100)
+            LoanTransactions
+                .Property(lt => lt.Notes)
+                .IsRequired(false)
+                .HasMaxLength(100);
+
             /*
              * Configure Relationships
              * Accounts (many-to-one)
              * Loans (many-to-one)
-             * LoanTypes (many-to-one)
              */
 
             LoanTransactions
                 .HasOne(lt => lt.Account)
                 .WithMany(a => a.LoanTransactions)
                 .HasForeignKey(lt => lt.AccountId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Restrict);
 
             LoanTransactions
                 .HasOne(lt => lt.Loan)
                 .WithMany(l => l.LoanTransactions)
                 .HasForeignKey(lt => lt.LoanId)
-                .OnDelete(DeleteBehavior.SetNull);
-
-            LoanTransactions
-                .HasOne(lt => lt.LoanType)
-                .WithMany(lt => lt.LoanTransactions)
-                .HasForeignKey(lt => lt.LoanTypeId)
                 .OnDelete(DeleteBehavior.Restrict);
-
-
         }
     }
 }

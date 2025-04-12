@@ -62,34 +62,12 @@ namespace Data.Configurations.Finance
                 .IsRequired(false);
 
             /*
-             *  Configure Relationships
+             *  Relationships
              *  CustomersAuth (one-to-many)
              *  Transactions (one-to-many)
              *  Loans (one-to-many)
              *  LoanTransactions (one-to-many)
              */
-            Accounts
-                .HasMany(a => a.CustomersAuth)
-                .WithOne(ca => ca.Account)
-                .HasForeignKey(ca => ca.AccountId)
-                .OnDelete(DeleteBehavior.Cascade);
-            Accounts
-                .HasMany(a => a.Transactions)
-                .WithOne(t => t.Account)
-                .HasForeignKey(t => t.AccountId)
-                .OnDelete(DeleteBehavior.SetNull);
-            Accounts
-                .HasMany(a => a.Loans)
-                .WithOne(l => l.Account)
-                .HasForeignKey(l => l.AccountId)
-                .OnDelete(DeleteBehavior.SetNull);
-            Accounts
-                .HasMany(a => a.LoanTransactions)
-                .WithOne(lt => lt.Account)
-                .HasForeignKey(lt => lt.AccountId)
-                .OnDelete(DeleteBehavior.SetNull);
-
         }
-
     }
 }
