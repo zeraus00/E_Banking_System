@@ -5,7 +5,7 @@
         // Configure UserInfo Table
         public void Configure(EntityTypeBuilder<UserInfo> UsersInfo)
         {
-            UsersInfo.ToTable("UsersInfo", "User");
+            UsersInfo.ToTable("UsersInfo", "UserSchema");
 
             /*  Configure Table Properties  */
 
