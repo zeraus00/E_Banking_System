@@ -58,11 +58,6 @@ namespace Data.Configurations.User
                 .WithMany(r => r.Addresses)
                 .HasForeignKey(a => a.RegionId)
                 .OnDelete(DeleteBehavior.SetNull);
-            Addresses
-                .HasMany(a => a.UsersInfo)
-                .WithOne(ui => ui.Address)
-                .HasForeignKey(a => a.AddressId)
-                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }
