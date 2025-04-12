@@ -72,7 +72,7 @@
                 .HasOne(lt => lt.Loan)
                 .WithMany(l => l.LoanTransactions)
                 .HasForeignKey(lt => lt.LoanId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Restrict);
 
             LoanTransactions
                 .HasOne(lt => lt.LoanType)
