@@ -13,7 +13,42 @@ namespace Data
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder
-                .UseMySql("Server=localhost;Port=3306;Database=ebankingDB;User Id=root;Password=admin1234;", new MySqlServerVersion(new Version(8, 0, 41)));
+                .UseMySql("Server=localhost;Port=3306;Database=ebankingDB;User Id=root;Password=admin1234;", new MySqlServerVersion(new Version(8, 0, 41)))
+                .UseSeeding((context, _) =>
+                {
+                    var testAuth  = context.Set<CustomerAuth>().FirstOrDefault(ca => ca.Email == "testemail@gmail.com");
+                    if (testAuth == null)
+                    {
+                        var customerAuthBuilder = new CustomerAuthBuilder();
+                        customerAuthBuilder
+                            .WithEmail("testemail@gmail.com")
+                            .WithUserName("testuser")
+                            .WithPassword("testpassword");
+
+                        CustomerAuth customerAuth = customerAuthBuilder.Build();
+                        var authenticationBuilder = new AuthenticationBuilder(context);
+
+                        authenticationBuilder.AddCustomerAuth(customerAuth);
+                    }
+                })
+                .UseAsyncSeeding(async (context, _, cancellationToken) =>
+                {
+                    var testAuth = context.Set<CustomerAuth>().FirstOrDefault(ca => ca.Email == "testemail@gmail.com");
+                    if (testAuth == null)
+                    {
+                        var customerAuthBuilder = new CustomerAuthBuilder();
+                        customerAuthBuilder
+                            .WithEmail("testemail@gmail.com")
+                            .WithUserName("testuser")
+                            .WithPassword("testpassword");
+
+                        CustomerAuth customerAuth = customerAuthBuilder.Build();
+                        var authenticationBuilder = new AuthenticationBuilder(context);
+
+                        await authenticationBuilder.AddCustomerAuthAsync(customerAuth);
+                    }
+                }
+                );
             //optionsBuilder.UseInMemoryDatabase("EBankingDb");
             base.OnConfiguring(optionsBuilder);
         }
