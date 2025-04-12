@@ -6,9 +6,6 @@
     <main>
         <header class="custom-card-clientpage clientheader px-4 py-4">
             <div class="align-items-start">
-                <NavLink class="nav-link custom-nav-link d-flex justify-content-start pb-3" href="/Withdraw_amount">
-                    ← Go Back
-                </NavLink>
                 <div class="d-flex align-items-center gap-3 mx-5">
                     <h1>Withdraw</h1>
                 </div>
@@ -36,18 +33,29 @@
                         <p class="m-0">confirmationNumber</p>
                     </div>
 
-                    <section class="d-flex flex-column form-check d-flex justify-content-end mt-3">
-                        <div class="pb-2">
-                            <input class="form-check-input mx-2" type="checkbox" id="termsAndConditions required">
-                            <label class="form-check-label text-light" for="withdrawAmountVerification">
-                                Confirm the details are correct.
-                            </label>
+                    <div class="row w-25 gx-2">
+                        <div class="col">
+                            <NavLink href="/Withdraw_amount">
+                                <button class="btn btn-primary btn-lg w-100">Go Back</button>
+                            </NavLink>
+                        </div>
+                        <div class="col">
+                            <NavLink href="/Withdraw_receipt">
+                                <button class="btn btn-primary btn-lg w-100">Continue</button>
+                            </NavLink>
                         </div>
 
-                        <NavLink href="/Withdraw_receipt">
-                            <button class="btn btn-primary btn-lg w-100">Continue</button>
-                        </NavLink>
-                    </section>
+                        <section class="d-flex flex-column form-check d-flex justify-content-end">
+                            <div class="pt-1">
+                                <input class="form-check-input mx-2" type="checkbox" id="depositAmountVerification required">
+                                <label class="form-check-label text-light" for="depositAmountVerification">
+                                    Confirm details are correct
+                                </label>
+                            </div>
+                        </section>
+
+                    </div>
+
                 </div>
             </section>
         </div>

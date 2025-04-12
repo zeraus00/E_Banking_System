@@ -6,9 +6,6 @@
     <main>
         <header class="custom-card-clientpage clientheader px-4 py-4">
             <div class="align-items-start">
-                <NavLink class="nav-link custom-nav-link d-flex justify-content-start pb-3" href="/Client_home">
-                    ← Go Back
-                </NavLink>
                 <div class="d-flex align-items-center gap-3 mx-5">
                     <h1>Withdraw</h1>
                 </div>
@@ -39,9 +36,18 @@
                         <h5 class="mb-1">clientName</h5>
                         <p class="mb-0">accountNumber</p>
                     </div>
-                    <NavLink class="w-25" href="/Withdraw_confirmation">
-                        <button class="btn btn-primary btn-lg w-100">Continue</button>
-                    </NavLink>
+                    <div class="row w-25 gx-2">
+                        <div class="col">
+                            <NavLink href="/Client_home">
+                                <button class="btn btn-primary btn-lg w-100">Go Back</button>
+                            </NavLink>
+                        </div>
+                        <div class="col">
+                            <NavLink href="/Withdraw_confirmation">
+                                <button class="btn btn-primary btn-lg w-100">Continue</button>
+                            </NavLink>
+                        </div>
+                    </div>
                 </div>
 
             </section>
