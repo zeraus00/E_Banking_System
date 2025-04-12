@@ -5,16 +5,22 @@
 
 <div class="page">
 	<main>
+
+		<!-- Registration Box -->
 		<div class="card registration mt-3 p-4 shadow-lg">
 			<div class="d-flex justify-content-between align-items-center">
 				<h3 class="fw-bold text-light">User Registration</h3>
+
+				<!-- Close Button -->
 				<NavLink href="/">
 					<button class="btn-close" aria-label="Close"></button> 
 				</NavLink>
 			</div>
 
+
 			<div class="information_box">
 
+				<!-- Row 1 -->
 				<div class="row g-2">
 					<div class="col-3">
 						<label class="text-light">First Name</label>
@@ -34,6 +40,7 @@
 					</div>
 				</div>
 
+				<!-- Row 2 -->
 				<div class="row g-2 mt-2">
 					<div class="col-1">
 						<label class="text-light">Age</label>
@@ -54,7 +61,6 @@
 							<option>Female</option>
 						</select>
 					</div>
-
 					<div class="col-2">
 						<label class="text-light">Civil Status</label>
 						<select class="form-select" required>
@@ -66,6 +72,7 @@
 					</div>
 				</div>
 
+				<!-- Row 3 -->
 				<div class="row g-2 mt-2">
 					<div class="col-3">
 						<label class="text-light">Religion</label>
@@ -85,6 +92,7 @@
 					</div>
 				</div>
 
+				<!-- Row 4 -->
 				<div class="row g-2 mt-2">
 					<div class="col-3">
 						<label class="text-light">Street No.</label>
@@ -94,8 +102,17 @@
 						<label class="text-light">House No.</label>
 						<input class="form-control" placeholder="Province" required>
 					</div>
+					<div class="col-3">
+						<label class="text-light">Email</label>
+						<input type="email" class="form-control" placeholder="Email" required>
+					</div>
+					<div class="col-3">
+						<label class="text-light">Contact No.</label>
+						<input class="form-control" placeholder="Contact No." required>
+					</div>
 				</div>
 
+				<!-- Row 5 (Father's Name)-->
 				<div class="row g-2 mt-2">
 					<div class="col-12">
 						<label class="text-light">Father's Name</label>
@@ -115,6 +132,7 @@
 						</div>
 					</div>
 
+					<!-- Row 6 (Mother's Name)-->
 					<div class="col-12">
 						<label class="text-light">Mother's Maiden Name</label>
 						<div class="row g-2">
@@ -133,6 +151,7 @@
 						</div>
 					</div>
 
+					<!-- Row 7 (Beneficiary's Name) -->
 					<div class="col-12">
 						<label class="text-light">Beneficiary's Name</label>
 						<div class="row g-2">
@@ -152,17 +171,27 @@
 					</div>
 				</div>
 
-				<div  class="row g-2 mt-3">
-					<div class="col-6">
+				<div class="row g-3 mt-3">
+					<!-- Upload Government ID -->
+					<div class="col-md-4">
 						<label class="text-light">Upload Government Valid ID (Front & Back)</label>
 						<div class="d-flex gap-2">
-							<input type="file" class="btn btn-light" required>
-							<button class="btn btn-outline-light">View Atttachment</button>
+							<input type="file" class="btn btn-light w-75" required />
+							<button class="btn btn-outline-light">View</button>
 						</div>
 					</div>
 
+					<!-- Upload 1x1 Picture -->
+					<div class="col-md-4">
+						<label class="text-light">Upload 1x1 Picture</label>
+						<div class="d-flex gap-2">
+							<input type="file" class="btn btn-light w-75" required />
+							<button class="btn btn-outline-light">View</button>
+						</div>
+					</div>
 				</div>
 
+				<!-- Terms and Conditions Checkbox -->
 				<div class="form-check d-flex justify-content-end mt-3">
 					<input class="form-check-input mx-2" type="checkbox" id="termsAndConditions required">
 					<label class="form-check-label text-light" for="termsAndConditions">
@@ -170,6 +199,7 @@
 					</label>
 				</div>
 
+				<!-- Register Button -->
 				<div class="text-end mt-3">
 					<button class="btn btn-primary btn-lg" @onclick="LoginAsync"> Register</button>
 				</div>

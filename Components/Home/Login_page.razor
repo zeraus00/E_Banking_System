@@ -6,28 +6,35 @@
 
 <div class="page">
 	<main>
+
+		<!-- Login Box -->
 		<div class="card login p-4 shadow-lg">
 			<div class="d-flex justify-content-end">
+
+				<!-- Close Button -->
 				<NavLink href="/">
 					<button type="button" class="btn-close" aria-label="Close"></button>
 				</NavLink>
 			</div>
 			<h2 class="text-center fw-bold">User Login</h2>
 
+			<!-- Error Handling (Draft) -->
 			@if (error.Length > 0)
 			{
 				<div class="alert alert-danger alert-dismissible fade show" role="alert">
 					<strong>@error</strong>
 					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 				</div>
-			}
+			} 
 
+			<!-- Authentication -->
 			<div class="loginform px-4">
 				<input class="form-control form-control-custom form-control-lg mb-3" @bind="email" placeholder="Email">
 				<input class="form-control form-control-custom form-control-lg" type="password" @bind="password" placeholder="Password">
 				
 				<div class="col d-flex align-items-center mt-1">
 
+					<!-- Remember Me Checkbox -->
 					<div class="form-check">
 						<input class="form-check-input" type="checkbox" id="rememberMe">
 						<label class="form-check-label" for="rememberMe">
@@ -35,6 +42,7 @@
 						</label>
 					</div>
 
+					<!-- Forgot Password Link -->
 					<NavLink class="nav-link ms-auto" href="/Forgot_password">
 						<span class="bi bi-info-circle-fill"></span> Forget Password?
 					</NavLink>
@@ -42,12 +50,14 @@
 				</div>
 			</div>
 
+			<!-- Login Button -->
 			<div class="rpw mb-2 px-4">
 				<NavLink class="d-grid" href="/Client_home">
 					<button class="btn btn-primary" @onclick="LoginAsync"> Log in</button>
 				</NavLink>
 			</div>
 
+			<!-- Sign Up Link -->
 			<div class="rpw px-4">
 				<div class="col d-flex align-items-center">
 					<p class="mb-0">Do not have an account?</p>

@@ -1,4 +1,4 @@
-﻿@page "/Withdraw_confirmation"
+﻿@page "/Transfer_confirmation"
 @inject NavigationManager NavigationManager
 
 
@@ -6,8 +6,11 @@
     <main>
         <header class="custom-card-clientpage clientheader px-4 py-4">
             <div class="align-items-start">
+                <NavLink class="nav-link custom-nav-link d-flex justify-content-start pb-3" href="/Transfer_amount">
+                    ← Go Back
+                </NavLink>
                 <div class="d-flex align-items-center gap-3 mx-5">
-                    <h1>Withdraw</h1>
+                    <h1>Transfer Money</h1>
                 </div>
             </div>
             <section class="d-flex justify-content-end align-items-end mx-5 gap-2">
@@ -21,8 +24,8 @@
         <div class="container">
             <section class="card registration shadow-lg d-flex flex-column my-5 p-3">
                 <div class="mx-auto text-center p-4">
-                    <h5>Withdraw Amount</h5>
-                    <h1 class="fw-bolder py-3 mb-3">withdrawAmount</h1>
+                    <h5>Trasfer Amount</h5>
+                    <h1 class="fw-bolder py-3 mb-3">TransferAmount</h1>
                 </div>
 
                 <div class="d-flex justify-content-between mx-5 align-items-end my-4">
@@ -33,26 +36,18 @@
                         <p class="m-0">confirmationNumber</p>
                     </div>
 
-                    <div class="row d-flex w-50 gx-2">
-                        <div class="d-flex flex-wrap gap-2">
-                            <NavLink href="/Withdraw_amount" class="flex-fill">
-                                <button class="btn btn-primary btn-lg w-100">Go Back</button>
-                            </NavLink>
-                            <NavLink href="/Withdraw_receipt" class="flex-fill">
-                                <button class="btn btn-primary btn-lg w-100">Continue</button>
-                            </NavLink>
+                    <section class="d-flex flex-column form-check d-flex justify-content-end mt-3">
+                        <div class="pb-2">
+                            <input class="form-check-input mx-2" type="checkbox" id="termsAndConditions required">
+                            <label class="form-check-label text-light" for="withdrawAmountVerification">
+                                Confirm the details are correct.
+                            </label>
                         </div>
 
-                        <section class="d-flex flex-column form-check d-flex justify-content-end align-items-end px-4">
-                            <div class="pt-1">
-                                <input class="form-check-input mx-2" type="checkbox" id="withdrawAmountVerification required">
-                                <label class="form-check-label text-light" for="withdrawAmountVerification">
-                                    Confirm details are correct
-                                </label>
-                            </div>
-                        </section>
-                    </div>
-
+                        <NavLink href="/Transfer_receipt">
+                            <button class="btn btn-primary btn-lg w-100">Continue</button>
+                        </NavLink>
+                    </section>
                 </div>
             </section>
         </div>

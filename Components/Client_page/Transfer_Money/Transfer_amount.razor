@@ -1,0 +1,69 @@
+﻿@page "/Transfer_amount"
+@inject NavigationManager NavigationManager
+
+<div class="page">
+    <main>
+
+        <!-- Header -->
+        <header class="custom-card-clientpage clientheader px-4 py-4">
+            <div>
+                <NavLink class="nav-link custom-nav-link d-flex justify-content-start pb-3" href="/Client_home">
+                    ← Go Back
+                </NavLink>
+                <div class="d-flex align-items-center gap-3 ms-3">
+                    <h1>Transfer Money</h1>
+                </div>
+            </div>
+            <section class="d-flex justify-content-end align-items-end mx-5 gap-2">
+                <p class="fs-6 fw-lighter align-text-bottom">Current Balance: </p>
+                <div class="custom-card-clientpage current-balance d-flex align-items-center justify-content-center">
+                    currentBalance
+                </div>
+            </section>
+        </header>
+
+        <!-- Form Section -->
+        <div class="container">
+            <section class="card registration shadow-lg d-flex flex-column mt-4 p-4">
+
+                <!-- Input: Account Number + Name -->
+                <div class="row g-4 mb-4">
+                    <div class="col-12 col-md-6">
+                        <label class="text-light">Enter Account Number</label>
+                        <input class="form-control form-control-custom form-control-lg mb-3" placeholder="Account Number" required>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="text-light">Enter Account Name</label>
+                        <input class="form-control form-control-custom form-control-lg mb-3" placeholder="Account Name" required>
+                    </div>
+                </div>
+
+                <!-- Transfer Amount Centered -->
+                <div class="row justify-content-center text-center mb-4">
+                    <div class="col-12 col-md-8">
+                        <h3 class="mb-3">Enter Transfer Amount</h3>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text fs-4">$</span>
+                            <input type="number" class="form-control form-control-custom form-control-lg fs-2" placeholder="000.00" />
+                        </div>
+                        <div class="d-flex justify-content-center gap-2 text-light fw-bold">
+                            <p>Max:</p>
+                            <p>currentBalance</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="d-flex justify-content-between align-items-center mx-2 mt-3">
+                    <div class="text-start">
+                        <h5 class="mb-1">clientName</h5>
+                        <p class="mb-0">accountNumber</p>
+                    </div>
+                    <NavLink class="w-25" href="/Transfer_confirmation">
+                        <button class="btn btn-primary btn-lg w-100">Continue</button>
+                    </NavLink>
+                </div>
+            </section>
+        </div>
+    </main>
+</div>

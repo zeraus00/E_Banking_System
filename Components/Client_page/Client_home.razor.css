@@ -10,7 +10,6 @@
 .custom-card {
     background-color: white;
     display: flex;
-    align-items: center;
 }
 
     .custom-card.client {
@@ -22,33 +21,19 @@
         border: none;
         border-radius: 0;
         border-bottom-right-radius: 50px;
+        margin-bottom: 20px;
     }
 
     .custom-card.balance {
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        align-items: flex-start;
-        margin: 2rem;
+        margin: 0;
         padding: 1rem;
         border-radius: 10px;
-        box-sizing: border-box;
+        width: 100%;
+        max-width: 100%;
     }
-
-        .custom-card.balance.md {
-            height: auto;
-            min-height: 200px;
-            width: 35%;
-            max-width: 100%;
-        }
-
-        .custom-card.balance.lg {
-            height: 250px;
-            width: 100%;
-            max-width: 100%;
-            border-radius: 20px;
-            justify-content: normal;
-        }
 
     .custom-card.sm {
         background-color: gray;
@@ -59,12 +44,17 @@
     }
 
     .custom-card.transactions {
-        height: 300px;
-        color: white;
-        background-color: #069DEC;
-        border: 2px solid white;
-        border-radius: 20px;
-        margin: 2rem;
+        flex-direction: column;
+        display: flex;
+        color: black;
+        background-color: white;
+        border: 20px solid #069DEC;
+        border-radius: 15px;
+        margin: 2rem 0;
+        padding: 1rem;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        width: 95%;
+        max-width: 100%;
     }
 
 .account-number {
@@ -74,7 +64,6 @@
 
 .notification {
     display: flex;
-    align-items: center;
     padding-right: 20px;
 }
 
@@ -83,7 +72,6 @@
         width: 35px;
         object-fit: contain;
     }
-
 
 .nav-container {
     display: grid;
@@ -111,6 +99,13 @@
         color: #41C1D8;
     }
 
+/* Adjustments for View All button */
+.btn-link {
+    color: #41C1D8;
+    text-decoration: none;
+}
+
+/* Adjustments for responsive design */
 @media (max-width: 600px) {
     .custom-card-wrapper {
         max-width: 100%;
@@ -122,5 +117,11 @@
 
     .custom-card.bottom h6 {
         font-size: 0.85rem;
+    }
+
+    /* Ensure proper padding for smaller screens */
+    .custom-card.transactions {
+        margin: 1rem 0;
+        padding: 0.75rem;
     }
 }

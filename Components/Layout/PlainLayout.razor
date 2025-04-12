@@ -1,9 +1,12 @@
 ﻿@inherits LayoutComponentBase
 <body>
+    <!-- Main Top NavBar Layout -->
     <div class="nav-horizontal">
-        <div class="logo mx-5">
-            <img src="/nexus_banking.png" alt="Logo" />
-        </div>
+        <NavLink href="/" class="nav-link">
+            <img class="logo mx-5" src="/nexus_banking.png" alt="Logo" />
+        </NavLink>
+
+        <!-- Top NavBar Navigation Links-->
         <nav class="nav-container">
             <NavLink class="nav-link custom-nav-link mx-1 my-auto" href="/" Match="NavLinkMatch.All">
                 Home
@@ -20,7 +23,10 @@
                 </button>
             </NavLink>
         </nav>
+
     </div>
+
+    <!-- Main Content -->
     <div class="main-content">
         @Body
     </div>

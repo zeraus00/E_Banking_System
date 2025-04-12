@@ -15,14 +15,14 @@
             </div>
             <section class="d-flex justify-content-end align-items-end mx-5 gap-2">
                 <p class="fs-6 fw-lighter align-text-bottom">Current Balance: </p>
-                <div class="custom-card current-balance d-flex align-items-center justify-content-center">
+                <div class="custom-card-clientpage current-balance d-flex align-items-center justify-content-center">
                     currentBalance
                 </div>
             </section>
         </header>
         <div class="container">
             <section class="card registration shadow-lg d-flex flex-column mt-4 p-3">
-                <h3 class="mx-3 my-3 ">Enter Withdrawal Amount</h3>
+                <h3 class="mx-3 my-3 ">Enter Deposit Amount</h3>
                 <div class="input-group px-4 mb-4">
                     <span class="input-group-text fs-2">$</span>
                     <input type="number" class="form-control form-control-custom form-control-lg fs-2" placeholder="000-000" />
@@ -33,7 +33,15 @@
                         <h5 class="mb-1">clientName</h5>
                         <p class="mb-0">accountNumber</p>
                     </div>
-                    <button class="btn btn-primary btn-lg w-25">Continue</button>
+
+                    <div class="d-flex flex-wrap gap-2 w-50">
+                        <NavLink href="/Client_home" class="flex-fill">
+                            <button class="btn btn-primary btn-lg w-100">Go Back</button>
+                        </NavLink>
+                        <NavLink href="/Deposit_confirmation" class="flex-fill">
+                            <button class="btn btn-primary btn-lg w-100">Continue</button>
+                        </NavLink>
+                    </div>
                 </div>
 
             </section>
