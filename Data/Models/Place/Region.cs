@@ -8,8 +8,8 @@
 
 
         /*  Navigation Properties   */
-        public ICollection<Province> Provinces { get; set; } = null!; 
-        public ICollection<Address> Addresses { get; set; } = null!; 
-        public ICollection<BirthInfo> BirthsInfo { get; set; } = null!;
+        public ICollection<Province> Provinces { get; set; } = new List<Province>(); 
+        public ICollection<Address> Addresses { get; set; } = new List<Address>(); 
+        public ICollection<BirthInfo> BirthsInfo { get; set; } = new List<BirthInfo>();
     }
 }

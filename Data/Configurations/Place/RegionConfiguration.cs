@@ -27,18 +27,6 @@ namespace Data.Configurations.Place
              *  Addresses (one-to-many)
              *  BirthsInfo (one-to-many)
              */
-            Regions
-                .HasMany(r => r.Provinces)
-                .WithOne(p => p.Region)
-                .HasForeignKey(p => p.RegionId);
-            Regions
-                .HasMany(r => r.Addresses)
-                .WithOne(a => a.Region)
-                .HasForeignKey(a => a.RegionId);
-            Regions
-                .HasMany(r => r.BirthsInfo)
-                .WithOne(b => b.Region)
-                .HasForeignKey(b => b.RegionId);
         }
 
     }
