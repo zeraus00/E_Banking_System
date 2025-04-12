@@ -4,53 +4,9 @@ namespace Data
 {
     public class EBankingContext : DbContext
     {
-        /*
         public EBankingContext(DbContextOptions<EBankingContext> options) : base(options)
         {
-        }
-        */
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder
-                .UseSqlServer("Server=localhost;Database=EBankingDb;User Id=myuser;Password=mypassword;")
-                .UseSeeding((context, _) =>
-                {
-                    var testAuth  = context.Set<CustomerAuth>().FirstOrDefault(ca => ca.Email == "testemail@gmail.com");
-                    if (testAuth == null)
-                    {
-                        var customerAuthBuilder = new CustomerAuthBuilder();
-                        customerAuthBuilder
-                            .WithEmail("testemail@gmail.com")
-                            .WithUserName("testuser")
-                            .WithPassword("testpassword");
-
-                        CustomerAuth customerAuth = customerAuthBuilder.Build();
-                        var authenticationBuilder = new AuthenticationBuilder(context);
-
-                        authenticationBuilder.AddCustomerAuth(customerAuth);
-                    }
-                })
-                .UseAsyncSeeding(async (context, _, cancellationToken) =>
-                {
-                    var testAuth = context.Set<CustomerAuth>().FirstOrDefault(ca => ca.Email == "testemail@gmail.com");
-                    if (testAuth == null)
-                    {
-                        var customerAuthBuilder = new CustomerAuthBuilder();
-                        customerAuthBuilder
-                            .WithEmail("testemail@gmail.com")
-                            .WithUserName("testuser")
-                            .WithPassword("testpassword");
-
-                        CustomerAuth customerAuth = customerAuthBuilder.Build();
-                        var authenticationBuilder = new AuthenticationBuilder(context);
-
-                        await authenticationBuilder.AddCustomerAuthAsync(customerAuth);
-                    }
-                }
-                );
-            //optionsBuilder.UseInMemoryDatabase("EBankingDb");
-            base.OnConfiguring(optionsBuilder);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
