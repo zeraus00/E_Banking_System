@@ -1,10 +1,10 @@
 ﻿namespace Database.Builder
 {
-    public class AuthenticationBuilder
+    public class AuthBuilder
     {
 
         private readonly DbContext _context;
-        public AuthenticationBuilder(DbContext context)
+        public AuthBuilder(DbContext context)
         {
             _context = context;
         }
