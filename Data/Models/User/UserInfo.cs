@@ -19,8 +19,8 @@
 
 
         /*  Navigation Properties   */
-        public BirthInfo BirthInfo { get; set; } = null!;
-        public Address Address { get; set; } = null!;
-        public ICollection<CustomerAuth> CustomersAuth { get; set; } = null!; 
+        public BirthInfo? BirthInfo { get; set; } 
+        public Address? Address { get; set; } 
+        public ICollection<CustomerAuth> CustomersAuth { get; set; } = new List<CustomerAuth>(); 
     }
 }

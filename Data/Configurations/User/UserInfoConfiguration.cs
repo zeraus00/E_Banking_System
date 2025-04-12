@@ -89,19 +89,10 @@
                 .WithMany(bi => bi.UsersInfo)
                 .HasForeignKey(ui => ui.BirthInfoId)
                 .OnDelete(DeleteBehavior.SetNull);
-
-            // Define Foreign Key to Address
             UsersInfo
                 .HasOne(ui => ui.Address)
                 .WithMany(a => a.UsersInfo)
                 .HasForeignKey(ui => ui.AddressId)
-                .OnDelete(DeleteBehavior.SetNull);
-
-            // Define Relationship to CustomerAuth
-            UsersInfo
-                .HasMany(ui => ui.CustomersAuth)
-                .WithOne(ca => ca.UserInfo)
-                .HasForeignKey(ca => ca.UserInfoId)
                 .OnDelete(DeleteBehavior.SetNull);
         }
     }
