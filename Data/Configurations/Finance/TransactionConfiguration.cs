@@ -62,7 +62,7 @@
                 .HasOne(t => t.Account)
                 .WithMany(a => a.Transactions)
                 .HasForeignKey(t => t.AccountId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
             Transactions
                 .HasOne(t => t.TransactionType)
                 .WithMany(tt => tt.Transactions)
