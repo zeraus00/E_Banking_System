@@ -21,11 +21,6 @@
                 .Property(ca => ca.AccountId)
                 .IsRequired();
 
-            // UserInfoId (Foreign Key to UsersInfo Table)
-            CustomersAuth
-                .Property(ca => ca.UserInfoId)
-                .IsRequired();
-
             // UserName (Required; MaxLength=20 ; Unique)
             CustomersAuth
                 .Property(ca => ca.UserName)
