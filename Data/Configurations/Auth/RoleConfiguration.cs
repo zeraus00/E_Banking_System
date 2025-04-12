@@ -5,7 +5,7 @@
         // Configure Roles Table
         public void Configure(EntityTypeBuilder<Role> Roles)
         {
-            Roles.ToTable("Roles", "Auth");
+            Roles.ToTable("Roles", "AuthSchema");
 
             /*  Configure Table Properties  */
 
