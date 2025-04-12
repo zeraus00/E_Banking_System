@@ -7,7 +7,7 @@ namespace Data.Configurations.Place
         // Configure Regions Table
         public void Configure(EntityTypeBuilder<Region> Regions)
         {
-            Regions.ToTable("Regions");
+            Regions.ToTable("Regions", "PlaceSchema");
             /*  Configure Table Properties  */
 
             // RegionId (Primary Key)

@@ -1,19 +1,12 @@
-﻿namespace Data
+﻿using Database.Builder;
+
+namespace Data
 {
     public class EBankingContext : DbContext
     {
         public EBankingContext(DbContextOptions<EBankingContext> options) : base(options)
         {
-        }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseMySql(
-                "server=localhost;database=eBankingDb;user=user;password=password",
-                new MySqlServerVersion(new Version(8, 0, 41))
-                );
-            //optionsBuilder.UseInMemoryDatabase("EBankingDb");
-            base.OnConfiguring(optionsBuilder);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

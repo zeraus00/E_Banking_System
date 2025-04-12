@@ -7,7 +7,7 @@ namespace Data.Configurations.Finance
         // Configure Accounts Table
         public void Configure(EntityTypeBuilder<Account> Accounts)
         {
-            Accounts.ToTable("Accounts", "Finance");
+            Accounts.ToTable("Accounts", "FinanceSchema");
 
             /*  Configure Table Properties  */
 
@@ -54,7 +54,7 @@ namespace Data.Configurations.Finance
             Accounts
                 .Property(a => a.DateOpened)
                 .IsRequired()
-                .HasDefaultValueSql("NOW()");
+                .HasDefaultValueSql("GETDATE()");
 
             //  DateClosed (Optional)
             Accounts
@@ -72,22 +72,22 @@ namespace Data.Configurations.Finance
                 .HasMany(a => a.CustomersAuth)
                 .WithOne(ca => ca.Account)
                 .HasForeignKey(ca => ca.AccountId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
             Accounts
                 .HasMany(a => a.Transactions)
                 .WithOne(t => t.Account)
                 .HasForeignKey(t => t.AccountId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.SetNull);
             Accounts
                 .HasMany(a => a.Loans)
                 .WithOne(l => l.Account)
                 .HasForeignKey(l => l.AccountId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.SetNull);
             Accounts
                 .HasMany(a => a.LoanTransactions)
                 .WithOne(lt => lt.Account)
                 .HasForeignKey(lt => lt.AccountId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.SetNull);
 
         }
 

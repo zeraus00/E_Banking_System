@@ -5,7 +5,7 @@
         // Configure EmployeesAuth Table
         public void Configure(EntityTypeBuilder<EmployeeAuth> EmployeesAuth)
         {
-            EmployeesAuth.ToTable("EmployeesAuth", "Authentication");
+            EmployeesAuth.ToTable("EmployeesAuth", "AuthSchema");
 
             /*  Configure Table Properties  */
 

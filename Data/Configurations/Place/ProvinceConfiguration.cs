@@ -7,7 +7,7 @@ namespace Data.Configurations.Place
         // Configure Provinces Table
         public void Configure(EntityTypeBuilder<Province> Provinces)
         {
-            Provinces.ToTable("Provinces", "Place");
+            Provinces.ToTable("Provinces", "PlaceSchema");
             /*  Configure Table Properties  */
 
             //  ProvinceId (Primary Key)

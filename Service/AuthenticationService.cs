@@ -7,7 +7,7 @@ namespace Service
         private readonly DbContext _context = context;
         // create a passwordhasher object here!
 
-        public async Task<bool> IsAuthenticated(string Email, string Password)
+        public async Task<bool> IsAuthenticatedAsync(string Email, string Password)
         {
             try
             {
@@ -21,12 +21,16 @@ namespace Service
                 bool passwordIsCorrect = await this.PasswordIsCorrect(Email, Password);
                 if (!passwordIsCorrect)
                 {
-                    throw new UserNotFoundException();
+                    throw new IncorrectPasswordException();
                 }
 
                 return true;
             }
             catch (UserNotFoundException)
+            {
+                return false;
+            }
+            catch (IncorrectPasswordException)
             {
                 return false;
             }

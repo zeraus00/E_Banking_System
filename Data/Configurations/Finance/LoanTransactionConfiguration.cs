@@ -6,7 +6,7 @@
         public void Configure (EntityTypeBuilder<LoanTransaction> LoanTransactions) 
         {
             LoanTransactions
-                .ToTable("LoanTransactions", "Finance");
+                .ToTable("LoanTransactions", "FinanceSchema");
 
             /*  Configure Table Properties  */
 
@@ -47,13 +47,13 @@
             LoanTransactions
                 .Property(lt => lt.TransactionDate)
                 .IsRequired()
-                .HasDefaultValueSql("CURDATE()");
+                .HasDefaultValueSql("GETDATE()");
 
             //  TransactionTime (Required; TimeSpan)
             LoanTransactions
                 .Property(lt => lt.TransactionTime)
                 .IsRequired()
-                .HasDefaultValueSql("CURTIME()");
+                .HasDefaultValueSql("CAST(GETDATE() AS TIME)");
 
             /*
              * Configure Relationships

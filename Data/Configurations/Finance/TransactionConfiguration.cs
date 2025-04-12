@@ -5,7 +5,7 @@
         // Configure Transactions Table
         public void Configure(EntityTypeBuilder<Transaction> Transactions)
         {
-            Transactions.ToTable("Transactions", "Finance");
+            Transactions.ToTable("Transactions", "FinanceSchema");
 
             /*  Configure Table Properties  */
 
@@ -15,11 +15,6 @@
             Transactions
                 .Property(t => t.TransactionId)
                 .ValueGeneratedOnAdd();
-
-            //  AccountId (Foreign Key to Accounts Table)
-            Transactions
-                .Property(t => t.AccountId)
-                .IsRequired();
 
             //  TransactionTypeId (Foreign Key to TransactionTypes Table)
             Transactions
@@ -45,12 +40,12 @@
             Transactions
                 .Property(t => t.TransactionDate)
                 .IsRequired()
-                .HasDefaultValueSql("CURDATE()");
+                .HasDefaultValueSql("GETDATE()");
             //  TransactionTime (Required, Default Value="CURTIME()")
             Transactions
                 .Property(t => t.TransactionTime)
                 .IsRequired()
-                .HasDefaultValueSql("CURTIME()");
+                .HasDefaultValueSql("CAST(GETDATE() AS TIME)");
             //  TransactionFee  (Required, DECIMAL(18,2), Default Value=0,0m)
             Transactions
                 .Property(t => t.TransactionFee)
@@ -67,7 +62,7 @@
                 .HasOne(t => t.Account)
                 .WithMany(a => a.Transactions)
                 .HasForeignKey(t => t.AccountId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Cascade);
             Transactions
                 .HasOne(t => t.TransactionType)
                 .WithMany(tt => tt.Transactions)

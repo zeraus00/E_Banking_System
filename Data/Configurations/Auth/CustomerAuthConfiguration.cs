@@ -5,7 +5,7 @@
         // Configure CustomersAuth Table
         public void Configure(EntityTypeBuilder<CustomerAuth> CustomersAuth)
         {
-            CustomersAuth.ToTable("CustomersAuth", "Authentication");
+            CustomersAuth.ToTable("CustomersAuth", "AuthSchema");
 
             /*  Configure Table Properties  */
 

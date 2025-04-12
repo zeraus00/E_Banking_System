@@ -5,7 +5,7 @@
         //  Configure BirthsInfo Table
         public void Configure(EntityTypeBuilder<BirthInfo> BirthInfos)
         {
-            BirthInfos.ToTable("BirthsInfo", "User");
+            BirthInfos.ToTable("BirthsInfo", "UserSchema");
 
             /*  Configure Table Properties  */
 

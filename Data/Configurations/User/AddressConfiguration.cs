@@ -7,7 +7,7 @@ namespace Data.Configurations.User
         // Addresses Table Configuration
         public void Configure(EntityTypeBuilder<Address> Addresses)
         {
-            Addresses.ToTable("Addresses", "User");
+            Addresses.ToTable("Addresses", "UserSchema");
 
             /*  Configure Table Properties  */
 
