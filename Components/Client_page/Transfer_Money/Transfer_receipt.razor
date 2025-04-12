@@ -1,5 +1,47 @@
-﻿<h3>Transfer_receipt</h3>
+﻿@page "/Transfer_receipt"
+@inject NavigationManager NavigationManager
 
-@code {
 
-}
+<div class="page">
+    <main>
+        <header class="custom-card-clientpage clientheader px-4 py-4">
+            <div class="align-items-start">
+                <NavLink class="nav-link custom-nav-link d-flex justify-content-start pb-3" href="/Transfer_confirmation">
+                    ← Go Back
+                </NavLink>
+                <div class="d-flex align-items-center gap-3 mx-5">
+                    <h1>Transfer Money</h1>
+                </div>
+            </div>
+            <section class="d-flex justify-content-end align-items-end mx-5 gap-2">
+                <p class="fs-6 fw-lighter align-text-bottom">Current Balance: </p>
+                <div class="custom-card-clientpage current-balance d-flex align-items-center justify-content-center">
+                    currentBalance
+                </div>
+            </section>
+        </header>
+
+        <div class="container">
+            <section class="card registration shadow-lg my-5 p-3">
+                <div class="d-flex gap-2 text-start border-bottom w-100 align-items-center p-4">
+                    <h4>Total Transfer Money Amount: </h4>
+                    <h2 class="fw-bolder mx-5">TransferAmount</h2>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-end my-3 mx-5">
+                    <div class="d-flex flex-column text-start mb-0">
+                        <h5 class="mb-1">clientName</h5>
+                        <p class="mb-0">accountNumber</p>
+                        <p class="mb-0">date</p>
+                        <p class="mb-0">confirmationNumber</p>
+                    </div>
+                    <NavLink class="w-25" href="/Client_home">
+                        <button class="btn btn-primary btn-lg w-100">Go Home</button>
+                    </NavLink>
+                </div>
+            </section>
+        </div>
+
+    </main>
+</div>
+
