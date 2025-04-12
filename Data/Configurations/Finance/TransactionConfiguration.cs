@@ -5,7 +5,7 @@
         // Configure Transactions Table
         public void Configure(EntityTypeBuilder<Transaction> Transactions)
         {
-            Transactions.ToTable("Transactions", "Finance");
+            Transactions.ToTable("Transactions", "FinanceSchema");
 
             /*  Configure Table Properties  */
 

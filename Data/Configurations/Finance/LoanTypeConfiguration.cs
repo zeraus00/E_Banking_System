@@ -6,7 +6,7 @@ namespace Data.Configurations.Finance
         //  Configure LoanTransactionTypesTable
         public void Configure(EntityTypeBuilder<LoanType> LoanTypes)
         {
-            LoanTypes.ToTable("LoanTypes", "Finance");
+            LoanTypes.ToTable("LoanTypes", "FinanceSchema");
 
             /*  Configure Table Properties  */
 

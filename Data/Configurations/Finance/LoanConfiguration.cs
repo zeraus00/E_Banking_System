@@ -5,7 +5,7 @@
         //  Configure Loans Table
         public void Configure(EntityTypeBuilder<Loan> Loans) 
         {
-            Loans.ToTable("Loans", "Finance");
+            Loans.ToTable("Loans", "FinanceSchema");
 
             /*  Configure Table Properties  */
 

@@ -7,7 +7,7 @@ namespace Data.Configurations.Finance
         // Configure Accounts Table
         public void Configure(EntityTypeBuilder<Account> Accounts)
         {
-            Accounts.ToTable("Accounts", "Finance");
+            Accounts.ToTable("Accounts", "FinanceSchema");
 
             /*  Configure Table Properties  */
 
