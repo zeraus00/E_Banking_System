@@ -1,7 +1,13 @@
-﻿@page "/Login_page"
-@inject NavigationManager NavigationManager
-@inject NavigationManager Navigation
+﻿@using Data
+@using System.Diagnostics
+@using Service
 @using Layout
+
+@page "/Login_page"
+@rendermode InteractiveServer
+@inject NavigationManager NavigationManager
+@inject EBankingContext context
+@inject AuthenticationService authenticationService
 @layout PlainLayout
 
 <div class="page">
@@ -31,7 +37,7 @@
 			<div class="loginform px-4">
 				<input class="form-control form-control-custom form-control-lg mb-3" @bind="email" placeholder="Email">
 				<input class="form-control form-control-custom form-control-lg" type="password" @bind="password" placeholder="Password">
-				
+
 				<div class="col d-flex align-items-center mt-1">
 
 					<!-- Remember Me Checkbox -->
@@ -52,9 +58,7 @@
 
 			<!-- Login Button -->
 			<div class="rpw mb-2 px-4">
-				<NavLink class="d-grid" href="/Client_home">
-					<button class="btn btn-primary" @onclick="LoginAsync"> Log in</button>
-				</NavLink>
+				<button class="btn btn-primary" @onclick="LoginAsync"> Log in</button>
 			</div>
 
 			<!-- Sign Up Link -->
@@ -71,35 +75,48 @@
 	</main>
 </div>
 
-
 @code {
 	public string email = "";
 	public string password = "";
 	public string error = "";
 
-	@code {
-		private async Task LoginAsync()
-		{
+	private void LoginSync() {
+		StateHasChanged();	
+		NavigationManager.NavigateTo("/Client_home");
+	}
+
+	private async Task LoginAsync()
+	{
+		try {
+			Debug.WriteLine("Login button clicked"); 
+			Debug.WriteLine(email);
+			Debug.WriteLine(password);
 			// Perform login logic here, such as checking credentials
-			bool isLoginSuccessful = await AuthenticateUserAsync();
+			bool isLoginSuccessful = await authenticationService.IsAuthenticatedAsync(email, password);
 
 			if (isLoginSuccessful)
 			{
 				// Navigate to the homepage (or any page after login)
-				Navigation.NavigateTo("/Client_home");
+				NavigationManager.NavigateTo("/Client_home");
 			}
 			else
 			{
+				error = "Invalid email or password. Please try again.";
 				// Handle failed login attempt (e.g., show error message)
 			}
+		} catch (Exception ex) {
+			Console.WriteLine($"Error during login: {ex.Message}");
+			error = "An error occurred during login. Please try again.";
 		}
+		
+	}
 
-		private Task<bool> AuthenticateUserAsync()
-		{
-			// Add your authentication logic here.
-			// Return true if the login is successful, otherwise false.
-			return Task.FromResult(true); // For demo purposes, assume the login is always successful
-		}
+	private async Task<bool> AuthenticateUserAsync()
+	{
+		// Add your authentication logic here.
+		// Return true if the login is successful, otherwise false.
+		return await authenticationService.IsAuthenticatedAsync(email, password);
+		//return Task.FromResult(true); // For demo purposes, assume the login is always successful
 	}
 }
 

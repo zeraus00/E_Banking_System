@@ -1,12 +1,16 @@
 using E_BankingSystem.Components;
 using Data;
 using Database.Builder;
+using Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddDbContext<EBankingContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
+    sqloptions => sqloptions.CommandTimeout(100)));
+builder.Services.AddScoped<AuthenticationService>();
+builder.Services.AddRazorPages();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
@@ -18,12 +22,12 @@ using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<EBankingContext>();
 
-    //dbContext.Database.EnsureCreated();
+    dbContext.Database.EnsureCreated();
     // Apply migrations (this will create or update the database schema)
     // dbContext.Database.Migrate();
 
     // Seed data (this ensures that only new data is added)
-    //SeedData(dbContext);
+    SeedData(dbContext);
 }
 
 // Configure the HTTP request pipeline.
