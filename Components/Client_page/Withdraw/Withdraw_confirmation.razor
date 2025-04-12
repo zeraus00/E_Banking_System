@@ -1,9 +1,34 @@
-﻿@page "/WithdrawDeposit"
+﻿@page "/Withdraw_confirmation"
+@inject NavigationManager NavigationManager
 
 
+<div class="page">
+    <main>
+        <header class="custom-card-clientpage clientheader px-4 pt-4 pb-4">
+            <div class="align-items-start">
+                <NavLink class="nav-link custom-nav-link d-flex justify-content-start pb-3" href="/Client_home">
+                    ← Go Back
+                </NavLink>
+                <div class="d-flex align-items-center gap-3 mx-5">
+                    <h1>Withdraw</h1>
+                </div>
+            </div>
+            <section class="d-flex justify-content-end align-items-end mx-5 gap-2">
+                <p class="fs-6 fw-lighter align-text-bottom">Current Balance: </p>
+                <div class="custom-card-clientpage current-balance d-flex align-items-center justify-content-center">
+                    currentBalance
+                </div>
+            </section>
+        </header>
 
-<h3>Withdraw / Deposit</h3>
+        <div class="container">
+            <section class="card registration shadow-lg d-flex flex-column mt-4 p-3">
+                <div class="mx-auto">
+                    <h5>Withdraw Amount</h5>
+                    <h1 class="fw-bolder">withdrawAmount</h1>
+                </div>
+            </section>
+        </div>
+    </main>
+</div>
 
-@code {
-
-}
