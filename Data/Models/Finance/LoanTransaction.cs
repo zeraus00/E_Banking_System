@@ -4,10 +4,9 @@
     {
         /*  Properties   */
         public int LoanTransactionId { get; private set; }      // primary key
-        public int? AccountId { get; set; }                      // foreign key to Account
+        public int AccountId { get; set; }                      // foreign key to Account
         public int LoanId { get; set; }                         // foreign key to loans table
-        public int LoanTypeId { get; set; }                     // foreign key to TransactionType table
-        public decimal AmountPaid { get; set; }                     // total amount paid in this transaction
+        public decimal AmountPaid { get; set; }                 // total amount paid in this transaction
         public decimal RemainingLoanBalance { get; set; } 
         public decimal InterestAmount { get; set; }             // portion of amount that covers interest
         public decimal PrincipalAmount { get; set; }            //portion of amount that reduces the principal or the original amount borrowed
@@ -21,6 +20,5 @@
         /*  Navigation Properties   */
         public Account Account { get; set; } = null!;
         public Loan Loan { get; set; } = null!;
-        public LoanType LoanType { get; set; } = null!;
     }
 }

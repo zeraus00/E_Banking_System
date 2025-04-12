@@ -9,6 +9,5 @@
 
         /*  Navigation Properties   */
         public ICollection<Loan> Loans { get; set; } = null!;
-        public ICollection<LoanTransaction> LoanTransactions { get; set; } = null!;
     }
 }

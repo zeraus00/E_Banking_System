@@ -59,7 +59,6 @@
              * Configure Relationships
              * Accounts (many-to-one)
              * Loans (many-to-one)
-             * LoanTypes (many-to-one)
              */
 
             LoanTransactions
@@ -73,14 +72,6 @@
                 .WithMany(l => l.LoanTransactions)
                 .HasForeignKey(lt => lt.LoanId)
                 .OnDelete(DeleteBehavior.Restrict);
-
-            LoanTransactions
-                .HasOne(lt => lt.LoanType)
-                .WithMany(lt => lt.LoanTransactions)
-                .HasForeignKey(lt => lt.LoanTypeId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-
         }
     }
 }
