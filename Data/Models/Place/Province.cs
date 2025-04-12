@@ -5,13 +5,13 @@
     {
         public int ProvinceId { get; set; }                         // Primary Key
         public string ProvinceName { get; set; } = string.Empty;    // Required
-        public int RegionId { get; set; }                           // Foreign Key to Region
+        public int? RegionId { get; set; }                           // Foreign Key to Region
 
 
         /*  Navigation Properties   */
-        public Region Region { get; set; } = null!; 
-        public ICollection<City> Cities { get; set; } = null!; 
-        public ICollection<Address> Addresses { get; set; } = null!; 
-        public ICollection<BirthInfo> BirthsInfo { get; set; } = null!; 
+        public Region? Region { get; set; } 
+        public ICollection<City> Cities { get; set; } = new List<City>(); 
+        public ICollection<Address> Addresses { get; set; } = new List<Address>(); 
+        public ICollection<BirthInfo> BirthsInfo { get; set; } = new List<BirthInfo>(); 
     }
 }
