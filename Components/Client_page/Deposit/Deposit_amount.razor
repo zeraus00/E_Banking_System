@@ -6,9 +6,6 @@
     <main>
         <header class="custom-card-clientpage clientheader px-4 pt-4 pb-4">
             <div class="align-items-start">
-                <NavLink class="nav-link custom-nav-link d-flex justify-content-start pb-3" href="/Client_home">
-                    ← Go Back
-                </NavLink>
                 <div class="d-flex align-items-center gap-3 mx-5">
                     <h1>Deposit</h1>
                 </div>
@@ -28,20 +25,22 @@
                     <input type="number" class="form-control form-control-custom form-control-lg fs-2" placeholder="000-000" />
                 </div>
 
-                <div class="d-flex justify-content-between mx-5 align-items-end mb-4">
+                <div class="d-flex justify-content-between mx-5">
                     <div class="d-flex flex-column text-start mb-0">
                         <h5 class="mb-1">clientName</h5>
                         <p class="mb-0">accountNumber</p>
+                    </div>             
+                    
+
+                    <div class="text-end mt-3">
+                        <NavLink class="w-25" href="/Deposit_confirmation">
+                            <button class="btn btn-primary btn-lg w-100 mb-2">Continue</button>
+                        </NavLink>
+                        <NavLink class="w-25" href="/Client_home">
+                            <button class="btn btn-danger btn-lg w-100">Cancel</button>
+                        </NavLink>
                     </div>
 
-                    <div class="d-flex flex-wrap gap-2 w-50">
-                        <NavLink href="/Client_home" class="flex-fill">
-                            <button class="btn btn-primary btn-lg w-100">Go Back</button>
-                        </NavLink>
-                        <NavLink href="/Deposit_confirmation" class="flex-fill">
-                            <button class="btn btn-primary btn-lg w-100">Continue</button>
-                        </NavLink>
-                    </div>
                 </div>
 
             </section>

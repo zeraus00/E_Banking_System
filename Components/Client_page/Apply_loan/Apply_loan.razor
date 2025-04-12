@@ -1,0 +1,174 @@
+﻿@page "/Apply_loan"
+@inject NavigationManager NavigationManager
+@using Layout
+@layout MainLayout
+
+<div class="page">
+	<main>
+
+		<!-- Registration Box -->
+		<div class="card registration mt-3 p-4 shadow-lg">
+			<div class="d-flex justify-content-between align-items-center flex-wrap">
+				<h3 class="fw-bold text-light">Registration For Loan</h3>
+
+				<!-- Close Button -->
+				<NavLink href="/Client_home">
+					<button class="btn-close" aria-label="Close"></button>
+				</NavLink>
+			</div>
+
+			<div class="information_box">
+				<!-- Row 1 -->
+				<div class="row g-3">
+					<div class="col-12 col-md-3">
+						<label class="text-light">First Name</label>
+						<input class="form-control" @bind="firstName" placeholder="First Name" required>
+					</div>
+					<div class="col-12 col-md-3">
+						<label class="text-light">Middle Name</label>
+						<input class="form-control" @bind="middleName" placeholder="Middle Name">
+					</div>
+					<div class="col-12 col-md-3">
+						<label class="text-light">Last Name</label>
+						<input class="form-control" @bind="lastName" placeholder="Last Name" required>
+					</div>
+					<div class="col-12 col-md-3">
+						<label class="text-light">Suffix</label>
+						<input class="form-control" placeholder="Suffix">
+					</div>
+				</div>
+
+				<div class="row g-3 mt-2">
+					<div class="col-12 col-md-4">
+						<label class="text-light">Province</label>
+						<input class="form-control" placeholder="Province" required>
+					</div>
+					<div class="col-12 col-md-4">
+						<label class="text-light">Municipality</label>
+						<input class="form-control" placeholder="Municipality" required>
+					</div>
+					<div class="col-12 col-md-4">
+						<label class="text-light">Barangay</label>
+						<input class="form-control" placeholder="Barangay" required>
+					</div>
+				</div>
+
+				<div class="row g-3 mt-2">
+					<div class="col-12 col-md-6">
+						<label class="text-light">Street No.</label>
+						<input class="form-control" placeholder="Street No." required>
+					</div>
+					<div class="col-12 col-md-6">
+						<label class="text-light">House No.</label>
+						<input class="form-control" placeholder="House No." required>
+					</div>
+				</div>
+
+				<div class="row g-3 mt-2">
+					<div class="col-6 col-md-2">
+						<label class="text-light">Age</label>
+						<input class="form-control" type="number" placeholder="Age" required>
+					</div>
+					<div class="col-12 col-md-3">
+						<label class="text-light">Birth Date</label>
+						<input class="form-control" type="date" placeholder="mm/dd/yyyy" required>
+					</div>
+					<div class="col-6 col-md-2">
+						<label class="text-light">Sex</label>
+						<select class="form-select" required>
+							<option>Male</option>
+							<option>Female</option>
+						</select>
+					</div>
+					<div class="col-12 col-md-3">
+						<label class="text-light">Contact No.</label>
+						<input class="form-control" @bind="ContactNo" placeholder="Contact No." required>
+					</div>
+					<div class="col-12 col-md-4">
+						<label class="text-light">Email</label>
+						<input class="form-control" @bind="Email" placeholder="Sample@gmail.com" required>
+					</div>
+					<div class="col-12 col-md-2">
+						<label class="text-light">Civil Status</label>
+						<select class="form-select" required>
+							<option>Single</option>
+							<option>Married</option>
+							<option>Separated</option>
+							<option>Widowed</option>
+						</select>
+					</div>
+					<div class="col-12 col-md-3">
+						<label class="text-light">Occupation</label>
+						<input class="form-control" @bind="Occupation" placeholder="Occupation" required>
+					</div>
+					<div class="col-12 col-md-3">
+						<label class="text-light">Gross Annual Income</label>
+						<input class="form-control" @bind="MinAnnualGross" placeholder="Minimum 250,000" required>
+					</div>
+					<div class="col-12 col-md-4">
+						<label class="text-light">Type of Loan</label>
+						<select class="form-select" required>
+							<option>Personal Loan</option>
+							<option>Etc.</option>
+						</select>
+					</div>
+				</div>
+
+				<!-- File Uploads -->
+				<div class="row g-3 mt-3">
+					<div class="col-12 col-md-6">
+						<label class="text-light">Upload Government Valid ID (Front & Back)</label>
+						<div class="d-flex flex-wrap gap-2">
+							<input type="file" class="btn btn-light" required>
+							<button class="btn btn-outline-light">View Attachment</button>
+						</div>
+					</div>
+					<div class="col-12 col-md-6">
+						<label class="text-light">Upload Latest Complete 1 Month Payslip</label>
+						<div class="d-flex flex-wrap gap-2">
+							<input type="file" class="btn btn-light" required>
+							<button class="btn btn-outline-light">View Attachment</button>
+						</div>
+					</div>
+				</div>
+
+				<!-- Terms and Conditions -->
+				<div class="form-check d-flex justify-content-end mt-3">
+					<input class="form-check-input mx-2" type="checkbox" id="termsAndConditions" required>
+					<label class="form-check-label text-light" for="termsAndConditions">
+						I accept the terms and conditions
+					</label>
+				</div>
+
+				<!-- Submit -->
+				<div class="text-end mt-3">
+					<button class="btn btn-primary btn-lg" @onclick="LoginAsync">Register</button>
+					<button class="btn btn-danger btn-lg" @onclick="LoginAsync">Cancel</button>
+				</div>
+			</div>
+		</div>
+	</main>
+</div>
+
+@code {
+	public string firstName = "";
+	public string middleName = "";
+	public string lastName = "";
+	public string error = "";
+	public string ContactNo = "";
+	public string Email = "";
+	public string Occupation = "";
+	public string MinAnnualGross = "";
+
+	private void LoginAsync()
+	{
+		if (string.IsNullOrEmpty(firstName) || string.IsNullOrEmpty(lastName))
+		{
+			error = "Please fill in both the email and password.";
+			return;
+		}
+
+		error = "";
+		NavigationManager.NavigateTo("/Client_home_page");
+	}
+}

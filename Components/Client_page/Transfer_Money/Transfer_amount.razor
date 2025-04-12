@@ -7,9 +7,6 @@
         <!-- Header -->
         <header class="custom-card-clientpage clientheader px-4 py-4">
             <div>
-                <NavLink class="nav-link custom-nav-link d-flex justify-content-start pb-3" href="/Client_home">
-                    ← Go Back
-                </NavLink>
                 <div class="d-flex align-items-center gap-3 ms-3">
                     <h1>Transfer Money</h1>
                 </div>
@@ -46,22 +43,24 @@
                             <span class="input-group-text fs-4">$</span>
                             <input type="number" class="form-control form-control-custom form-control-lg fs-2" placeholder="000.00" />
                         </div>
-                        <div class="d-flex justify-content-center gap-2 text-light fw-bold">
-                            <p>Max:</p>
-                            <p>currentBalance</p>
-                        </div>
                     </div>
                 </div>
 
                 <!-- Footer -->
-                <div class="d-flex justify-content-between align-items-center mx-2 mt-3">
+                <div class="d-flex justify-content-between mx-2 mt-3">
                     <div class="text-start">
                         <h5 class="mb-1">clientName</h5>
                         <p class="mb-0">accountNumber</p>
                     </div>
-                    <NavLink class="w-25" href="/Transfer_confirmation">
-                        <button class="btn btn-primary btn-lg w-100">Continue</button>
-                    </NavLink>
+
+                    <div class="text-end mt-3">
+                        <NavLink class="w-25" href="/Transfer_confirmation">
+                            <button class="btn btn-primary btn-lg w-100 mb-2">Continue</button>
+                        </NavLink>
+                        <NavLink class="w-25" href="/Client_home">
+                            <button class="btn btn-danger btn-lg w-100">Cancel</button>
+                        </NavLink>
+                    </div>
                 </div>
             </section>
         </div>
