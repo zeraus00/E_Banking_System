@@ -13,7 +13,7 @@ namespace Data
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder
-                .UseMySql("Server=localhost;Port=3306;Database=ebankingDB;User Id=root;Password=admin1234;", new MySqlServerVersion(new Version(8, 0, 41)))
+                .UseSqlServer("Server=localhost;Database=EBankingDb;User Id=myuser;Password=mypassword;")
                 .UseSeeding((context, _) =>
                 {
                     var testAuth  = context.Set<CustomerAuth>().FirstOrDefault(ca => ca.Email == "testemail@gmail.com");
