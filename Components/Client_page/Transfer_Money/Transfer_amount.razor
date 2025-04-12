@@ -1,16 +1,16 @@
-﻿@page "/Deposit_amount"
+﻿@page "/Transfer_amount"
 @inject NavigationManager NavigationManager
 
 
 <div class="page">
     <main>
-        <header class="custom-card-clientpage clientheader px-4 pt-4 pb-4">
+        <header class="custom-card-clientpage clientheader px-4 py-4">
             <div class="align-items-start">
                 <NavLink class="nav-link custom-nav-link d-flex justify-content-start pb-3" href="/Client_home">
                     ← Go Back
                 </NavLink>
                 <div class="d-flex align-items-center gap-3 mx-5">
-                    <h1>Deposit</h1>
+                    <h1>Transfer Money</h1>
                 </div>
             </div>
             <section class="d-flex justify-content-end align-items-end mx-5 gap-2">
@@ -20,12 +20,18 @@
                 </div>
             </section>
         </header>
+
         <div class="container">
             <section class="card registration shadow-lg d-flex flex-column mt-4 p-3">
-                <h3 class="mx-3 my-3 ">Enter Withdrawal Amount</h3>
+                <h3 class="mx-3 my-3 ">Enter Transfer Money Amount</h3>
                 <div class="input-group px-4 mb-4">
                     <span class="input-group-text fs-2">$</span>
                     <input type="number" class="form-control form-control-custom form-control-lg fs-2" placeholder="000-000" />
+                </div>
+
+                <div class="d-flex gap-2 text-light mx-5 fw-bold">
+                    <p>Max:</p>
+                    <p>currentBalance</p>
                 </div>
 
                 <div class="d-flex justify-content-between mx-5 align-items-end mb-4">
@@ -33,7 +39,9 @@
                         <h5 class="mb-1">clientName</h5>
                         <p class="mb-0">accountNumber</p>
                     </div>
-                    <button class="btn btn-primary btn-lg w-25">Continue</button>
+                    <NavLink class="w-25" href="/Transfer_confirmation">
+                        <button class="btn btn-primary btn-lg w-100">Continue</button>
+                    </NavLink>
                 </div>
 
             </section>
