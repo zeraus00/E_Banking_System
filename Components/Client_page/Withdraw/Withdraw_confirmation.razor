@@ -4,9 +4,9 @@
 
 <div class="page">
     <main>
-        <header class="custom-card-clientpage clientheader px-4 pt-4 pb-4">
+        <header class="custom-card-clientpage clientheader px-4 py-4">
             <div class="align-items-start">
-                <NavLink class="nav-link custom-nav-link d-flex justify-content-start pb-3" href="/Client_home">
+                <NavLink class="nav-link custom-nav-link d-flex justify-content-start pb-3" href="/Withdraw_amount">
                     ← Go Back
                 </NavLink>
                 <div class="d-flex align-items-center gap-3 mx-5">
@@ -22,13 +22,36 @@
         </header>
 
         <div class="container">
-            <section class="card registration shadow-lg d-flex flex-column mt-4 p-3">
-                <div class="mx-auto">
+            <section class="card registration shadow-lg d-flex flex-column my-5 p-3">
+                <div class="mx-auto text-center p-4">
                     <h5>Withdraw Amount</h5>
-                    <h1 class="fw-bolder">withdrawAmount</h1>
+                    <h1 class="fw-bolder py-3 mb-3">withdrawAmount</h1>
+                </div>
+
+                <div class="d-flex justify-content-between mx-5 align-items-end my-4">
+                    <div class="d-flex flex-column text-start text-light mb-0">
+                        <h5 class="mb-1 fw-bold">clientName</h5>
+                        <p class="m-0">accountNumber</p>
+                        <p class="m-0">date</p>
+                        <p class="m-0">confirmationNumber</p>
+                    </div>
+
+                    <section class="d-flex flex-column form-check d-flex justify-content-end mt-3">
+                        <div class="pb-2">
+                            <input class="form-check-input mx-2" type="checkbox" id="termsAndConditions required">
+                            <label class="form-check-label text-light" for="withdrawAmountVerification">
+                                Confirm the details are correct.
+                            </label>
+                        </div>
+
+                        <NavLink href="/Withdraw_confirmation">
+                            <button class="btn btn-primary btn-lg w-100">Continue</button>
+                        </NavLink>
+                    </section>
                 </div>
             </section>
         </div>
+
     </main>
 </div>
 
