@@ -1,10 +1,16 @@
 ﻿using Exceptions;
+using Data;
 
 namespace Service
 {
-    public class AuthenticationService(DbContext context)
+    public class AuthenticationService
     {
-        private readonly DbContext _context = context;
+
+        private readonly EBankingContext _context;
+        public AuthenticationService(EBankingContext context)
+        {
+            _context = context;
+        }
         // create a passwordhasher object here!
 
         public async Task<bool> IsAuthenticatedAsync(string Email, string Password)
@@ -48,7 +54,9 @@ namespace Service
         /* temporary method for testing authentication */
         public async Task<bool> PasswordIsCorrect(string email, string password)
         {
-            var user = await _context.Set<CustomerAuth>().FirstAsync(u => u.Email == email);
+            var user = await _context.Set<CustomerAuth>().FirstOrDefaultAsync(u => u.Email == email);
+            if (user == null) return false; // fallback safety
+
             if (password == user.Password)
             {
                 return true;
