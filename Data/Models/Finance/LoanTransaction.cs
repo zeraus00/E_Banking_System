@@ -13,7 +13,6 @@
         public DateTime DueDate { get; set; }
         public DateTime TransactionDate { get; set; }           // when will the payment was supposed to happen
         public TimeSpan TransactionTime { get; set; }
-
         public string Notes { get; set; } = string.Empty;       // remarks
 
 

@@ -18,7 +18,7 @@ using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<EBankingContext>();
 
-    //dbContext.Database.EnsureCreated();
+    dbContext.Database.EnsureCreated();
     // Apply migrations (this will create or update the database schema)
     // dbContext.Database.Migrate();
 
