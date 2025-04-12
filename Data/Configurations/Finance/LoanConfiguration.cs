@@ -16,16 +16,6 @@
                 .Property(l => l.LoanId)
                 .ValueGeneratedOnAdd();
 
-            //  AccountId (Foreign Key to Accounts Table)
-            Loans
-                .Property(l => l.AccountId)
-                .IsRequired();
-
-            //  LoanTypeId (Foreign Key to LoanTypes Table)
-            Loans
-                .Property(l => l.AccountId)
-                .IsRequired();
-
             //  LoanAmount (Required; Decimal(18,2))
             Loans
                 .Property(l => l.LoanAmount)
@@ -97,7 +87,7 @@
                 .HasOne(l => l.Account)
                 .WithMany(a => a.Loans)
                 .HasForeignKey(l => l.AccountId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.SetNull);
             Loans
                 .HasOne(l => l.LoanType)
                 .WithMany(lt => lt.Loans)

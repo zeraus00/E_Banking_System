@@ -72,22 +72,22 @@ namespace Data.Configurations.Finance
                 .HasMany(a => a.CustomersAuth)
                 .WithOne(ca => ca.Account)
                 .HasForeignKey(ca => ca.AccountId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
             Accounts
                 .HasMany(a => a.Transactions)
                 .WithOne(t => t.Account)
                 .HasForeignKey(t => t.AccountId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.SetNull);
             Accounts
                 .HasMany(a => a.Loans)
                 .WithOne(l => l.Account)
                 .HasForeignKey(l => l.AccountId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.SetNull);
             Accounts
                 .HasMany(a => a.LoanTransactions)
                 .WithOne(lt => lt.Account)
                 .HasForeignKey(lt => lt.AccountId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.SetNull);
 
         }
 

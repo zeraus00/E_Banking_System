@@ -4,7 +4,7 @@
     {
         /*  Properties   */
         public int LoanId { get; set; }                     //  Primary key
-        public int AccountId { get; set; }                  //  Foreign key to Account
+        public int? AccountId { get; set; }                  //  Foreign key to Account
         public int LoanTypeId { get; set; }                 //  Foreign key to LoanType
         public decimal LoanAmount { get; set; }             //  Required; Decimal(18,2)
         public decimal InterestRate { get; set; }           //  Required; Decimal(5,2)

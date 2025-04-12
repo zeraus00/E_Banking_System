@@ -16,11 +16,6 @@
                 .Property(t => t.TransactionId)
                 .ValueGeneratedOnAdd();
 
-            //  AccountId (Foreign Key to Accounts Table)
-            Transactions
-                .Property(t => t.AccountId)
-                .IsRequired();
-
             //  TransactionTypeId (Foreign Key to TransactionTypes Table)
             Transactions
                 .Property(t => t.TransactionTypeId)
@@ -67,7 +62,7 @@
                 .HasOne(t => t.Account)
                 .WithMany(a => a.Transactions)
                 .HasForeignKey(t => t.AccountId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Cascade);
             Transactions
                 .HasOne(t => t.TransactionType)
                 .WithMany(tt => tt.Transactions)
