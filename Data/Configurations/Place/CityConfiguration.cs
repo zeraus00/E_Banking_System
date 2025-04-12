@@ -30,19 +30,8 @@ namespace Data.Configurations.Place
             Cities
                 .HasOne(c => c.Province)
                 .WithMany(p => p.Cities)
-                .HasForeignKey(c => c.ProvinceId);
-            Cities
-                .HasMany(c => c.Barangays)
-                .WithOne(b => b.City)
-                .HasForeignKey(b => b.CityId);
-            Cities
-                .HasMany(c => c.Addresses)
-                .WithOne(a => a.City)
-                .HasForeignKey(a => a.CityId);
-            Cities
-                .HasMany(c => c.BirthInfos)
-                .WithOne(b => b.City)
-                .HasForeignKey(b => b.CityId);
+                .HasForeignKey(c => c.ProvinceId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }
