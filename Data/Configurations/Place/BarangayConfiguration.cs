@@ -7,7 +7,7 @@ namespace Data.Configurations.Place
         // Configure Barangays Table
         public void Configure(EntityTypeBuilder<Barangay> Barangays)
         {
-            Barangays.ToTable("Barangays", "Place");
+            Barangays.ToTable("Barangays", "PlaceSchema");
             /*  Configure Table Properties  */
 
             // BarangayId (Primary Key)

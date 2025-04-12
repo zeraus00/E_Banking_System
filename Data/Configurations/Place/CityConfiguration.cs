@@ -7,7 +7,7 @@ namespace Data.Configurations.Place
         // Configure Cities Table
         public void Configure(EntityTypeBuilder<City> Cities)
         {
-            Cities.ToTable("Cities", "Place");
+            Cities.ToTable("Cities", "PlaceSchema");
             /*  Configure Table Properties  */
 
             // CityId (Primary Key)
