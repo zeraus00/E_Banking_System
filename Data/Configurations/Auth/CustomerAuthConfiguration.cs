@@ -60,7 +60,7 @@
                 .HasOne(ca => ca.Account)
                 .WithMany(a => a.CustomersAuth)
                 .HasForeignKey(ca => ca.AccountId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
             CustomersAuth
                 .HasOne(ca => ca.UserInfo)
                 .WithMany(u => u.CustomersAuth)

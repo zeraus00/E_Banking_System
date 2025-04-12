@@ -102,6 +102,14 @@
 						<label class="text-light">House No.</label>
 						<input class="form-control" placeholder="Province" required>
 					</div>
+					<div class="col-3">
+						<label class="text-light">Email</label>
+						<input type="email" class="form-control" placeholder="Email" required>
+					</div>
+					<div class="col-3">
+						<label class="text-light">Contact No.</label>
+						<input class="form-control" placeholder="Contact No." required>
+					</div>
 				</div>
 
 				<!-- Row 5 (Father's Name)-->
@@ -163,13 +171,22 @@
 					</div>
 				</div>
 
-				<!-- Row 8 (Government Valid ID) -->
-				<div  class="row g-2 mt-3">
-					<div class="col-6">
+				<div class="row g-3 mt-3">
+					<!-- Upload Government ID -->
+					<div class="col-md-4">
 						<label class="text-light">Upload Government Valid ID (Front & Back)</label>
 						<div class="d-flex gap-2">
-							<input type="file" class="btn btn-light" required>
-							<button class="btn btn-outline-light">View Atttachment</button>
+							<input type="file" class="btn btn-light w-75" required />
+							<button class="btn btn-outline-light">View</button>
+						</div>
+					</div>
+
+					<!-- Upload 1x1 Picture -->
+					<div class="col-md-4">
+						<label class="text-light">Upload 1x1 Picture</label>
+						<div class="d-flex gap-2">
+							<input type="file" class="btn btn-light w-75" required />
+							<button class="btn btn-outline-light">View</button>
 						</div>
 					</div>
 				</div>

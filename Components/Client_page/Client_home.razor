@@ -13,7 +13,7 @@
                         <h4 class="account-number">accountNumber</h4>
                     </div>
                 </div>
-                <div class="notification img mx-5">
+                <div class="notification img mx-5 my-auto">
                     <img src="/bootstrap/Utilities/Bell.png" alt="Notification Bell" />
                 </div>
             </header>
@@ -61,7 +61,7 @@
                         <div class="col-6">
                             <a href="/Loan_page" class="nav-link button d-flex justify-content-between align-items-center p-3 border rounded shadow-sm h-100">
                                 Loan Payment
-                                <img src="/bootstrap/Utilities/loan.png" alt="Loan Icon" style="width: 20px; height: 20px;" />
+                                <img src="/bootstrap/Utilities/loan.png" alt="Loan Icon" style="width: 23px; height: 23px;" />
                             </a>
                         </div>
 
@@ -73,27 +73,38 @@
 
 
         <!-- Recent Transactions Section -->
-        <div class="container-md mt-4">
+        <div class="container-md mt-4 px-5">
             <section class="custom-card transactions">
-                <div class="custom-card balance lg text-black p-4 border shadow-sm">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <label class="fs-4 mb-3">Recent Transactions</label>
-                        <button type="button" class="btn btn-link text-decoration-none">View All</button>
-                    </div>
+                <div class="d-flex justify-content-between align-items-center border-bottom">
+                    <label class="fs-4 mb-3 fw-bold">Recent Transactions</label>
+                    <button type="button" class="btn btn-link text-decoration-none">View All</button>
+                </div>
 
                     <!-- Transactions List -->
-                    <div class="row g-2 mt-3 fs-5">
-                        <div class="col-12">
-                            <label class="d-block">Deposit - $200</label>
-                        </div>
-                        <div class="col-12">
-                            <label class="d-block">Withdrawal - $50</label>
-                        </div>
-                        <div class="col-12">
-                            <label class="d-block">Transfer - $100</label>
-                        </div>
+                <div class="container py-3 px-5">
+                    <div class="row fs-5 fw-bold pb-3">
+                        <div class="col">Transaction</div>
+                        <div class="col text-end">Amount</div>
+                        <div class="col text-end">Date</div>
+                    </div>
+
+                    <div class="row fs-5 mb-1">
+                        <div class="col">Deposit</div>
+                        <div class="col text-end">$200</div>
+                        <div class="col text-end">04-01-2025</div>
+                    </div>
+                    <div class="row fs-5 mb-1">
+                        <div class="col">Withdraw</div>
+                        <div class="col text-end">$500</div>
+                        <div class="col text-end">04-02-2025</div>
+                    </div>
+                    <div class="row fs-5">
+                        <div class="col">Loan</div>
+                        <div class="col text-end">$300</div>
+                        <div class="col text-end">04-03-2025</div>
                     </div>
                 </div>
+
             </section>
         </div>
 
