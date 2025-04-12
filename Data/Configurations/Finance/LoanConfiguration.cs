@@ -59,7 +59,7 @@
             Loans
                 .Property(l => l.ApplicationDate)
                 .IsRequired()
-                .HasDefaultValueSql("CURDATE()");
+                .HasDefaultValueSql("GETDATE()");
 
             //  LoanStatus (Required; Default: 'Pending')
             Loans

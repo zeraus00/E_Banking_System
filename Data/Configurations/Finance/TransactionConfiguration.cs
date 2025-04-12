@@ -45,12 +45,12 @@
             Transactions
                 .Property(t => t.TransactionDate)
                 .IsRequired()
-                .HasDefaultValueSql("CURDATE()");
+                .HasDefaultValueSql("GETDATE()");
             //  TransactionTime (Required, Default Value="CURTIME()")
             Transactions
                 .Property(t => t.TransactionTime)
                 .IsRequired()
-                .HasDefaultValueSql("CURTIME()");
+                .HasDefaultValueSql("CAST(GETDATE() AS TIME)");
             //  TransactionFee  (Required, DECIMAL(18,2), Default Value=0,0m)
             Transactions
                 .Property(t => t.TransactionFee)

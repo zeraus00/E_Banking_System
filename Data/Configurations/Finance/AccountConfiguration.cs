@@ -54,7 +54,7 @@ namespace Data.Configurations.Finance
             Accounts
                 .Property(a => a.DateOpened)
                 .IsRequired()
-                .HasDefaultValueSql("NOW()");
+                .HasDefaultValueSql("GETDATE()");
 
             //  DateClosed (Optional)
             Accounts
