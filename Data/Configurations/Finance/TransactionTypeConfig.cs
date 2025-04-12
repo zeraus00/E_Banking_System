@@ -25,11 +25,6 @@
              *  Configure Relationships
              *  Transactions (one-to-many)
              */
-            TransactionTypes
-                .HasMany(tt => tt.Transactions)
-                .WithOne(t => t.TransactionType)
-                .HasForeignKey(t => t.TransactionTypeId)
-                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
