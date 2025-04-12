@@ -10,8 +10,6 @@
 .custom-card {
     background-color: white;
     display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
     .custom-card.client {
@@ -30,11 +28,9 @@
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        align-items: center;
         margin: 0;
         padding: 1rem;
         border-radius: 10px;
-        box-sizing: border-box;
         height: 160px;
         width: 100%;
         max-width: 100%;

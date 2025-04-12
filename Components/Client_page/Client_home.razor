@@ -4,9 +4,9 @@
 <div class="page">
     <main>
         <!-- Welcome Header (Rectangle Style) -->
-        <div class="container-md">
+        <div class="container-md m-0 p-0">
             <header class="custom-card client pt-4 pb-4 d-flex justify-content-between align-items-start">
-                <div class="mx-5">
+                <div class="px-5">
                     <h5>Welcome Back</h5>
                     <div class="d-flex align-items-center gap-3">
                         <h1>clientName</h1>
@@ -20,11 +20,11 @@
         </div>
 
         <!-- Main Section: Balance + Actions -->
-        <div class="container-md mt-4">
+        <div class="container mt-4">
             <div class="row g-3">
-                <!-- Balance Card (Rectangle) -->
-                <div class="col-12 col-md-6">
-                    <section class="custom-card balance p-4 text-center h-100 border rounded shadow-sm bg-white">
+                <!-- Balance Card -->
+                <div class="col-12 col-md-5 p-3">
+                    <section class="custom-card balance text-start p-4 h-100 border rounded shadow-sm bg-white w-100">
                         <h3>Current Balance:</h3>
                         <div class="fs-1 my-3">currentBalance</div>
                         <div class="custom-card sm">
@@ -33,37 +33,44 @@
                     </section>
                 </div>
 
-                <!-- Actions: Withdraw, Deposit, Transfer, Loan -->
-                <div class="col-12 col-md-6">
-                    <div class="row g-3">
-                        <div class="col-12 col-sm-6">
+                <!-- Action Buttons -->
+                <div class="col-12 col-md-6 my-auto">
+                    <div class="row g-4">
+
+                        <div class="col-6">
                             <a href="/Withdraw_amount" class="nav-link button d-flex justify-content-between align-items-center p-3 border rounded shadow-sm h-100">
                                 Withdraw
                                 <img src="/bootstrap/Utilities/withdraw.png" alt="Withdraw Icon" style="width: 30px; height: 30px;" />
                             </a>
                         </div>
-                        <div class="col-12 col-sm-6">
+
+                        <div class="col-6">
                             <a href="/Transfer_page" class="nav-link button d-flex justify-content-between align-items-center p-3 border rounded shadow-sm h-100">
                                 Transfer
                                 <img src="/bootstrap/Utilities/transfer.png" alt="Transfer Icon" style="width: 20px; height: 20px;" />
                             </a>
                         </div>
-                        <div class="col-12 col-sm-6">
+
+                        <div class="col-6">
                             <a href="/Deposit_amount" class="nav-link button d-flex justify-content-between align-items-center p-3 border rounded shadow-sm h-100">
                                 Deposit
                                 <img src="/bootstrap/Utilities/deposit.png" alt="Deposit Icon" style="width: 30px; height: 30px;" />
                             </a>
                         </div>
-                        <div class="col-12 col-sm-6">
+
+                        <div class="col-6">
                             <a href="/Loan_page" class="nav-link button d-flex justify-content-between align-items-center p-3 border rounded shadow-sm h-100">
                                 Loan Payment
                                 <img src="/bootstrap/Utilities/loan.png" alt="Loan Icon" style="width: 20px; height: 20px;" />
                             </a>
                         </div>
+
                     </div>
                 </div>
+
             </div>
         </div>
+
 
         <!-- Recent Transactions Section -->
         <div class="container-md mt-4">
