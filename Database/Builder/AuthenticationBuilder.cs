@@ -19,9 +19,21 @@
             await _context.Set<CustomerAuth>().AddAsync(customerAuth);
             await _context.SaveChangesAsync();
         }
+
+        public void AddEmployeeAuth(EmployeeAuth employeeAuth)
+        {
+            _context.Set<EmployeeAuth>().Add(employeeAuth);
+            _context.SaveChanges();
+        }
+
+        public async Task AddEmployeeAuthAsync(EmployeeAuth employeeAuth)
+        {
+            await _context.Set<EmployeeAuth>().AddAsync(employeeAuth);
+            await _context.SaveChangesAsync();
+        }
     }
 
-    public class CustomerAuthBuilder 
+    public class CustomerAuthBuilder
     {
         private int _accountId;
         private int _userInfoId;
@@ -72,4 +84,39 @@
         }
     }
 
+
+    public class EmployeeAuthBuilder
+    {
+        private string _userName = string.Empty;
+        private string _email = string.Empty;
+        private string _password = string.Empty;
+
+        public EmployeeAuthBuilder WithUserName(string userName)
+        {
+            _userName = userName;
+            return this;
+        }
+
+        public EmployeeAuthBuilder WithEmail(string email)
+        {
+            _email = email;
+            return this;
+        }
+
+        public EmployeeAuthBuilder WithPassword(string password)
+        {
+            _password = password;
+            return this;
+        }
+
+        public EmployeeAuth Build()
+        {
+            return new EmployeeAuth
+            {
+                UserName = _userName,
+                Email = _email,
+                Password = _password
+            };
+        }
+    }
 }
