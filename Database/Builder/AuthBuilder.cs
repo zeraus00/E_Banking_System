@@ -20,6 +20,18 @@
             await _context.Set<UserAuth>().AddAsync(userAuth);
             await _context.SaveChangesAsync();
         }
+
+        public void AddRoleSync(Role role)
+        {
+            _context.Set<Role>().Add(role);
+            _context.SaveChanges();
+        }
+
+        public async Task AddRoleAsync(Role role)
+        {
+            await _context.Set<Role>().AddAsync(role);
+            await _context.SaveChangesAsync();
+        }
     }
 
     public class UserAuthBuilder
@@ -77,6 +89,25 @@
                 UserName = _userName,
                 Email = _email,
                 Password = _password
+            };
+        }
+    }
+
+    public class RoleBuilder
+    {
+        private string _roleName = string.Empty;
+
+        public RoleBuilder WithRoleName(string roleName)
+        {
+            _roleName = roleName;
+            return this;
+        }
+
+        public Role Build()
+        {
+            return new Role
+            {
+                RoleName = _roleName
             };
         }
     }
