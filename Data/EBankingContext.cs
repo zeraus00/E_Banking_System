@@ -1,6 +1,4 @@
-﻿using Database.Builder;
-
-namespace Data
+﻿namespace Data
 {
     public class EBankingContext : DbContext
     {
