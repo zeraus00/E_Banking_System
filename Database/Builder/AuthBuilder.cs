@@ -45,8 +45,8 @@
     public class UserAuthBuilder
     {
         private int _roleId;
-        private int _accountId;
-        private int _userInfoId;
+        private int? _accountId;
+        private int? _userInfoId;
         private string _userName = string.Empty;
         private string _email = string.Empty;
         private string _password = string.Empty;
