@@ -1,6 +1,6 @@
-﻿namespace Database.Builder
+﻿namespace Database.Repository
 {
-    public class FinanceBuilder(DbContext context)
+    public class FinanceRepository(DbContext context)
     {
         DbContext _context = context;
 

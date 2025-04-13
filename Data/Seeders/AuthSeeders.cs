@@ -1,4 +1,4 @@
-﻿using Database.Builder;
+﻿using Database.Repository;
 
 namespace Data.Seeders
 {
@@ -18,16 +18,16 @@ namespace Data.Seeders
         {
             if (!await _context.Roles.AnyAsync())
             {
-                var authBuilder = new AuthBuilder(_context);
+                var authRepository = new AuthRepository(_context);
                 var roleNames = new[] { "Administrator", "User", "Employee"};
                 foreach (var roleName in roleNames)
                 {
                     var role = new RoleBuilder()
                         .WithRoleName(roleName)
                         .Build();
-                    await authBuilder.AddRoleAsync(role);
+                    await authRepository.AddRoleAsync(role);
                 }
-                await authBuilder.SaveChangesAsync();
+                await authRepository.SaveChangesAsync();
             }
         }
 
@@ -35,7 +35,7 @@ namespace Data.Seeders
         {
             if (!await _context.UsersAuth.AnyAsync())
             {
-                var authBuilder = new AuthBuilder(_context);
+                var authRepository = new AuthRepository(_context);
                 var userAuthBuilder = new UserAuthBuilder();
 
                 var users = new List<(string userName, string email, string password)>
@@ -52,10 +52,10 @@ namespace Data.Seeders
                         .WithEmail(email)
                         .WithPassword(password);
                     var userAuth = userAuthBuilder.Build();
-                    await authBuilder.AddUserAuthAsync(userAuth);
+                    await authRepository.AddUserAuthAsync(userAuth);
                 }
 
-                await authBuilder.SaveChangesAsync();
+                await authRepository.SaveChangesAsync();
             }
         }
     }

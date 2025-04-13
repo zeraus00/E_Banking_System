@@ -1,6 +1,6 @@
-﻿namespace Database.Builder
+﻿namespace Database.Repository
 {
-    public class UserBuilder(DbContext context)
+    public class UserRepository(DbContext context)
     {
         private readonly DbContext _context = context;
 
