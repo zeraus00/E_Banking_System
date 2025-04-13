@@ -1,5 +1,9 @@
-﻿namespace Database.Repository
+﻿namespace Database.Repositories
 {
+    /// <summary>
+    /// CRUD operations handler for FinanceSchema
+    /// Methods for adding, updating, deleting and retrieving data from the database
+    /// </summary>
     public class FinanceRepository
     {
         DbContext _context;
@@ -9,6 +13,12 @@
             _context = context;
         }
 
+        /// <summary>
+        /// Adds a new Account to the database
+        /// </summary>
+        /// <param name="account"></param>
+        /// <returns></returns>
+
         public async Task AddAccount(Account account)
         {
             await _context.Set<Account>().AddAsync(account);
@@ -16,7 +26,9 @@
         }
 
     }
-
+    /// <summary>
+    /// Builder class for Account
+    /// </summary>
     public class AccountBuilder
     {
         private string _accountType = string.Empty;
@@ -69,6 +81,10 @@
             return this;
         }
 
+        /// <summary>
+        /// Builds the Account object with the specified properties
+        /// </summary>
+        /// <returns></returns>
         public Account Builder()
         {
             return new Account

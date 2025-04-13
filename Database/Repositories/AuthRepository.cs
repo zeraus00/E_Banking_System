@@ -1,5 +1,9 @@
-﻿namespace Database.Repository
+﻿namespace Database.Repositories
 {
+    /// <summary>
+    /// CRUD operations handler for AuthSchema
+    /// Methods for adding, updating, deleting and retrieving data from the database
+    /// </summary>
     public class AuthRepository
     {
 
@@ -9,6 +13,9 @@
             _context = context;
         }
 
+        /// <summary>
+        /// Saves changes to the database
+        /// </summary>
         public void saveChanges()
         {
             _context.SaveChanges();
@@ -19,6 +26,10 @@
             await _context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Adds a new UserAuth to the database
+        /// </summary>
+        /// <param name="userAuth"></param>
         public void AddUserAuthSync(UserAuth userAuth)
         {
             _context.Set<UserAuth>().Add(userAuth);
@@ -29,6 +40,10 @@
             await _context.Set<UserAuth>().AddAsync(userAuth);
         }
 
+        /// <summary>
+        /// Adds a new Role to the database
+        /// </summary>
+        /// <param name="role"></param>
         public void AddRoleSync(Role role)
         {
             _context.Set<Role>().Add(role);
@@ -41,7 +56,10 @@
 
 
     }
-
+    /// <summary>
+    /// Builder class for UserAuth
+    /// Methods for setting properties of UserAuth
+    /// </summary>
     public class UserAuthBuilder
     {
         private int _roleId;
@@ -87,6 +105,10 @@
             return this;
         }
 
+        /// <summary>
+        /// Builds the UserAuth object with the specified properties
+        /// </summary>
+        /// <returns> UserAuth object </returns>
         public UserAuth Build()
         {
             return new UserAuth
@@ -101,6 +123,10 @@
         }
     }
 
+    /// <summary>
+    /// Builder class for Role
+    /// Methods for setting properties of Role
+    /// </summary>
     public class RoleBuilder
     {
         private string _roleName = string.Empty;
@@ -111,6 +137,10 @@
             return this;
         }
 
+        /// <summary>
+        /// Builds the Role object with the specified properties
+        /// </summary>
+        /// <returns> Role Object </returns>
         public Role Build()
         {
             return new Role

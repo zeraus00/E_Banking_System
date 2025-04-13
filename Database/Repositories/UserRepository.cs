@@ -1,28 +1,56 @@
-﻿namespace Database.Repository
+﻿namespace Database.Repositories
 {
-    public class UserRepository(DbContext context)
+    /// <summary>
+    /// CRUD operations handler for UserSchema
+    /// Methods for adding, updating, deleting and retrieving data from the database
+    /// </summary>
+    /// <param name="context"></param>
+    public class UserRepository
     {
-        private readonly DbContext _context = context;
+        private readonly DbContext _context;
 
+        public UserRepository(DbContext context)
+        {
+            _context = context;
+        }
+
+        /// <summary>
+        /// Adds a new UserInfo to the database
+        /// </summary>
+        /// <param name="userInfo"></param>
+        /// <returns></returns>
         public async Task AddUserInfo(UserInfo userInfo)
         {
             await _context.Set<UserInfo>().AddAsync(userInfo);
             await _context.SaveChangesAsync();
         }
 
+
+        /// <summary>
+        /// Adds a new Address to the database
+        /// </summary>
+        /// <param name="birthInfo"></param>
+        /// <returns></returns>
         public async Task AddBirthInfo(BirthInfo birthInfo)
         {
             await _context.Set<BirthInfo>().AddAsync(birthInfo);
             await _context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Adds a new Address to the database
+        /// </summary>
+        /// <param name="address"></param>
+        /// <returns></returns>
         public async Task AddAddress(Address address)
         {
             await _context.Set<Address>().AddAsync(address);
             await _context.SaveChangesAsync();
         }
     }
-
+    /// <summary>
+    /// Builder class for UserInfo
+    /// </summary>
     public class UserInfoBuilder
     {
         private string _firstName = string.Empty;
@@ -110,6 +138,10 @@
             return this;
         }
 
+        /// <summary>
+        /// Builds the UserInfo object with the specified properties
+        /// </summary>
+        /// <returns></returns>
         public UserInfo Build()
         {
             return new UserInfo
@@ -130,6 +162,9 @@
         }
     }
 
+    /// <summary>
+    /// Builder class for BirthInfo
+    /// </summary>
     public class BirthInfoBuilder
     {
         private DateTime _birthDate;
@@ -161,6 +196,10 @@
             return this;
         }
 
+        /// <summary>
+        /// Builds the BirthInfo object with the specified properties
+        /// </summary>
+        /// <returns></returns>
         public BirthInfo Build()
         {
             return new BirthInfo
@@ -173,6 +212,9 @@
         }
     }
 
+    /// <summary>
+    /// Builder class for Address
+    /// </summary>
     public class AddressBuilder
     {
         private string _house = string.Empty;
@@ -225,6 +267,10 @@
             return this;
         }
 
+        /// <summary>
+        /// Builds the Address object with the specified properties
+        /// </summary>
+        /// <returns></returns>
         public Address Build()
         {
             return new Address
