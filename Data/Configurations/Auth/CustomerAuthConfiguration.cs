@@ -16,10 +16,11 @@
                 .Property(ca => ca.CustomerAuthId)
                 .ValueGeneratedOnAdd();
 
-            // AccountId (Foreign Key to Accounts Table)
+            // RoleId (Required; Foreign Key to Roles Table)
             CustomersAuth
-                .Property(ca => ca.AccountId)
-                .IsRequired();
+                .Property(ca => ca.RoleId)
+                .IsRequired()
+                .HasDefaultValue(1);
 
             // UserName (Required; MaxLength=20 ; Unique)
             CustomersAuth
