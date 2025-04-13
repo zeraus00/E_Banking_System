@@ -1,6 +1,6 @@
 using E_BankingSystem.Components;
 using Data;
-using Database.Builder;
+using Data.Seeders;
 using Service;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,7 +27,7 @@ using (var scope = app.Services.CreateScope())
     // dbContext.Database.Migrate();
 
     // Seed data (this ensures that only new data is added)
-    SeedData(dbContext);
+    await SeedData(dbContext);
 }
 
 // Configure the HTTP request pipeline.
@@ -49,22 +49,14 @@ app.MapRazorComponents<App>()
 app.Run();
 
 
-void SeedData(EBankingContext context)
+static async Task SeedData(EBankingContext context)
 {
-    // Seed your database with initial data here
-    // For example, you can add some default users, roles, etc.
-    // context.Users.Add(new User { Name = "Admin", Role = "Administrator" });
-    // context.SaveChanges();
 
-    if (!context.UsersAuth.Any())
-    {
-        var authBuilder = new AuthBuilder(context);
-        var userAuth = new UserAuthBuilder();
 
-        userAuth
-            .WithUserName("admin")
-            .WithPassword("admin")
-            .WithEmail("admin@gmail.com");
-        authBuilder.AddUserAuthSync(userAuth.Build());
-    }
+    AuthSeeders authSeeders = new AuthSeeders(context);
+
+    // Seed roles
+    await authSeeders.SeedRoles();
+    // Seed users
+    await authSeeders.SeedUsersAuth();
 }
