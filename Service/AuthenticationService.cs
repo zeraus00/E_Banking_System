@@ -47,7 +47,7 @@ namespace Service
         // verify if email exists
         public async Task<bool> EmailExists(string email)
         {
-            var user = await _context.Set<EmployeeAuth>().FirstOrDefaultAsync(u => u.Email == email);
+            var user = await _context.Set<UserAuth>().FirstOrDefaultAsync(u => u.Email == email);
             if (user!=null)
             Console.WriteLine(user.Email);
 
@@ -57,7 +57,7 @@ namespace Service
         /* temporary method for testing authentication */
         public async Task<bool> PasswordIsCorrect(string email, string password)
         {
-            var user = await _context.Set<EmployeeAuth>().FirstOrDefaultAsync(u => u.Email == email);
+            var user = await _context.Set<UserAuth>().FirstOrDefaultAsync(u => u.Email == email);
             if (user == null) return false; // fallback safety
 
             if (password.Trim().Equals(user.Password.Trim()))

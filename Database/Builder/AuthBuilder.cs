@@ -9,110 +9,71 @@
             _context = context;
         }
 
-        public void AddCustomerAuth(CustomerAuth customerAuth)
+        public void AddUserAuthSync(UserAuth userAuth)
         {
-            _context.Set<CustomerAuth>().Add(customerAuth);
-            _context.SaveChanges();
-        }
-        public async Task AddCustomerAuthAsync(CustomerAuth customerAuth)
-        {
-            await _context.Set<CustomerAuth>().AddAsync(customerAuth);
-            await _context.SaveChangesAsync();
-        }
-
-        public void AddEmployeeAuth(EmployeeAuth employeeAuth)
-        {
-            _context.Set<EmployeeAuth>().Add(employeeAuth);
+            _context.Set<UserAuth>().Add(userAuth);
             _context.SaveChanges();
         }
 
-        public async Task AddEmployeeAuthAsync(EmployeeAuth employeeAuth)
+        public async Task AddUserAuthAsync(UserAuth userAuth)
         {
-            await _context.Set<EmployeeAuth>().AddAsync(employeeAuth);
+            await _context.Set<UserAuth>().AddAsync(userAuth);
             await _context.SaveChangesAsync();
         }
     }
 
-    public class CustomerAuthBuilder
+    public class UserAuthBuilder
     {
+        private int _roleId;
         private int _accountId;
         private int _userInfoId;
         private string _userName = string.Empty;
         private string _email = string.Empty;
         private string _password = string.Empty;
 
-        public CustomerAuthBuilder WithAccountId(int accountId)
+        public UserAuthBuilder WithRoleId(int roleId)
+        {
+            _roleId = roleId;
+            return this;
+        }
+
+        public UserAuthBuilder WithAccountId(int accountId)
         {
             _accountId = accountId;
             return this;
         }
 
-        public CustomerAuthBuilder WithUserInfoId(int userInfoId)
+        public UserAuthBuilder WithUserInfoId(int userInfoId)
         {
             _userInfoId = userInfoId;
             return this;
         }
 
-        public CustomerAuthBuilder WithUserName(string userName)
+        public UserAuthBuilder WithUserName(string userName)
         {
             _userName = userName;
             return this;
         }
 
-        public CustomerAuthBuilder WithEmail(string email)
+        public UserAuthBuilder WithEmail(string email)
         {
             _email = email;
             return this;
         }
 
-        public CustomerAuthBuilder WithPassword(string password)
+        public UserAuthBuilder WithPassword(string password)
         {
             _password = password;
             return this;
         }
 
-        public CustomerAuth Build()
+        public UserAuth Build()
         {
-            return new CustomerAuth
+            return new UserAuth
             {
+                RoleId = _roleId,
                 AccountId = _accountId,
                 UserInfoId = _userInfoId,
-                UserName = _userName,
-                Email = _email,
-                Password = _password
-            };
-        }
-    }
-
-
-    public class EmployeeAuthBuilder
-    {
-        private string _userName = string.Empty;
-        private string _email = string.Empty;
-        private string _password = string.Empty;
-
-        public EmployeeAuthBuilder WithUserName(string userName)
-        {
-            _userName = userName;
-            return this;
-        }
-
-        public EmployeeAuthBuilder WithEmail(string email)
-        {
-            _email = email;
-            return this;
-        }
-
-        public EmployeeAuthBuilder WithPassword(string password)
-        {
-            _password = password;
-            return this;
-        }
-
-        public EmployeeAuth Build()
-        {
-            return new EmployeeAuth
-            {
                 UserName = _userName,
                 Email = _email,
                 Password = _password

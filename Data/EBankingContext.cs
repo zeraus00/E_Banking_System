@@ -12,12 +12,10 @@ namespace Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             /*  Configure Authentication Schema
-             *  Configure CustomerAuth Table
-             *  Configure EmployeeAuthTable
+             *  Configure UsersAuth Table
              *  Configure Roles Table
              */
             modelBuilder.ApplyConfiguration(new UserAuthConfiguration());
-            modelBuilder.ApplyConfiguration(new EmployeeAuthConfiguration());
             modelBuilder.ApplyConfiguration(new RoleConfiguration());
 
             /*  Configure Finance Schema
@@ -62,8 +60,7 @@ namespace Data
         /*  Add DbSet for each model    */
 
         //  Authentication
-        public DbSet<UserAuth> CustomersAuth { get; set; }
-        public DbSet<EmployeeAuth> EmployeesAuth { get; set; }
+        public DbSet<UserAuth> UsersAuth { get; set; }
         public DbSet<Role> Roles { get; set; }
 
         //  Finance
@@ -83,7 +80,7 @@ namespace Data
         //  User
         public DbSet<Address> Addresses { get; set; }
         public DbSet<BirthInfo> BirthInfos { get; set; }
-        public DbSet<UserInfo> UserInfos { get; set; }
+        public DbSet<UserInfo> UsersInfo { get; set; }
 
     }
 

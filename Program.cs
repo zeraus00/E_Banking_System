@@ -56,15 +56,15 @@ void SeedData(EBankingContext context)
     // context.Users.Add(new User { Name = "Admin", Role = "Administrator" });
     // context.SaveChanges();
 
-    if (!context.EmployeesAuth.Any())
+    if (!context.UsersAuth.Any())
     {
         var authBuilder = new AuthBuilder(context);
-        var employeeAuth = new EmployeeAuthBuilder();
+        var userAuth = new UserAuthBuilder();
 
-        employeeAuth
+        userAuth
             .WithUserName("admin")
             .WithPassword("admin")
             .WithEmail("admin@gmail.com");
-        authBuilder.AddEmployeeAuth(employeeAuth.Build());
+        authBuilder.AddUserAuthSync(userAuth.Build());
     }
 }
