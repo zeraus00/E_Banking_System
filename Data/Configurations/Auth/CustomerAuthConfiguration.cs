@@ -49,9 +49,15 @@
 
             /*  
              *  Configure Relationships
+             *  Roles (many-to-one)
              *  Accounts (many-to-one)
              *  UsersInfo (many-to-one)
              */
+            CustomersAuth
+                .HasOne(ca => ca.Role)
+                .WithMany(r => r.CustomersAuth)
+                .HasForeignKey(ca => ca.RoleId)
+                .OnDelete(DeleteBehavior.Restrict);
             CustomersAuth
                 .HasOne(ca => ca.Account)
                 .WithMany(a => a.CustomersAuth)
