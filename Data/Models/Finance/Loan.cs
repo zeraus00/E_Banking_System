@@ -12,7 +12,7 @@
         public decimal MonthlyPayment { get; set; }         //  Required; Decimal(18,2)
         public decimal RemainingLoanBalance { get; set; }   //  Required; Decimal(18,2)
         public DateTime ApplicationDate { get; set; }       //  Required; Default: CURDATE()
-        public String LoanStatus { get; set; } = "Pending"; //  Required; Default: 'Pending'
+        public String LoanStatus { get; set; }              //  Required; Default: 'Pending'
         public DateTime StartDate { get; set; }             //  Required: Loan start date
         public DateTime DueDate { get; set; }               //  Required: Loan due date
         public DateTime UpdateDate { get; set; }            //  Required: Loan payment update date

@@ -16,6 +16,11 @@
                 .Property(l => l.LoanId)
                 .ValueGeneratedOnAdd();
 
+            //  AccountId (Foreign Key; Required)
+            Loans
+                .Property(l => l.AccountId)
+                .IsRequired();
+
             //  LoanAmount (Required; Decimal(18,2))
             Loans
                 .Property(l => l.LoanAmount)
