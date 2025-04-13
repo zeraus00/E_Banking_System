@@ -20,7 +20,7 @@
             UsersAuth
                 .Property(ua => ua.RoleId)
                 .IsRequired()
-                .HasDefaultValue(1);
+                .HasDefaultValue(2);
 
             // UserName (Required; MaxLength=20 ; Unique)
             UsersAuth
