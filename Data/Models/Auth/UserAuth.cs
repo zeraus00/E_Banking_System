@@ -3,9 +3,9 @@
 
 
     // CustomersAuth Table
-    public class CustomerAuth
+    public class UserAuth
     {
-        public int CustomerAuthId { get; set; }                 // Primary Key
+        public int UserAuthId { get; set; }                     // Primary Key
         public int RoleId { get; set; }                         // Foreign Key to Roles Table
         public int? AccountId { get; set; }                     // Foreign Key to Accounts Table
         public int? UserInfoId { get; set; }                    // Foreign Key to UsersInfo Table

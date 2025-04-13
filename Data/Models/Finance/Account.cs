@@ -15,7 +15,7 @@
         public DateTime? DateClosed { get; set; }
 
 
-        public ICollection<CustomerAuth> CustomersAuth { get; set; } = null!; 
+        public ICollection<UserAuth> UsersAuth { get; set; } = null!; 
         public ICollection<Transaction> Transactions { get; set; } = null!;  
         public ICollection<Loan> Loans { get; set; } = null!; 
         public ICollection<LoanTransaction> LoanTransactions { get; set; } = null!; 

@@ -8,7 +8,7 @@
         public string RoleName { get; private set; } = string.Empty;   // Required; Customer, Employee, Admin
 
         /*  Navigation Properties  */
-        public ICollection<CustomerAuth> CustomersAuth { get; set; } = new List<CustomerAuth>();
+        public ICollection<UserAuth> UsersAuth { get; set; } = new List<UserAuth>();
 
     }
 }

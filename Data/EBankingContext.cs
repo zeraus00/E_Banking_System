@@ -16,7 +16,7 @@ namespace Data
              *  Configure EmployeeAuthTable
              *  Configure Roles Table
              */
-            modelBuilder.ApplyConfiguration(new CustomerAuthConfiguration());
+            modelBuilder.ApplyConfiguration(new UserAuthConfiguration());
             modelBuilder.ApplyConfiguration(new EmployeeAuthConfiguration());
             modelBuilder.ApplyConfiguration(new RoleConfiguration());
 
@@ -62,7 +62,7 @@ namespace Data
         /*  Add DbSet for each model    */
 
         //  Authentication
-        public DbSet<CustomerAuth> CustomersAuth { get; set; }
+        public DbSet<UserAuth> CustomersAuth { get; set; }
         public DbSet<EmployeeAuth> EmployeesAuth { get; set; }
         public DbSet<Role> Roles { get; set; }
 
