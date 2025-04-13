@@ -1,14 +1,20 @@
 ﻿namespace Database.Repository
 {
-    public class FinanceRepository(DbContext context)
+    public class FinanceRepository
     {
-        DbContext _context = context;
+        DbContext _context;
+
+        public FinanceRepository(DbContext context)
+        {
+            _context = context;
+        }
 
         public async Task AddAccount(Account account)
         {
             await _context.Set<Account>().AddAsync(account);
             await _context.SaveChangesAsync();
         }
+
     }
 
     public class AccountBuilder
