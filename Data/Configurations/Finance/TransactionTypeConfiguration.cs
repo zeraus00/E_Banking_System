@@ -1,6 +1,6 @@
 ﻿namespace Data.Configurations.Finance
 {
-    public class TransactionTypeConfig : IEntityTypeConfiguration<TransactionType>
+    public class TransactionTypeConfiguration : IEntityTypeConfiguration<TransactionType>
     {
         // Configure TransactionTypes Table
         public void Configure(EntityTypeBuilder<TransactionType> TransactionTypes)

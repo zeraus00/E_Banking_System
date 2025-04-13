@@ -31,7 +31,7 @@ namespace Data
             modelBuilder.ApplyConfiguration(new LoanTransactionConfiguration());
             modelBuilder.ApplyConfiguration(new LoanTypeConfiguration());
             modelBuilder.ApplyConfiguration(new TransactionConfiguration());
-            modelBuilder.ApplyConfiguration(new TransactionTypeConfig());
+            modelBuilder.ApplyConfiguration(new TransactionTypeConfiguration());
 
             /*  Configure Place Schema
              *  Configure Barangays Table
