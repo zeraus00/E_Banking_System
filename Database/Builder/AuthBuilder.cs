@@ -9,29 +9,37 @@
             _context = context;
         }
 
+        public void saveChanges()
+        {
+            _context.SaveChanges();
+        }
+
+        public async Task saveChangesAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
+
         public void AddUserAuthSync(UserAuth userAuth)
         {
             _context.Set<UserAuth>().Add(userAuth);
-            _context.SaveChanges();
         }
 
         public async Task AddUserAuthAsync(UserAuth userAuth)
         {
             await _context.Set<UserAuth>().AddAsync(userAuth);
-            await _context.SaveChangesAsync();
         }
 
         public void AddRoleSync(Role role)
         {
             _context.Set<Role>().Add(role);
-            _context.SaveChanges();
         }
 
         public async Task AddRoleAsync(Role role)
         {
             await _context.Set<Role>().AddAsync(role);
-            await _context.SaveChangesAsync();
         }
+
+
     }
 
     public class UserAuthBuilder
