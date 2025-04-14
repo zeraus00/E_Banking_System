@@ -27,7 +27,7 @@ namespace Data.Seeders
                         .Build();
                     await authRepository.AddRoleAsync(role);
                 }
-                await authRepository.SaveChangesAsync();
+                await _context.SaveChangesAsync();
             }
         }
 
@@ -55,7 +55,7 @@ namespace Data.Seeders
                     await authRepository.AddUserAuthAsync(userAuth);
                 }
 
-                await authRepository.SaveChangesAsync();
+                await _context.SaveChangesAsync();
             }
         }
     }

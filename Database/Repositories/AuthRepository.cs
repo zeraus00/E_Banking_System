@@ -1,4 +1,6 @@
-﻿namespace Database.Repositories
+﻿using Exceptions;
+
+namespace Database.Repositories
 {
     /// <summary>
     /// CRUD operations handler for AuthSchema
@@ -14,20 +16,7 @@
         }
 
         /// <summary>
-        /// Saves changes to the database
-        /// </summary>
-        public void saveChanges()
-        {
-            _context.SaveChanges();
-        }
-
-        public async Task SaveChangesAsync()
-        {
-            await _context.SaveChangesAsync();
-        }
-
-        /// <summary>
-        /// Adds a new UserAuth to the database
+        /// Methods to add new objects to the UserSchema
         /// </summary>
         /// <param name="userAuth"></param>
         public void AddUserAuthSync(UserAuth userAuth)
@@ -40,10 +29,6 @@
             await _context.Set<UserAuth>().AddAsync(userAuth);
         }
 
-        /// <summary>
-        /// Adds a new Role to the database
-        /// </summary>
-        /// <param name="role"></param>
         public void AddRoleSync(Role role)
         {
             _context.Set<Role>().Add(role);
@@ -54,13 +39,82 @@
             await _context.Set<Role>().AddAsync(role);
         }
 
+        public UserAuth GetUserAuthByIdSync(int userAuthId)
+        {
+            var userAuth = _context.Set<UserAuth>().Find(userAuthId);
 
+            if (userAuth == null)
+            {
+                throw new UserNotFoundException($"User with ID {userAuthId} not found.");
+            }
+
+            return userAuth;
+        }
+
+        public async Task<UserAuth> GetUserAuthByIdAsync(int userAuthId)
+        {
+            var userAuth = await _context.Set<UserAuth>().FindAsync(userAuthId);
+            if (userAuth == null)
+            {
+                throw new UserNotFoundException($"User with ID {userAuthId} not found.");
+            }
+            return userAuth;
+        }
+        /// <summary>
+        /// Methods for querying the UserSchema
+        /// </summary>
+        /// <param name="userNameOrEmail"></param>
+        /// <returns></returns>
+        /// <exception cref="UserNotFoundException"></exception>
+
+        public UserAuth GetUserAuthByUserNameOrEmailSync(string userNameOrEmail)
+        {
+            var trimmedUserNameOrEmail = userNameOrEmail.Trim();
+            var userAuth = _context
+                .Set<UserAuth>()
+                .FirstOrDefault(
+                    ua => ua.UserName == trimmedUserNameOrEmail ||
+                          ua.Email == trimmedUserNameOrEmail
+                );
+
+            if (userAuth == null)
+            {
+                throw new UserNotFoundException($"User with username or email {userNameOrEmail} not found.");
+            }
+            return userAuth;
+        }
+
+        public async Task<UserAuth> GetUserAuthByUserNameOrEmailAsync(string userNameOrEmail)
+        {
+            var trimmedUserNameOrEmail = userNameOrEmail.Trim();
+            var userAuth = await _context
+                .Set<UserAuth>()
+                .FirstOrDefaultAsync(
+                    ua => ua.UserName == trimmedUserNameOrEmail ||
+                          ua.Email == trimmedUserNameOrEmail
+                );
+            if (userAuth == null)
+            {
+                throw new UserNotFoundException($"User with username or email {userNameOrEmail} not found.");
+            }
+            return userAuth;
+        }
+
+        public UserAuth GetUserAuthByRoleIdSync(int roleId)
+        {
+            var userAuth = _context.Set<UserAuth>().Where(ua => ua.RoleId == roleId).ToList();
+            if (userAuth == null)
+            {
+                throw new UserNotFoundException($"User with role ID {roleId} not found.");
+            }
+            return userAuth.FirstOrDefault();
+        }
     }
     /// <summary>
     /// Builder class for UserAuth
     /// Methods for setting properties of UserAuth
     /// </summary>
-    public class UserAuthBuilder
+        public class UserAuthBuilder
     {
         private int _roleId;
         private int? _accountId;
@@ -89,19 +143,19 @@
 
         public UserAuthBuilder WithUserName(string userName)
         {
-            _userName = userName;
+            _userName = userName.Trim();
             return this;
         }
 
         public UserAuthBuilder WithEmail(string email)
         {
-            _email = email;
+            _email = email.Trim();
             return this;
         }
 
         public UserAuthBuilder WithPassword(string password)
         {
-            _password = password;
+            _password = password.Trim();
             return this;
         }
 
@@ -133,7 +187,7 @@
 
         public RoleBuilder WithRoleName(string roleName)
         {
-            _roleName = roleName;
+            _roleName = roleName.Trim();
             return this;
         }
 
