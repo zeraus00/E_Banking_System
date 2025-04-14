@@ -24,12 +24,7 @@ namespace Data.Configurations.User
             // Street (MaxLength=50)
             Addresses
                 .Property(a => a.Street)
-                .HasMaxLength(50)
-                .IsRequired();
-            // PostalCode (Required)
-            Addresses
-                .Property(a => a.PostalCode)
-                .IsRequired();
+                .HasMaxLength(50);
 
             /*  Configure Relationships  
              *  Barangays (many-to-one)
