@@ -80,55 +80,34 @@
 	public string password = "";
 	public string error = "";
 
-	private void LoginSync() {
-		StateHasChanged();	
-		NavigationManager.NavigateTo("/Client_home");
-	}
-
 	private async Task LoginAsync()
 	{
 		try {
-			Debug.WriteLine("Login button clicked"); 
-			Debug.WriteLine(email);
-			Debug.WriteLine(password);
 			// Perform login logic here, such as checking credentials
 			bool isLoginSuccessful = await authenticationService.IsAuthenticatedAsync(email, password);
 
-			if (isLoginSuccessful)
-			{
-				// Navigate to the homepage (or any page after login)
-				NavigationManager.NavigateTo("/Client_home");
-			}
-			else
-			{
+			if (!isLoginSuccessful) {
 				error = "Invalid email or password. Please try again.";
 				// Handle failed login attempt (e.g., show error message)
 			}
+
+			/*
+			 * add GetUserAuthRoleId method here
+			 * if (roleId == 1) {
+			 *		go to admin home
+			 * } else if (roleId == 2) {
+			 *		go to user home
+			 * } else if (roleId == 3) {
+			 *		go to employee home
+			 * }
+			 * 
+			 */
+
+			NavigationManager.NavigateTo("/Client_home");
 		} catch (Exception ex) {
 			Console.WriteLine($"Error during login: {ex.Message}");
 			error = "An error occurred during login. Please try again.";
 		}
 		
 	}
-
-	private async Task<bool> AuthenticateUserAsync()
-	{
-		// Add your authentication logic here.
-		// Return true if the login is successful, otherwise false.
-		return await authenticationService.IsAuthenticatedAsync(email, password);
-		//return Task.FromResult(true); // For demo purposes, assume the login is always successful
-	}
 }
-
-
-@* 	private void LoginAsync()
-	{
-		if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
-		{
-			error = "Please fill in both the email and password.";
-			return;
-		}
-
-		error = "";
-		NavigationManager.NavigateTo("/Client_home_page");
-	} *@
