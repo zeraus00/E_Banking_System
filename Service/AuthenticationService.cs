@@ -34,7 +34,7 @@ namespace Service
                 // validate password
                 if (!trimmedPassword.Equals(user.Password))
                 {
-                    throw new IncorrectPasswordException();
+                    throw new AuthenticationException();
                 }
                 return true;
             }
@@ -42,7 +42,7 @@ namespace Service
             {
                 return false;
             }
-            catch (IncorrectPasswordException)
+            catch (AuthenticationException)
             {
                 return false;
             }
@@ -61,7 +61,7 @@ namespace Service
                 // validate password
                 if (!trimmedPassword.Equals(user.Password))
                 {
-                    throw new IncorrectPasswordException();
+                    throw new AuthenticationException();
                 }
 
                 return true;
@@ -70,7 +70,7 @@ namespace Service
             {
                 return false;
             }
-            catch (IncorrectPasswordException)
+            catch (AuthenticationException)
             {
                 return false;
             }

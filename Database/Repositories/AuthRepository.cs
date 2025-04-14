@@ -79,7 +79,7 @@ namespace Database.Repositories
 
             if (userAuth == null)
             {
-                throw new UserNotFoundException($"User with username or email {userNameOrEmail} not found.");
+                throw new AuthenticationException();
             }
             return userAuth;
         }
@@ -95,7 +95,7 @@ namespace Database.Repositories
                 );
             if (userAuth == null)
             {
-                throw new UserNotFoundException($"User with username or email {userNameOrEmail} not found.");
+                throw new AuthenticationException();
             }
             return userAuth;
         }
