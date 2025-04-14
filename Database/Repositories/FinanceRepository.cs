@@ -105,25 +105,25 @@
 
         public AccountBuilder WithAccountType(string accountType)
         {
-            _accountType = accountType;
+            _accountType = accountType.Trim();
             return this;
         }
 
         public AccountBuilder WithAccountNumber(string accountNumber)
         {
-            _accountNumber = accountNumber;
+            _accountNumber = accountNumber.Trim();
             return this;
         }
 
         public AccountBuilder WithAccountName(string accountName)
         {
-            _accountName = accountName;
+            _accountName = accountName.Trim();
             return this;
         }
 
         public AccountBuilder WithAccountStatus(string accountStatus)
         {
-            _accountStatus = accountStatus;
+            _accountStatus = accountStatus.Trim();
             return this;
         }
 
@@ -224,7 +224,7 @@
         }
         public LoanBuilder WithLoanStatus(string loanStatus)
         {
-            _loanStatus = loanStatus;
+            _loanStatus = loanStatus.Trim();
             return this;
         }
         public LoanBuilder WithStartDate(DateTime startDate)
@@ -337,6 +337,12 @@
             _transactionTime = transactionTime;
             return this;
         }
+
+        public LoanTransactionBuilder WithNotes(string notes)
+        {
+            _notes = notes.Trim();
+            return this;
+        }
         /// <summary>
         /// Builds the LoanTransaction object with the specified properties
         /// </summary>
@@ -354,6 +360,7 @@
                 DueDate = _dueDate,
                 TransactionDate = _transactionDate,
                 TransactionTime = _transactionTime
+                Notes = _notes
             };
         }
     }
@@ -367,7 +374,7 @@
 
         public LoanTypeBuilder WithLoanTypeName(string loanTypeName)
         {
-            _loanTypeName = loanTypeName;
+            _loanTypeName = loanTypeName.Trim();
             return this;
         }
 
@@ -468,7 +475,7 @@
 
         public TransactionTypeBuilder WithTransactionTypeName(string transactionTypeName)
         {
-            _transactionTypeName = transactionTypeName;
+            _transactionTypeName = transactionTypeName.Trim();
             return this;
         }
 
