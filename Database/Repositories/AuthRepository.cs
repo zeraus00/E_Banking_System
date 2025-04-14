@@ -102,12 +102,26 @@ namespace Database.Repositories
 
         public UserAuth GetUserAuthByRoleIdSync(int roleId)
         {
-            var userAuth = _context.Set<UserAuth>().Where(ua => ua.RoleId == roleId).ToList();
+            var userAuth = _context
+                .Set<UserAuth>()
+                .FirstOrDefault(ua => ua.RoleId == roleId);
             if (userAuth == null)
             {
                 throw new UserNotFoundException($"User with role ID {roleId} not found.");
             }
-            return userAuth.FirstOrDefault();
+            return userAuth;
+        }
+
+        public async Task<UserAuth> GetUserAuthByRoleIdAsync(int roleId)
+        {
+            var userAuth = await _context
+                .Set<UserAuth>()
+                .FirstOrDefaultAsync(ua => ua.RoleId == roleId);
+            if (userAuth == null)
+            {
+                throw new UserNotFoundException($"User with role ID {roleId} not found.");
+            }
+            return userAuth;
         }
     }
     /// <summary>
