@@ -1,4 +1,6 @@
-﻿namespace Database.Repositories
+﻿using Exceptions;
+
+namespace Database.Repositories
 {
     /// <summary>
     /// CRUD operations handler for FinanceSchema
@@ -87,7 +89,7 @@
             var account = _context.Set<Account>().Find(accountId);
             if (account == null)
             {
-                //throw account not found exception here
+                throw new AccountNotFoundException(accountId);
             }
             return account;
         }
@@ -97,7 +99,7 @@
             var account = await _context.Set<Account>().FindAsync(accountId);
             if (account == null)
             {
-                //throw account not found exception here
+                throw new AccountNotFoundException(accountId);
             }
             return account;
         }
@@ -112,7 +114,7 @@
                 );
             if (account == null)
             {
-                // throw exception here
+                throw new AccountNotFoundException(accountNumber);
             }
             return account;
         }
@@ -127,7 +129,7 @@
                 );
             if (account == null)
             {
-                // throw exception here
+                throw new AccountNotFoundException(accountNumber);
             }
             return account;
         }
