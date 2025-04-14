@@ -15,37 +15,47 @@
         }
 
         /// <summary>
-        /// Adds a new UserInfo to the database
+        /// Save changes to the database
+        /// </summary>
+        public void SaveChangesSync()
+        {
+            _context.SaveChanges();
+        }
+
+        public async Task SaveChangesAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// Methods to add objects to the database
         /// </summary>
         /// <param name="userInfo"></param>
         /// <returns></returns>
-        public async Task AddUserInfo(UserInfo userInfo)
+        
+        public void AddUserInfoSync(UserInfo userInfo)
+        {
+            _context.Set<UserInfo>().Add(userInfo);
+        }
+        public async Task AddUserInfoAsync(UserInfo userInfo)
         {
             await _context.Set<UserInfo>().AddAsync(userInfo);
-            await _context.SaveChangesAsync();
         }
-
-
-        /// <summary>
-        /// Adds a new Address to the database
-        /// </summary>
-        /// <param name="birthInfo"></param>
-        /// <returns></returns>
-        public async Task AddBirthInfo(BirthInfo birthInfo)
+        public void AddBirthInfoSync(BirthInfo birthInfo)
+        {
+            _context.Set<BirthInfo>().Add(birthInfo);
+        }
+        public async Task AddBirthInfoAsync(BirthInfo birthInfo)
         {
             await _context.Set<BirthInfo>().AddAsync(birthInfo);
-            await _context.SaveChangesAsync();
         }
-
-        /// <summary>
-        /// Adds a new Address to the database
-        /// </summary>
-        /// <param name="address"></param>
-        /// <returns></returns>
-        public async Task AddAddress(Address address)
+        public void AddAddressSync(Address address)
+        {
+            _context.Set<Address>().Add(address);
+        }
+        public async Task AddAddressAsync(Address address)
         {
             await _context.Set<Address>().AddAsync(address);
-            await _context.SaveChangesAsync();
         }
     }
     /// <summary>
@@ -219,11 +229,11 @@
     {
         private string _house = string.Empty;
         private string _street = string.Empty;
-        private int _barangayId;
-        private int _cityId;
-        private int _provinceId;
-        private int _regionId;
-        private int _postalCode;
+        private int? _barangayId;
+        private int? _cityId;
+        private int? _provinceId;
+        private int? _regionId;
+        private int? _postalCode;
 
         public AddressBuilder WithHouse(string house)
         {
