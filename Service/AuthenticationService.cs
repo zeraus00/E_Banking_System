@@ -1,5 +1,6 @@
 ﻿using Exceptions;
 using Data;
+using Database.Repositories;
 
 namespace Service
 {
@@ -13,19 +14,52 @@ namespace Service
         }
         // create a passwordhasher object here!
 
+
+        /// <summary>
+        /// Method to check if the user is authenticated
+        /// </summary>
+        /// <param name="Email"></param>
+        /// <param name="Password"></param>
+        /// <returns></returns>
+        public bool IsAuthenticatedSync(string Email, string Password)
+        {
+            try
+            {
+                string trimmedEmail = Email.Trim();
+                string trimmedPassword = Password.Trim();
+
+                // check if email exists
+                var user = new AuthRepository(_context).GetUserAuthByUserNameOrEmailSync(trimmedEmail);
+                
+                // validate password
+                if (!trimmedPassword.Equals(user.Password))
+                {
+                    throw new IncorrectPasswordException();
+                }
+                return true;
+            }
+            catch (UserNotFoundException)
+            {
+                return false;
+            }
+            catch (IncorrectPasswordException)
+            {
+                return false;
+            }
+            //verify password
+        }
         public async Task<bool> IsAuthenticatedAsync(string Email, string Password)
         {
             try
             {
-                // check if email exists
-                bool emailExists = await this.EmailExists(Email);
-                if (!emailExists)
-                {
-                    throw new UserNotFoundException();
-                }
+                string trimmedEmail = Email.Trim();
+                string trimmedPassword = Password.Trim();
 
-                bool passwordIsCorrect = await this.PasswordIsCorrect(Email, Password);
-                if (!passwordIsCorrect)
+                // check if email exists
+                var user = await new AuthRepository(_context).GetUserAuthByUserNameOrEmailAsync(trimmedEmail);
+
+                // validate password
+                if (!trimmedPassword.Equals(user.Password))
                 {
                     throw new IncorrectPasswordException();
                 }
@@ -44,31 +78,5 @@ namespace Service
             //verify password
         }
 
-        // verify if email exists
-        public async Task<bool> EmailExists(string email)
-        {
-            var user = await _context.Set<UserAuth>().FirstOrDefaultAsync(u => u.Email == email);
-            if (user!=null)
-            Console.WriteLine(user.Email);
-
-            return user != null;
-        }
-
-        /* temporary method for testing authentication */
-        public async Task<bool> PasswordIsCorrect(string email, string password)
-        {
-            var user = await _context.Set<UserAuth>().FirstOrDefaultAsync(u => u.Email == email);
-            if (user == null) return false; // fallback safety
-
-            if (password.Trim().Equals(user.Password.Trim()))
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-
-        }
     }
 }
