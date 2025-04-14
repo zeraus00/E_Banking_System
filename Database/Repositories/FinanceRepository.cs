@@ -14,20 +14,7 @@
         }
 
         /// <summary>
-        /// Saves changes to the database
-        /// </summary>
-        public void SaveChangesSync()
-        {
-            _context.SaveChanges();
-        }
-
-        public async Task SaveChangesAsync()
-        {
-            await _context.SaveChangesAsync();
-        }
-
-        /// <summary>
-        /// Adds a new object to the database
+        /// Adds a new object to the finance schema
         /// </summary>
         /// <returns></returns>
         public void AddAccountSync(Account account)
@@ -89,6 +76,61 @@
         {
             await _context.Set<TransactionType>().AddAsync(transactionType);
         }
+        /// <summary>
+        /// Methods for querying the finance schema
+        /// </summary>
+        /// <param name="accountId"></param>
+        /// <returns></returns>
+        public Account GetAccountByIdSync(int accountId)
+        {
+            //
+            var account = _context.Set<Account>().Find(accountId);
+            if (account == null)
+            {
+                //throw account not found exception here
+            }
+            return account;
+        }
+
+        public async Task<Account> GetAccountByIdAsync(int accountId)
+        {
+            var account = await _context.Set<Account>().FindAsync(accountId);
+            if (account == null)
+            {
+                //throw account not found exception here
+            }
+            return account;
+        }
+
+        public Account GetAccountByAccountNumberSync(string accountNumber)
+        {
+            var trimmedAccountNumber = accountNumber.Trim();
+            var account = _context
+                .Set<Account>()
+                .FirstOrDefault(
+                    acc => acc.AccountNumber == trimmedAccountNumber
+                );
+            if (account == null)
+            {
+                // throw exception here
+            }
+            return account;
+        }
+
+        public async Task<Account> GetAccountByAccountNumberAsync(string accountNumber)
+        {
+            var trimmedAccountNumber = accountNumber.Trim();
+            var account = await _context
+                .Set<Account>()
+                .FirstOrDefaultAsync(
+                    acc => acc.AccountNumber == trimmedAccountNumber
+                );
+            if (account == null)
+            {
+                // throw exception here
+            }
+            return account;
+        }
     }
     /// <summary>
     /// Builder class for Account
@@ -149,7 +191,7 @@
         /// Builds the Account object with the specified properties
         /// </summary>
         /// <returns></returns>
-        public Account Builder()
+        public Account Build()
         {
             return new Account
             {
@@ -359,7 +401,7 @@
                 PrincipalAmount = _principalAmount,
                 DueDate = _dueDate,
                 TransactionDate = _transactionDate,
-                TransactionTime = _transactionTime
+                TransactionTime = _transactionTime,
                 Notes = _notes
             };
         }
