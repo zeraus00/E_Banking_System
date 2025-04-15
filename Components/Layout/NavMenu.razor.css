@@ -70,6 +70,13 @@
     padding: 0;
 }
 
+.bottom-row {
+    height: 200px;
+    margin-right: 10%;
+    margin-left: 10%;
+    padding: 0;
+}
+
 .toggler {
     appearance: none;
     cursor: pointer;

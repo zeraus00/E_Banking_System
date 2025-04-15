@@ -12,18 +12,6 @@
     display: flex;
 }
 
-    .custom-card.client {
-        color: white;
-        height: 100%;
-        max-height: 140px;
-        justify-content: space-between;
-        background-color: #1A449F;
-        border: none;
-        border-radius: 0;
-        border-bottom-right-radius: 50px;
-        margin-bottom: 20px;
-    }
-
     .custom-card.balance {
         display: flex;
         flex-direction: column;
