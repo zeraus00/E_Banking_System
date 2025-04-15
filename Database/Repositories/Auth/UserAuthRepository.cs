@@ -101,16 +101,26 @@ namespace Database.Repositories.Auth
         }
 
         /// <summary>
-        /// Query entries by UserName or Email in UsersAuth table.
+        /// Query entries by UserName or Email in UsersAuth table
         /// </summary>
         /// <param name="userNameOrEmail"></param>
+        /// <param name="includeRole">Set to true to include Role nav property</param>
         /// <returns></returns>
         /// <exception cref="AuthenticationException"></exception>
-        public UserAuth GetUserAuthByUserNameOrEmailSync(string userNameOrEmail)
+        public UserAuth GetUserAuthByUserNameOrEmailSync(string userNameOrEmail, bool includeRole = false)
         {
             var trimmedUserNameOrEmail = userNameOrEmail.Trim();
-            var userAuth = _context
+
+            var query = _context
                 .Set<UserAuth>()
+                .AsQueryable();
+
+            if (includeRole)
+            {
+                query = query.Include(ua => ua.Role);
+            }
+
+            var userAuth = query
                 .FirstOrDefault(
                     ua => ua.UserName == trimmedUserNameOrEmail ||
                           ua.Email == trimmedUserNameOrEmail
@@ -127,13 +137,23 @@ namespace Database.Repositories.Auth
         /// Query entries by UserName or Email in UsersAuth table.
         /// </summary>
         /// <param name="userNameOrEmail"></param>
+        /// <param name="includeRole">Set to true to include Role nav property</param>
         /// <returns></returns>
         /// <exception cref="AuthenticationException"></exception>
-        public async Task<UserAuth> GetUserAuthByUserNameOrEmailAsync(string userNameOrEmail)
+        public async Task<UserAuth> GetUserAuthByUserNameOrEmailAsync(string userNameOrEmail, bool includeRole = false)
         {
             var trimmedUserNameOrEmail = userNameOrEmail.Trim();
-            var userAuth = await _context
+
+            var query = _context
                 .Set<UserAuth>()
+                .AsQueryable();
+
+            if (includeRole)
+            {
+                query = query.Include(ua => ua.Role);
+            }
+
+            var userAuth = await query
                 .FirstOrDefaultAsync(
                     ua => ua.UserName == trimmedUserNameOrEmail ||
                           ua.Email == trimmedUserNameOrEmail
@@ -181,24 +201,44 @@ namespace Database.Repositories.Auth
             return userAuth;
         }
         /// <summary>
-        /// Get the RoleName of a user.
+        /// Get the Role of a user through querying by primary key.
         /// </summary>
-        /// <param name="userAuthId"></param>
+        /// <param name="userAuthId">The userAuthId or primary key of the UsersAuth table.</param>
         /// <returns></returns>
         public Role GetUserRoleSync(int userAuthId)
         {
-            var userAuth = this.GetUserAuthByIdSync(userAuthId, true);
-            return userAuth.Role;
+            return this.GetUserAuthByIdSync(userAuthId, true).Role;
         }
 
         /// <summary>
-        /// Get the RoleName of a user.
+        /// Get the Role of a user through querying by primary key.
         /// </summary>
-        /// <param name="userAuthId"></param>
+        /// <param name="userAuthId">The userAuthId or primary key of the UsersAuth table.</param>
         /// <returns></returns>
         public async Task<Role> GetUserRoleAsync(int userAuthId)
         {
             var userAuth = await this.GetUserAuthByIdAsync(userAuthId, true);
+            return userAuth.Role;
+        }
+
+        /// <summary>
+        /// Get the Role of a user through querying by Username or Email.
+        /// </summary>
+        /// <param name="userNameOrEmail">The username or email of the user.</param>
+        /// <returns></returns>
+        public Role GetUserRoleSync(string userNameOrEmail)
+        {
+            return this.GetUserAuthByUserNameOrEmailSync(userNameOrEmail, true).Role;
+        }
+
+        /// <summary>
+        /// Get the Role of a user through querying by Username or Email
+        /// </summary>
+        /// <param name="userNameOrEmail">The username or email of the user.</param>
+        /// <returns></returns>
+        public async Task<Role> GetUserRoleAsync(string userNameOrEmail)
+        {
+            var userAuth = await this.GetUserAuthByUserNameOrEmailAsync(userNameOrEmail, true);
             return userAuth.Role;
         }
     }
