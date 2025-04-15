@@ -1,4 +1,4 @@
-﻿namespace Database.Repositories
+﻿namespace Data.Repositories
 {
     /// <summary>
     /// CRUD operations handler for UserSchema
@@ -32,7 +32,7 @@
         /// </summary>
         /// <param name="userInfo"></param>
         /// <returns></returns>
-        
+
         public void AddUserInfoSync(UserInfo userInfo)
         {
             _context.Set<UserInfo>().Add(userInfo);

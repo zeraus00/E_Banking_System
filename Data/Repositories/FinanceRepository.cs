@@ -1,6 +1,6 @@
 ﻿using Exceptions;
 
-namespace Database.Repositories
+namespace Data.Repositories
 {
     /// <summary>
     /// CRUD operations handler for FinanceSchema

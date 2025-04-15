@@ -1,4 +1,4 @@
-﻿using Database.Repositories.Auth;
+﻿using Data.Repositories.Auth;
 
 namespace Data.Seeders
 {

@@ -1,6 +1,4 @@
-﻿using Data;
-
-namespace Database.Repositories.Auth
+﻿namespace Data.Repositories.Auth
 {
     /// <summary>
     /// Class for handling CRUD operations in Roles table.

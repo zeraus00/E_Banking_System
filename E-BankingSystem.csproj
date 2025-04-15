@@ -25,9 +25,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Database\Repositories\Finance\" />
-    <Folder Include="Database\Repositories\User\" />
-    <Folder Include="Database\Repositories\Place\" />
+    <Folder Include="Data\Repositories\Finance\" />
+    <Folder Include="Data\Repositories\User\" />
+    <Folder Include="Data\Repositories\Place\" />
   </ItemGroup>
 
 </Project>

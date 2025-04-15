@@ -1,7 +1,6 @@
 ﻿using Exceptions;
-using Data;
 
-namespace Database.Repositories.Auth
+namespace Data.Repositories.Auth
 {
     /// <summary>
     /// Class for handling CRUD operations in UsersAuth table.
@@ -14,7 +13,7 @@ namespace Database.Repositories.Auth
     {
         private readonly EBankingContext _context;
 
-        public UserAuthRepository (EBankingContext context)
+        public UserAuthRepository(EBankingContext context)
         {
             _context = context;
         }
@@ -55,7 +54,8 @@ namespace Database.Repositories.Auth
                     .Set<UserAuth>()
                     .Include(ua => ua.Role)
                     .FirstOrDefault(ua => ua.UserAuthId == userAuthId);
-            } else
+            }
+            else
             {
                 userAuth = _context
                     .Set<UserAuth>()
@@ -86,7 +86,8 @@ namespace Database.Repositories.Auth
                     .Set<UserAuth>()
                     .Include(ua => ua.Role)
                     .FirstOrDefaultAsync(ua => ua.UserAuthId == userAuthId);
-            } else
+            }
+            else
             {
                 userAuth = await _context
                     .Set<UserAuth>()
@@ -209,7 +210,7 @@ namespace Database.Repositories.Auth
         /// <returns></returns>
         public Role GetUserRoleSync(int userAuthId)
         {
-            return this.GetUserAuthByIdSync(userAuthId, true).Role;
+            return GetUserAuthByIdSync(userAuthId, true).Role;
         }
 
         /// <summary>
@@ -219,7 +220,7 @@ namespace Database.Repositories.Auth
         /// <returns></returns>
         public async Task<Role> GetUserRoleAsync(int userAuthId)
         {
-            var userAuth = await this.GetUserAuthByIdAsync(userAuthId, true);
+            var userAuth = await GetUserAuthByIdAsync(userAuthId, true);
             return userAuth.Role;
         }
 
@@ -230,7 +231,7 @@ namespace Database.Repositories.Auth
         /// <returns></returns>
         public Role GetUserRoleSync(string userNameOrEmail)
         {
-            return this.GetUserAuthByUserNameOrEmailSync(userNameOrEmail, true).Role;
+            return GetUserAuthByUserNameOrEmailSync(userNameOrEmail, true).Role;
         }
 
         /// <summary>
@@ -240,7 +241,7 @@ namespace Database.Repositories.Auth
         /// <returns></returns>
         public async Task<Role> GetUserRoleAsync(string userNameOrEmail)
         {
-            var userAuth = await this.GetUserAuthByUserNameOrEmailAsync(userNameOrEmail, true);
+            var userAuth = await GetUserAuthByUserNameOrEmailAsync(userNameOrEmail, true);
             return userAuth.Role;
         }
     }

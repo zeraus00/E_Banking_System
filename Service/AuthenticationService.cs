@@ -1,6 +1,6 @@
 ﻿using Exceptions;
 using Data;
-using Database.Repositories.Auth;
+using Data.Repositories.Auth;
 
 namespace Service
 {
