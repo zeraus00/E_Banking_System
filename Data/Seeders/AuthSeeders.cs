@@ -38,16 +38,17 @@ namespace Data.Seeders
                 var userAuthRepository = new UserAuthRepository(_context);
                 var userAuthBuilder = new UserAuthBuilder();
 
-                var users = new List<(string userName, string email, string password)>
+                var users = new List<(int roleId, string userName, string email, string password)>
                 {
-                    ("admin", "admin@gmail.com", "admin123"),
-                    ("user", "user@gmail.com", "user123"),
-                    ("employee", "employee@gmail.com", "employee123")
+                    (1, "admin", "admin@gmail.com", "admin123"),
+                    (2, "user", "user@gmail.com", "user123"),
+                    (3, "employee", "employee@gmail.com", "employee123")
                 };
 
-                foreach (var (userName, email, password) in users)
+                foreach (var (roleId, userName, email, password) in users)
                 {
                     userAuthBuilder
+                        .WithRoleId(roleId)
                         .WithUserName(userName)
                         .WithEmail(email)
                         .WithPassword(password);
