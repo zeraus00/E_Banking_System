@@ -1,6 +1,6 @@
 ﻿using Exceptions;
 using Data;
-using Database.Repositories;
+using Database.Repositories.Auth;
 
 namespace Service
 {
@@ -29,7 +29,7 @@ namespace Service
                 string trimmedPassword = Password.Trim();
 
                 // check if email exists
-                var user = new AuthRepository(_context).GetUserAuthByUserNameOrEmailSync(trimmedEmail);
+                var user = new UserAuthRepository(_context).GetUserAuthByUserNameOrEmailSync(trimmedEmail);
                 
                 // validate password
                 if (!trimmedPassword.Equals(user.Password))
@@ -56,7 +56,7 @@ namespace Service
                 string trimmedPassword = Password.Trim();
 
                 // check if email exists
-                var user = await new AuthRepository(_context).GetUserAuthByUserNameOrEmailAsync(trimmedEmail);
+                var user = await new UserAuthRepository(_context).GetUserAuthByUserNameOrEmailAsync(trimmedEmail);
 
                 // validate password
                 if (!trimmedPassword.Equals(user.Password))
