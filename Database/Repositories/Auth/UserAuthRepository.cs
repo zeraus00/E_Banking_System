@@ -171,16 +171,17 @@ namespace Database.Repositories.Auth
         /// <param name="roleId"></param>
         /// <returns></returns>
         /// <exception cref="UserNotFoundException"></exception>
-        public UserAuth GetUserAuthByRoleIdSync(int roleId)
+        public List<UserAuth> GetUsersAuthByRoleIdSync(int roleId)
         {
-            var userAuth = _context
+            var usersAuth = _context
                 .Set<UserAuth>()
-                .FirstOrDefault(ua => ua.RoleId == roleId);
-            if (userAuth == null)
+                .Where(ua => ua.RoleId == roleId)
+                .ToList();
+            if (usersAuth.Count == 0)
             {
                 throw new UserNotFoundException($"User with role ID {roleId} not found.");
             }
-            return userAuth;
+            return usersAuth;
         }
 
         /// <summary>
@@ -189,16 +190,17 @@ namespace Database.Repositories.Auth
         /// <param name="roleId"></param>
         /// <returns></returns>
         /// <exception cref="UserNotFoundException"></exception>
-        public async Task<UserAuth> GetUserAuthByRoleIdAsync(int roleId)
+        public async Task<List<UserAuth>> GetUsersAuthByRoleIdAsync(int roleId)
         {
-            var userAuth = await _context
+            var usersAuth = await _context
                 .Set<UserAuth>()
-                .FirstOrDefaultAsync(ua => ua.RoleId == roleId);
-            if (userAuth == null)
+                .Where(ua => ua.RoleId == roleId)
+                .ToListAsync();
+            if (usersAuth.Count == 0)
             {
                 throw new UserNotFoundException($"User with role ID {roleId} not found.");
             }
-            return userAuth;
+            return usersAuth;
         }
         /// <summary>
         /// Get the Role of a user through querying by primary key.
