@@ -1,6 +1,7 @@
 ﻿using Exceptions;
 using Data;
 using Data.Repositories.Auth;
+using Data.Enums;
 
 namespace Service
 {
@@ -96,6 +97,36 @@ namespace Service
         {
             var Role = await new UserAuthRepository(_context).GetUserRoleAsync(Email);
             return Role.RoleId;
+        }
+
+        /// <summary>
+        /// Returns true if the RoleId corresponds to administrator.
+        /// </summary>
+        /// <param name="roleId"></param>
+        /// <returns></returns>
+        public bool IsAdmin(int roleId)
+        {
+            return roleId == (int) RoleType.Administrator;
+        }
+
+        /// <summary>
+        /// Returns true if the RoleId corresponds to user.
+        /// </summary>
+        /// <param name="roleId"></param>
+        /// <returns></returns>
+        public bool IsUser(int roleId)
+        {
+            return roleId == (int) RoleType.User;
+        }
+
+        /// <summary>
+        /// Returns true if the RoleId corresponds to employee.
+        /// </summary>
+        /// <param name="roleId"></param>
+        /// <returns></returns>
+        public bool IsEmployee(int roleId)
+        {
+            return roleId == (int) RoleType.Employee;
         }
     }
 }
