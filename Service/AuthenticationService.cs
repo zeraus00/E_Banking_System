@@ -76,5 +76,26 @@ namespace Service
 
             //verify password
         }
+
+        /// <summary>
+        /// Method to get the RoleId of a user
+        /// </summary>
+        /// <param name="Email"></param>
+        /// <returns></returns>
+        public int GetUserRoleIdSync(string Email)
+        {
+            return new UserAuthRepository(_context).GetUserRoleSync(Email).RoleId;
+        }
+
+        /// <summary>
+        /// Method to get the RoleId of a user
+        /// </summary>
+        /// <param name="Email"></param>
+        /// <returns></returns>
+        public async Task<int> GetUserRoleIdAsync(string Email)
+        {
+            var Role = await new UserAuthRepository(_context).GetUserRoleAsync(Email);
+            return Role.RoleId;
+        }
     }
 }
