@@ -191,6 +191,11 @@ namespace Database.Repositories.Auth
             return userAuth.Role.RoleName;
         }
 
+        /// <summary>
+        /// Get the RoleName of a user.
+        /// </summary>
+        /// <param name="userAuthId"></param>
+        /// <returns></returns>
         public async Task<string> GetRoleNameAsync(int userAuthId)
         {
             var userAuth = await this.GetUserAuthByIdAsync(userAuthId, true);
