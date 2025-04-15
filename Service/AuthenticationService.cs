@@ -38,16 +38,19 @@ namespace Service
                 }
                 return true;
             }
-            catch (UserNotFoundException)
-            {
-                return false;
-            }
             catch (AuthenticationException)
             {
                 return false;
             }
             //verify password
         }
+
+        /// <summary>
+        /// Method to check if the user is authenticated
+        /// </summary>
+        /// <param name="Email"></param>
+        /// <param name="Password"></param>
+        /// <returns></returns>
         public async Task<bool> IsAuthenticatedAsync(string Email, string Password)
         {
             try
@@ -66,10 +69,6 @@ namespace Service
 
                 return true;
             }
-            catch (UserNotFoundException)
-            {
-                return false;
-            }
             catch (AuthenticationException)
             {
                 return false;
@@ -77,6 +76,5 @@ namespace Service
 
             //verify password
         }
-
     }
 }
