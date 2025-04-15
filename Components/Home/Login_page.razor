@@ -89,6 +89,7 @@
 
 			if (!isLoginSuccessful) {
 				error = "Invalid email or password. Please try again.";
+				return;
 				// Handle failed login attempt (e.g., show error message)
 			}
 
@@ -117,8 +118,9 @@
 			NavigationManager.NavigateTo("/Client_home");
 		} else if (authenticationService.IsEmployee(roleId)) {
 			// go to employee home
+		} else {
+			throw new Exception("User Role not Found.");
 		}
 
-		throw new Exception("User Role not Found.");
 	}
 }
