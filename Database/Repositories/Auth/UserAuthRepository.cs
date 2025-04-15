@@ -185,10 +185,10 @@ namespace Database.Repositories.Auth
         /// </summary>
         /// <param name="userAuthId"></param>
         /// <returns></returns>
-        public string GetRoleNameSync(int userAuthId)
+        public Role GetUserRoleSync(int userAuthId)
         {
             var userAuth = this.GetUserAuthByIdSync(userAuthId, true);
-            return userAuth.Role.RoleName;
+            return userAuth.Role;
         }
 
         /// <summary>
@@ -196,10 +196,10 @@ namespace Database.Repositories.Auth
         /// </summary>
         /// <param name="userAuthId"></param>
         /// <returns></returns>
-        public async Task<string> GetRoleNameAsync(int userAuthId)
+        public async Task<Role> GetUserRoleAsync(int userAuthId)
         {
             var userAuth = await this.GetUserAuthByIdAsync(userAuthId, true);
-            return userAuth.Role.RoleName;
+            return userAuth.Role;
         }
     }
 }
