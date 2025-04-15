@@ -2,12 +2,13 @@
 <body>
     <!-- Side NavBar Layout -->
     <nav class="sidebar">
+
+        <!-- Top Row -->
         <div class="top-row border-bottom">
 
-                <!-- Profile Picture Container -->
+                <!-- Profile Picture Container (Draft) -->
                 <div class="profile-picture_container">
 
-                    <!-- Draft -->
                     <label for="fileInput">
                         @if (previewImage != null)
                         {
@@ -34,7 +35,7 @@
 
         </div>
 
-        <!-- Sidebar Navigation Links -->
+        <!-- Sidebar Navigation Links (Middle Row)-->
         <div class="position-relative" onclick="document.querySelector('.toggler').click()">
             <p class="position-absolute text-light top-0 start-0 mx-4 my-3 fw-lighter" style="font-size: 0.75rem;">USER</p>
             <div class="middle-row border-bottom">
@@ -58,6 +59,7 @@
             </div>
         </div>
 
+        <!-- Sidebar Navigation Links (Bottom Row) -->
         <div class="position-relative" onclick="document.querySelector('.toggler').click()">
             <p class="position-absolute text-light top-0 start-0 mx-4 my-3 fw-lighter" style="font-size: 0.75rem;">OTHERS</p>
             <div class="bottom-row">
