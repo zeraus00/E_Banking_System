@@ -1,6 +1,5 @@
-﻿@using Data
-@using System.Diagnostics
-@using Service
+﻿@using Data;
+@using Service;
 @using Layout
 
 @page "/Login_page"
@@ -80,6 +79,8 @@
 	public string password = "";
 	public string error = "";
 
+
+
 	private async Task LoginAsync()
 	{
 		try {
@@ -91,23 +92,33 @@
 				// Handle failed login attempt (e.g., show error message)
 			}
 
-			/*
-			 * add GetUserAuthRoleId method here
-			 * if (roleId == 1) {
-			 *		go to admin home
-			 * } else if (roleId == 2) {
-			 *		go to user home
-			 * } else if (roleId == 3) {
-			 *		go to employee home
-			 * }
-			 * 
-			 */
+			int roleId = await authenticationService.GetUserRoleIdAsync(email);
 
-			NavigationManager.NavigateTo("/Client_home");
+			NavigateBasedOnRole(roleId);
+
+
 		} catch (Exception ex) {
 			Console.WriteLine($"Error during login: {ex.Message}");
 			error = "An error occurred during login. Please try again.";
 		}
-		
+
+	}
+
+	/// <summary>
+	/// Handles Role-Based Access Control for log-in.
+	/// Navigates the home pages with User RoleIds.
+	/// </summary>
+	/// <param name="roleId"></param>
+	private void NavigateBasedOnRole(int roleId) 
+	{
+		if (authenticationService.IsAdmin(roleId)) {
+			// go to admin home
+		} else if (authenticationService.IsUser(roleId)) {
+			NavigationManager.NavigateTo("/Client_home");
+		} else if (authenticationService.IsEmployee(roleId)) {
+			// go to employee home
+		}
+
+		throw new Exception("User Role not Found.");
 	}
 }
