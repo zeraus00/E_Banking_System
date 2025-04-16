@@ -27,7 +27,10 @@
             _accountTypeName = accountTypeName.Trim();
             return this;
         }
-
+        /// <summary>
+        /// Builds the AccountType object with the specified parameters.
+        /// </summary>
+        /// <returns></returns>
         public AccountType Build()
         {
             return new AccountType
