@@ -8,33 +8,9 @@
     /// DbContext.SaveChanges or DbContext.SaveChangesAsync externally.
     /// </summary>
     /// <param name="_context"></param>
-    public class BarangayRepository
+    public class BarangayRepository : Repository
     {
-        private readonly EBankingContext _context;
-
-        public BarangayRepository(EBankingContext context)
-        {
-            _context = context;
-        }
-
-        /// <summary>
-        /// Adds a new entry to the Barangays table.
-        /// </summary>
-        /// <param name="barangay"></param>
-        public void AddBarangaySync(Barangay barangay)
-        {
-            _context.Set<Barangay>().Add(barangay);
-        }
-
-        /// <summary>
-        /// Adds a new entry to the Barangays table.
-        /// </summary>
-        /// <param name="barangay"></param>
-        public async Task AddBarangayAsync(Barangay barangay)
-        {
-            await _context.Set<Barangay>().AddAsync(barangay);
-        }
-        
+        public BarangayRepository(EBankingContext context) : base(context) { }
     }
 
     /// <summary>

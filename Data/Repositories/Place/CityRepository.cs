@@ -8,36 +8,13 @@
     /// DbContext.SaveChanges or DbContext.SaveChangesAsync externally.
     /// </summary>
     /// <param name="_context"></param>
-    public class CityRepository
+    public class CityRepository : Repository
     {
-        private readonly EBankingContext _context;
-
-        public CityRepository(EBankingContext context)
-        {
-            _context = context;
-        }
-
-        /// <summary>
-        /// Adds a new entry to the Cities table.
-        /// </summary>
-        /// <param name="address"></param>
-        public void AddCitySync(City city)
-        {
-            _context.Set<City>().Add(city);
-        }
-
-        /// <summary>
-        /// Adds a new entry to the Cities table.
-        /// </summary>
-        /// <param name="address"></param>
-        public async Task AddCityAsync(City city)
-        {
-            await _context.Set<City>().AddAsync(city);
-        }
+        public CityRepository(EBankingContext context) : base(context) { }
     }
 
     /// <summary>
-    /// Builder class for Address
+    /// Builder class for City
     /// </summary>
     public class CityBuilder
     {

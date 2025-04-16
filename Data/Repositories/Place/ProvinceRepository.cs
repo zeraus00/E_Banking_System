@@ -8,36 +8,13 @@
     /// DbContext.SaveChanges or DbContext.SaveChangesAsync externally.
     /// </summary>
     /// <param name="_context"></param>
-    public class ProvinceRepository
+    public class ProvinceRepository : Repository
     {
-        private readonly EBankingContext _context;
-
-        public ProvinceRepository(EBankingContext context)
-        {
-            _context = context;
-        }
-
-        /// <summary>
-        /// Adds a new entry to the Provinces table.
-        /// </summary>
-        /// <param name="province"></param>
-        public void AddProvinceSync(Province province)
-        {
-            _context.Set<Province>().Add(province);
-        }
-
-        /// <summary>
-        /// Adds a new entry to the Provinces table.
-        /// </summary>
-        /// <param name="province"></param>
-        public async Task AddProvinceAsync(Province province)
-        {
-            await _context.Set<Province>().AddAsync(province);
-        }
+        public ProvinceRepository(EBankingContext context) : base(context) { }
     }
 
     /// <summary>
-    /// Builder class for Address
+    /// Builder class for Province
     /// </summary>
     public class ProvinceBuilder
     {

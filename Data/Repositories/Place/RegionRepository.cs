@@ -8,32 +8,9 @@
     /// DbContext.SaveChanges or DbContext.SaveChangesAsync externally.
     /// </summary>
     /// <param name="_context"></param>
-    public class RegionRepository
+    public class RegionRepository : Repository
     {
-        private readonly EBankingContext _context;
-
-        public RegionRepository(EBankingContext context)
-        {
-            _context = context;
-        }
-
-        /// <summary>
-        /// Adds a new entry to the Regions table.
-        /// </summary>
-        /// <param name="region"></param>
-        public void AddRegionSync(Region region)
-        {
-            _context.Set<Region>().Add(region);
-        }
-
-        /// <summary>
-        /// Adds a new entry to the Regions table.
-        /// </summary>
-        /// <param name="region"></param>
-        public async Task AddRegionAsync(Region region)
-        {
-            await _context.Set<Region>().AddAsync(region);
-        }
+        public RegionRepository(EBankingContext context) : base(context) { }
     }
     
     /// <summary>
