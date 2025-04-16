@@ -1,7 +1,6 @@
 ﻿body, html {
     margin: 0;
     padding: 0;
-    width: 100%;
     background-image: url('/bootstrap/Utilities/bank-background.jpg');
     background-size: cover;
     background-position: center top;
