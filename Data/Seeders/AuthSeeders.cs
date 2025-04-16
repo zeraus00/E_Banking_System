@@ -1,4 +1,4 @@
-﻿using Database.Repositories;
+﻿using Data.Repositories.Auth;
 
 namespace Data.Seeders
 {
@@ -18,16 +18,16 @@ namespace Data.Seeders
         {
             if (!await _context.Roles.AnyAsync())
             {
-                var authRepository = new AuthRepository(_context);
+                var roleRepository = new RoleRepository(_context);
                 var roleNames = new[] { "Administrator", "User", "Employee"};
                 foreach (var roleName in roleNames)
                 {
                     var role = new RoleBuilder()
                         .WithRoleName(roleName)
                         .Build();
-                    await authRepository.AddRoleAsync(role);
+                    await roleRepository.AddRoleAsync(role);
                 }
-                await authRepository.SaveChangesAsync();
+                await _context.SaveChangesAsync();
             }
         }
 
@@ -35,27 +35,28 @@ namespace Data.Seeders
         {
             if (!await _context.UsersAuth.AnyAsync())
             {
-                var authRepository = new AuthRepository(_context);
+                var userAuthRepository = new UserAuthRepository(_context);
                 var userAuthBuilder = new UserAuthBuilder();
 
-                var users = new List<(string userName, string email, string password)>
+                var users = new List<(int roleId, string userName, string email, string password)>
                 {
-                    ("admin", "admin@gmail.com", "admin123"),
-                    ("user", "user@gmail.com", "user123"),
-                    ("employee", "employee@gmail.com", "employee123")
+                    (1, "admin", "admin@gmail.com", "admin123"),
+                    (2, "user", "user@gmail.com", "user123"),
+                    (3, "employee", "employee@gmail.com", "employee123")
                 };
 
-                foreach (var (userName, email, password) in users)
+                foreach (var (roleId, userName, email, password) in users)
                 {
                     userAuthBuilder
+                        .WithRoleId(roleId)
                         .WithUserName(userName)
                         .WithEmail(email)
                         .WithPassword(password);
                     var userAuth = userAuthBuilder.Build();
-                    await authRepository.AddUserAuthAsync(userAuth);
+                    await userAuthRepository.AddUserAuthAsync(userAuth);
                 }
 
-                await authRepository.SaveChangesAsync();
+                await _context.SaveChangesAsync();
             }
         }
     }

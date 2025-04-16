@@ -44,8 +44,8 @@
             UsersAuth
                 .Property(ua => ua.Password)
                 .IsRequired()
-                .HasMaxLength(60)
-                .IsFixedLength();
+                .HasMaxLength(60);
+                //.IsFixedLength();
 
             /*  
              *  Configure Relationships

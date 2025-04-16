@@ -1,0 +1,49 @@
+﻿@page "/Settings_change_email"
+@inject NavigationManager NavigationManager
+
+<div class="page">
+	<main>
+		<!-- Header -->
+		<header class="custom-card-clientpage clientheader px-4 py-4">
+			<div>
+				<div class="d-flex align-items-center gap-3 ms-3">
+					<h1>Update Email</h1>
+				</div>
+			</div>
+		</header>
+
+		<!-- Main Content -->
+		<div class="card registration shadow mt-3">
+			<div class="mt-3 mx-5">
+
+				<!-- Password Conditions -->
+				<h5 class="text-start fw-light text-light my-3">
+					Enter your new email address. A verification email will be sent to the new email address. 
+					Click the URL in the verification email to complete the procedure.
+				</h5>
+				<ul class="fs-6 fw-light">
+					<li>Note (draft).</li>
+				</ul>
+			</div>
+
+			<!-- Password Fields -->
+			<div class="loginform sm mt-1">
+				<input class="form-control form-control-custom form-control-lg mb-3" type="email" placeholder="Current Email">
+				<input class="form-control form-control-custom form-control-lg mb-3" type="email" placeholder="Confirm New Email">
+			</div>
+
+			<!-- Change Password Button -->
+			<div class="mt-3 text-center">
+				<NavLink class="w-25 mx-auto" href="/Settings_page">
+					<button class="btn btn-danger w-25">Cancel</button>
+				</NavLink>
+				<NavLink class="w-25 mx-auto" href="/Settings_page">
+					<button class="btn btn-primary w-25">Send Verification Email</button>
+				</NavLink>
+			</div>
+		
+		</div>
+	</main>
+
+
+</div>

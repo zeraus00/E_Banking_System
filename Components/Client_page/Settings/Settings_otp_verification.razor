@@ -1,12 +1,19 @@
-﻿@page "/Verification"
+﻿@page "/Settings_enter_otp"
 @inject NavigationManager NavigationManager
-@using Layout
-@layout PlainLayout
 
 <div class="page">
 	<main>
+		<!-- Header -->
+		<header class="custom-card-clientpage clientheader px-4 py-4">
+			<div>
+				<div class="d-flex align-items-center gap-3 ms-3">
+					<h1>Verification</h1>
+				</div>
+			</div>
+		</header>
+
 		<!-- Verification Card Container -->
-		<div class="card forget_password shadow-lg">
+		<div class="card registration shadow-lg mt-3">
 			<h3 class="fw-bold text-light mt-5 mx-5">Enter Verification Pin</h3>
 
 			<!-- Instructions -->
@@ -29,25 +36,23 @@
 			</div>
 
 			<!-- Continue Button -->
-			<NavLink class="btn btn-primary btn-lg d-grid col-4 mx-auto mt-3" href="/New_password">
+			<NavLink class="btn btn-primary btn-lg d-grid col-4 mx-auto mt-3" href="/Settings_change_password">
 				Submit
 			</NavLink>
 
 			<!-- Resend Pin Navlink -->
-			<NavLink class="nav-link custom-nav-link-2 fw-lighter mx-auto mt-1" href="#">
+			<NavLink class="nav-link custom-nav-link-2 fw-lighter mx-auto mt-1 mb-5" href="#">
 				Resend pin
 			</NavLink>
 
 			<!-- try Another Way Navlink -->
-@* 			<NavLink class="nav-link custom-nav-link-2 fw-lighter mx-auto mb-2" href="#">
+@* 			<NavLink class="nav-link custom-nav-link-2 fw-lighter mx-auto mb-5" href="#">
 				Try another way
 			</NavLink> *@
 
-			<!-- Go Back Navlink -->
-			<NavLink class="nav-link custom-nav-link margin" href="/Login_page">
+			<NavLink class="nav-link custom-nav-link margin" href="/Settings_page">
 				← Go Back
 			</NavLink>
-
 		</div>
 
 	</main>

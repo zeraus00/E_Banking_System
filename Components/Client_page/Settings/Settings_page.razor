@@ -1,0 +1,72 @@
+﻿@page "/Settings_page"
+@inject NavigationManager NavigationManager
+
+<div class="page">
+    <main>
+
+        <!-- Header -->
+        <header class="custom-card-clientpage clientheader px-4 py-4">
+            <div>
+                <div class="d-flex align-items-center gap-3 ms-3">
+                    <h1>Settings</h1>
+                </div>
+            </div>
+
+            <!-- Go Back Navlink -->
+            <section class="d-flex justify-content-end align-items-end mx-5 gap-2">
+                <button class="btn btn-outline-light rounded-pill" href="/Login_page">
+                    ← Go Back
+                </button>
+            </section>
+        </header>
+
+        <!-- Settings Main Content -->
+        <div class="container-fluid text-white px-4 py-5">
+
+            <div class="card registration shadow-lg p-5">
+                <!-- Profile Section -->
+                <div class="d-flex align-items-center mb-4">
+                    <div class="rounded-circle bg-secondary" style="width: 80px; height: 80px;"></div>
+                    <div class="ms-3">
+                        <h5 class="mb-1">sampleName</h5>
+                        <small class="text-muted">accountID</small>
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="mb-3 border-bottom pb-2 d-flex justify-content-between align-items-center">
+                    <div>
+                        <label class="form-label text-muted">Email Address</label>
+                        <div>sampleEmail</div>
+                    </div>
+                    <NavLink class="custom-nav-link" href="/Settings_enter_password">
+                        <button class="btn btn-link text-decoration-none text-light">Change</button>
+                    </NavLink>
+                </div>
+
+                <!-- Contact Number -->
+                <div class="mb-3 border-bottom pb-2 d-flex justify-content-between align-items-center">
+                    <div>
+                        <label class="form-label text-muted">Contact No.</label>
+                        <div>+63 000 0000</div>
+                    </div>
+                    <button class="btn btn-link text-decoration-none text-light">Change</button>
+                </div>
+
+                <!-- Password -->
+                <div class="border-bottom pb-2 d-flex justify-content-between align-items-center">
+                    <div>
+                        <label class="form-label text-muted">Password</label>
+                        <div>**********</div>
+                    </div>
+                    <NavLink class="custom-nav-link" href="/Settings_enter_otp">
+                        <button class="btn btn-link text-decoration-none text-light">Change</button>
+                    </NavLink>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+	}
+</div>
