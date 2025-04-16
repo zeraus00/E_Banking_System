@@ -1,9 +1,12 @@
 .sidebar {
     width: 270px;
-    min-height: 100vh;
-    height: auto;
+    height: 100vh;
+    overflow-y: auto;
     background: #212B5E;
+    position: sticky; 
+    top: 0; 
 }
+
 
 .profile-picture-container {
     position: relative;
@@ -71,7 +74,7 @@
 }
 
 .bottom-row {
-    height: 270px;
+    height: 150px;
     margin-right: 10%;
     margin-left: 10%;
     padding: 0;
