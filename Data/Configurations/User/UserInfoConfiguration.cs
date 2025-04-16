@@ -21,6 +21,12 @@
                 .Property(ui => ui.UserNameId)
                 .IsRequired();
 
+            //  ProfilePicture (Required but nullable for now; MaxSize:1MB)
+            UsersInfo
+                .Property(a => a.ProfilePicture)
+                .HasColumnType("VARBINARY")  
+                .HasMaxLength(1048576);
+
             //  Age (Required)
             UsersInfo
                 .Property(ui => ui.Age)

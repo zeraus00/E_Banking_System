@@ -5,6 +5,7 @@
     {
         public int UserInfoId { get; set; }                                 // Primary Key        
         public int UserNameId { get; set; }                                 // Foreign Key to Names
+        public byte[]? ProfilePicture { get; set; }                         // User image
         public int Age { get; set; }                                        // Required
         public string Sex { get; set; } = string.Empty;                     // Required; Max Length : 10
         public int? BirthInfoId { get; set; }                               // Foreign Key to BirthInfo
