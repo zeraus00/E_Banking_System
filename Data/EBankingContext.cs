@@ -69,6 +69,7 @@
 
         //  Finance
         public DbSet<Account> Accounts { get; set; }
+        public DbSet<AccountType> AccountTypes { get; set; }
         public DbSet<Loan> Loans { get; set; }
         public DbSet<LoanTransaction> LoanTransactions { get; set; }
         public DbSet<LoanType> LoanTypes { get; set; }
@@ -84,6 +85,8 @@
         //  User
         public DbSet<Address> Addresses { get; set; }
         public DbSet<BirthInfo> BirthInfos { get; set; }
+        public DbSet<Name> Names { get; set; }
+        public DbSet<Religion> Religions { get; set; }
         public DbSet<UserInfo> UsersInfo { get; set; }
 
     }
