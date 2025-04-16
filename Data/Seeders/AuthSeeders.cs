@@ -25,7 +25,7 @@ namespace Data.Seeders
                     var role = new RoleBuilder()
                         .WithRoleName(roleName)
                         .Build();
-                    await roleRepository.AddRoleAsync(role);
+                    await roleRepository.AddAsync(role);
                 }
                 await _context.SaveChangesAsync();
             }
@@ -53,7 +53,7 @@ namespace Data.Seeders
                         .WithEmail(email)
                         .WithPassword(password);
                     var userAuth = userAuthBuilder.Build();
-                    await userAuthRepository.AddUserAuthAsync(userAuth);
+                    await userAuthRepository.AddAsync(userAuth);
                 }
 
                 await _context.SaveChangesAsync();

@@ -5,37 +5,11 @@ namespace Data.Repositories.Auth
     /// <summary>
     /// Class for handling CRUD operations in UsersAuth table.
     /// Contains both sync and async versions of each method.
-    /// 
-    /// NOTE: There is no persistent saving here. You MUST call
-    /// DbContext.SaveChanges or DbContext.SaveChangesAsync externally.
     /// </summary>
-    public class UserAuthRepository
+    public class UserAuthRepository : Repository
     {
-        private readonly EBankingContext _context;
 
-        public UserAuthRepository(EBankingContext context)
-        {
-            _context = context;
-        }
-
-        /// <summary>
-        /// Add a new entry to the UserAuths Table
-        /// </summary>
-        /// <param name="userAuth"></param>
-        /// 
-        public void AddUserAuthSync(UserAuth userAuth)
-        {
-            _context.Set<UserAuth>().Add(userAuth);
-        }
-        /// <summary>
-        /// Add a new entry to the UserAuths Table
-        /// </summary>
-        /// <param name="userAuth"></param>
-        /// 
-        public async Task AddUserAuthAsync(UserAuth userAuth)
-        {
-            await _context.Set<UserAuth>().AddAsync(userAuth);
-        }
+        public UserAuthRepository(EBankingContext context) : base(context) { }
 
         /// <summary>
         /// Query entries by primary key in UserAuth Table
