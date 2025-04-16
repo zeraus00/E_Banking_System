@@ -1,7 +1,7 @@
 using E_BankingSystem.Components;
 using Data;
 using Data.Seeders;
-using Service;
+using Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

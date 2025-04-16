@@ -3,15 +3,13 @@ using Data;
 using Data.Repositories.Auth;
 using Data.Enums;
 
-namespace Service
+namespace Services
 {
-    public class AuthenticationService
+    public class AuthenticationService : Service
     {
-
-        private readonly EBankingContext _context;
-        public AuthenticationService(EBankingContext context)
-        {
-            _context = context;
+        private readonly UserAuthRepository _userAuthRepository;
+        public AuthenticationService(EBankingContext context) : base(context) {
+            _userAuthRepository = new UserAuthRepository(_context);
         }
         // create a passwordhasher object here!
 
@@ -30,7 +28,7 @@ namespace Service
                 string trimmedPassword = Password.Trim();
 
                 // check if email exists
-                var user = new UserAuthRepository(_context).GetUserAuthByUserNameOrEmailSync(trimmedEmail);
+                var user = _userAuthRepository.GetUserAuthByUserNameOrEmailSync(trimmedEmail);
                 
                 // validate password
                 if (!trimmedPassword.Equals(user.Password))
@@ -60,7 +58,7 @@ namespace Service
                 string trimmedPassword = Password.Trim();
 
                 // check if email exists
-                var user = await new UserAuthRepository(_context).GetUserAuthByUserNameOrEmailAsync(trimmedEmail);
+                var user = await _userAuthRepository.GetUserAuthByUserNameOrEmailAsync(trimmedEmail);
 
                 // validate password
                 if (!trimmedPassword.Equals(user.Password))
@@ -85,7 +83,7 @@ namespace Service
         /// <returns></returns>
         public int GetUserRoleIdSync(string Email)
         {
-            return new UserAuthRepository(_context).GetUserRoleSync(Email).RoleId;
+            return _userAuthRepository.GetUserRoleSync(Email).RoleId;
         }
 
         /// <summary>
@@ -95,7 +93,7 @@ namespace Service
         /// <returns></returns>
         public async Task<int> GetUserRoleIdAsync(string Email)
         {
-            var Role = await new UserAuthRepository(_context).GetUserRoleAsync(Email);
+            var Role = await _userAuthRepository.GetUserRoleAsync(Email);
             return Role.RoleId;
         }
 
