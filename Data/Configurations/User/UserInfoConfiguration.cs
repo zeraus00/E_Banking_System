@@ -61,14 +61,6 @@
                 .IsRequired()
                 .HasMaxLength(20);
 
-            //  Religion (Required; MaxLength=50)
-            UsersInfo
-                .Property(ui => ui.Religion)
-                .IsRequired()
-                .HasMaxLength(50);
-
-
-
             /*  
              *  Configure Relationships
              *  Names: UserName (one to one)
@@ -76,6 +68,7 @@
              *  Names: MotherName (many to one)
              *  BirthsInfo (many-to-one)
              *  Addresses (many-to-one)
+             *  Religions (many-to-one)
              *  CustomersAuth (one-to-many)
              */
 
@@ -103,6 +96,11 @@
                 .HasOne(ui => ui.Address)
                 .WithMany(a => a.UsersInfo)
                 .HasForeignKey(ui => ui.AddressId)
+                .OnDelete(DeleteBehavior.SetNull);
+            UsersInfo
+                .HasOne(ui => ui.Religion)
+                .WithMany(r => r.UsersInfo)
+                .HasForeignKey(ui => ui.ReligionId)
                 .OnDelete(DeleteBehavior.SetNull);
         }
     }

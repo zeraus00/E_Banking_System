@@ -14,7 +14,7 @@
         public string ContactNumber { get; set; } = string.Empty;           // Required; Field Length : 11
         public string TaxIdentificationNumber { get; set; } = string.Empty; // Required; Max Length : 12
         public string CivilStatus { get; set; } = string.Empty;             // Required; Max Length : 20
-        public string Religion { get; set; } = string.Empty;                // Required; Max Length : 50
+        public int? ReligionId { get; set; }                                // Foreign Key to Religions
 
 
         /*  Navigation Properties   */
@@ -23,6 +23,7 @@
         public Name UserName { get; set; } = null!;
         public Name FatherName { get; set; } = null!;
         public Name MotherName { get; set; } = null!;
+        public Religion Religion { get; set; } = null!;
         public ICollection<UserAuth> UsersAuth { get; set; } = new List<UserAuth>(); 
     }
 }
