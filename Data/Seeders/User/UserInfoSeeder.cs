@@ -12,41 +12,60 @@ namespace Data.Seeders.User
             _userInfoRepository = new UserInfoRepository(_context);
         }
 
+        Name name;
+        Name fatherName;
+        Name motherName;
+        UserInfo userInfo;
         public async Task SeedUserInfos()
         {
-            Name name;
-            UserInfo userInfo;
             if (!await _context.Names.AnyAsync())
             {
                 name = new NameBuilder()
                     .WithFirstName("Bogart")
                     .WithMiddleName("Mon")
                     .WithLastName("Dela Mon")
+                    .WithSuffix("Jr.")
                     .Build();
+
+                fatherName = new NameBuilder()
+                    .WithFirstName("Bogart")
+                    .WithMiddleName("Mon")
+                    .WithLastName("Dela Mon")
+                    .WithSuffix("Sr.")
+                    .Build();
+
+                motherName = new NameBuilder()
+                    .WithFirstName("Marie")
+                    .WithMiddleName("Tess")
+                    .WithLastName("Mon")
+                    .Build();
+
                 await _nameRepository.AddAsync(name);
+                await _nameRepository.AddAsync(fatherName);
+                await _nameRepository.AddAsync(motherName);
 
-                if (!await _context.UsersInfo.AnyAsync())
-                {
-                    userInfo = new UserInfoBuilder()
-                        .WithUserNameId(name.NameId)
-                        .WithAge(25)
-                        .WithSex("Unicorn")
-                        .WithFatherNameId(name.NameId)
-                        .WithMotherNameId(name.NameId)
-                        .WithContactNumber("09669696969")
-                        .WithTaxIdentificationNumber("696969696969")
-                        .WithCivilStatus("Oppressed")
-                        .Build();
-
-                    await _userInfoRepository.AddAsync(userInfo);
-
-                    await _nameRepository.SaveChangesAsync();
-                    await _userInfoRepository.SaveChangesAsync();
-                }
-
+                await _nameRepository.SaveChangesAsync();
             }
 
-            
+            if (!await _context.UsersInfo.AnyAsync())
+            {
+                userInfo = new UserInfoBuilder()
+                    .WithUserNameId(name.NameId)
+                    .WithAge(25)
+                    .WithSex("Unicorn")
+                    .WithFatherNameId(fatherName.NameId)
+                    .WithMotherNameId(motherName.NameId)
+                    .WithContactNumber("09669696969")
+                    .WithTaxIdentificationNumber("696969696969")
+                    .WithCivilStatus("Oppressed")
+                    .Build();
+
+                await _userInfoRepository.AddAsync(userInfo);
+
+                await _userInfoRepository.SaveChangesAsync();
+            }
+
+
         }
     }
 }
