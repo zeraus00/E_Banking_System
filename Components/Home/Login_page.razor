@@ -28,14 +28,27 @@
 			{
 				<div class="alert alert-danger alert-dismissible fade show" role="alert">
 					<strong>@error</strong>
-					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 				</div>
 			} 
 
 			<!-- Authentication -->
 			<div class="loginform px-4">
 				<input class="form-control form-control-custom form-control-lg mb-3" @bind="email" placeholder="Email">
-				<input class="form-control form-control-custom form-control-lg" type="password" @bind="password" placeholder="Password">
+				
+				<div class="position-relative">
+					<input type="@passwordInputType"
+						   @bind="password"
+						   class="form-control form-control-custom form-control-lg pe-5"
+						   placeholder="Password" />
+
+					<button type="button"
+							class="btn position-absolute end-0 top-50 translate-middle-y me-3 p-0 border-0 bg-transparent"
+							style="z-index: 10;"
+							@onclick="TogglePasswordVisibility">
+						<i class="bi @eyeIconClass text-muted"></i>
+					</button>
+				</div>
+
 
 				<div class="col d-flex align-items-center mt-1">
 
@@ -49,7 +62,7 @@
 
 					<!-- Forgot Password Link -->
 					<NavLink class="nav-link ms-auto" href="/Forgot_password">
-						<span class="bi bi-info-circle-fill"></span> Forget Password?
+						Forget Password?
 					</NavLink>
 
 				</div>
@@ -79,7 +92,22 @@
 	public string password = "";
 	public string error = "";
 
+	private string passwordInputType = "password";
+	private string eyeIconClass = "bi-eye-slash";
 
+	private void TogglePasswordVisibility()
+	{
+		if (passwordInputType == "password")
+		{
+			passwordInputType = "text"; // See password
+			eyeIconClass = "bi-eye"; // Change icon to open eye
+		}
+		else
+		{
+			passwordInputType = "password"; // Hide password
+			eyeIconClass = "bi-eye-slash"; // Change icon to closed eye
+		}
+	}
 
 	private async Task LoginAsync()
 	{
