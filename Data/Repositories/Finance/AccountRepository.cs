@@ -82,7 +82,7 @@ namespace Data.Repositories.Finance
     /// </summary>
     public class AccountBuilder
     {
-        private string _accountType = string.Empty;
+        private int _accountTypeId;
         private string _accountNumber = string.Empty;
         private string _accountName = string.Empty;
         private string _accountStatus = string.Empty;
@@ -91,9 +91,9 @@ namespace Data.Repositories.Finance
         private DateTime _dateOpened = DateTime.UtcNow;
         private DateTime? _dateClosed;
 
-        public AccountBuilder WithAccountType(string accountType)
+        public AccountBuilder WithAccountType(int accountTypeId)
         {
-            _accountType = accountType.Trim();
+            _accountTypeId = accountTypeId;
             return this;
         }
 
@@ -146,7 +146,7 @@ namespace Data.Repositories.Finance
         {
             return new Account
             {
-                AccountType = _accountType,
+                AccountTypeId = _accountTypeId,
                 AccountNumber = _accountNumber,
                 AccountName = _accountName,
                 AccountStatus = _accountStatus,

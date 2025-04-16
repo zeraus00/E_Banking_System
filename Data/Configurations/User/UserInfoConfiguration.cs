@@ -24,8 +24,8 @@
             //  ProfilePicture (Required but nullable for now; MaxSize:1MB)
             UsersInfo
                 .Property(a => a.ProfilePicture)
-                .HasColumnType("VARBINARY")  
-                .HasMaxLength(1048576);
+                .HasColumnType("VARBINARY(MAX)")  
+                .HasMaxLength(1024 * 1024);
 
             //  Age (Required)
             UsersInfo
@@ -45,7 +45,7 @@
 
             //  MotherNameId (Required)
             UsersInfo
-                .Property(ui => ui.MotherName)
+                .Property(ui => ui.MotherNameId)
                 .IsRequired();
 
             //  ContactNumber (Required; Field Length=11)

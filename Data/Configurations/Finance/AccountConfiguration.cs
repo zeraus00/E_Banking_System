@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-
-namespace Data.Configurations.Finance
+﻿namespace Data.Configurations.Finance
 {
     public class AccountConfiguration : IEntityTypeConfiguration<Account>
     {
@@ -20,7 +18,7 @@ namespace Data.Configurations.Finance
 
             //  AccountType (Required)
             Accounts
-                .Property(a => a.AccountType)
+                .Property(a => a.AccountTypeId)
                 .IsRequired();
 
             //  AccountNumber (Required; MaxLength=12; FixedLength)
@@ -63,7 +61,7 @@ namespace Data.Configurations.Finance
             /*
              *  Relationships
              *  Accounts (self-referencing many-to-one)
-             *  CustomersAuth (one-to-many)
+             *  UersAuth (one-to-many)
              *  Transactions (one-to-many)
              *  Loans (one-to-many)
              *  LoanTransactions (one-to-many)
@@ -79,7 +77,7 @@ namespace Data.Configurations.Finance
                 .HasOne(a => a.LinkedBeneficiaryAccount)
                 .WithMany(b => b.LinkedSourceAccounts)
                 .HasForeignKey(a => a.LinkedBeneficiaryId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

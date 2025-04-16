@@ -8,6 +8,6 @@
         public string AccountTypeName { get; set; } = string.Empty;     //  Required; MaxLength = 20
 
         /*  Navigation Properties   */
-        public ICollection<Account> Accounts = new List<Account>();
+        public ICollection<Account> Accounts { get; set; } = new List<Account>();
     }
 }
