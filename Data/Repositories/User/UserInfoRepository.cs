@@ -43,43 +43,24 @@
     /// </summary>
     public class UserInfoBuilder
     {
-        private string _firstName = string.Empty;
-        private string? _middleName;
-        private string _lastName = string.Empty;
-        private string? _suffix;
+        private int _userNameId;
         private int _age;
         private string _sex = string.Empty;
         private int? _birthInfoId;
         private int? _addressId;
+        private int _fatherNameId;
+        private int _motherNameId;
         private string _contactNumber = string.Empty;
         private string _taxIdentificationNumber = string.Empty;
         private string _civilStatus = string.Empty;
         private string _religion = string.Empty;
 
-        public UserInfoBuilder WithFirstName(string firstName)
+        
+        public UserInfoBuilder WithUserNameId(int userNameId)
         {
-            _firstName = firstName;
+            _userNameId = userNameId;
             return this;
         }
-
-        public UserInfoBuilder WithMiddleName(string? middleName)
-        {
-            _middleName = middleName;
-            return this;
-        }
-
-        public UserInfoBuilder WithLastName(string lastName)
-        {
-            _lastName = lastName;
-            return this;
-        }
-
-        public UserInfoBuilder WithSuffix(string? suffix)
-        {
-            _suffix = suffix;
-            return this;
-        }
-
         public UserInfoBuilder WithAge(int age)
         {
             _age = age;
@@ -104,6 +85,17 @@
             return this;
         }
 
+        public UserInfoBuilder WithFatherNameId(int fatherNameId)
+        {
+            _fatherNameId = fatherNameId;
+            return this;
+        }
+
+        public UserInfoBuilder WithMotherNameId(int motherNameId)
+        {
+            _motherNameId = motherNameId;
+            return this;
+        }
         public UserInfoBuilder WithContactNumber(string contactNumber)
         {
             _contactNumber = contactNumber;
@@ -136,14 +128,13 @@
         {
             return new UserInfo
             {
-                FirstName = _firstName,
-                MiddleName = _middleName,
-                LastName = _lastName,
-                Suffix = _suffix,
+                UserNameId = _userNameId,
                 Age = _age,
                 Sex = _sex,
                 BirthInfoId = _birthInfoId,
                 AddressId = _addressId,
+                FatherNameId = _fatherNameId,
+                MotherNameId = _motherNameId,
                 ContactNumber = _contactNumber,
                 TaxIdentificationNumber = _taxIdentificationNumber,
                 CivilStatus = _civilStatus,
