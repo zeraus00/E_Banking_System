@@ -27,7 +27,7 @@
         private string _contactNumber = string.Empty;
         private string _taxIdentificationNumber = string.Empty;
         private string _civilStatus = string.Empty;
-        private int _religionId;
+        private int? _religionId;
 
         
         public UserInfoBuilder WithUserNameId(int userNameId)
