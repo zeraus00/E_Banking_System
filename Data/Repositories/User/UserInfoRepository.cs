@@ -44,6 +44,7 @@
     public class UserInfoBuilder
     {
         private int _userNameId;
+        private byte[]? _profilePicture; //nullable for now
         private int _age;
         private string _sex = string.Empty;
         private int? _birthInfoId;
@@ -53,12 +54,18 @@
         private string _contactNumber = string.Empty;
         private string _taxIdentificationNumber = string.Empty;
         private string _civilStatus = string.Empty;
-        private string _religion = string.Empty;
+        private int _religionId;
 
         
         public UserInfoBuilder WithUserNameId(int userNameId)
         {
             _userNameId = userNameId;
+            return this;
+        }
+
+        public UserInfoBuilder WithProfilePicture(string filePath)
+        {
+            // add logic here for profile picture assignment
             return this;
         }
         public UserInfoBuilder WithAge(int age)
@@ -114,9 +121,9 @@
             return this;
         }
 
-        public UserInfoBuilder WithReligion(string religion)
+        public UserInfoBuilder WithReligion(int religionId)
         {
-            _religion = religion;
+            _religionId = religionId;
             return this;
         }
 
@@ -138,7 +145,7 @@
                 ContactNumber = _contactNumber,
                 TaxIdentificationNumber = _taxIdentificationNumber,
                 CivilStatus = _civilStatus,
-                Religion = _religion
+                ReligionId = _religionId
             };
         }
     }
