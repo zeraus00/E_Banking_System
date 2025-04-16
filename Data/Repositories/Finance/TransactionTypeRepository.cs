@@ -1,31 +1,13 @@
 ﻿namespace Data.Repositories.Finance
 {
-    public class TransactionTypeRepository
+    /// <summary>
+    /// CRUD operations handler for TransactionTypes table.
+    /// Methods for adding, updating, deleting and retrieving data from the database
+    /// </summary>
+    /// <param name="context"></param>
+    public class TransactionTypeRepository : Repository
     {
-        private readonly EBankingContext _context;
-
-        public TransactionTypeRepository(EBankingContext context)
-        {
-            _context = context;
-        }
-
-        /// <summary>
-        /// Adds a new entry to the TransactionTypes table.
-        /// </summary>
-        /// <param name="transactionType"></param>
-        public void AddTransactionTypeSync(TransactionType transactionType)
-        {
-            _context.Set<TransactionType>().Add(transactionType);
-        }
-
-        /// <summary>
-        /// Adds a new entry to the TransactionTypes table.
-        /// </summary>
-        /// <param name="transactionType"></param>
-        public async Task AddTransactionTypeAsync(TransactionType transactionType)
-        {
-            await _context.Set<TransactionType>().AddAsync(transactionType);
-        }
+        public TransactionTypeRepository(EBankingContext context) : base(context) { }
     }
     /// <summary>
     /// Builder class for TransactionType

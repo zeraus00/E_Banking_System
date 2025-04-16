@@ -7,38 +7,9 @@ namespace Data.Repositories.Finance
     /// Methods for adding, updating, deleting and retrieving data from the database
     /// </summary>
     /// <param name="context"></param>
-    public class AccountRepository
+    public class AccountRepository : Repository
     {
-        private readonly EBankingContext _context;
-
-        public AccountRepository(EBankingContext context)
-        {
-            _context = context;
-        }
-
-        /// <summary>
-        /// Adds a new entry to the Accounts table.
-        /// </summary>
-        /// <returns></returns>
-        public void AddAccountSync(Account account)
-        {
-            _context.Set<Account>().Add(account);
-        }
-
-        /// <summary>
-        /// Adds a new entry to the Accounts table.
-        /// </summary>
-        /// <returns></returns>
-        public async Task AddAccountAsync(Account account)
-        {
-            await _context.Set<Account>().AddAsync(account);
-        }
-
-        /// <summary>
-        /// Gets an account object by querying with the primary key.
-        /// </summary>
-        /// <param name="accountId"></param>
-        /// <returns></returns>
+        public AccountRepository(EBankingContext context) : base(context) { }
         public Account GetAccountByIdSync(int accountId)
         {
             //
