@@ -18,11 +18,10 @@ namespace Data.Configurations.Finance
                 .Property(a => a.AccountId)
                 .ValueGeneratedOnAdd();
 
-            //  AccountType (Required; MaxLength=20)
+            //  AccountType (Required)
             Accounts
                 .Property(a => a.AccountType)
-                .IsRequired()
-                .HasMaxLength(20);
+                .IsRequired();
 
             //  AccountNumber (Required; MaxLength=12; FixedLength)
             Accounts
@@ -69,6 +68,12 @@ namespace Data.Configurations.Finance
              *  Loans (one-to-many)
              *  LoanTransactions (one-to-many)
              */
+
+            Accounts
+                .HasOne(a => a.AccountType)
+                .WithMany(at => at.Accounts)
+                .HasForeignKey(a => a.AccountTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             Accounts
                 .HasOne(a => a.LinkedBeneficiaryAccount)
