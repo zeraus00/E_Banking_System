@@ -74,33 +74,62 @@
 
 				<!-- Row 3 -->
 				<div class="row g-2 mt-2">
+
+					<!-- Religion -->
 					<div class="col-3">
 						<label class="text-light">Religion</label>
-						<input class="form-control" placeholder="Religion">
+						<select class="form-select" @bind="selectedReligion">
+							@foreach (var option in religionOptions)
+							{
+								<option value="@option">@option</option>
+							}
+						</select>
 					</div>
+
+					<!-- Province -->
 					<div class="col-3">
 						<label class="text-light">Province</label>
-						<input class="form-control" placeholder="Province" required>
+						<select class="form-select" @bind="selectedProvince" required>
+							@foreach (var province in provinceOptions)
+							{
+								<option value="@province">@province</option>
+							}
+						</select>
 					</div>
+
+					<!-- Municipality -->
 					<div class="col-3">
 						<label class="text-light">Municipality</label>
-						<input class="form-control" placeholder="Municipality" required>
+						<select class="form-select" @bind="selectedMunicipality" required>
+							@foreach (var municipality in municipalityOptions)
+							{
+								<option value="@municipality">@municipality</option>
+							}
+						</select>
 					</div>
+
+					<!-- Barangay -->
 					<div class="col-3">
 						<label class="text-light">Barangay</label>
-						<input class="form-control" placeholder="Barangay" required>
+						<select class="form-select" @bind="selectedBarangay" required>
+							@foreach (var barangay in barangayOptions)
+							{
+								<option value="@barangay">@barangay</option>
+							}
+						</select>
 					</div>
+
 				</div>
 
 				<!-- Row 4 -->
 				<div class="row g-2 mt-2">
 					<div class="col-3">
 						<label class="text-light">Street No.</label>
-						<input class="form-control" placeholder="Religion" required>
+						<input class="form-control" placeholder="Street No." required>
 					</div>
 					<div class="col-3">
 						<label class="text-light">House No.</label>
-						<input class="form-control" placeholder="Province" required>
+						<input class="form-control" placeholder="House No." required>
 					</div>
 					<div class="col-3">
 						<label class="text-light">Email</label>
@@ -193,7 +222,7 @@
 
 				<!-- Terms and Conditions Checkbox -->
 				<div class="form-check d-flex justify-content-end mt-3">
-					<input class="form-check-input mx-2" type="checkbox" id="termsAndConditions required">
+					<input class="form-check-input mx-2" type="checkbox" id="termsAndConditions" required>
 					<label class="form-check-label text-light" for="termsAndConditions">
 						I accept the terms and conditions
 					</label>
@@ -209,12 +238,48 @@
 	</main>
 </div>
 
-
 @code {
 	public string firstName = "";
 	public string middleName = "";
 	public string lastName = "";
 	public string error = "";
+
+	private string selectedReligion;
+	private List<string> religionOptions = new List<string>
+	{
+		"Religion 1",
+		"Religion 2",
+		"Religion 3",
+		"Religion 4"
+	};
+
+	private string selectedProvince;
+	private string selectedMunicipality;
+	private string selectedBarangay;
+
+	private List<string> provinceOptions = new List<string>
+	{
+		"Province 1",
+		"Province 2",
+		"Province 3",
+		"Province 4"
+	};
+
+	private List<string> municipalityOptions = new List<string>
+	{
+		"Municipality 1",
+		"Municipality 2",
+		"Municipality 3",
+		"Municipality 4"
+	};
+
+	private List<string> barangayOptions = new List<string>
+	{
+		"Barangay 1",
+		"Barangay 2",
+		"Barangay 3",
+		"Barangay 4"
+	};
 
 	private void LoginAsync()
 	{
@@ -228,3 +293,4 @@
 		NavigationManager.NavigateTo("/Client_home_page");
 	}
 }
+
