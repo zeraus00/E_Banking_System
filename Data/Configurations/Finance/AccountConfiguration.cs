@@ -63,11 +63,18 @@ namespace Data.Configurations.Finance
 
             /*
              *  Relationships
+             *  Accounts (self-referencing many-to-one)
              *  CustomersAuth (one-to-many)
              *  Transactions (one-to-many)
              *  Loans (one-to-many)
              *  LoanTransactions (one-to-many)
              */
+
+            Accounts
+                .HasOne(a => a.LinkedBeneficiaryAccount)
+                .WithMany(b => b.LinkedSourceAccounts)
+                .HasForeignKey(a => a.LinkedBeneficiaryId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }
