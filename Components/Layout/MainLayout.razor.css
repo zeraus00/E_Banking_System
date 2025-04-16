@@ -28,9 +28,10 @@
 
 .body-wrapper {
     display: flex;
+    overflow: hidden;
 }
 
-.main-content{
+.main-content {
     width: 100%;
     height: 100vh;
 }

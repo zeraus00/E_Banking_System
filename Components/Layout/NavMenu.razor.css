@@ -1,8 +1,25 @@
 .sidebar {
     width: 270px;
-    min-height: 100vh;
-    height: auto;
+    height: 100vh;
+    overflow-y: auto;
     background: #212B5E;
+    position: sticky; 
+    top: 0; 
+}
+
+.sidebar::-webkit-scrollbar{
+    width: 6px;
+}
+
+.siddebar::-webkit-scrollbar-track{
+    background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.3); 
+    border-radius: 10px;
+    border: 2px solid transparent; 
+    background-clip: content-box;
 }
 
 .profile-picture-container {
@@ -64,14 +81,14 @@
 }
 
 .middle-row {
-    height: 370px;
+    height: 450px;
     margin-right: 10%;
     margin-left: 10%;
     padding: 0;
 }
 
 .bottom-row {
-    height: 200px;
+    height: 150px;
     margin-right: 10%;
     margin-left: 10%;
     padding: 0;
