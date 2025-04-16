@@ -3,38 +3,11 @@
     /// <summary>
     /// CRUD operations handler for UsersInfo table
     /// Methods for adding, updating, deleting and retrieving data from the database
-    /// 
-    /// NOTE: There is no persistent saving here. You MUST call
-    /// DbContext.SaveChanges or DbContext.SaveChangesAsync externally.
     /// </summary>
     /// <param name="_context"></param>
-    public class UserInfoRepository
+    public class UserInfoRepository : Repository
     {
-        private readonly EBankingContext _context;
-
-        public UserInfoRepository(EBankingContext context)
-        {
-            _context = context;
-        }
-
-        /// <summary>
-        /// Adds a new entry to the UsersInfo table.
-        /// </summary>
-        /// <param name="userInfo"></param>
-        public void AddUserInfoSync(UserInfo userInfo)
-        {
-            _context.Set<UserInfo>().Add(userInfo);
-        }
-
-        /// <summary>
-        /// Adds a new entry to the UsersInfo table.
-        /// </summary>
-        /// <param name="userInfo"></param>
-        /// <returns></returns>
-        public async Task AddUserInfoAsync(UserInfo userInfo)
-        {
-            await _context.Set<UserInfo>().AddAsync(userInfo);
-        }
+        public UserInfoRepository(EBankingContext context) : base(context) { }
 
     }
 

@@ -8,33 +8,10 @@
     /// DbContext.SaveChanges or DbContext.SaveChangesAsync externally.
     /// </summary>
     /// <param name="_context"></param>
-    public class BirthInfoRepository
+    public class BirthInfoRepository : Repository
     {
-        private readonly EBankingContext _context;
+        public BirthInfoRepository(EBankingContext context) : base(context) { }
 
-        public BirthInfoRepository(EBankingContext context)
-        {
-            _context = context;
-        }
-
-        /// <summary>
-        /// Adds a new entry to the BirthsInfo table.
-        /// </summary>
-        /// <param name="birthInfo"></param>
-        public void AddBirthInfoSync(BirthInfo birthInfo)
-        {
-            _context.Set<BirthInfo>().Add(birthInfo);
-        }
-
-        /// <summary>
-        /// Adds a new entry to the BirthsInfo table.
-        /// </summary>
-        /// <param name="birthInfo"></param>
-        /// <returns></returns>
-        public async Task AddBirthInfoAsync(BirthInfo birthInfo)
-        {
-            await _context.Set<BirthInfo>().AddAsync(birthInfo);
-        }
     }
 
     /// <summary>
