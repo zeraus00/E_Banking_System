@@ -7,6 +7,20 @@
     top: 0; 
 }
 
+.sidebar::-webkit-scrollbar{
+    width: 6px;
+}
+
+.siddebar::-webkit-scrollbar-track{
+    background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.3); 
+    border-radius: 10px;
+    border: 2px solid transparent; 
+    background-clip: content-box;
+}
 
 .profile-picture-container {
     position: relative;
