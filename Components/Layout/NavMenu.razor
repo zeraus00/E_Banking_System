@@ -1,5 +1,5 @@
 ﻿@inject IWebHostEnvironment Env
-<body>
+
     <!-- Side NavBar Layout -->
     <nav class="sidebar">
 
@@ -8,7 +8,8 @@
 
                 <!-- Profile Picture Container (Draft) -->
                 <div class="profile-picture_container">
-
+                    <div class="profile-placeholder"></div>
+@* 
                     <label for="fileInput">
                         @if (previewImage != null)
                         {
@@ -25,7 +26,7 @@
                     <div class="edit-overlay">
                         <i class="fas fa-camera"></i>
                     </div>
-                    <InputFile id="fileInput" style="display: none;" OnChange="HandleSelected" accept="image/*" />
+                    <InputFile id="fileInput" style="display: none;" OnChange="HandleSelected" accept="image/*" /> *@
                 </div>
 
             <div class="text-light mt-3">
@@ -50,10 +51,16 @@
                         <NavLink class="nav-link" href="/Deposit_amount">Deposit</NavLink>
                     </div>
                     <div class="nav-item px-3">
-                        <NavLink class="nav-link" href="/Transactions">Transactions</NavLink>
+                        <NavLink class="nav-link lh-sm" href="/Transactions">Recent Transactions</NavLink>
                     </div>
                     <div class="nav-item px-3">
-                        <NavLink class="nav-link" href="/Transfer_amount">Transfer Money</NavLink>
+                        <NavLink class="nav-link lh-sm" href="/Transfer_amount">Transfer Money</NavLink>
+                    </div>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link lh-sm" href="/Apply_loan">Apply for Loan</NavLink>
+                    </div>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link lh-sm" href="/Loan_balance">Check Loan Balance</NavLink>
                     </div>
                 </nav>
             </div>
@@ -75,8 +82,7 @@
         </div>
 
     </nav>
-</body>
-
+@* 
 @code {
     private string? previewImage;
 
@@ -94,3 +100,4 @@
         await imageFile.OpenReadStream().CopyToAsync(fs);
     }
 }
+ *@
