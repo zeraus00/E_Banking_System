@@ -116,6 +116,7 @@ namespace Data.Repositories.Finance
         private string _accountName = string.Empty;
         private string _accountStatus = string.Empty;
         private decimal _balance = 0.0m;
+        private int? _linkedBeneficiaryId;
         private DateTime _dateOpened = DateTime.UtcNow;
         private DateTime? _dateClosed;
 
@@ -149,6 +150,11 @@ namespace Data.Repositories.Finance
             return this;
         }
 
+        public AccountBuilder WithLinkedBeneficiaryId(int linkedBeneficiaryId)
+        {
+            _linkedBeneficiaryId = linkedBeneficiaryId;
+            return this;
+        }
         public AccountBuilder WithDateOpened(DateTime dateOpened)
         {
             _dateOpened = dateOpened;

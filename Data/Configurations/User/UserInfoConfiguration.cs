@@ -16,29 +16,16 @@
                 .Property(ui => ui.UserInfoId)
                 .ValueGeneratedOnAdd();
 
-            //  FirstName (Required; MaxLength=50)
+            //  UserNameId (Required)
             UsersInfo
-                .Property(ui => ui.FirstName)
-                .HasMaxLength(50)
+                .Property(ui => ui.UserNameId)
                 .IsRequired();
 
-            //  MiddleName (Optional; MaxLength=50)
+            //  ProfilePicture (Required but nullable for now; MaxSize:1MB)
             UsersInfo
-                .Property(ui => ui.MiddleName)
-                .HasMaxLength(50)
-                .IsRequired(false);
-
-            //  LastName (Required; MaxLength=50)
-            UsersInfo
-                .Property(ui => ui.LastName)
-                .HasMaxLength(50)
-                .IsRequired();
-
-            //  Suffix (Optional; MaxLength=10)
-            UsersInfo
-                .Property(ui => ui.Suffix)
-                .HasMaxLength(10)
-                .IsRequired(false);
+                .Property(a => a.ProfilePicture)
+                .HasColumnType("VARBINARY")  
+                .HasMaxLength(1048576);
 
             //  Age (Required)
             UsersInfo
@@ -50,6 +37,16 @@
                 .Property(ui => ui.Sex)
                 .IsRequired()
                 .HasMaxLength(10);
+
+            // FatherNameId (Required)
+            UsersInfo
+                .Property(ui => ui.FatherNameId)
+                .IsRequired();
+
+            //  MotherNameId (Required)
+            UsersInfo
+                .Property(ui => ui.MotherName)
+                .IsRequired();
 
             //  ContactNumber (Required; Field Length=11)
             UsersInfo
@@ -70,20 +67,32 @@
                 .IsRequired()
                 .HasMaxLength(20);
 
-            //  Religion (Required; MaxLength=50)
-            UsersInfo
-                .Property(ui => ui.Religion)
-                .IsRequired()
-                .HasMaxLength(50);
-
-
-
             /*  
-             *  Configure Relationships  
-             *  BirthInfo (many-to-one)
-             *  Address (many-to-one)
+             *  Configure Relationships
+             *  Names: UserName (one to one)
+             *  Names: FatherName (many to one)
+             *  Names: MotherName (many to one)
+             *  BirthsInfo (many-to-one)
+             *  Addresses (many-to-one)
+             *  Religions (many-to-one)
              *  CustomersAuth (one-to-many)
              */
+
+            UsersInfo
+                .HasOne(ui => ui.UserName)
+                .WithOne(n => n.UserInUsersInfo)
+                .HasForeignKey<UserInfo>(ui => ui.UserNameId)
+                .OnDelete(DeleteBehavior.Restrict);
+            UsersInfo
+                .HasOne(ui => ui.FatherName)
+                .WithMany(n => n.FatherInUsersInfo)
+                .HasForeignKey(ui => ui.FatherNameId)
+                .OnDelete(DeleteBehavior.Restrict);
+            UsersInfo
+                .HasOne(ui => ui.MotherName)
+                .WithMany(n => n.MotherInUsersInfo)
+                .HasForeignKey(ui => ui.MotherNameId)
+                .OnDelete(DeleteBehavior.Restrict);
             UsersInfo
                 .HasOne(ui => ui.BirthInfo)
                 .WithMany(bi => bi.UsersInfo)
@@ -93,6 +102,11 @@
                 .HasOne(ui => ui.Address)
                 .WithMany(a => a.UsersInfo)
                 .HasForeignKey(ui => ui.AddressId)
+                .OnDelete(DeleteBehavior.SetNull);
+            UsersInfo
+                .HasOne(ui => ui.Religion)
+                .WithMany(r => r.UsersInfo)
+                .HasForeignKey(ui => ui.ReligionId)
                 .OnDelete(DeleteBehavior.SetNull);
         }
     }

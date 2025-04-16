@@ -8,32 +8,9 @@
     /// DbContext.SaveChanges or DbContext.SaveChangesAsync externally.
     /// </summary>
     /// <param name="_context"></param>
-    public class AddressRepository
+    public class AddressRepository : Repository
     {
-        private readonly EBankingContext _context;
-
-        public AddressRepository(EBankingContext context)
-        {
-            _context = context;
-        }
-
-        /// <summary>
-        /// Adds a new entry to the Addresses table.
-        /// </summary>
-        /// <param name="address"></param>
-        public void AddAddressSync(Address address)
-        {
-            _context.Set<Address>().Add(address);
-        }
-
-        /// <summary>
-        /// Adds a new entry to the Addresses table.
-        /// </summary>
-        /// <param name="address"></param>
-        public async Task AddAddressAsync(Address address)
-        {
-            await _context.Set<Address>().AddAsync(address);
-        }
+        public AddressRepository(EBankingContext context) : base (context) { }
     }
 
     /// <summary>

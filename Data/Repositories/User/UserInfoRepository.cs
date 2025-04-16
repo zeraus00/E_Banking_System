@@ -3,38 +3,11 @@
     /// <summary>
     /// CRUD operations handler for UsersInfo table
     /// Methods for adding, updating, deleting and retrieving data from the database
-    /// 
-    /// NOTE: There is no persistent saving here. You MUST call
-    /// DbContext.SaveChanges or DbContext.SaveChangesAsync externally.
     /// </summary>
     /// <param name="_context"></param>
-    public class UserInfoRepository
+    public class UserInfoRepository : Repository
     {
-        private readonly EBankingContext _context;
-
-        public UserInfoRepository(EBankingContext context)
-        {
-            _context = context;
-        }
-
-        /// <summary>
-        /// Adds a new entry to the UsersInfo table.
-        /// </summary>
-        /// <param name="userInfo"></param>
-        public void AddUserInfoSync(UserInfo userInfo)
-        {
-            _context.Set<UserInfo>().Add(userInfo);
-        }
-
-        /// <summary>
-        /// Adds a new entry to the UsersInfo table.
-        /// </summary>
-        /// <param name="userInfo"></param>
-        /// <returns></returns>
-        public async Task AddUserInfoAsync(UserInfo userInfo)
-        {
-            await _context.Set<UserInfo>().AddAsync(userInfo);
-        }
+        public UserInfoRepository(EBankingContext context) : base(context) { }
 
     }
 
@@ -43,43 +16,31 @@
     /// </summary>
     public class UserInfoBuilder
     {
-        private string _firstName = string.Empty;
-        private string? _middleName;
-        private string _lastName = string.Empty;
-        private string? _suffix;
+        private int _userNameId;
+        private byte[]? _profilePicture; //nullable for now
         private int _age;
         private string _sex = string.Empty;
         private int? _birthInfoId;
         private int? _addressId;
+        private int _fatherNameId;
+        private int _motherNameId;
         private string _contactNumber = string.Empty;
         private string _taxIdentificationNumber = string.Empty;
         private string _civilStatus = string.Empty;
-        private string _religion = string.Empty;
+        private int _religionId;
 
-        public UserInfoBuilder WithFirstName(string firstName)
+        
+        public UserInfoBuilder WithUserNameId(int userNameId)
         {
-            _firstName = firstName;
+            _userNameId = userNameId;
             return this;
         }
 
-        public UserInfoBuilder WithMiddleName(string? middleName)
+        public UserInfoBuilder WithProfilePicture(string filePath)
         {
-            _middleName = middleName;
+            // add logic here for profile picture assignment
             return this;
         }
-
-        public UserInfoBuilder WithLastName(string lastName)
-        {
-            _lastName = lastName;
-            return this;
-        }
-
-        public UserInfoBuilder WithSuffix(string? suffix)
-        {
-            _suffix = suffix;
-            return this;
-        }
-
         public UserInfoBuilder WithAge(int age)
         {
             _age = age;
@@ -104,6 +65,17 @@
             return this;
         }
 
+        public UserInfoBuilder WithFatherNameId(int fatherNameId)
+        {
+            _fatherNameId = fatherNameId;
+            return this;
+        }
+
+        public UserInfoBuilder WithMotherNameId(int motherNameId)
+        {
+            _motherNameId = motherNameId;
+            return this;
+        }
         public UserInfoBuilder WithContactNumber(string contactNumber)
         {
             _contactNumber = contactNumber;
@@ -122,9 +94,9 @@
             return this;
         }
 
-        public UserInfoBuilder WithReligion(string religion)
+        public UserInfoBuilder WithReligion(int religionId)
         {
-            _religion = religion;
+            _religionId = religionId;
             return this;
         }
 
@@ -136,18 +108,17 @@
         {
             return new UserInfo
             {
-                FirstName = _firstName,
-                MiddleName = _middleName,
-                LastName = _lastName,
-                Suffix = _suffix,
+                UserNameId = _userNameId,
                 Age = _age,
                 Sex = _sex,
                 BirthInfoId = _birthInfoId,
                 AddressId = _addressId,
+                FatherNameId = _fatherNameId,
+                MotherNameId = _motherNameId,
                 ContactNumber = _contactNumber,
                 TaxIdentificationNumber = _taxIdentificationNumber,
                 CivilStatus = _civilStatus,
-                Religion = _religion
+                ReligionId = _religionId
             };
         }
     }
