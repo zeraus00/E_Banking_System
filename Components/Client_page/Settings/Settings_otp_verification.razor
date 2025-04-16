@@ -1,4 +1,4 @@
-﻿@page "/Settings_otp_verification"
+﻿@page "/Settings_enter_otp"
 @inject NavigationManager NavigationManager
 
 <div class="page">
@@ -41,15 +41,18 @@
 			</NavLink>
 
 			<!-- Resend Pin Navlink -->
-			<NavLink class="nav-link custom-nav-link-2 fw-lighter mx-auto mt-1" href="#">
+			<NavLink class="nav-link custom-nav-link-2 fw-lighter mx-auto mt-1 mb-5" href="#">
 				Resend pin
 			</NavLink>
 
 			<!-- try Another Way Navlink -->
-			<NavLink class="nav-link custom-nav-link-2 fw-lighter mx-auto mb-5" href="#">
+@* 			<NavLink class="nav-link custom-nav-link-2 fw-lighter mx-auto mb-5" href="#">
 				Try another way
-			</NavLink>
+			</NavLink> *@
 
+			<NavLink class="nav-link custom-nav-link margin" href="/Settings_page">
+				← Go Back
+			</NavLink>
 		</div>
 
 	</main>
