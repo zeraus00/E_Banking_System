@@ -18,6 +18,7 @@
 
             /*  Configure Finance Schema
              *  Configure Accounts Table
+             *  Configure AccountTypes Table
              *  Configure Loans Table
              *  Configure LoanTransactions Table
              *  Configure LoanTypes Table
@@ -25,6 +26,7 @@
              *  Configure TransactionTypes Table 
              */
             modelBuilder.ApplyConfiguration(new AccountConfiguration());
+            modelBuilder.ApplyConfiguration(new AccountTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LoanConfiguration());
             modelBuilder.ApplyConfiguration(new LoanTransactionConfiguration());
             modelBuilder.ApplyConfiguration(new LoanTypeConfiguration());
@@ -45,10 +47,14 @@
             /*  Configure User Schema
              *  Configure Address Table
              *  Configure BirthsInfo Table
+             *  Configure Names Table
+             *  Configure Religions Table
              *  Configure UsersInfo Table
              */
             modelBuilder.ApplyConfiguration(new AddressConfiguration());
             modelBuilder.ApplyConfiguration(new BirthInfoConfiguration());
+            modelBuilder.ApplyConfiguration(new NameConfiguration());
+            modelBuilder.ApplyConfiguration(new ReligionConfiguration());
             modelBuilder.ApplyConfiguration(new UserInfoConfiguration());
 
 
