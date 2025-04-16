@@ -1,6 +1,6 @@
 ﻿namespace Data.Enums
 {
-    public enum AccountType
+    public enum AccountTypes
     {
         CheckingAccount = 1,
         SavingsAccount = 2,

@@ -104,7 +104,7 @@ namespace Services
         /// <returns></returns>
         public bool IsAdmin(int roleId)
         {
-            return roleId == (int) RoleType.Administrator;
+            return roleId == (int) RoleTypes.Administrator;
         }
 
         /// <summary>
@@ -114,7 +114,7 @@ namespace Services
         /// <returns></returns>
         public bool IsUser(int roleId)
         {
-            return roleId == (int) RoleType.User;
+            return roleId == (int) RoleTypes.User;
         }
 
         /// <summary>
@@ -124,7 +124,7 @@ namespace Services
         /// <returns></returns>
         public bool IsEmployee(int roleId)
         {
-            return roleId == (int) RoleType.Employee;
+            return roleId == (int) RoleTypes.Employee;
         }
     }
 }
