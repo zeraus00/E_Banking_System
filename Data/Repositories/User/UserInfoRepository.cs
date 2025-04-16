@@ -49,7 +49,7 @@
 
         public UserInfoBuilder WithSex(string sex)
         {
-            _sex = sex;
+            _sex = sex.Trim();
             return this;
         }
 
@@ -78,19 +78,19 @@
         }
         public UserInfoBuilder WithContactNumber(string contactNumber)
         {
-            _contactNumber = contactNumber;
+            _contactNumber = contactNumber.Trim();
             return this;
         }
 
         public UserInfoBuilder WithTaxIdentificationNumber(string taxIdentificationNumber)
         {
-            _taxIdentificationNumber = taxIdentificationNumber;
+            _taxIdentificationNumber = taxIdentificationNumber.Trim();
             return this;
         }
 
         public UserInfoBuilder WithCivilStatus(string civilStatus)
         {
-            _civilStatus = civilStatus;
+            _civilStatus = civilStatus.Trim();
             return this;
         }
 
