@@ -2,7 +2,7 @@
 
 namespace Data.Seeders
 {
-    public class AuthSeeders
+    public class AuthSeeder
     {
         // Seed your database with initial data here
         // For example, you can add some default users, roles, etc.
@@ -11,7 +11,7 @@ namespace Data.Seeders
 
         private readonly EBankingContext _context;
 
-        public AuthSeeders(EBankingContext context) {
+        public AuthSeeder(EBankingContext context) {
             _context = context;
         }
         public async Task SeedRoles()
@@ -38,20 +38,32 @@ namespace Data.Seeders
                 var userAuthRepository = new UserAuthRepository(_context);
                 var userAuthBuilder = new UserAuthBuilder();
 
-                var users = new List<(int roleId, string userName, string email, string password)>
+                var users = new List<(int roleId, int? accountId, int? userInfoId, string userName, string email, string password)>
                 {
-                    (1, "admin", "admin@gmail.com", "admin123"),
-                    (2, "user", "user@gmail.com", "user123"),
-                    (3, "employee", "employee@gmail.com", "employee123")
+                    (1, null, null, "admin", "admin@gmail.com", "admin123"),
+                    (2, 1, null, "user", "user@gmail.com", "user123"),
+                    (3, null, null, "employee", "employee@gmail.com", "employee123")
                 };
 
-                foreach (var (roleId, userName, email, password) in users)
+                foreach (var (roleId, accountId, userInfoId, userName, email, password) in users)
                 {
                     userAuthBuilder
                         .WithRoleId(roleId)
                         .WithUserName(userName)
                         .WithEmail(email)
                         .WithPassword(password);
+
+                    if (accountId.HasValue)
+                    {
+                        userAuthBuilder
+                            .WithAccountId(accountId.Value);
+                    }
+                    if (userInfoId.HasValue)
+                    {
+                        userAuthBuilder
+                            .WithUserInfoId(userInfoId.Value);
+                    }
+
                     var userAuth = userAuthBuilder.Build();
                     await userAuthRepository.AddAsync(userAuth);
                 }

@@ -1,6 +1,8 @@
 using E_BankingSystem.Components;
 using Data;
 using Data.Seeders;
+using Data.Seeders.User;
+using Data.Seeders.Finance;
 using Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,6 +24,7 @@ using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<EBankingContext>();
 
+    //dbContext.Database.EnsureDeleted();
     dbContext.Database.EnsureCreated();
     // Apply migrations (this will create or update the database schema)
     // dbContext.Database.Migrate();
@@ -53,8 +56,19 @@ static async Task SeedData(EBankingContext context)
 {
 
 
-    AuthSeeders authSeeders = new AuthSeeders(context);
+    AuthSeeder authSeeders = new AuthSeeder(context);
+    AccountSeeder accountSeeders = new AccountSeeder(context);
+    AccountTypeSeeder accountTypeSeeders = new AccountTypeSeeder(context);
+    NameSeeder nameSeeders = new NameSeeder(context);
+    UserInfoSeeder userInfoSeeders = new UserInfoSeeder(context);
 
+    
+    // Seed AccountTypes
+    await accountTypeSeeders.SeedAccountTypes();
+    // Seed Accounts
+    await accountSeeders.SeedAccounts();
+    // Seed Names and UsersInfo
+    await userInfoSeeders.SeedUserInfos();
     // Seed roles
     await authSeeders.SeedRoles();
     // Seed users
