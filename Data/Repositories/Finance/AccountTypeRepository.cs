@@ -24,7 +24,7 @@
 
         public AccountTypeBuilder WithAccountTypeName(string accountTypeName)
         {
-            _accountTypeName = accountTypeName;
+            _accountTypeName = accountTypeName.Trim();
             return this;
         }
 
