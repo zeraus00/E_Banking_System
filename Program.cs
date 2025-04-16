@@ -18,7 +18,7 @@ builder.Services.AddRazorComponents()
 var app = builder.Build();
 
 // Apply any pending migrations and seed the database
-/*using (var scope = app.Services.CreateScope())
+using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<EBankingContext>();
 
@@ -28,7 +28,7 @@ var app = builder.Build();
 
     // Seed data (this ensures that only new data is added)
     await SeedData(dbContext);
-}*/
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
