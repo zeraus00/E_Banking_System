@@ -189,6 +189,14 @@ namespace Data.Repositories.Auth
             }
             return usersAuth;
         }
+        /// <summary>
+        /// Builds an IQueryable for querying the UsersAuth table that includes all related entities.
+        /// </summary>
+        /// <returns>An IQueryable of UserAuth with all includes.</returns>
+        public IQueryable<UserAuth> QueryIncludeAll()
+        {
+            return this.ComposeQuery(includeRole: true, includeAccount: true, includeUserInfo: true);
+        }
 
         /// <summary>
         /// Builds an IQueryable for querying the UsersAuth table with optional related entities.
@@ -197,7 +205,7 @@ namespace Data.Repositories.Auth
         /// <param name="includeAccount">Whether to include the related Account entity.</param>
         /// <param name="includeUserInfo">Whether to include the related UserInfo entity.</param>
         /// <returns>An IQueryable of UserAuth with optional includes.</returns>
-        public IQueryable<UserAuth> ComposeUsersAuthQuery(
+        public IQueryable<UserAuth> ComposeQuery(
                 bool includeRole = false,
                 bool includeAccount = false,
                 bool includeUserInfo = false
