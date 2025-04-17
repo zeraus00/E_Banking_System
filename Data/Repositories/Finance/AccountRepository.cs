@@ -1,4 +1,6 @@
 ﻿using Exceptions;
+using Microsoft.Identity.Client;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Data.Repositories.Finance
 {
@@ -10,70 +12,132 @@ namespace Data.Repositories.Finance
     public class AccountRepository : Repository
     {
         public AccountRepository(EBankingContext context) : base(context) { }
-        public Account GetAccountByIdSync(int accountId)
+        /// <summary>
+        /// Retrieves an Account entry by its primary key.
+        /// Optionally accepts a pre-composed IQueryable with desired includes.
+        /// </summary>
+        /// <param name="accountId">The primary key of the Account entity.</param>
+        /// <param name="query">
+        /// An optional IQueryable with includes already applied.
+        /// If null, a basic lookup using DbContext.Find is performed.
+        /// </param>
+        /// <returns>The Account entity if found or null if not.</returns>
+        public Account? GetAccountByIdSync(int accountId, IQueryable<Account>? query = null)
         {
-            //
-            var account = _context.Set<Account>().Find(accountId);
-            if (account == null)
+            Account? account;
+            if (query != null)
             {
-                throw new AccountNotFoundException(accountId);
+                account = query.FirstOrDefault(a => a.AccountId == accountId);
+            } else
+            {
+                account = _context
+                    .Accounts
+                    .Find(accountId);
             }
             return account;
         }
 
         /// <summary>
-        /// Gets an account object by querying with the primary key.
+        /// Retrieves an Account entry by its primary key asynchronously.
+        /// Optionally accepts a pre-composed IQueryable with desired includes.
         /// </summary>
-        /// <param name="accountId"></param>
-        /// <returns></returns>
-        public async Task<Account> GetAccountByIdAsync(int accountId)
+        /// <param name="accountId">The primary key of the Account entity.</param>
+        /// <param name="query">
+        /// An optional IQueryable with includes already applied.
+        /// If null, a basic lookup using DbContext.Find is performed.
+        /// </param>
+        /// <returns>The Account entity if found or null if not.</returns>
+        public async Task<Account?> GetAccountByIdAsync(int accountId, IQueryable<Account>? query = null)
         {
-            var account = await _context.Set<Account>().FindAsync(accountId);
-            if (account == null)
+            Account? account;
+            if (query != null)
             {
-                throw new AccountNotFoundException(accountId);
+                account = await query.FirstOrDefaultAsync(a => a.AccountId == accountId);
+            }
+            else
+            {
+                account = await _context
+                    .Accounts
+                    .FindAsync(accountId);
             }
             return account;
         }
 
         /// <summary>
-        /// Gets an account object by querying with the account number.
+        /// Retrieves an Account entry by its account number.
+        /// Optionally accepts a pre-composed IQueryable with desired includes.
         /// </summary>
-        /// <param name="accountNumber"></param>
-        /// <returns></returns>
-        public Account GetAccountByAccountNumberSync(string accountNumber)
+        /// <param name="accountNumber">The account number of the Account entity.</param>
+        /// <param name="query">
+        /// An optional IQueryable with includes already applied.
+        /// </param>
+        /// <returns>The Account entity if found or null if not.</returns>
+        public Account? GetAccountByAccountNumberSync(string accountNumber, IQueryable<Account>? query = null)
         {
             var trimmedAccountNumber = accountNumber.Trim();
-            var account = _context
-                .Set<Account>()
-                .FirstOrDefault(
-                    acc => acc.AccountNumber == trimmedAccountNumber
-                );
-            if (account == null)
+            Account? account;
+            if (query != null)
             {
-                throw new AccountNotFoundException(accountNumber);
+                account = query.FirstOrDefault(a => a.AccountNumber == accountNumber);
+            }
+            else
+            {
+                account = _context
+                    .Accounts
+                    .FirstOrDefault(a => a.AccountNumber == accountNumber);
             }
             return account;
         }
 
         /// <summary>
-        /// Gets an account object by querying with the account number.
+        /// Retrieves an Account entry asynchronously by its account number.
+        /// Optionally accepts a pre-composed IQueryable with desired includes.
         /// </summary>
-        /// <param name="accountNumber"></param>
-        /// <returns></returns>
-        public async Task<Account> GetAccountByAccountNumberAsync(string accountNumber)
+        /// <param name="accountNumber">The account number of the Account entity.</param>
+        /// <param name="query">
+        /// An optional IQueryable with includes already applied.
+        /// </param>
+        /// <returns>The Account entity if found or null if not.</returns>
+        public async Task<Account?> GetAccountByAccountNumberAsync(string accountNumber, IQueryable<Account>? query = null)
         {
             var trimmedAccountNumber = accountNumber.Trim();
-            var account = await _context
-                .Set<Account>()
-                .FirstOrDefaultAsync(
-                    acc => acc.AccountNumber == trimmedAccountNumber
-                );
-            if (account == null)
+            Account? account;
+            if (query != null)
             {
-                throw new AccountNotFoundException(accountNumber);
+                account = await query.FirstOrDefaultAsync(a => a.AccountNumber == accountNumber);
+            }
+            else
+            {
+                account = await _context
+                    .Accounts
+                    .FirstOrDefaultAsync(a => a.AccountNumber == accountNumber);
             }
             return account;
+        }
+
+        public IQueryable<Account> ComposeAccountQuery(
+            bool includeAccountType = false,
+            bool includeLinkedBeneficiaryAccount = false,
+            bool includeLinkedSourceAccounts = false,
+            bool includeUsersAuth = false,
+            bool includeTransactions = false,
+            bool includeLoans = false,
+            bool includeLoanTransactions = false
+            )
+        {
+            var query = _context
+                .Accounts
+                .AsQueryable();
+
+            if (includeAccountType) { query = query.Include(a => a.AccountType); }
+            if (includeLinkedBeneficiaryAccount) { query = query.Include(a => a.LinkedBeneficiaryAccount); }
+            if (includeLinkedSourceAccounts) { query = query.Include(a => a.LinkedSourceAccounts); }
+            if (includeUsersAuth) { query = query.Include(a => a.UsersAuth); }
+            if (includeTransactions) { query = query.Include(a => a.Transactions); }
+            if (includeLoans) { query = query.Include(a => a.Loans); }
+            if (includeLoanTransactions) { query = query.Include(a => a.LoanTransactions); }
+
+            return query;
         }
     }
 

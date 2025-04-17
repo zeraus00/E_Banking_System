@@ -62,6 +62,22 @@ namespace Data.Repositories.User
             }
             return userInfo;
         }
+
+        /// <summary>
+        /// Builds an IQueryable for querying the UsersInfo table that includes all related entities.
+        /// </summary>
+        /// <returns>An IQueryable of UserInfo with all includes.</returns>
+        public IQueryable<UserInfo> QueryIncludeAll()
+        {
+            return this.ComposeQuery(
+                includeName: true,
+                includeBirthInfo: true,
+                includeFatherName: true,
+                includeMotherName: true,
+                includeReligion: true
+                );
+        }
+
         /// <summary>
         /// Builds an IQueryable for querying the UsersAuth table with optional related entities.
         /// </summary>
@@ -71,7 +87,7 @@ namespace Data.Repositories.User
         /// <param name="includeMotherName">Whether to include the related MotherName entity.</param>
         /// <param name="includeReligion">Whether to include the related Religion entity.</param>
         /// <returns>An IQueryable of UserInfo with optional includes.</returns>
-        public IQueryable<UserInfo> ComposeUserInfoQuery(
+        public IQueryable<UserInfo> ComposeQuery(
             bool includeName = false,
             bool includeBirthInfo = false,
             bool includeFatherName = false,
