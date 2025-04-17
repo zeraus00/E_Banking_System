@@ -5,10 +5,10 @@ using Data.Enums;
 
 namespace Services
 {
-    public class AuthenticationService : Service
+    public class LogInService : Service
     {
         private UserAuthRepository _userAuthRepository;
-        public AuthenticationService(EBankingContext context) : base(context) {
+        public LogInService(EBankingContext context) : base(context) {
             _userAuthRepository = new UserAuthRepository(_context);
         }
         // create a passwordhasher object here!

@@ -22,7 +22,8 @@ builder.Services.AddRazorComponents()
 
 
 // Authentication Services
-builder.Services.AddScoped<AuthenticationService>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<LogInService>();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {

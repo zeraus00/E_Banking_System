@@ -1,12 +1,16 @@
 ﻿@using Data;
-@using Services;
 @using Layout
+@using Services;
+@using System.Security.Claims;
+@using Microsoft.AspNetCore.Authentication;
+@using Microsoft.AspNetCore.Authentication.Cookies;
 
 @page "/Login_page"
 @rendermode InteractiveServer
 @inject NavigationManager NavigationManager
-@inject EBankingContext context
-@inject AuthenticationService authenticationService
+@inject EBankingContext _context
+@inject IHttpContextAccessor HttpContextAccessor
+@inject LogInService _logInService
 @layout PlainLayout
 
 <div class="page">
@@ -34,17 +38,17 @@
 			<!-- Authentication -->
 			<div class="loginform px-4">
 				<input class="form-control form-control-custom form-control-lg mb-3" @bind="email" placeholder="Email">
-				
+
 				<div class="position-relative">
 					<input type="@passwordInputType"
-						   @bind="password"
-						   class="form-control form-control-custom form-control-lg pe-5"
-						   placeholder="Password" />
+					@bind="password"
+					class="form-control form-control-custom form-control-lg pe-5"
+					placeholder="Password" />
 
 					<button type="button"
-							class="btn position-absolute end-0 top-50 translate-middle-y me-3 p-0 border-0 bg-transparent"
-							style="z-index: 10;"
-							@onclick="TogglePasswordVisibility">
+					class="btn position-absolute end-0 top-50 translate-middle-y me-3 p-0 border-0 bg-transparent"
+					style="z-index: 10;"
+					@onclick="TogglePasswordVisibility">
 						<i class="bi @eyeIconClass text-muted"></i>
 					</button>
 				</div>
@@ -88,6 +92,7 @@
 </div>
 
 @code {
+
 	public string email = "";
 	public string password = "";
 	public string error = "";
@@ -113,17 +118,25 @@
 	{
 		try {
 			// Perform login logic here, such as checking credentials
-			bool isLoginSuccessful = await authenticationService.IsAuthenticatedAsync(email, password);
-
-			if (!isLoginSuccessful) {
+			UserAuth? userAuth = await _logInService.TryAuthenticateUserAsync(email, password);
+			if (userAuth == null) {
 				error = "Invalid email or password. Please try again.";
 				return;
 				// Handle failed login attempt (e.g., show error message)
 			}
+			string name = userAuth.Account == null ? "DefaultName" : userAuth.Account.AccountName;
+			string role = userAuth.Role.RoleName;
+			var claims = new List<Claim>
+			{
+				new Claim(ClaimTypes.Name, name),
+				new Claim(ClaimTypes.Role, role)
+			};
+			var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+			var principal = new ClaimsPrincipal(identity);
+			//await HttpContextAccessor.HttpContext!.SignInAsync(
+			//	principal);
 
-			//int roleId = await authenticationService.GetUserRoleIdAsync(email);
-
-			//NavigateBasedOnRole(roleId);
+			NavigateBasedOnRole(userAuth.Role.RoleId);
 
 
 		} catch (Exception ex) {
@@ -140,11 +153,11 @@
 	/// <param name="roleId"></param>
 	private void NavigateBasedOnRole(int roleId) 
 	{
-		if (authenticationService.IsAdmin(roleId)) {
+		if (_logInService.IsAdmin(roleId)) {
 			// go to admin home
-		} else if (authenticationService.IsUser(roleId)) {
+		} else if (_logInService.IsUser(roleId)) {
 			NavigationManager.NavigateTo("/Client_home");
-		} else if (authenticationService.IsEmployee(roleId)) {
+		} else if (_logInService.IsEmployee(roleId)) {
 			// go to employee home
 		} else {
 			throw new Exception("User Role not Found.");
