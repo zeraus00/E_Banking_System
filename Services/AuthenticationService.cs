@@ -7,7 +7,7 @@ namespace Services
 {
     public class AuthenticationService : Service
     {
-        private readonly UserAuthRepository _userAuthRepository;
+        private UserAuthRepository _userAuthRepository;
         public AuthenticationService(EBankingContext context) : base(context) {
             _userAuthRepository = new UserAuthRepository(_context);
         }
@@ -17,19 +17,23 @@ namespace Services
         /// <summary>
         /// Method to check if the user is authenticated
         /// </summary>
-        /// <param name="Email"></param>
-        /// <param name="Password"></param>
+        /// <param name="email"></param>
+        /// <param name="password"></param>
         /// <returns></returns>
-        public bool IsAuthenticatedSync(string Email, string Password)
+        public bool IsAuthenticatedSync(string email, string password)
         {
             try
             {
-                string trimmedEmail = Email.Trim();
-                string trimmedPassword = Password.Trim();
+                string trimmedEmail = email.Trim();
+                string trimmedPassword = password.Trim();
 
                 // check if email exists
-                var user = _userAuthRepository.GetUserAuthByUserNameOrEmailSync(trimmedEmail);
+                var user = _userAuthRepository
+                    .GetUserAuthByUserNameOrEmailSync(trimmedEmail) 
+                    ?? throw new AuthenticationException();
                 
+                
+
                 // validate password
                 if (!trimmedPassword.Equals(user.Password))
                 {
@@ -41,60 +45,37 @@ namespace Services
             {
                 return false;
             }
-            //verify password
         }
 
         /// <summary>
         /// Method to check if the user is authenticated
         /// </summary>
-        /// <param name="Email"></param>
-        /// <param name="Password"></param>
+        /// <param name="email"></param>
+        /// <param name="password"></param>
         /// <returns></returns>
-        public async Task<bool> IsAuthenticatedAsync(string Email, string Password)
+        public async Task<bool> IsAuthenticatedAsync(string email, string password)
         {
             try
             {
-                string trimmedEmail = Email.Trim();
-                string trimmedPassword = Password.Trim();
+                string trimmedEmail = email.Trim();
+                string trimmedPassword = password.Trim();
 
                 // check if email exists
-                var user = await _userAuthRepository.GetUserAuthByUserNameOrEmailAsync(trimmedEmail);
+                var user = await _userAuthRepository
+                    .GetUserAuthByUserNameOrEmailAsync(trimmedEmail)
+                    ?? throw new AuthenticationException();
 
                 // validate password
                 if (!trimmedPassword.Equals(user.Password))
                 {
                     throw new AuthenticationException();
                 }
-
                 return true;
             }
             catch (AuthenticationException)
             {
                 return false;
             }
-
-            //verify password
-        }
-
-        /// <summary>
-        /// Method to get the RoleId of a user
-        /// </summary>
-        /// <param name="Email"></param>
-        /// <returns></returns>
-        public int GetUserRoleIdSync(string Email)
-        {
-            return _userAuthRepository.GetUserRoleSync(Email).RoleId;
-        }
-
-        /// <summary>
-        /// Method to get the RoleId of a user
-        /// </summary>
-        /// <param name="Email"></param>
-        /// <returns></returns>
-        public async Task<int> GetUserRoleIdAsync(string Email)
-        {
-            var Role = await _userAuthRepository.GetUserRoleAsync(Email);
-            return Role.RoleId;
         }
 
         /// <summary>
