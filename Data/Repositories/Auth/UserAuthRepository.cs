@@ -8,26 +8,25 @@ namespace Data.Repositories.Auth
     /// </summary>
     public class UserAuthRepository : Repository
     {
-
         public UserAuthRepository(EBankingContext context) : base(context) { }
 
         /// <summary>
-        /// Query entries by primary key in UserAuth Table
+        /// Retrieves a UserAuth entry by its primary key.
+        /// Optionally accepts a pre-composed IQueryable with desired includes (e.g., Role, Account).
         /// </summary>
-        /// <param name="userAuthId">The primary key.</param>
-        /// <param name="includeRole">Set to true to include Role nav property</param>
-        /// <returns></returns>
-        /// <exception cref="UserNotFoundException"></exception>
-        public UserAuth GetUserAuthByIdSync(int userAuthId, bool includeRole = false)
+        /// <param name="userAuthId">The primary key of the UserAuth entity.</param>
+        /// <param name="query">
+        /// An optional IQueryable with includes already applied.
+        /// If null, a basic lookup using DbContext.Find is performed.
+        /// </param>
+        /// <returns>The UserAuth entity if found or null if not.</returns>
+        public UserAuth? GetUserAuthByIdSync(int userAuthId, IQueryable<UserAuth>? query = null)
         {
             UserAuth? userAuth;
 
-            if (includeRole)
+            if (query != null)
             {
-                userAuth = _context
-                    .Set<UserAuth>()
-                    .Include(ua => ua.Role)
-                    .FirstOrDefault(ua => ua.UserAuthId == userAuthId);
+                userAuth = query.FirstOrDefault(ua => ua.UserAuthId == userAuthId);
             }
             else
             {
@@ -35,31 +34,26 @@ namespace Data.Repositories.Auth
                     .Set<UserAuth>()
                     .Find(userAuthId);
             }
-
-            if (userAuth == null)
-            {
-                throw new UserNotFoundException($"User with ID {userAuthId} not found.");
-            }
-
             return userAuth;
         }
+
         /// <summary>
-        /// Query entries by primary key in UserAuth Table
+        /// Retrieves a UserAuth entry asynchronously by its primary key.
+        /// Optionally accepts a pre-composed IQueryable with desired includes (e.g., Role, Account).
         /// </summary>
-        /// <param name="userAuthId">The primary key.</param>
-        /// <param name="includeRole">Set to true to include Role nav property</param>
-        /// <returns></returns>
-        /// <exception cref="UserNotFoundException"></exception>
-        public async Task<UserAuth> GetUserAuthByIdAsync(int userAuthId, bool includeRole = false)
+        /// <param name="userAuthId">The primary key of the UserAuth entity.</param>
+        /// <param name="query">
+        /// An optional IQueryable with includes already applied.
+        /// If null, a basic lookup using DbContext.Find is performed.
+        /// </param>
+        /// <returns>The UserAuth entity if found or null if not.</returns>
+        public async Task<UserAuth?> GetUserAuthByIdAsync(int userAuthId, IQueryable<UserAuth>? query = null)
         {
             UserAuth? userAuth;
 
-            if (includeRole)
+            if (query != null)
             {
-                userAuth = await _context
-                    .Set<UserAuth>()
-                    .Include(ua => ua.Role)
-                    .FirstOrDefaultAsync(ua => ua.UserAuthId == userAuthId);
+                userAuth = await query.FirstOrDefaultAsync(ua => ua.UserAuthId == userAuthId);
             }
             else
             {
@@ -67,156 +61,156 @@ namespace Data.Repositories.Auth
                     .Set<UserAuth>()
                     .FindAsync(userAuthId);
             }
-
-            if (userAuth == null)
-            {
-                throw new UserNotFoundException($"User with ID {userAuthId} not found.");
-            }
             return userAuth;
         }
 
         /// <summary>
-        /// Query entries by UserName or Email in UsersAuth table
+        /// Retrieves a UserAuth entry by UserName or Email.
+        /// Optionally accepts a pre-composed IQueryable with desired includes (e.g., Role, Account).
         /// </summary>
-        /// <param name="userNameOrEmail"></param>
-        /// <param name="includeRole">Set to true to include Role nav property</param>
-        /// <returns></returns>
-        /// <exception cref="AuthenticationException"></exception>
-        public UserAuth GetUserAuthByUserNameOrEmailSync(string userNameOrEmail, bool includeRole = false)
+        /// <param name="userNameOrEmail">The username or email of the user to search for.</param>
+        /// <param name="query">
+        /// An optional IQueryable with includes already applied.
+        /// If null, a basic lookup using DbContext.Find is performed.
+        /// </param>
+        /// <returns>The UserAuth entity if found or null if not.</returns>
+        public UserAuth? GetUserAuthByUserNameOrEmailSync(string userNameOrEmail, IQueryable<UserAuth>? query = null)
         {
             var trimmedUserNameOrEmail = userNameOrEmail.Trim();
+            UserAuth? userAuth;
 
-            var query = _context
-                .Set<UserAuth>()
-                .AsQueryable();
-
-            if (includeRole)
+            if (query != null)
             {
-                query = query.Include(ua => ua.Role);
+                userAuth = query
+                    .FirstOrDefault(
+                    ua => ua.UserName == trimmedUserNameOrEmail ||
+                          ua.Email == trimmedUserNameOrEmail
+                    );
             }
-
-            var userAuth = query
+            else {
+                userAuth = _context
+                .UsersAuth
                 .FirstOrDefault(
                     ua => ua.UserName == trimmedUserNameOrEmail ||
                           ua.Email == trimmedUserNameOrEmail
                 );
-
-            if (userAuth == null)
-            {
-                throw new AuthenticationException();
             }
             return userAuth;
         }
 
         /// <summary>
-        /// Query entries by UserName or Email in UsersAuth table.
+        /// Retrieves a UserAuth entry by UserName or Email asynchronously.
+        /// Optionally accepts a pre-composed IQueryable with desired includes (e.g., Role, Account).
         /// </summary>
-        /// <param name="userNameOrEmail"></param>
-        /// <param name="includeRole">Set to true to include Role nav property</param>
-        /// <returns></returns>
-        /// <exception cref="AuthenticationException"></exception>
-        public async Task<UserAuth> GetUserAuthByUserNameOrEmailAsync(string userNameOrEmail, bool includeRole = false)
+        /// <param name="userNameOrEmail">The username or email of the user to search for.</param>
+        /// <param name="query">
+        /// An optional IQueryable with includes already applied.
+        /// If null, a basic lookup using DbContext.Find is performed.
+        /// </param>
+        /// <returns>The UserAuth entity if found or null if not.</returns>
+        public async Task<UserAuth?> GetUserAuthByUserNameOrEmailAsync(string userNameOrEmail, IQueryable<UserAuth>? query = null)
         {
             var trimmedUserNameOrEmail = userNameOrEmail.Trim();
+            UserAuth? userAuth;
 
-            var query = _context
-                .Set<UserAuth>()
-                .AsQueryable();
-
-            if (includeRole)
+            if (query != null)
             {
-                query = query.Include(ua => ua.Role);
+                userAuth = await query
+                    .FirstOrDefaultAsync(
+                    ua => ua.UserName == trimmedUserNameOrEmail ||
+                          ua.Email == trimmedUserNameOrEmail
+                    );
             }
-
-            var userAuth = await query
+            else
+            {
+                userAuth = await _context
+                .UsersAuth
                 .FirstOrDefaultAsync(
                     ua => ua.UserName == trimmedUserNameOrEmail ||
                           ua.Email == trimmedUserNameOrEmail
                 );
-            if (userAuth == null)
-            {
-                throw new AuthenticationException();
             }
             return userAuth;
         }
 
         /// <summary>
-        /// Query entries by RoleId in UsersAuth Table.
+        /// Retrieves a UserAuth entry by roleId.
+        /// Optionally accepts a pre-composed IQueryable with desired includes (e.g., Role, Account).
         /// </summary>
-        /// <param name="roleId"></param>
-        /// <returns></returns>
-        /// <exception cref="UserNotFoundException"></exception>
-        public List<UserAuth> GetUsersAuthByRoleIdSync(int roleId)
+        /// <param name="roleId">The role ID of the users to search for.</param>
+        /// <param name="query">
+        /// An optional IQueryable with includes already applied.
+        /// If null, a basic lookup using DbContext.Find is performed.
+        /// </param>
+        /// <returns>A list of UserAuth entities associated with the specified roleId.</returns>
+        public List<UserAuth> GetUsersAuthByRoleIdSync(int roleId, IQueryable<UserAuth>? query = null)
         {
-            var usersAuth = _context
+            List<UserAuth> usersAuth;
+            if (query != null)
+            {
+                usersAuth = query
+                    .Where(ua => ua.RoleId == roleId)
+                    .ToList();
+            } else
+            {
+                usersAuth = _context
                 .Set<UserAuth>()
                 .Where(ua => ua.RoleId == roleId)
                 .ToList();
-            if (usersAuth.Count == 0)
-            {
-                throw new UserNotFoundException($"User with role ID {roleId} not found.");
             }
             return usersAuth;
         }
 
         /// <summary>
-        /// Query entries by RoleId in UsersAuth Table.
+        /// Retrieves a UserAuth entry by roleId asynchronously.
+        /// Optionally accepts a pre-composed IQueryable with desired includes (e.g., Role, Account).
         /// </summary>
-        /// <param name="roleId"></param>
-        /// <returns></returns>
-        /// <exception cref="UserNotFoundException"></exception>
-        public async Task<List<UserAuth>> GetUsersAuthByRoleIdAsync(int roleId)
+        /// <param name="roleId">The role ID of the users to search for.</param>
+        /// <param name="query">
+        /// An optional IQueryable with includes already applied.
+        /// If null, a basic lookup using DbContext.Find is performed.
+        /// </param>
+        /// <returns>A list of UserAuth entities associated with the specified roleId.</returns>
+        public async Task<List<UserAuth>> GetUsersAuthByRoleIdAsync(int roleId, IQueryable<UserAuth>? query = null)
         {
-            var usersAuth = await _context
+            List<UserAuth> usersAuth;
+            if (query != null)
+            {
+                usersAuth = await query
+                    .Where(ua => ua.RoleId == roleId)
+                    .ToListAsync();
+
+            } else
+            {
+                usersAuth = await _context
                 .Set<UserAuth>()
                 .Where(ua => ua.RoleId == roleId)
                 .ToListAsync();
-            if (usersAuth.Count == 0)
-            {
-                throw new UserNotFoundException($"User with role ID {roleId} not found.");
             }
             return usersAuth;
         }
-        /// <summary>
-        /// Get the Role of a user through querying by primary key.
-        /// </summary>
-        /// <param name="userAuthId">The userAuthId or primary key of the UsersAuth table.</param>
-        /// <returns></returns>
-        public Role GetUserRoleSync(int userAuthId)
-        {
-            return GetUserAuthByIdSync(userAuthId, true).Role;
-        }
 
         /// <summary>
-        /// Get the Role of a user through querying by primary key.
+        /// Builds an IQueryable for querying the UsersAuth table with optional related entities.
         /// </summary>
-        /// <param name="userAuthId">The userAuthId or primary key of the UsersAuth table.</param>
-        /// <returns></returns>
-        public async Task<Role> GetUserRoleAsync(int userAuthId)
+        /// <param name="includeRole">Whether to include the related Role entity.</param>
+        /// <param name="includeAccount">Whether to include the related Account entity.</param>
+        /// <param name="includeUserInfo">Whether to include the related UserInfo entity.</param>
+        /// <returns>An IQueryable of UserAuth with optional includes.</returns>
+        public IQueryable<UserAuth> ComposeUsersAuthQuery(
+                bool includeRole = false,
+                bool includeAccount = false,
+                bool includeUserInfo = false
+                )
         {
-            var userAuth = await GetUserAuthByIdAsync(userAuthId, true);
-            return userAuth.Role;
-        }
+            var query = _context
+                .UsersAuth
+                .AsQueryable();
+            if (includeRole) { query = query.Include(ua => ua.Role); }
+            if (includeAccount) { query = query.Include(ua => ua.Account); }
+            if (includeUserInfo) { query = query.Include(ua => ua.UserInfo); }
 
-        /// <summary>
-        /// Get the Role of a user through querying by Username or Email.
-        /// </summary>
-        /// <param name="userNameOrEmail">The username or email of the user.</param>
-        /// <returns></returns>
-        public Role GetUserRoleSync(string userNameOrEmail)
-        {
-            return GetUserAuthByUserNameOrEmailSync(userNameOrEmail, true).Role;
-        }
-
-        /// <summary>
-        /// Get the Role of a user through querying by Username or Email
-        /// </summary>
-        /// <param name="userNameOrEmail">The username or email of the user.</param>
-        /// <returns></returns>
-        public async Task<Role> GetUserRoleAsync(string userNameOrEmail)
-        {
-            var userAuth = await GetUserAuthByUserNameOrEmailAsync(userNameOrEmail, true);
-            return userAuth.Role;
+            return query;
         }
     }
 }
