@@ -1,15 +1,97 @@
-﻿namespace Data.Repositories.User
+﻿using Exceptions;
+
+namespace Data.Repositories.User
 {
     /// <summary>
     /// CRUD operations handler for UsersInfo table
     /// Methods for adding, updating, deleting and retrieving data from the database
     /// </summary>
-    /// <param name="_context"></param>
     public class UserInfoRepository : Repository
     {
         public UserInfoRepository(EBankingContext context) : base(context) { }
 
-    }
+
+        /// <summary>
+        /// Retrieves a UserInfo entry by its primary key.
+        /// Optionally accepts a pre-composed IQueryable with desired includes.
+        /// </summary>
+        /// <param name="userInfoId">The primary key of the UserInfo entity.</param>
+        /// <param name="query">
+        /// An optional IQueryable with includes already applied.
+        /// If null, a basic lookup using DbContext.Find is performed.
+        /// </param>
+        /// <returns>The UserInfo entity if found or null if not.</returns>
+        public UserInfo? GetUserInfoByIdSync(int userInfoId, IQueryable<UserInfo>? query = null)
+        {
+            UserInfo? userInfo;
+            if (query != null)
+            {
+                userInfo = query.FirstOrDefault(ui => ui.UserInfoId == userInfoId);
+            }
+            else
+            {
+                userInfo = _context
+                    .UsersInfo
+                    .Find(userInfoId);
+            }
+            return userInfo;
+        }
+
+        /// <summary>
+        /// Retrieves a UserInfo entry by its primary key asynchronously.
+        /// Optionally accepts a pre-composed IQueryable with desired includes.
+        /// </summary>
+        /// <param name="userInfoId">The primary key of the UserInfo entity.</param>
+        /// <param name="query">
+        /// An optional IQueryable with includes already applied.
+        /// If null, a basic lookup using DbContext.Find is performed.
+        /// </param>
+        /// <returns>The UserInfo entity if found or null if not.</returns>
+        public async Task<UserInfo?> GetUserInfoByIdAsync(int userInfoId, IQueryable<UserInfo>? query = null)
+        {
+            UserInfo? userInfo;
+            if (query != null)
+            {
+                userInfo = await query.FirstOrDefaultAsync(ui => ui.UserInfoId == userInfoId);
+            }
+            else
+            {
+                userInfo = await _context
+                    .UsersInfo
+                    .FindAsync(userInfoId);
+            }
+            return userInfo;
+        }
+        /// <summary>
+        /// Builds an IQueryable for querying the UsersAuth table with optional related entities.
+        /// </summary>
+        /// <param name="includeName">Whether to include the related Name entity.</param>
+        /// <param name="includeBirthInfo">Whether to include the related BirthInfo entity.</param>
+        /// <param name="includeFatherName">Whether to include the related FatherName entity.</param>
+        /// <param name="includeMotherName">Whether to include the related MotherName entity.</param>
+        /// <param name="includeReligion">Whether to include the related Religion entity.</param>
+        /// <returns>An IQueryable of UserInfo with optional includes.</returns>
+        public IQueryable<UserInfo> ComposeUserInfoQuery(
+            bool includeName = false,
+            bool includeBirthInfo = false,
+            bool includeFatherName = false,
+            bool includeMotherName = false,
+            bool includeReligion = false
+            )
+        {
+            var query = _context
+                .UsersInfo
+                .AsQueryable();
+
+            if (includeName) { query = query.Include(ui => ui.UserName); }
+            if (includeBirthInfo) { query = query.Include(ui => ui.BirthInfo); }
+            if (includeFatherName) { query = query.Include(ui => ui.FatherName); }
+            if (includeMotherName) { query = query.Include(ui => ui.MotherName); }
+            if (includeReligion) { query = query.Include(ui => ui.Religion); }
+
+            return query;
+        }
+    } 
 
     /// <summary>
     /// Builder class for UserInfo
