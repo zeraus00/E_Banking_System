@@ -13,38 +13,62 @@ namespace Services
         }
         // create a passwordhasher object here!
 
+        /// <summary>
+        /// Attempts to authenticate a user based on the provided email and password.
+        /// This method trims the input email and password, queries the repository for a matching user, 
+        /// and checks if the password is correct. If the credentials are valid, the corresponding 
+        /// <see cref="UserAuth"/> object is returned; otherwise, <c>null</c> is returned.
+        /// </summary>
+        /// <param name="email">The email address associated with the user account.</param>
+        /// <param name="password">The password provided for authentication.</param>
+        /// <returns>
+        /// A <see cref="UserAuth"/> object if authentication is successful; otherwise, <c>null</c> if
+        /// the credentials do not match or an error occurs during authentication.
+        /// </returns>
+        public UserAuth? TryAuthenticateUserSync(string email, string password)
+        {
+            string trimmedEmail = email.Trim();
+            string trimmedPassword = password.Trim();
+
+            var query = _userAuthRepository.QueryIncludeAll();
+            var userAuth = _userAuthRepository
+                .GetUserAuthByUserNameOrEmailSync(trimmedEmail, query);
+
+            if (userAuth == null || !this.IsAuthenticated(userAuth, trimmedPassword))
+            {
+                return null;
+            }
+
+            return userAuth;
+        }
 
         /// <summary>
-        /// Method to check if the user is authenticated
+        /// Attempts to authenticate a user asynchronously based on the provided email and password.
+        /// This method trims the input email and password, queries the repository for a matching user, 
+        /// and checks if the password is correct. If the credentials are valid, the corresponding 
+        /// <see cref="UserAuth"/> object is returned; otherwise, <c>null</c> is returned.
         /// </summary>
-        /// <param name="email"></param>
-        /// <param name="password"></param>
-        /// <returns></returns>
-        public bool IsAuthenticatedSync(string email, string password)
+        /// <param name="email">The email address associated with the user account.</param>
+        /// <param name="password">The password provided for authentication.</param>
+        /// <returns>
+        /// A <see cref="UserAuth"/> object if authentication is successful; otherwise, <c>null</c> if
+        /// the credentials do not match or an error occurs during authentication.
+        /// </returns>
+        public async Task<UserAuth?> TryAuthenticateUserAsync(string email, string password)
         {
-            try
-            {
-                string trimmedEmail = email.Trim();
-                string trimmedPassword = password.Trim();
+            string trimmedEmail = email.Trim();
+            string trimmedPassword = password.Trim();
 
-                // check if email exists
-                var user = _userAuthRepository
-                    .GetUserAuthByUserNameOrEmailSync(trimmedEmail) 
-                    ?? throw new AuthenticationException();
-                
-                
+            var query = _userAuthRepository.QueryIncludeAll();
+            var userAuth = await _userAuthRepository
+                .GetUserAuthByUserNameOrEmailAsync(trimmedEmail, query);
 
-                // validate password
-                if (!trimmedPassword.Equals(user.Password))
-                {
-                    throw new AuthenticationException();
-                }
-                return true;
-            }
-            catch (AuthenticationException)
+            if (userAuth == null || !this.IsAuthenticated(userAuth, trimmedPassword))
             {
-                return false;
+                return null;
             }
+
+            return userAuth;
         }
 
         /// <summary>
@@ -53,29 +77,9 @@ namespace Services
         /// <param name="email"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        public async Task<bool> IsAuthenticatedAsync(string email, string password)
+        public bool IsAuthenticated(UserAuth userAuth, string password)
         {
-            try
-            {
-                string trimmedEmail = email.Trim();
-                string trimmedPassword = password.Trim();
-
-                // check if email exists
-                var user = await _userAuthRepository
-                    .GetUserAuthByUserNameOrEmailAsync(trimmedEmail)
-                    ?? throw new AuthenticationException();
-
-                // validate password
-                if (!trimmedPassword.Equals(user.Password))
-                {
-                    throw new AuthenticationException();
-                }
-                return true;
-            }
-            catch (AuthenticationException)
-            {
-                return false;
-            }
+            return userAuth.Password.Equals(password);
         }
 
         /// <summary>
