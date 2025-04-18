@@ -1,4 +1,4 @@
-﻿@page "/Settings_change_email"
+﻿@page "/Settings_change_contact"
 @inject NavigationManager NavigationManager
 
 <div class="page">
@@ -7,7 +7,7 @@
 		<header class="custom-card-clientpage clientheader px-4 py-4">
 			<div>
 				<div class="d-flex align-items-center gap-3 ms-3">
-					<h1>Update Email</h1>
+					<h1>Update Contact Number</h1>
 				</div>
 			</div>
 		</header>
@@ -18,20 +18,19 @@
 
 				<!-- Password Conditions -->
 				<h5 class="text-start fw-light text-light my-3">
-					Enter your new email address. 
+					Enter your new contact number.
 				</h5>
 				<ul class="fs-6 fw-light">
 					<li>
-						A verification email will be sent to the new email address.
-						Click the URL in the verification email to complete the procedure.
+						A one-time password (OTP) code will be sent to the new contact number.
 					</li>
 				</ul>
 			</div>
 
 			<!-- Password Fields -->
 			<div class="loginform sm mt-1">
-				<input class="form-control form-control-custom form-control-lg mb-3" type="email" placeholder="New Email Address">
-				<input class="form-control form-control-custom form-control-lg mb-3" type="email" placeholder="Confirm New Email Address">
+				<input class="form-control form-control-custom form-control-lg mb-3" type="email" placeholder="New Contact No.">
+				<input class="form-control form-control-custom form-control-lg mb-3" type="email" placeholder="Confirm New Contact No.">
 			</div>
 
 			<!-- Change Password Button -->
@@ -39,8 +38,8 @@
 				<NavLink class="w-25 mx-auto" href="/Settings_page">
 					<button class="btn btn-danger w-25">Cancel</button>
 				</NavLink>
-				<NavLink class="w-25 mx-auto" href="/Settings_page">
-					<button class="btn btn-primary w-25">Send Verification Email</button>
+				<NavLink class="w-25 mx-auto" href="/Settings_contact_otp">
+					<button class="btn btn-primary w-25">Continue</button>
 				</NavLink>
 			</div>
 		
