@@ -1,21 +1,43 @@
 ﻿@page "/Client_home"
 @inject NavigationManager NavigationManager
+@inject ClientHomeService _clientHomeService;
+@inject NexusAuthenticationStateProvider _authenticationStateProvider
 
 <div class="page">
     <main>
-        <!-- Header -->
-            <header class="custom-card-clientpage clientheader pt-4 pb-4 d-flex justify-content-between align-items-start">
-                <div class="px-5">
-                    <h5>Welcome Back</h5>
-                    <div class="d-flex align-items-center gap-3">
-                        <h1>clientName</h1>
-                        <h4 class="account-number">accountNumber</h4>
+        <AuthorizeView>
+            <Authorized>
+                <!-- Header -->
+                <header class="custom-card-clientpage clientheader pt-4 pb-4 d-flex justify-content-between align-items-start">
+                    <div class="px-5">
+                        <h5>Welcome Back</h5>
+                        <div class="d-flex align-items-center gap-3">
+                            <h1>clientName</h1>
+                            <h4 class="account-number">accountNumber</h4>
+                        </div>
                     </div>
-                </div>
-                <div class="notification img mx-5 my-auto">
-                    <img src="/bootstrap/Utilities/Bell.png" alt="Notification Bell" />
-                </div>
-            </header>
+                    <div class="notification img mx-5 my-auto">
+                        <img src="/bootstrap/Utilities/Bell.png" alt="Notification Bell" />
+                    </div>
+                </header>
+            </Authorized>
+            <NotAuthorized>
+                <!-- Header -->
+                <header class="custom-card-clientpage clientheader pt-4 pb-4 d-flex justify-content-between align-items-start">
+                    <div class="px-5">
+                        <h5>You are not signed in.</h5>
+                        <div class="d-flex align-items-center gap-3">
+                            <h1>clientName</h1>
+                            <h4 class="account-number">accountNumber</h4>
+                        </div>
+                    </div>
+                    <div class="notification img mx-5 my-auto">
+                        <img src="/bootstrap/Utilities/Bell.png" alt="Notification Bell" />
+                    </div>
+                </header>
+            </NotAuthorized>
+        </AuthorizeView>
+
 
         <!-- Main Section: Balance + Actions -->
         <div class="container mt-4">
@@ -83,7 +105,7 @@
                     <a href="/Recent_transactions" class="btn btn-link text-decoration-none">View All</a>
                 </div>
 
-                    <!-- Transactions List -->
+                <!-- Transactions List -->
                 <div class="container py-3 px-5">
                     <div class="row fs-5 fw-bold pb-3">
                         <div class="col">Transaction</div>
@@ -115,7 +137,19 @@
 </div>
 
 
+@code {
+    private ClaimsPrincipal? user;
+    private string accountNumber { get; set; } = string.Empty;
+    private string userName { get; set; } = string.Empty;
 
+    protected override async Task OnInitializedAsync() {
+        var authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
+        user = authState.User;
+
+
+        
+    }
+}
 
 
 
