@@ -4,8 +4,8 @@ using Data.Seeders;
 using Data.Seeders.User;
 using Data.Seeders.Finance;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Components.Authorization;
 using Services;
-using System.Security.Claims;
 using ViewModels;
 using Microsoft.AspNetCore.Antiforgery;
 
@@ -31,6 +31,8 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<CredentialValidationService>();
 builder.Services.AddScoped<SignInService>();
 builder.Services.AddScoped<ClaimsHelperService>();
+builder.Services.AddScoped<AuthenticationStateProvider, NexusAuthenticationStateProvider>();
+builder.Services.AddScoped<NexusAuthenticationService>();
 
 builder.Services.AddAntiforgery(options =>
 {
