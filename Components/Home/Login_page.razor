@@ -14,7 +14,7 @@
 @inject IHttpContextAccessor HttpContextAccessor
 @inject IJSRuntime JS
 @inject HttpClient http
-@inject LogInService _logInService
+@inject CredentialValidationService _logInService
 @layout PlainLayout
 
 
@@ -185,7 +185,7 @@
 		try {
 
 			// Perform login logic here, such as checking credentials
-			UserAuth? userAuth = await _logInService.TryAuthenticateUserAsync(loginModel.Email, loginModel.Password);
+			UserAuth? userAuth = await _logInService.TryValidateUserAsync(loginModel.Email, loginModel.Password);
 			if (userAuth == null) {
 				error = "Invalid email or password. Please try again.";
 				return;

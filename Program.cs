@@ -30,7 +30,7 @@ builder.Services.AddRazorComponents()
 // Authentication Services
 builder.Services.AddHttpClient();
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<LogInService>();
+builder.Services.AddScoped<CredentialValidationService>();
 
 builder.Services.AddAntiforgery(options =>
 {
@@ -130,23 +130,23 @@ app.MapGet("/get-csrf", (HttpContext context, IAntiforgery antiforgery) =>
     return Results.Ok(new { message = "CSRF token set in cookie." });
 });
 
-app.MapPost("/login", async (HttpContext httpContext, IAntiforgery antiforgery, LogInService logInService, LogInViewModel loginModel) =>
+app.MapPost("/login", async (HttpContext _httpContext, IAntiforgery _antiforgery, CredentialValidationService _validationService, LogInViewModel _loginModel) =>
 {
     try 
     {
-        await antiforgery.ValidateRequestAsync(httpContext);
+        await _antiforgery.ValidateRequestAsync(_httpContext);
         //httpContext.Response.Headers.SetCookie = "bths=usr:mabudachi";
-        var email = (loginModel.Email ?? string.Empty).Trim();
-        var password = (loginModel.Password ?? string.Empty).Trim();
+        var email = (_loginModel.Email ?? string.Empty).Trim();
+        var password = (_loginModel.Password ?? string.Empty).Trim();
         Console.WriteLine(email + " " + password);
-        Console.WriteLine(httpContext.Request.Scheme);
+        Console.WriteLine(_httpContext.Request.Scheme);
 
-        var userAuth = await logInService.TryAuthenticateUserAsync(email, password);
+        var userAuth = await _validationService.TryValidateUserAsync(email, password);
         if (userAuth == null)
         {
             Console.WriteLine("userAuth is null");
             //return Results.Redirect("/Home/Landing_page"); // Ensure no further processing occurs after redirect
-            httpContext.Response.Redirect("/Landing_page");
+            _httpContext.Response.Redirect("/Landing_page");
             return;
         }
 
@@ -177,10 +177,10 @@ app.MapPost("/login", async (HttpContext httpContext, IAntiforgery antiforgery, 
         }
 
         Console.WriteLine("Signing in user...");
-        await httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, authProperties);
+        await _httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, authProperties);
         Console.WriteLine("Sign-in complete.");
 
-        var user = httpContext.User;
+        var user = _httpContext.User;
         Console.WriteLine($"User Identity IsAuthenticated: {user.Identity?.IsAuthenticated}");
         Console.WriteLine($"User Identity Name: {user.Identity?.Name}");
 
@@ -196,7 +196,7 @@ app.MapPost("/login", async (HttpContext httpContext, IAntiforgery antiforgery, 
         Console.WriteLine("Redirect Url: " + redirectUrl);
 
         //return Results.Redirect(redirectUrl); // Ensure no further processing occurs after redirect
-        httpContext.Response.Redirect(redirectUrl);
+        _httpContext.Response.Redirect(redirectUrl);
         return; 
     } catch (Exception ex)
     {
