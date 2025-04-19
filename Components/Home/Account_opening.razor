@@ -1,5 +1,10 @@
-﻿@page "/Account_opening"
+﻿@using Services
+@using Exceptions
+
+@page "/Account_opening"
 @inject NavigationManager NavigationManager
+@inject RegistrationService RegistrationService
+@inject HttpClient HttpClient
 @using Layout
 @layout PlainLayout
 
@@ -147,203 +152,225 @@
 					<!-- Full Address -->
 					<label class="text-light">Full Address</label>
 
-					<div class="row gx-2">
-						<!-- Province -->
-						<div class="col">
-							<select class="form-select form-select-sm" @bind="selectedProvince" required>
-								@foreach (var province in provinceOptions)
-								{
-									<option value="@province">@province</option>
-								}
-							</select>
-						</div>
-
-						<!-- Municipality -->
-						<div class="col">
-							<select class="form-select form-select-sm" @bind="selectedMunicipality" required>
-								@foreach (var municipality in municipalityOptions)
-								{
-									<option value="@municipality">@municipality</option>
-								}
-							</select>
-						</div>
-
-						<!-- Barangay -->
-						<div class="col">
-							<select class="form-select form-select-sm" @bind="selectedBarangay" required>
-								@foreach (var barangay in barangayOptions)
-								{
-									<option value="@barangay">@barangay</option>
-								}
-							</select>
-						</div>
-
-						<!-- Street No. -->
-						<div class="col">
-							<input class="form-control form-control-sm" @bind="streetNo" placeholder="Street No." required>
-						</div>
-
-						<!-- House No. -->
-						<div class="col">
-							<input class="form-control form-control-sm" @bind="houseNo" placeholder="House No." required>
-						</div>
-
+					<!-- Region -->
+					<div class="col">
+						<select class="form-select form-select-sm" @onchange="async _ => await LoadProvinceAsync()" required>
+							@foreach (var r in regions)
+							{
+								<option value="@r.RegionId">@r.RegionName</option>
+							}
+						</select>
 					</div>
 
-
-					<!-- Row 5 -->
-					<div class="row g-2 mt-3">
-
-						<!-- Region -->
-						<div class="col">
-							<label class="text-light">Birth Place</label>
-							<select class="form-select form-select-sm" @bind="selectedRegion" required>
-								@foreach (var region in regionOptions)
-								{
-									<option value="@region">@region</option>
-								}
-							</select>
-						</div>
-
-						<!-- City -->
-						<div class="col">
-							<label class="text-light" style="visibility: hidden;">City</label>
-							<select class="form-select form-select-sm" @bind="selectedCity" required>
-								@foreach (var city in cityOptions)
-								{
-									<option value="@city">@city</option>
-								}
-							</select>
-						</div>
-
-						<!-- Province -->
-						<div class="col">
-							<label class="text-light" style="visibility: hidden;">Province</label>
-							<select class="form-select form-select-sm" @bind="selectedBirthProvince" required>
-								@foreach (var birthProvince in birthProvinceOptions)
-								{
-									<option value="@birthProvince">@birthProvince</option>
-								}
-							</select>
-						</div
-
-						<!-- Birth Date -->
-						<div class="col">
-							<label class="text-light">Birth Date</label>
-							<input class="form-control form-control-sm" type="date" required>
-						</div>
-
-						<!-- Occupation -->
-						<div class="col">
-							<label class="text-light">Occupation</label>
-							<input class="form-control form-control-sm" placeholder="Occupation" required>
-						</div>
-
-					</div>
-					
-
-					<div class="row g-2 mt-2">
-
-
-						<!-- Row 6 (Father's Name)-->
-						<div class="col-12">
-
-							<label class="text-light">Father's Name</label>
-							<div class="row g-2">
-								<div class="col-3">
-									<input class="form-control form-control-sm" @bind="fatherFirstName" placeholder="First Name">
-								</div>
-								<div class="col-3">
-									<input class="form-control form-control-sm" @bind="fatherMiddleName" placeholder="Middle Name">
-								</div>
-								<div class="col-3">
-									<input class="form-control form-control-sm" @bind="fatherLastName" placeholder="Last Name">
-								</div>
-								<div class="col-1">
-									<input class="form-control form-control-sm" @bind="fatherSuffix" placeholder="Suffix">
-								</div>
-							</div>
-						</div>
-
-
-						<!-- Row 7 (Mother's Name)-->
-						<div class="col-12">
-							<label class="text-light">Mother's Maiden Name</label>
-							<div class="row g-2">
-								<div class="col-3">
-									<input class="form-control form-control-sm" @bind="motherFirstName" placeholder="First Name">
-								</div>
-								<div class="col-3">
-									<input class="form-control form-control-sm" @bind="motherMiddleName" placeholder="Middle Name">
-								</div>
-								<div class="col-3">
-									<input class="form-control form-control-sm" @bind="motherLastName" placeholder="Last Name">
-								</div>
-								<div class="col-1">
-									<input class="form-control form-control-sm" @bind="motherSuffix" placeholder="Suffix">
-								</div>
-							</div>
-						</div>
-
-
-						<!-- Row 8 (Beneficiary's Name) -->
-						<div class="col-12">
-							<label class="text-light">Beneficiary's Name</label>
-							<div class="row g-2">
-								<div class="col-3">
-									<input class="form-control form-control-sm" @bind="beneficiaryFirstName" placeholder="First Name">
-								</div>
-								<div class="col-3">
-									<input class="form-control form-control-sm" @bind="beneficiaryMiddleName" placeholder="Middle Name">
-								</div>
-								<div class="col-3">
-									<input class="form-control form-control-sm" @bind="beneficiaryLastName" placeholder="Last Name">
-								</div>
-								<div class="col-1">
-									<input class="form-control form-control-sm" @bind="beneficiarySuffix" placeholder="Suffix">
-								</div>
-							</div>
-						</div>
+					<!-- Province -->
+					<div class="col">
+						<label class="text-light" style="visibility: hidden;">Province</label>
+						<select class="form-select form-select-sm" @onchange="async _ => await LoadCitiesAsync()" required>
+							@foreach (var p in provinces)
+							{
+								<option value="@p.ProvinceId">@p.ProvinceName</option>
+							}
+						</select>
 					</div>
 
-					<div class="row g-3 mt-3">
-						<!-- Upload Government ID -->
-						<div class="col-md-4">
-							<label class="text-light">Upload Government Valid ID (Front & Back)</label>
-
-							<!-- View Button -->
-							<div class="d-flex gap-2">
-								<input type="file" class="btn btn-light btn-sm w-75" required />
-								<button class="btn btn-outline-light">View</button>
-							</div>
-						</div>
-
-						<!-- Upload 1x1 Picture -->
-						<div class="col-md-4">
-							<label class="text-light">Upload 1x1 Picture</label>
-
-							<!-- View BUtton -->
-							<div class="d-flex gap-2">
-								<input type="file" class="btn btn-light btn-sm w-75" required />
-								<button class="btn btn-outline-light">View</button>
-							</div>
-						</div>
+					<!-- City -->
+					<div class="col">
+						<label class="text-light" style="visibility: hidden;">City</label>
+						<select class="form-select form-select-sm" @onchange="async _ => await LoadBarangaysAsync()" required>
+							@foreach (var c in cities)
+							{
+								<option value="@c.CityId">@c.CityName</option>
+							}
+						</select>
 					</div>
 
-					<!-- Terms and Conditions Checkbox -->
-					<div class="form-check d-flex justify-content-end mt-3">
-						<input class="form-check-input mx-2" type="checkbox" id="termsAndConditions" required>
-						<label class="form-check-label text-light" for="termsAndConditions">
-							I accept the terms and conditions
-						</label>
+					<!-- Barangay -->
+					<div class="col-3">
+						<label class="text-light">Barangay</label>
+						<select class="form-select form-select-sm" @bind="selectedBarangay" required>
+							@foreach (var b in barangays)
+							{
+								<option value="@b.BarangayId">@b.BarangayName</option>
+							}
+						</select>
 					</div>
 
-					<!-- Register Button -->
-					<div class="text-end mt-3">
-						<button class="btn btn-primary btn-secondary" @onclick="LoginAsync">Submit Application</button>
+					<!-- Street No. -->
+					<div class="col">
+						<input class="form-control form-control-sm" @bind="streetNo" placeholder="Street No." required>
+					</div>
+
+					<!-- House No. -->
+					<div class="col">
+						<input class="form-control form-control-sm" @bind="houseNo" placeholder="House No." required>
 					</div>
 
 				</div>
+
+
+				<!-- Row 5 -->
+				<div class="row g-2 mt-3">
+
+					<!-- Region -->
+					<div class="col">
+						<label class="text-light">Birth Place</label>
+						<select class="form-select form-select-sm" @onchange="async _ => await LoadProvinceAsync()" required>
+							@foreach (var r in regions)
+							{
+								<option value="@r.RegionId">@r.RegionName</option>
+							}
+						</select>
+					</div>
+
+					<!-- Province -->
+					<div class="col">
+						<label class="text-light" style="visibility: hidden;">Province</label>
+						<select class="form-select form-select-sm" @onchange="async _ => await LoadCitiesAsync()" required>
+							@foreach (var p in provinces)
+							{
+								<option value="@p.ProvinceId">@p.ProvinceName</option>
+							}
+						</select>
+					</div>
+
+					<!-- City -->
+					<div class="col">
+						<label class="text-light" style="visibility: hidden;">City</label>
+						<select class="form-select form-select-sm" @onchange="async _ => await LoadBarangaysAsync()" required>
+							@foreach (var c in cities)
+							{
+								<option value="@c.CityId">@c.CityName</option>
+							}
+						</select>
+					</div>
+
+					<!-- Barangay -->
+					<div class="col-3">
+						<label class="text-light">Barangay</label>
+						<select class="form-select form-select-sm" @bind="selectedBarangay" required>
+							@foreach (var b in barangays)
+							{
+								<option value="@b.BarangayId">@b.BarangayName</option>
+							}
+						</select>
+					</div>
+
+					<!-- Birth Date -->
+					<div class="col">
+						<label class="text-light">Birth Date</label>
+						<input class="form-control form-control-sm" type="date" required>
+					</div>
+
+					<!-- Occupation -->
+					<div class="col">
+						<label class="text-light">Occupation</label>
+						<input class="form-control form-control-sm" placeholder="Occupation" required>
+					</div>
+
+				</div>
+					
+
+				<div class="row g-2 mt-2">
+
+
+					<!-- Row 6 (Father's Name)-->
+					<div class="col-12">
+
+						<label class="text-light">Father's Name</label>
+						<div class="row g-2">
+							<div class="col-3">
+								<input class="form-control form-control-sm" @bind="fatherFirstName" placeholder="First Name">
+							</div>
+							<div class="col-3">
+								<input class="form-control form-control-sm" @bind="fatherMiddleName" placeholder="Middle Name">
+							</div>
+							<div class="col-3">
+								<input class="form-control form-control-sm" @bind="fatherLastName" placeholder="Last Name">
+							</div>
+							<div class="col-1">
+								<input class="form-control form-control-sm" @bind="fatherSuffix" placeholder="Suffix">
+							</div>
+						</div>
+					</div>
+
+
+					<!-- Row 7 (Mother's Name)-->
+					<div class="col-12">
+						<label class="text-light">Mother's Maiden Name</label>
+						<div class="row g-2">
+							<div class="col-3">
+								<input class="form-control form-control-sm" @bind="motherFirstName" placeholder="First Name">
+							</div>
+							<div class="col-3">
+								<input class="form-control form-control-sm" @bind="motherMiddleName" placeholder="Middle Name">
+							</div>
+							<div class="col-3">
+								<input class="form-control form-control-sm" @bind="motherLastName" placeholder="Last Name">
+							</div>
+							<div class="col-1">
+								<input class="form-control form-control-sm" @bind="motherSuffix" placeholder="Suffix">
+							</div>
+						</div>
+					</div>
+
+
+					<!-- Row 8 (Beneficiary's Name) -->
+					<div class="col-12">
+						<label class="text-light">Beneficiary's Name</label>
+						<div class="row g-2">
+							<div class="col-3">
+								<input class="form-control form-control-sm" @bind="beneficiaryFirstName" placeholder="First Name">
+							</div>
+							<div class="col-3">
+								<input class="form-control form-control-sm" @bind="beneficiaryMiddleName" placeholder="Middle Name">
+							</div>
+							<div class="col-3">
+								<input class="form-control form-control-sm" @bind="beneficiaryLastName" placeholder="Last Name">
+							</div>
+							<div class="col-1">
+								<input class="form-control form-control-sm" @bind="beneficiarySuffix" placeholder="Suffix">
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="row g-3 mt-3">
+					<!-- Upload Government ID -->
+					<div class="col-md-4">
+						<label class="text-light">Upload Government Valid ID (Front & Back)</label>
+
+						<!-- View Button -->
+						<div class="d-flex gap-2">
+							<input type="file" class="btn btn-light btn-sm w-75" required />
+							<button class="btn btn-outline-light">View</button>
+						</div>
+					</div>
+
+					<!-- Upload 1x1 Picture -->
+					<div class="col-md-4">
+						<label class="text-light">Upload 1x1 Picture</label>
+
+						<!-- View BUtton -->
+						<div class="d-flex gap-2">
+							<input type="file" class="btn btn-light btn-sm w-75" required />
+							<button class="btn btn-outline-light">View</button>
+						</div>
+					</div>
+				</div>
+
+				<!-- Terms and Conditions Checkbox -->
+				<div class="form-check d-flex justify-content-end mt-3">
+					<input class="form-check-input mx-2" type="checkbox" id="termsAndConditions" required>
+					<label class="form-check-label text-light" for="termsAndConditions">
+						I accept the terms and conditions
+					</label>
+				</div>
+
+				<!-- Register Button -->
+				<div class="text-end mt-3">
+					<button class="btn btn-primary btn-secondary" @onclick="LoginAsync">Submit Application</button>
+				</div>
+
 			</div>
 		</div>
 	</main>
