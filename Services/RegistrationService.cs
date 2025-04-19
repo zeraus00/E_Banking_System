@@ -26,7 +26,7 @@ namespace Services
         }
 
 
-        public async Task RegisterAsync(string firstName, string? middleName, string lastName, string? suffix,
+        public async Task RegisterAsync(string userFirstName, string? userMiddleName, string userLastName, string? userSuffix,
                 string fatherFirstName, string? fatherMiddleName, string fatherLastName, string? fatherSuffix,
                 string motherFirstName, string? motherMiddleName, string motherLastName, string? motherSuffix,
                 string beneficiaryFirstName, string? beneficiaryMiddleName, string beneficiaryLastName, string? beneficiarySuffix,
@@ -35,7 +35,7 @@ namespace Services
                 int age, string sex, string contactNumber, string Occupation, string taxIdentificationNumber, string civilStatus, string userReligion
             )
         {
-            Name UserName = await RegisterName(firstName, middleName, lastName, suffix);
+            Name UserName = await RegisterName(userFirstName, userMiddleName, userLastName, userSuffix);
             Name FatherName = await RegisterName(fatherFirstName, fatherMiddleName, fatherLastName, fatherSuffix);
             Name MotherName = await RegisterName(motherFirstName, motherMiddleName, motherLastName, motherSuffix);
             Name BeneficiaryName = await RegisterName(beneficiaryFirstName, beneficiaryMiddleName, beneficiaryLastName, beneficiarySuffix);
@@ -62,32 +62,32 @@ namespace Services
         }
 
 
-        public async Task<Name> RegisterName(string firstName, string? middleName, string lastName, string? suffix)
+        public async Task<Name> RegisterName(string userFirstName, string? userMiddleName, string userLastName, string? userSuffix)
         {
 
-            if (string.IsNullOrWhiteSpace(firstName)) 
+            if (string.IsNullOrWhiteSpace(userFirstName)) 
             {
                 throw new FieldMissingException("First Name is required.");
             }
 
-            if (string.IsNullOrWhiteSpace(lastName)) 
+            if (string.IsNullOrWhiteSpace(userLastName)) 
             {
                 throw new FieldMissingException($"Last Name is required.");
             }
 
             var nameBuilder = new NameBuilder();
             nameBuilder
-                .WithFirstName(firstName)
-                .WithLastName(lastName);
+                .WithFirstName(userFirstName)
+                .WithLastName(userLastName);
 
-            if (!string.IsNullOrWhiteSpace(middleName))
+            if (!string.IsNullOrWhiteSpace(userMiddleName))
             {
-                nameBuilder.WithMiddleName(middleName);
+                nameBuilder.WithMiddleName(userMiddleName);
             }
 
-            if (!string.IsNullOrWhiteSpace(suffix))
+            if (!string.IsNullOrWhiteSpace(userSuffix))
             {
-                nameBuilder.WithSuffix(suffix);
+                nameBuilder.WithSuffix(userSuffix);
             }
 
             Name UserName = nameBuilder.Build();
