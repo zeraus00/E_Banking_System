@@ -24,10 +24,9 @@
     }
 
     .custom-card.sm {
-        background-color: gray;
+        background-color: #E0E0E0;
         font-weight: lighter;
         width: 100%;
-        padding: 0.5rem;
         border-radius: 5px;
     }
 
@@ -36,7 +35,7 @@
         display: flex;
         color: black;
         background-color: white;
-        border: 20px solid #069DEC;
+        border: 15px solid #3B61B4;
         border-radius: 15px;
         margin: 2rem 0;
         padding: 1rem;
@@ -75,8 +74,8 @@
     background-color: #41C1D8;
     border: 2px solid white;
     color: black;
-    font-size: 20px;
-    border-radius: 10px;
+    font-size: 18px;
+    border-radius: 5px;
     width: 100%;
     text-align: left;
     padding: 12px 30px;
@@ -87,13 +86,11 @@
         color: #41C1D8;
     }
 
-/* Adjustments for View All button */
 .btn-link {
     color: #41C1D8;
     text-decoration: none;
 }
 
-/* Adjustments for responsive design */
 @media (max-width: 600px) {
     .custom-card-wrapper {
         max-width: 100%;
