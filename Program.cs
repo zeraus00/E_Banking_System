@@ -33,6 +33,7 @@ builder.Services.AddScoped<SignInService>();
 builder.Services.AddScoped<ClaimsHelperService>();
 builder.Services.AddScoped<AuthenticationStateProvider, NexusAuthenticationStateProvider>();
 builder.Services.AddScoped<NexusAuthenticationService>();
+builder.Services.AddScoped<RegistrationService>();
 
 builder.Services.AddAntiforgery(options =>
 {

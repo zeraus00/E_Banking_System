@@ -32,7 +32,7 @@ namespace Services
                 string beneficiaryFirstName, string? beneficiaryMiddleName, string beneficiaryLastName, string? beneficiarySuffix,
                 DateTime birthDate, int birthCityId, int birthProvinceId, int birthRegionId,
                 string houseNo, string street, int barangayId, int cityId, int provinceId, int regionId, int postalCode,
-                int age, string sex, string contactNumber, string taxIdentificationNumber, string civilStatus, string userReligion
+                int age, string sex, string contactNumber, string Occupation, string taxIdentificationNumber, string civilStatus, string userReligion
             )
         {
             Name UserName = await RegisterName(firstName, middleName, lastName, suffix);
@@ -55,6 +55,7 @@ namespace Services
                 age,
                 sex,
                 contactNumber,
+                Occupation,
                 taxIdentificationNumber, 
                 civilStatus
                 );
@@ -241,6 +242,7 @@ namespace Services
                 .WithAge(age)
                 .WithSex(sex)
                 .WithContactNumber(contactNumber)
+                .WithOccupation(Occupation)
                 .WithTaxIdentificationNumber(taxIdentificationNumber)
                 .WithCivilStatus(civilStatus);
 
