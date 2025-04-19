@@ -11,6 +11,7 @@
 @inject HttpClient http
 @inject CredentialValidationService _validationService
 @inject SignInService _signInService
+@inject ClaimsHelperService _claimsHelperService
 @layout PlainLayout
 
 
@@ -196,12 +197,8 @@
 				return;
 			}
 
-			//  Create a list of claims from User Authentication details.
-			var claims = _signInService.ConvertToClaimsList(userAuth);
-
-
 			//  Handle Sign In logic.
-			await _signInService.TrySignInAsync(claims);
+			await _signInService.TrySignInAsync(userAuth);
 
 			//	Redirect based on role.
 			redirectUrl = _signInService.RedirectBasedOnRole(userAuth.RoleId);

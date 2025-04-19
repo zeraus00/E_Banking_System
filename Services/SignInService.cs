@@ -15,50 +15,27 @@ namespace Services
     public class SignInService
     {
         private readonly HttpContext _httpContext;
-        string _cookieScheme;
+        private readonly ClaimsHelperService _claimsHelperService;
 
         /// <summary>
         /// Constructor for the SignInService.
         /// </summary>
-        /// <param name="httpContext">HttpContext to manage user session and authentication.</param>
+        /// <param name="accessor">accessor to httpcontext manage user session and authentication.</param>
         public SignInService(IHttpContextAccessor accessor)
         {
             _httpContext = accessor.HttpContext!;
-            _cookieScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        }
-
-        /// <summary>
-        /// Converts the user authentication information into a list of claims.
-        /// </summary>
-        /// <param name="userAuth">User authentication details.</param>
-        /// <returns>A list of claims representing the user's identity.</returns>
-        public List<Claim> ConvertToClaimsList(UserAuth userAuth)
-        {
-            var roleId = userAuth.RoleId.ToString();
-            var accountId = (userAuth.AccountId ?? 0).ToString();
-            var userInfoId = (userAuth.UserInfoId ?? 0).ToString();
-
-            return new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, userAuth.UserAuthId.ToString()),
-                new Claim(ClaimTypes.Name, userAuth.Email),
-                new Claim(ClaimTypes.Role, userAuth.Role.RoleName),
-                new Claim(CustomClaimTypes.RoleId, roleId),
-                new Claim(CustomClaimTypes.AccountId, accountId),
-                new Claim(CustomClaimTypes.UserInfoId, userInfoId)
-            };
+            _claimsHelperService = new();
         }
 
         /// <summary>
         /// Signs in the user by creating an authentication ticket and adding the claims.
         /// </summary>
-        /// <param name="claims">The list of claims representing the user's identity.</param>
+        /// <param name="userAuth">The model containing the user's authentication details.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        public async Task TrySignInAsync(List<Claim> claims)
+        public async Task TrySignInAsync(UserAuth userAuth)
         {
 
-            var identity = new ClaimsIdentity(claims, _cookieScheme);
-            var principal = new ClaimsPrincipal(identity);
+            var principal = _claimsHelperService.CreateClaimsPrincipal(userAuth);
 
             var authProperties = new AuthenticationProperties
             {
@@ -68,7 +45,7 @@ namespace Services
             };
 
             //  Sign in the user
-            await _httpContext.SignInAsync(_cookieScheme, principal, authProperties);
+            await _httpContext.SignInAsync(_claimsHelperService.cookieScheme, principal, authProperties);
             return;
         }
 

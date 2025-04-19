@@ -30,6 +30,7 @@ builder.Services.AddHttpClient();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<CredentialValidationService>();
 builder.Services.AddScoped<SignInService>();
+builder.Services.AddScoped<ClaimsHelperService>();
 
 builder.Services.AddAntiforgery(options =>
 {
@@ -130,7 +131,11 @@ app.MapGet("/get-csrf", (HttpContext context, IAntiforgery antiforgery) =>
 });
 
 
-app.MapPost("/login", async (LogInViewModel _loginModel, CredentialValidationService _validationService, SignInService _signInService) =>
+app.MapPost("/login", async (
+    LogInViewModel _loginModel, 
+    CredentialValidationService _validationService, 
+    SignInService _signInService,
+    ClaimsHelperService _claimsHelperService) =>
 {
     try 
     {
@@ -149,12 +154,8 @@ app.MapPost("/login", async (LogInViewModel _loginModel, CredentialValidationSer
             return Results.Redirect(redirectUrl);
         }
 
-        //  Create a list of claims from User Authentication details.
-        var claims = _signInService.ConvertToClaimsList(userAuth);
-
-
         //  Handle Sign In logic.
-        await _signInService.TrySignInAsync(claims);
+        await _signInService.TrySignInAsync(userAuth);
 
         redirectUrl = _signInService.RedirectBasedOnRole(userAuth.RoleId);
         return Results.Redirect(redirectUrl); 
