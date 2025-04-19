@@ -130,13 +130,13 @@
 					<!-- Contact No -->
 					<div class="col">
 						<label class="text-light">Contact No.</label>
-						<input class="form-control form-control-sm" placeholder="Contact No." required>
+						<input class="form-control form-control-sm" @bind="contactNumber" placeholder="Contact No." required>
 					</div>
 
 					<!-- Email Address -->
 					<div class="col">
 						<label class="text-light">Email Address</label>
-						<input type="email" class="form-control form-control-sm" placeholder="Email" required>
+						<input type="email" class="form-control form-control-sm" @bind="email" placeholder="Email" required>
 					</div>
 				</div>
 			
@@ -180,12 +180,12 @@
 
 						<!-- Street No. -->
 						<div class="col">
-							<input class="form-control form-control-sm" placeholder="Street No." required>
+							<input class="form-control form-control-sm" @bind="streetNo" placeholder="Street No." required>
 						</div>
 
 						<!-- House No. -->
 						<div class="col">
-							<input class="form-control form-control-sm" placeholder="House No." required>
+							<input class="form-control form-control-sm" @bind="houseNo" placeholder="House No." required>
 						</div>
 
 					</div>
@@ -251,16 +251,16 @@
 							<label class="text-light">Father's Name</label>
 							<div class="row g-2">
 								<div class="col-3">
-									<input class="form-control form-control-sm" placeholder="First Name">
+									<input class="form-control form-control-sm" @bind="fatherFirstName" placeholder="First Name">
 								</div>
 								<div class="col-3">
-									<input class="form-control form-control-sm" placeholder="Middle Name">
+									<input class="form-control form-control-sm" @bind="fatherMiddleName" placeholder="Middle Name">
 								</div>
 								<div class="col-3">
-									<input class="form-control form-control-sm" placeholder="Last Name">
+									<input class="form-control form-control-sm" @bind="fatherLastName" placeholder="Last Name">
 								</div>
 								<div class="col-1">
-									<input class="form-control form-control-sm" placeholder="Suffix">
+									<input class="form-control form-control-sm" @bind="fatherSuffix" placeholder="Suffix">
 								</div>
 							</div>
 						</div>
@@ -271,16 +271,16 @@
 							<label class="text-light">Mother's Maiden Name</label>
 							<div class="row g-2">
 								<div class="col-3">
-									<input class="form-control form-control-sm" placeholder="First Name">
+									<input class="form-control form-control-sm" @bind="motherFirstName" placeholder="First Name">
 								</div>
 								<div class="col-3">
-									<input class="form-control form-control-sm" placeholder="Middle Name">
+									<input class="form-control form-control-sm" @bind="motherMiddleName" placeholder="Middle Name">
 								</div>
 								<div class="col-3">
-									<input class="form-control form-control-sm" placeholder="Last Name">
+									<input class="form-control form-control-sm" @bind="motherLastName" placeholder="Last Name">
 								</div>
 								<div class="col-1">
-									<input class="form-control form-control-sm" placeholder="Suffix">
+									<input class="form-control form-control-sm" @bind="motherSuffix" placeholder="Suffix">
 								</div>
 							</div>
 						</div>
@@ -291,16 +291,16 @@
 							<label class="text-light">Beneficiary's Name</label>
 							<div class="row g-2">
 								<div class="col-3">
-									<input class="form-control form-control-sm" placeholder="First Name">
+									<input class="form-control form-control-sm" @bind="beneficiaryFirstName" placeholder="First Name">
 								</div>
 								<div class="col-3">
-									<input class="form-control form-control-sm" placeholder="Middle Name">
+									<input class="form-control form-control-sm" @bind="beneficiaryMiddleName" placeholder="Middle Name">
 								</div>
 								<div class="col-3">
-									<input class="form-control form-control-sm" placeholder="Last Name">
+									<input class="form-control form-control-sm" @bind="beneficiaryLastName" placeholder="Last Name">
 								</div>
 								<div class="col-1">
-									<input class="form-control form-control-sm" placeholder="Suffix">
+									<input class="form-control form-control-sm" @bind="beneficiarySuffix" placeholder="Suffix">
 								</div>
 							</div>
 						</div>
@@ -349,87 +349,167 @@
 	</main>
 </div>
 
+
+
 @code {
+
+	private string error = string.Empty;
+
 	public string firstName = "";
 	public string middleName = "";
 	public string lastName = "";
-	public string error = "";
+	public string suffix = "";
 
-	private string selectedReligion;
-	private List<string> religionOptions = new List<string>
+	public int age;
+	public DateTime birthDate;
+	public string selectedBirthCity = "";
+	public string selectedBirthProvince = "";
+	public string selectedBirthRegion = "";
+
+	public string email = "";
+	public string selectedSex = "";
+	public string selectedCivilStatus = "";
+	public string selectedReligion = "";
+	public string contactNumber = "";
+	public string Occupation = "";
+	//address info
+	public string houseNo = "";
+	public string streetNo = "";
+	public string selectedRegion = "";
+	public string selectedProvince = "";
+	public string selectedCity = "";
+	public string selectedBarangay = "";
+
+	//Parents Name
+	public string fatherFirstName = "";
+	public string fatherMiddleName = "";
+	public string fatherLastName = "";
+	public string fatherSuffix = "";
+
+	public string motherFirstName = "";
+	public string motherMiddleName = "";
+	public string motherLastName = "";
+	public string motherSuffix = "";
+
+	public string beneficiaryFirstName = "";
+	public string beneficiaryMiddleName = "";
+	public string beneficiaryLastName = "";
+	public string beneficiarySuffix = "";
+
+	private List<Region> regions = new List<Region>();
+	private List<Province> provinces = new List<Province>();
+	private List<City> cities = new List<City>();
+	private List<Barangay> barangays = new List<Barangay>();
+
+	// For birth place of user
+
+	// For Full address of user
+	private async Task OnInitializedAsync()
 	{
-		"Religion 1",
-		"Religion 2",
-		"Religion 3",
-		"Religion 4"
-	};
+		await LoadRegionAsync();	
+	}
 
-	private string selectedProvince;
-	private string selectedMunicipality;
-	private string selectedBarangay;
-
-	private List<string> provinceOptions = new List<string>
+	private async Task LoadRegionAsync()
 	{
-		"Province 1",
-		"Province 2",
-		"Province 3",
-		"Province 4"
-	};
+		var regionResponse = await HttpClient.GetFromJsonAsync<List<Region>>("https://psgc.gitlab.io/api/regions/");
+		regions = regionResponse ?? new List<Region>();
+		await LoadProvinceAsync();
+	}
 
-	private List<string> municipalityOptions = new List<string>
+	private async Task LoadProvinceAsync()
 	{
-		"Municipality 1",
-		"Municipality 2",
-		"Municipality 3",
-		"Municipality 4"
-	};
+		var provinceResponse = await HttpClient.GetFromJsonAsync<List<Province>>($"https://psgc.gitlab.io/api/regions/{selectedRegion}/provinces/");
+		provinces = provinceResponse ?? new List<Province>();
+		await LoadCitiesAsync();
+	}
 
-	private List<string> barangayOptions = new List<string>
+	private async Task LoadCitiesAsync()
 	{
-		"Barangay 1",
-		"Barangay 2",
-		"Barangay 3",
-		"Barangay 4"
-	};
+		var citiesResponse = await HttpClient.GetFromJsonAsync<List<City>>($"https://psgc.gitlab.io/api/provinces/{selectedProvince}/municipalities/");
+		cities = citiesResponse ?? new List<City>();
+		await LoadBarangaysAsync();
+	}
 
-	private string selectedRegion;
-	private string selectedCity;
-	private string selectedBirthProvince;
-
-	private List<string> regionOptions = new List<string>
+	private async Task LoadBarangaysAsync()
 	{
-		"Region 1",
-		"Region 2",
-		"Region 3",
-		"Region 4"
-	};
+		var barangayResponse = await HttpClient.GetFromJsonAsync<List<Barangay>>($"https://psgc.gitlab.io/api/municipalities/{selectedCity}/barangays/");
+		barangays = barangayResponse ?? new List<Barangay>();
+	}
 
-		private List<string> cityOptions = new List<string>
+	private int GetIdFromSelected(string selectedCode, List<dynamic> options)
 	{
-		"City 1",
-		"City 2",
-		"City 3",
-		"City 4"
-	};
-
-	private List<string> birthProvinceOptions = new List<string>
-	{
-		"Province 1",
-		"Province 2",
-		"Province 3",
-		"Province 4"
-	};
-
-	private void LoginAsync()
-	{
-		if (string.IsNullOrEmpty(firstName) || string.IsNullOrEmpty(lastName))
+		foreach (var item in options)
 		{
-			error = "Please fill in both the email and password.";
-			return;
+			if (item?.Code == selectedCode)
+			{
+				return item?.Id ?? 0;
+			}
 		}
 
-		error = "";
-		NavigationManager.NavigateTo("/Client_home_page");
+		return 0;
 	}
+
+	///private int GetIdFromSelected(string selectedCode, List<dynamic> options)
+	///{
+		///var selected = options.FirstOrDefault(item => item.Code == selectedCode);
+		///return selected?.id ?? 0;
+	///}
+
+	private async Task LoginAsync()
+	{
+		try
+		{
+			await RegistrationService.RegisterAsync
+			(
+				userFirstName: firstName,
+				userMiddleName: middleName,
+				userLastName: lastName,
+				userSuffix: suffix,
+				birthDate: birthDate,
+				birthCityId: 1,
+				birthProvinceId: 1,
+				birthRegionId: 1, 
+				houseNo: houseNo,
+				street: streetNo,
+				barangayId: GetIdFromSelected(selectedBarangay, barangays.Cast<dynamic>().ToList()),
+				cityId: GetIdFromSelected(selectedCity, cities.Cast<dynamic>().ToList()),
+				provinceId: GetIdFromSelected(selectedProvince, provinces.Cast<dynamic>().ToList()),
+				regionId: GetIdFromSelected(selectedRegion, regions.Cast<dynamic>().ToList()),
+				postalCode: 1000,
+				age: age,
+				sex: selectedSex,
+				contactNumber: contactNumber,
+				Occupation: Occupation,
+				email: email, 
+				civilStatus: selectedCivilStatus,
+				userReligion: 1,
+				fatherFirstName: fatherFirstName,
+				fatherMiddleName: fatherMiddleName,
+				fatherLastName: fatherLastName,
+				fatherSuffix: fatherSuffix,
+				motherFirstName: motherFirstName,
+				motherMiddleName: motherMiddleName,
+				motherLastName: motherLastName,
+				motherSuffix: motherSuffix,
+				beneficiaryFirstName: beneficiaryFirstName,
+				beneficiaryMiddleName: beneficiaryMiddleName,
+				beneficiaryLastName: beneficiaryLastName,
+				beneficiarySuffix: beneficiarySuffix
+			);
+			NavigationManager.NavigateTo("/");
+
+		}
+
+		catch (MissingFieldException ex)
+		{
+			error = ex.Message;
+		}
+		catch (Exception ex)
+		{
+			error = "Error occurred: " + ex.Message;
+		}
+	}
+
 }
+
 
