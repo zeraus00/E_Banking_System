@@ -192,27 +192,55 @@
 
 
 					<!-- Row 5 -->
-					<div class="row g-2 mt-2">
+					<div class="row g-2 mt-3">
 
-						<!-- Birth Place -->
-						<div class="col-3">
+						<!-- Region -->
+						<div class="col">
 							<label class="text-light">Birth Place</label>
-							<input class="form-control form-control-sm" placeholder="Birth Place" required>
+							<select class="form-select form-select-sm" @bind="selectedRegion" required>
+								@foreach (var region in regionOptions)
+								{
+									<option value="@region">@region</option>
+								}
+							</select>
 						</div>
 
+						<!-- City -->
+						<div class="col">
+							<label class="text-light" style="visibility: hidden;">City</label>
+							<select class="form-select form-select-sm" @bind="selectedCity" required>
+								@foreach (var city in cityOptions)
+								{
+									<option value="@city">@city</option>
+								}
+							</select>
+						</div>
+
+						<!-- Province -->
+						<div class="col">
+							<label class="text-light" style="visibility: hidden;">Province</label>
+							<select class="form-select form-select-sm" @bind="selectedBirthProvince" required>
+								@foreach (var birthProvince in birthProvinceOptions)
+								{
+									<option value="@birthProvince">@birthProvince</option>
+								}
+							</select>
+						</div
+
 						<!-- Birth Date -->
-						<div class="col-3">
+						<div class="col">
 							<label class="text-light">Birth Date</label>
-							<input class="form-control form-control-sm" type="date" placeholder="mm/dd/yyyy" required>
+							<input class="form-control form-control-sm" type="date" required>
 						</div>
 
 						<!-- Occupation -->
-						<div class="col-3">
+						<div class="col">
 							<label class="text-light">Occupation</label>
 							<input class="form-control form-control-sm" placeholder="Occupation" required>
 						</div>
-					</div>
 
+					</div>
+					
 
 					<div class="row g-2 mt-2">
 
@@ -362,6 +390,34 @@
 		"Barangay 2",
 		"Barangay 3",
 		"Barangay 4"
+	};
+
+	private string selectedRegion;
+	private string selectedCity;
+	private string selectedBirthProvince;
+
+	private List<string> regionOptions = new List<string>
+	{
+		"Region 1",
+		"Region 2",
+		"Region 3",
+		"Region 4"
+	};
+
+		private List<string> cityOptions = new List<string>
+	{
+		"City 1",
+		"City 2",
+		"City 3",
+		"City 4"
+	};
+
+	private List<string> birthProvinceOptions = new List<string>
+	{
+		"Province 1",
+		"Province 2",
+		"Province 3",
+		"Province 4"
 	};
 
 	private void LoginAsync()
