@@ -31,6 +31,7 @@ builder.Services.AddRazorComponents()
 builder.Services.AddHttpClient();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<CredentialValidationService>();
+builder.Services.AddScoped<SignInService>();
 
 builder.Services.AddAntiforgery(options =>
 {
