@@ -1,97 +1,140 @@
 ﻿@using Data;
 @using Layout
-@using Services;
-@using System.Security.Claims;
 @using Microsoft.AspNetCore.Authentication;
 @using Microsoft.AspNetCore.Authentication.Cookies;
+@using Services;
+@using System.Security.Claims;
+@using System.ComponentModel.DataAnnotations;
+@using ViewModels;
 
 @page "/Login_page"
-@rendermode InteractiveServer
+@* @rendermode InteractiveServer *@
 @inject NavigationManager NavigationManager
 @inject EBankingContext _context
 @inject IHttpContextAccessor HttpContextAccessor
+@inject IJSRuntime JS
+@inject HttpClient http
 @inject LogInService _logInService
 @layout PlainLayout
 
-<div class="page">
-	<main>
 
-		<!-- Login Box -->
-		<div class="card login p-4 shadow-lg">
-			<div class="d-flex justify-content-end">
+@* <EditForm Model="loginModel" OnValidSubmit="LogInAsync" FormName="LogInForm">
+	<DataAnnotationsValidator />
+	<ValidationSummary />
 
-				<!-- Close Button -->
-				<NavLink href="/">
-					<button type="button" class="btn-close" aria-label="Close"></button>
-				</NavLink>
-			</div>
-			<h2 class="text-center fw-bold">User Login</h2>
+	<div class="form-group">
+		<label for="email">Email</label>
+		<InputText id="email" class="form-control" @bind-Value="loginModel.Email" />
+		<ValidationMessage For="() => loginModel.Email" />
+	</div>
 
-			<!-- Error Handling (Draft) -->
-			@if (error.Length > 0)
-			{
-				<div class="alert alert-danger alert-dismissible fade show" role="alert">
-					<strong>@error</strong>
+	<div class="form-group">
+		<label for="password">Password</label>
+		<InputText id="password" type="password" class="form-control" @bind-Value="loginModel.Password" />
+		<ValidationMessage For="() => loginModel.Password" />
+	</div>
+
+	<button type="submit" class="btn btn-primary">Login</button>
+</EditForm> *@
+
+<EditForm Model="loginModel" OnValidSubmit="LogInAsync" FormName="LogInForm">
+	<DataAnnotationsValidator />
+	<div class="page">
+		<main>
+
+			<!-- Login Box -->
+			<div class="card login p-4 shadow-lg">
+				<div class="d-flex justify-content-end">
+
+					<!-- Close Button -->
+					<NavLink href="/">
+						<button type="button" class="btn-close" aria-label="Close"></button>
+					</NavLink>
 				</div>
-			} 
+				<h2 class="text-center fw-bold">User Login</h2>
 
-			<!-- Authentication -->
-			<div class="loginform px-4">
-				<input class="form-control form-control-custom form-control-lg mb-3" @bind="email" placeholder="Email">
+				<!-- Error Handling (Draft) -->
+				@if (error.Length > 0)
+				{
+					<div class="alert alert-danger alert-dismissible fade show" role="alert">
+						<strong>@error</strong>
+					</div>
+				}
 
-				<div class="position-relative">
-					<input type="@passwordInputType"
-					@bind="password"
-					class="form-control form-control-custom form-control-lg pe-5"
-					placeholder="Password" />
+				<!-- Authentication -->
+				<div class="loginform px-4">
+					<InputText id="email" class="form-control form-control-custom form-control-lg mb-3" @bind-Value="loginModel.Email" />
+					<ValidationMessage For="() => loginModel.Email" />
+						@* 
+					<input class="form-control form-control-custom form-control-lg mb-3" @bind="loginModel.Email" placeholder="Email">
+						*@
+					<div class="position-relative">
+						<InputText id="password" 
+							type="password"
+								   class="form-control form-control-custom form-control-lg pe-5"
+								   @bind-Value="loginModel.Password" />
+						<ValidationMessage For="() => loginModel.Password" />
 
-					<button type="button"
-					class="btn position-absolute end-0 top-50 translate-middle-y me-3 p-0 border-0 bg-transparent"
-					style="z-index: 10;"
-					@onclick="TogglePasswordVisibility">
-						<i class="bi @eyeIconClass text-muted"></i>
-					</button>
-				</div>
+						@* <input type="@passwordInputType"
+						@bind="loginModel.Password"
+						class="form-control form-control-custom form-control-lg pe-5"
+						placeholder="Password" /> *@
 
-
-				<div class="col d-flex align-items-center mt-1">
-
-					<!-- Remember Me Checkbox -->
-					<div class="form-check">
-						<input class="form-check-input" type="checkbox" id="rememberMe">
-						<label class="form-check-label" for="rememberMe">
-							Remember me
-						</label>
+						<button type="button"
+						class="btn position-absolute end-0 top-50 translate-middle-y me-3 p-0 border-0 bg-transparent"
+						style="z-index: 10;"
+						@onclick="TogglePasswordVisibility">
+							<i class="bi @eyeIconClass text-muted"></i>
+						</button>
 					</div>
 
-					<!-- Forgot Password Link -->
-					<NavLink class="nav-link ms-auto" href="/Forgot_password">
-						Forget Password?
-					</NavLink>
 
+					<div class="col d-flex align-items-center mt-1">
+
+						<!-- Remember Me Checkbox -->
+						<div class="form-check">
+							<input class="form-check-input" type="checkbox" id="rememberMe">
+							<label class="form-check-label" for="rememberMe">
+								Remember me
+							</label>
+						</div>
+
+						<!-- Forgot Password Link -->
+						<NavLink class="nav-link ms-auto" href="/Forgot_password">
+							Forget Password?
+						</NavLink>
+
+					</div>
 				</div>
-			</div>
 
-			<!-- Login Button -->
-			<div class="mb-2 mx-auto px-4 w-100">
-				<button class="btn btn-primary w-100" @onclick="LoginAsync"> Log in</button>
-			</div>
-
-			<!-- Sign Up Link -->
-			<div class="rpw px-4">
-				<div class="col d-flex align-items-center">
-					<p class="mb-0">Do not have an account?</p>
-					<NavLink class="nav-link ms-auto" href="Sign_up_page">
-						Register
-					</NavLink>
+				<!-- Login Button -->
+				<div class="mb-2 mx-auto px-4 w-100">
+					<button type="submit" class="btn btn-primary w-100">Login</button>
+					@* <button class="btn btn-primary w-100" @onclick="TryLogInAsync"> Log in</button> *@
 				</div>
-			</div>
 
-		</div>
-	</main>
-</div>
+				<!-- Sign Up Link -->
+				<div class="rpw px-4">
+					<div class="col d-flex align-items-center">
+						<p class="mb-0">Do not have an account?</p>
+						<NavLink class="nav-link ms-auto" href="Sign_up_page">
+							Register
+						</NavLink>
+					</div>
+				</div>
+
+			</div>
+		</main>
+	</div>
+</EditForm>
+
 
 @code {
+	[CascadingParameter]
+	HttpContext httpContext { get; set; }
+
+	[SupplyParameterFromForm]
+	public LogInViewModel loginModel { get; set; } = new();
 
 	public string email = "";
 	public string password = "";
@@ -114,11 +157,35 @@
 		}
 	}
 
-	private async Task LoginAsync()
+	private async Task TryLogInAsync() 
+	{
+		try 
+		{
+			var token = await JS.InvokeAsync<string>("getCookie", "XSRF-TOKEN");
+
+			var request = new HttpRequestMessage(HttpMethod.Post, "/login");
+			request.Headers.Add("X-CSRF-TOKEN", token);
+			request.Content = JsonContent.Create(new { Email = "a@a.com", Password = "123" });
+
+			var response = await http.SendAsync(request);
+			// // handle response
+			// //Console.WriteLine(Model.Email + " " + Model.Password);
+			// Console.WriteLine("aaaaa " + NavigationManager.BaseUri.ToString() + "login");
+			// await http.PostAsJsonAsync(NavigationManager.BaseUri + "login", loginModel);
+			
+		} catch (Exception ex) {
+			Console.WriteLine(ex.Message);
+			error = ex.Message;
+
+		}
+	}
+
+	private async Task LogInAsync()
 	{
 		try {
+
 			// Perform login logic here, such as checking credentials
-			UserAuth? userAuth = await _logInService.TryAuthenticateUserAsync(email, password);
+			UserAuth? userAuth = await _logInService.TryAuthenticateUserAsync(loginModel.Email, loginModel.Password);
 			if (userAuth == null) {
 				error = "Invalid email or password. Please try again.";
 				return;
@@ -128,14 +195,20 @@
 			string role = userAuth.Role.RoleName;
 			var claims = new List<Claim>
 			{
-				new Claim(ClaimTypes.Name, name),
-				new Claim(ClaimTypes.Role, role)
+				new Claim(ClaimTypes.NameIdentifier, loginModel.Email),
+				new Claim(ClaimTypes.Name, loginModel.Email),
+				new Claim(ClaimTypes.Role, role),
+				new Claim("accountId", userAuth.AccountId?.ToString() ?? "No Account")
 			};
 			var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 			var principal = new ClaimsPrincipal(identity);
-			//await HttpContextAccessor.HttpContext!.SignInAsync(
-			//	principal);
 
+			await httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+			var user = httpContext.User;
+			Console.WriteLine($"User Identity IsAuthenticated: {user.Identity?.IsAuthenticated}");
+			Console.WriteLine($"User Identity Name: {user.Identity?.Name}");
+
+			Console.WriteLine(userAuth.Role.RoleId);
 			NavigateBasedOnRole(userAuth.Role.RoleId);
 
 
@@ -156,7 +229,8 @@
 		if (_logInService.IsAdmin(roleId)) {
 			// go to admin home
 		} else if (_logInService.IsUser(roleId)) {
-			NavigationManager.NavigateTo("/Client_home");
+			httpContext.Response.Redirect("/Client_home");
+			//NavigationManager.NavigateTo("/Client_home");
 		} else if (_logInService.IsEmployee(roleId)) {
 			// go to employee home
 		} else {
