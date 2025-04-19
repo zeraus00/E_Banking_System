@@ -1,6 +1,8 @@
 ﻿using Exceptions;
 using Data;
 using Data.Repositories.User;
+using Data.Repositories.Auth;
+using Data.Models.User;
 
 
 namespace Services
@@ -13,6 +15,7 @@ namespace Services
         BirthInfoRepository _birthInfoRepository;
         AddressRepository _addressRepository;
         ReligionRepository _religionRepository;
+        UserAuthRepository _userAuthRepository;
 
 
         public RegistrationService(EBankingContext context) : base(context)
@@ -23,6 +26,7 @@ namespace Services
             _birthInfoRepository = new BirthInfoRepository(_context);
             _addressRepository = new AddressRepository(_context);
             _religionRepository = new ReligionRepository(_context);
+            _userAuthRepository = new UserAuthRepository(_context);
         }
 
 
@@ -32,7 +36,8 @@ namespace Services
                 string beneficiaryFirstName, string? beneficiaryMiddleName, string beneficiaryLastName, string? beneficiarySuffix,
                 DateTime birthDate, int birthCityId, int birthProvinceId, int birthRegionId,
                 string houseNo, string street, int barangayId, int cityId, int provinceId, int regionId, int postalCode,
-                int age, string sex, string contactNumber, string Occupation, string taxIdentificationNumber, string civilStatus, string userReligion
+                int age, string sex, string contactNumber, string Occupation, string taxIdentificationNumber, string civilStatus, string userReligion,
+                string userName, string email, string password
             )
         {
             Name UserName = await RegisterName(userFirstName, userMiddleName, userLastName, userSuffix);
@@ -43,6 +48,7 @@ namespace Services
             BirthInfo UserBirthInfo = await RegisterBirthInfo(birthDate, birthCityId, birthProvinceId, birthRegionId);
             Address UserAddress = await RegisterAddress(houseNo, street, barangayId, cityId, provinceId, regionId, postalCode);
             Religion UserReligion = await RegisterReligion(userReligion);
+
 
 
             UserInfo UserInfo = await RegisterUserInfo(
@@ -57,7 +63,10 @@ namespace Services
                 contactNumber,
                 Occupation,
                 taxIdentificationNumber, 
-                civilStatus
+                civilStatus,
+                userName,
+                email,
+                password
                 );
         }
 
@@ -210,7 +219,11 @@ namespace Services
             string contactNumber,
             string Occupation,
             string taxIdentificationNumber,
-            string civilStatus) 
+            string civilStatus,
+            string userName,
+            string email,
+            string password
+            ) 
         {
             if (string.IsNullOrWhiteSpace(contactNumber)) 
             {
@@ -231,6 +244,28 @@ namespace Services
                 throw new FieldMissingException("Civil Status is required.");
             }
 
+            if (string.IsNullOrWhiteSpace(userName))
+            {
+                throw new FieldMissingException("Username is Required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                throw new FieldMissingException("Email is required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(password))
+            {
+                throw new FieldMissingException("Password is required.");
+            }
+
+            //check for existing user by username
+            var existingUser = await _userAuthRepository.GetUserAuthByUserNameOrEmailAsync(userName);
+            if (existingUser != null)
+            {
+                throw new DuplicateWaitObjectException("Username is already exists.");
+            }
+
             var UserInfoBuilder = new UserInfoBuilder();
             UserInfoBuilder
                 .WithUserNameId(userNameId)
@@ -246,9 +281,20 @@ namespace Services
                 .WithTaxIdentificationNumber(taxIdentificationNumber)
                 .WithCivilStatus(civilStatus);
 
-            UserInfo UserInfo = _userInfoBuilder.Build();
+            UserInfo UserInfo = UserInfoBuilder.Build();
             await _userInfoRepository.AddAsync(UserInfo);
             await _userInfoRepository.SaveChangesAsync();
+
+            var UserAuthBuilder = new UserAuthBuilder()
+                .WithRoleId(2)
+               .WithUserInfoId(UserInfo.UserInfoId)
+               .WithUserName(userName)
+               .WithPassword(password);
+
+            UserAuth userAuth = UserAuthBuilder.Build();
+            await _userAuthRepository.AddAsync(userAuth);
+            await _userAuthRepository.SaveChangesAsync();
+
             return UserInfo;
         }
 
