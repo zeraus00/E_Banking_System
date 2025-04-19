@@ -1,112 +1,76 @@
 ﻿@page "/Transaction"
 @inject NavigationManager NavigationManager
 
-<div class="page">
-    <main>
-        <!-- Welcome Header (Rectangle Style) -->
-        <div class="container-md m-0 p-0">
-            <header class="custom-card client pt-4 pb-4 d-flex justify-content-between align-items-start">
-                <div class="px-5">
-                    <h5>Welcome Back</h5>
-                    <div class="d-flex align-items-center gap-3">
-                        <h1>clientName</h1>
-                        <h4 class="account-number">accountNumber</h4>
-                    </div>
-                </div>
-                <div class="notification img mx-5 my-auto">
-                    <img src="/bootstrap/Utilities/Bell.png" alt="Notification Bell" />
-                </div>
-            </header>
-        </div>
+<div class="container mt-4">
+    <h4 class="text-muted border-bottom pb-2">Account with paid loan</h4>
 
-        <!-- Main Section: Balance + Actions -->
-        <div class="container mt-4">
-            <div class="row g-3">
-                <!-- Balance Card -->
-                <div class="col-12 col-md-5 p-3">
-                    <section class="custom-card balance text-start p-4 h-100 border rounded shadow-sm bg-white w-100">
-                        <h3>Current Balance:</h3>
-                        <div class="fs-1 my-3">currentBalance</div>
-                        <div class="custom-card sm">
-                            <h6>clientPhone</h6>
-                        </div>
-                    </section>
-                </div>
+    <div class="d-flex align-items-center gap-2 my-3">
+        <InputDate class="form-control" @bind-Value="startDate" placeholder="Start Date" />
+        <InputDate class="form-control" @bind-Value="endDate" placeholder="End Date" />
+        <button class="btn btn-primary shadow-sm">Filter</button>
+    </div>
 
-                <!-- Action Buttons -->
-                <div class="col-12 col-md-6 my-auto">
-                    <div class="row g-4">
-
-                        <div class="col-6">
-                            <a href="/Withdraw_amount" class="nav-link button d-flex justify-content-between align-items-center p-3 border rounded shadow-sm h-100">
-                                Withdraw
-                                <img src="/bootstrap/Utilities/withdraw.png" alt="Withdraw Icon" style="width: 30px; height: 30px;" />
-                            </a>
-                        </div>
-
-                        <div class="col-6">
-                            <a href="/Transfer_amount" class="nav-link button d-flex justify-content-between align-items-center p-3 border rounded shadow-sm h-100">
-                                Transfer
-                                <img src="/bootstrap/Utilities/transfer.png" alt="Transfer Icon" style="width: 20px; height: 20px;" />
-                            </a>
-                        </div>
-
-                        <div class="col-6">
-                            <a href="/Deposit_amount" class="nav-link button d-flex justify-content-between align-items-center p-3 border rounded shadow-sm h-100">
-                                Deposit
-                                <img src="/bootstrap/Utilities/deposit.png" alt="Deposit Icon" style="width: 30px; height: 30px;" />
-                            </a>
-                        </div>
-
-                        <div class="col-6">
-                            <a href="/Loan_page" class="nav-link button d-flex justify-content-between align-items-center p-3 border rounded shadow-sm h-100">
-                                Loan Payment
-                                <img src="/bootstrap/Utilities/loan.png" alt="Loan Icon" style="width: 23px; height: 23px;" />
-                            </a>
-                        </div>
-
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-
-        <!-- Recent Transactions Section -->
-        <div class="container-md mt-4 px-5">
-            <section class="custom-card transactions">
-                <div class="d-flex justify-content-between align-items-center border-bottom">
-                    <label class="fs-4 mb-3 fw-bold">Recent Transactions</label>
-                    <button type="button" class="btn btn-link text-decoration-none">View All</button>
-                </div>
-
-                <!-- Transactions List -->
-                <div class="container py-3 px-5">
-                    <div class="row fs-5 fw-bold pb-3">
-                        <div class="col">Transaction</div>
-                        <div class="col text-end">Amount</div>
-                        <div class="col text-end">Date</div>
-                    </div>
-
-                    <div class="row fs-5 mb-1">
-                        <div class="col">Deposit</div>
-                        <div class="col text-end">$200</div>
-                        <div class="col text-end">04-01-2025</div>
-                    </div>
-                    <div class="row fs-5 mb-1">
-                        <div class="col">Withdraw</div>
-                        <div class="col text-end">$500</div>
-                        <div class="col text-end">04-02-2025</div>
-                    </div>
-                    <div class="row fs-5">
-                        <div class="col">Loan</div>
-                        <div class="col text-end">$300</div>
-                        <div class="col text-end">04-03-2025</div>
-                    </div>
-                </div>
-
-            </section>
-        </div>
-
-    </main>
+    <div class="table-responsive">
+        <table class="table table-bordered text-center">
+            <thead class="table-info">
+                <tr>
+                    <th>Name</th>
+                    <th>Account Number</th>
+                    <th>Loan Amount</th>
+                    <th>Loan Term</th>
+                    <th>Statement Date</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var account in paidLoanAccounts)
+                {
+                    <tr class="@((paidLoanAccounts.IndexOf(account) % 2 == 0 ? "bg-light" : ""))">
+                        <td>@account.Name</td>
+                        <td>@account.AccountNumber</td>
+                        <td>@account.LoanAmount.ToString("N0")</td>
+                        <td>@account.LoanTerm</td>
+                        <td>@account.StatementDate?.ToString("MM/dd/yy")</td>
+                        <td>
+                            <button class="btn btn-outline-info btn-sm px-3">View Status</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 </div>
+
+@code {
+    private DateTime? startDate;
+    private DateTime? endDate;
+
+    private List<LoanAccount> paidLoanAccounts = new()
+    {
+        new LoanAccount
+        {
+            Name = "Sample Name #1",
+            AccountNumber = "AAA-000000",
+            LoanAmount = 20000,
+            LoanTerm = "6 Months",
+            StatementDate = null
+        },
+        new LoanAccount
+        {
+            Name = "Sample Name #3",
+            AccountNumber = "AAA-000000",
+            LoanAmount = 40000,
+            LoanTerm = "12 Months",
+            StatementDate = null
+        }
+    };
+
+    public class LoanAccount
+    {
+        public string Name { get; set; }
+        public string AccountNumber { get; set; }
+        public int LoanAmount { get; set; }
+        public string LoanTerm { get; set; }
+        public DateTime? StatementDate { get; set; }
+    }
+}

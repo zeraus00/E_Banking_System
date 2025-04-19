@@ -5,51 +5,39 @@
 
 <div class="page">
     <main>
-        <AuthorizeView>
-            <Authorized>
-                <!-- Header -->
-                <header class="custom-card-clientpage clientheader pt-4 pb-4 d-flex justify-content-between align-items-start">
-                    <div class="px-5">
-                        <h5>Welcome Back</h5>
-                        <div class="d-flex align-items-center gap-3">
-                            <h1>clientName</h1>
-                            <h4 class="account-number">accountNumber</h4>
-                        </div>
-                    </div>
-                    <div class="notification img mx-5 my-auto">
-                        <img src="/bootstrap/Utilities/Bell.png" alt="Notification Bell" />
-                    </div>
-                </header>
-            </Authorized>
-            <NotAuthorized>
-                <!-- Header -->
-                <header class="custom-card-clientpage clientheader pt-4 pb-4 d-flex justify-content-between align-items-start">
-                    <div class="px-5">
-                        <h5>You are not signed in.</h5>
-                        <div class="d-flex align-items-center gap-3">
-                            <h1>clientName</h1>
-                            <h4 class="account-number">accountNumber</h4>
-                        </div>
-                    </div>
-                    <div class="notification img mx-5 my-auto">
-                        <img src="/bootstrap/Utilities/Bell.png" alt="Notification Bell" />
-                    </div>
-                </header>
-            </NotAuthorized>
-        </AuthorizeView>
+        <!-- Header -->
+        <header class="custom-card-clientpage clientheader py-4 d-flex justify-content-between align-items-start">
+            <div class="px-5">
+                <h5>Welcome Back</h5>
+                <div class="d-flex align-items-center gap-4">
+                    <h2><strong>@(string.IsNullOrWhiteSpace(clientName) ? "Client Name" : clientName)</strong></h2>
+                <h4 class="text-secondary">@($"{(string.IsNullOrWhiteSpace(accountNumber) ? "XXXX-XXXX" : accountNumber)}")</h4>
+                </div>
+            </div>
 
+            <div class="notification img mx-5 my-auto">
+                <img src="/bootstrap/Utilities/Bell.png" alt="Notification Bell" />
+            </div>
+
+        </header>
 
         <!-- Main Section: Balance + Actions -->
         <div class="container mt-4">
-            <div class="row g-3">
+            <div class="row">
 
                 <!-- Balance Card -->
                 <div class="col-12 col-md-5 px-5">
-                    <section class="custom-card balance text-start p-4 h-100 border rounded shadow-sm bg-white w-100">
-                        <h3>Current Balance:</h3>
-                        <div class="fs-1 my-3">currentBalance</div>
+                    <section class="custom-card balance text-start p-3 h-100 border rounded shadow-sm bg-white w-100">
+                        <h3 class="fw-bold my-1">Current Balance:</h3>
+                        <h4 class="justify-content-center text-center align-items-center">
+                            <span class="@(currentBalance >= 0 ? "text-success" : "text-danger")">
+                                @currentBalance.ToString("C")
+                            </span>
+                        </h4>
                         <div class="custom-card sm">
-                            <h6>clientPhone</h6>
+                            <p class="m-1">
+                                <strong>Phone:</strong> @(string.IsNullOrWhiteSpace(clientPhone) ? "N/A" : clientPhone)
+                            </p>
                         </div>
                     </section>
                 </div>
@@ -60,31 +48,31 @@
 
                         <!-- Withdraw -->
                         <div class="col-6">
-                            <a href="/Withdraw_amount" class="nav-link button d-flex justify-content-between align-items-center p-3 border rounded shadow-sm h-100">
+                            <a href="/Withdraw_amount" class="nav-link button d-flex justify-content-between align-items-center shadow-sm h-100">
                                 Withdraw
-                                <img src="/bootstrap/Utilities/withdraw.png" alt="Withdraw Icon" style="width: 30px; height: 30px;" />
+                                <img src="/bootstrap/Utilities/withdraw.png" alt="Withdraw Icon" style="width: 30px; height: 30px; " />
                             </a>
                         </div>
 
                         <!-- Transfer -->
                         <div class="col-6">
-                            <a href="/Transfer_amount" class="nav-link button d-flex justify-content-between align-items-center p-3 border rounded shadow-sm h-100">
+                            <a href="/Transfer_amount" class="nav-link button d-flex justify-content-between align-items-center shadow-sm h-100">
                                 Transfer
-                                <img src="/bootstrap/Utilities/transfer.png" alt="Transfer Icon" style="width: 20px; height: 20px;" />
+                                <img src="/bootstrap/Utilities/transfer.png" alt="Transfer Icon" style="width: 20px; height: 20px; " />
                             </a>
                         </div>
 
                         <!-- Deposit -->
                         <div class="col-6">
-                            <a href="/Deposit_amount" class="nav-link button d-flex justify-content-between align-items-center p-3 border rounded shadow-sm h-100">
+                            <a href="/Deposit_amount" class="nav-link button d-flex justify-content-between align-items-center shadow-sm h-100">
                                 Deposit
-                                <img src="/bootstrap/Utilities/deposit.png" alt="Deposit Icon" style="width: 30px; height: 30px;" />
+                                <img src="/bootstrap/Utilities/deposit.png" alt="Deposit Icon" style="width: 30px; height: 30px; " />
                             </a>
                         </div>
 
                         <!-- Loan -->
                         <div class="col-6">
-                            <a href="/Apply_loan" class="nav-link button d-flex justify-content-between align-items-center p-3 border rounded shadow-sm h-100">
+                            <a href="/Apply_loan" class="nav-link button d-flex justify-content-between align-items-center shadow-sm h-100">
                                 Apply Loan
                                 <img src="/bootstrap/Utilities/loan.png" alt="Loan Icon" style="width: 23px; height: 23px;" />
                             </a>
@@ -101,33 +89,27 @@
         <div class="container-md mt-4 px-5">
             <section class="custom-card transactions">
                 <div class="d-flex justify-content-between align-items-center border-bottom">
-                    <label class="fs-4 mb-3 fw-bold">Recent Transactions</label>
+                    <label class="fs-5 mb-3 fw-bold">Recent Transactions</label>
                     <a href="/Recent_transactions" class="btn btn-link text-decoration-none">View All</a>
                 </div>
 
-                <!-- Transactions List -->
-                <div class="container py-3 px-5">
-                    <div class="row fs-5 fw-bold pb-3">
-                        <div class="col">Transaction</div>
-                        <div class="col text-end">Amount</div>
-                        <div class="col text-end">Date</div>
-                    </div>
-
-                    <div class="row fs-5 mb-1">
-                        <div class="col">Deposit</div>
-                        <div class="col text-end">$200</div>
-                        <div class="col text-end">04-01-2025</div>
-                    </div>
-                    <div class="row fs-5 mb-1">
-                        <div class="col">Withdraw</div>
-                        <div class="col text-end">$500</div>
-                        <div class="col text-end">04-02-2025</div>
-                    </div>
-                    <div class="row fs-5">
-                        <div class="col">Loan</div>
-                        <div class="col text-end">$300</div>
-                        <div class="col text-end">04-03-2025</div>
-                    </div>
+                    <!-- Transactions List -->
+                <div class="container py-3 px-3">
+                    @if (recentTransactions == null || !recentTransactions.Any())
+                    {
+                        <p class="text-muted">No transactions available.</p>
+                    }
+                    else
+                    {
+                        @foreach (var tx in recentTransactions.Take(3))
+                        {
+                            <div class="row fs-6 mb-2 border-bottom pb-2">
+                                <div class="col">@tx.Type</div>
+                                <div class="col text-end">@tx.Amount.ToString("C")</div>
+                                <div class="col text-end">@tx.Date.ToShortDateString()</div>
+                            </div>
+                        }
+                    }
                 </div>
 
             </section>
@@ -138,168 +120,23 @@
 
 
 @code {
-    private ClaimsPrincipal? user;
-    private string accountNumber { get; set; } = string.Empty;
-    private string userName { get; set; } = string.Empty;
+    // Mock data for demonstration — replace with real data from your backend
+    private string clientName = "Bogart Banking";
+    private string accountNumber = "1234-5678";
+    private decimal currentBalance = 18500.75M;
+    private string clientPhone = "0917-123-4567";
 
-    protected override async Task OnInitializedAsync() {
-        var authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
-        user = authState.User;
-
-
-        
-    }
-}
-
-
-
-@* 
-@code {
-    private string clientName = "Sample Name";
-    private string accountNumber = "#123-456";
-    private decimal currentBalance = 4055.00M;
-    private string clientPhone = "+63 000 000 0000";
-    private List<Transaction> recentTransactions = new List<Transaction>();
-
-    protected override async Task OnInitializedAsync()
+    private List<Transaction> recentTransactions = new()
     {
-        // Assuming there's an API endpoint for client data
-        var response = await Http.GetFromJsonAsync<Client>("api/client");
-        if (response != null)
-        {
-            clientName = response.Name;
-            accountNumber = response.AccountNumber;
-            currentBalance = response.Balance;
-            clientPhone = response.PhoneNumber;
-        }
-
-        var transactionsResponse = await Http.GetFromJsonAsync<List<Transaction>>("api/transactions");
-        if (transactionsResponse != null)
-        {
-            recentTransactions = transactionsResponse;
-        }
-    }
+        new Transaction { Type = "Deposit", Amount = 5000.00M, Date = DateTime.Now.AddDays(-1) },
+        new Transaction { Type = "Withdrawal", Amount = 2000.00M, Date = DateTime.Now.AddDays(-3) },
+        new Transaction { Type = "Transfer", Amount = 1000.00M, Date = DateTime.Now.AddDays(-5) }
+    };
 
     public class Transaction
     {
         public string Type { get; set; }
         public decimal Amount { get; set; }
-    }
-
-    public class Client
-    {
-        public string Name { get; set; }
-        public string AccountNumber { get; set; }
-        public decimal Balance { get; set; }
-        public string PhoneNumber { get; set; }
+        public DateTime Date { get; set; }
     }
 }
-@page "/Client_home"
-@inject HttpClient Http
-@inject NavigationManager NavigationManager
-@layout MainLayout
-
-<div class="page">
-    <main>
-        <div class="custom-card client px-4 pt-4 pb-4">
-            <div class="align-items-start">
-                <h5>Welcome Back</h5>
-                <div class="d-flex align-items-center gap-3">
-                    <h1>@clientName</h1>
-                    <h4 class="account-number">@accountNumber</h4>
-                </div>
-            </div>
-            <div class="notification img align-items-end">
-                <img src="/bootstrap/Utilities/Bell.png" alt="Notification Bell" />
-            </div>
-        </div>
-        <div class="body-wrapper">
-            <div class="custom-card balance md">
-                <h3>Current Balance: </h3>
-                <div class="fs-1 mx-auto">
-                    @currentBalance
-                </div>
-                <div class="custom-card sm">
-                    <h6>@clientPhone</h6>
-                </div>
-            </div>
-
-            <!-- Navigation Buttons -->
-            <div>
-                <nav class="nav-container">
-                    <NavLink class="nav-link button" href="/Login_page">
-                        <button type="button" class="nav-link button">Withdraw</button>
-                    </NavLink>
-                    <NavLink class="nav-link button" href="/Login_page">
-                        <button type="button" class="nav-link button">Deposit</button>
-                    </NavLink>
-                    <NavLink class="nav-link button" href="/Login_page">
-                        <button type="button" class="nav-link button">Transfer</button>
-                    </NavLink>
-                    <NavLink class="nav-link button" href="/Login_page">
-                        <button type="button" class="nav-link button">Loan Payment</button>
-                    </NavLink>
-                </nav>
-            </div>
-        </div>
-
-        <!-- Transactions Section -->
-        <div class="custom-card transactions mx-3 mt-5">
-            <div class="custom-card balance lg text-black">
-                <label class="custom-card sm bg-transparent border-bottom justify-content-between fs-4">
-                    Recent Transactions
-                    <button type="button" class="btn nav-link">View All</button>
-                </label>
-                <div class="row g-2 mt-3 fs-5">
-                    @foreach(var transaction in recentTransactions)
-                    {
-                        <label class="mt-3">@transaction.Type - @transaction.Amount</label>
-                    }
-                </div>
-            </div>
-        </div>
-
-    </main>
-</div>
-
-@code {
-    private string clientName = "Sample Name";
-    private string accountNumber = "#123-456";
-    private decimal currentBalance = 4055.00M;
-    private string clientPhone = "+63 000 000 0000";
-    private List<Transaction> recentTransactions = new List<Transaction>();
-
-    protected override async Task OnInitializedAsync()
-    {
-        // Assuming there's an API endpoint for client data
-        var response = await Http.GetFromJsonAsync<Client>("api/client");
-        if (response != null)
-        {
-            clientName = response.Name;
-            accountNumber = response.AccountNumber;
-            currentBalance = response.Balance;
-            clientPhone = response.PhoneNumber;
-        }
-
-        var transactionsResponse = await Http.GetFromJsonAsync<List<Transaction>>("api/transactions");
-        if (transactionsResponse != null)
-        {
-            recentTransactions = transactionsResponse;
-        }
-    }
-
-    public class Transaction
-    {
-        public string Type { get; set; }
-        public decimal Amount { get; set; }
-    }
-
-    public class Client
-    {
-        public string Name { get; set; }
-        public string AccountNumber { get; set; }
-        public decimal Balance { get; set; }
-        public string PhoneNumber { get; set; }
-    }
-}
- *@
