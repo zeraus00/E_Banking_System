@@ -13,6 +13,7 @@
         public int FatherNameId { get; set; }                               // Foreign Key to Names
         public int MotherNameId { get; set; }                               // Foreign Key to Names
         public string ContactNumber { get; set; } = string.Empty;           // Required; Field Length : 11
+        public string Occupation { get; set; } = string.Empty;              // Required; Field Length: 50
         public string TaxIdentificationNumber { get; set; } = string.Empty; // Required; Max Length : 12
         public string CivilStatus { get; set; } = string.Empty;             // Required; Max Length : 20
         public int? ReligionId { get; set; }                                // Foreign Key to Religions

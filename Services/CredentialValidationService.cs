@@ -5,10 +5,10 @@ using Data.Enums;
 
 namespace Services
 {
-    public class LogInService : Service
+    public class CredentialValidationService : Service
     {
         private UserAuthRepository _userAuthRepository;
-        public LogInService(EBankingContext context) : base(context) {
+        public CredentialValidationService(EBankingContext context) : base(context) {
             _userAuthRepository = new UserAuthRepository(_context);
         }
         // create a passwordhasher object here!
@@ -25,7 +25,7 @@ namespace Services
         /// A <see cref="UserAuth"/> object if authentication is successful; otherwise, <c>null</c> if
         /// the credentials do not match or an error occurs during authentication.
         /// </returns>
-        public UserAuth? TryAuthenticateUserSync(string email, string password)
+        public UserAuth? TryValidateUserSync(string email, string password)
         {
             string trimmedEmail = email.Trim();
             string trimmedPassword = password.Trim();
@@ -34,7 +34,7 @@ namespace Services
             var userAuth = _userAuthRepository
                 .GetUserAuthByUserNameOrEmailSync(trimmedEmail, query);
 
-            if (userAuth == null || !this.IsAuthenticated(userAuth, trimmedPassword))
+            if (userAuth == null || !this.IsPasswordValid(userAuth, trimmedPassword))
             {
                 return null;
             }
@@ -54,7 +54,7 @@ namespace Services
         /// A <see cref="UserAuth"/> object if authentication is successful; otherwise, <c>null</c> if
         /// the credentials do not match or an error occurs during authentication.
         /// </returns>
-        public async Task<UserAuth?> TryAuthenticateUserAsync(string email, string password)
+        public async Task<UserAuth?> TryValidateUserAsync(string email, string password)
         {
             string trimmedEmail = email.Trim();
             string trimmedPassword = password.Trim();
@@ -63,7 +63,7 @@ namespace Services
             var userAuth = await _userAuthRepository
                 .GetUserAuthByUserNameOrEmailAsync(trimmedEmail, query);
 
-            if (userAuth == null || !this.IsAuthenticated(userAuth, trimmedPassword))
+            if (userAuth == null || !this.IsPasswordValid(userAuth, trimmedPassword))
             {
                 return null;
             }
@@ -77,7 +77,7 @@ namespace Services
         /// <param name="email"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        public bool IsAuthenticated(UserAuth userAuth, string password)
+        public bool IsPasswordValid(UserAuth userAuth, string password)
         {
             return userAuth.Password.Equals(password);
         }

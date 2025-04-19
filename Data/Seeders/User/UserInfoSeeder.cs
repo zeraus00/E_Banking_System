@@ -56,6 +56,7 @@ namespace Data.Seeders.User
                     .WithFatherNameId(fatherName.NameId)
                     .WithMotherNameId(motherName.NameId)
                     .WithContactNumber("09669696969")
+                    .WithOccupation("Macho Dancer")
                     .WithTaxIdentificationNumber("696969696969")
                     .WithCivilStatus("Oppressed")
                     .Build();

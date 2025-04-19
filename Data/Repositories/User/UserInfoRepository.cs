@@ -123,6 +123,7 @@ namespace Data.Repositories.User
         private int _fatherNameId;
         private int _motherNameId;
         private string _contactNumber = string.Empty;
+        private string _occupation = string.Empty;
         private string _taxIdentificationNumber = string.Empty;
         private string _civilStatus = string.Empty;
         private int? _religionId;
@@ -180,6 +181,11 @@ namespace Data.Repositories.User
             return this;
         }
 
+        public UserInfoBuilder WithOccupation(string occupation)
+        {
+            _occupation = occupation.Trim();
+            return this;
+        }
         public UserInfoBuilder WithTaxIdentificationNumber(string taxIdentificationNumber)
         {
             _taxIdentificationNumber = taxIdentificationNumber.Trim();
@@ -214,6 +220,7 @@ namespace Data.Repositories.User
                 FatherNameId = _fatherNameId,
                 MotherNameId = _motherNameId,
                 ContactNumber = _contactNumber,
+                Occupation = _occupation,
                 TaxIdentificationNumber = _taxIdentificationNumber,
                 CivilStatus = _civilStatus,
                 ReligionId = _religionId

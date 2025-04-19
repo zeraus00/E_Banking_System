@@ -9,8 +9,6 @@ namespace Services
     {
         private UserInfoRepository _userInfoRepository;
         private AccountRepository _accountRepository;
-        private UserInfo? _userInfo { get; set; }
-        private Account? _account { get; set; }
         public ClientHomeService(EBankingContext context) : base(context)
         {
             _userInfoRepository = new UserInfoRepository(_context);
@@ -18,28 +16,30 @@ namespace Services
         }
 
 
-        public void GetUserInfoSync(int userInfoId)
+        public UserInfo? GetUserInfoSync(int userInfoId)
         {
             var query = _userInfoRepository.ComposeQuery(includeName: true);
-            _userInfo = _userInfoRepository.GetUserInfoByIdSync(userInfoId, query);
+            var userInfo = _userInfoRepository.GetUserInfoByIdSync(userInfoId, query);
+            return userInfo;
         }
-        public async Task GetUserInfoAsync(int userInfoId)
+        public async Task<UserInfo?> GetUserInfoAsync(int userInfoId)
         {
             var query = _userInfoRepository.ComposeQuery(includeName: true);
-            _userInfo = await _userInfoRepository.GetUserInfoByIdAsync(userInfoId, query);
+            var userInfo = await _userInfoRepository.GetUserInfoByIdAsync(userInfoId, query);
+            return userInfo;
         }
-        public string GetUserFullName()
+        public string? GetUserFullName(UserInfo? userInfo)
         {
-            if(_userInfo == null)
+            if(userInfo == null)
             {
-                throw new Exception();  // ex to be updated.
+                return null;  // ex to be updated.
             }
             List<string?> names = new List<string?>
             {
-                _userInfo.UserName.FirstName,
-                _userInfo.UserName.MiddleName,
-                _userInfo.UserName.LastName,
-                _userInfo.UserName.Suffix
+                userInfo.UserName.FirstName,
+                userInfo.UserName.MiddleName,
+                userInfo.UserName.LastName,
+                userInfo.UserName.Suffix
             };
             string fullName = string.Empty;
 
@@ -51,24 +51,17 @@ namespace Services
             return fullName.Trim();
         }
         
-        public void GetAccountSync(int accountId)
+        public Account? GetAccountSync(int accountId)
         {
-            _account = _accountRepository.GetAccountByIdSync(accountId);
+            var account = _accountRepository.GetAccountByIdSync(accountId);
+            return account;
         }
         
-        public async Task GetAccountAsync(int accountId)
+        public async Task<Account?> GetAccountAsync(int accountId)
         {
-            _account = await _accountRepository.GetAccountByIdAsync(accountId);
+            var account = await _accountRepository.GetAccountByIdAsync(accountId);
+            return account;
         }
 
-        public string GetAccountNumber()
-        {
-            if(_account == null)
-            {
-                throw new Exception();  // ex to be updated.
-            }
-
-            return _account.AccountNumber;
-        }
     }
 }

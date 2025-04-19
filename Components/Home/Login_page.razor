@@ -1,10 +1,4 @@
-﻿@using Data;
-@using Layout
-@using Microsoft.AspNetCore.Authentication;
-@using Microsoft.AspNetCore.Authentication.Cookies;
-@using Services;
-@using System.Security.Claims;
-@using System.ComponentModel.DataAnnotations;
+﻿@using Layout
 @using ViewModels;
 
 @page "/Login_page"
@@ -14,7 +8,9 @@
 @inject IHttpContextAccessor HttpContextAccessor
 @inject IJSRuntime JS
 @inject HttpClient http
-@inject LogInService _logInService
+@inject CredentialValidationService _validationService
+@inject SignInService _signInService
+@inject ClaimsHelperService _claimsHelperService
 @layout PlainLayout
 
 
@@ -37,7 +33,7 @@
 	<button type="submit" class="btn btn-primary">Login</button>
 </EditForm> *@
 
-<EditForm Model="loginModel" OnValidSubmit="LogInAsync" FormName="LogInForm">
+<EditForm Model="_loginModel" OnValidSubmit="LogInAsync" FormName="LogInForm">
 	<DataAnnotationsValidator />
 	<div class="page">
 		<main>
@@ -63,17 +59,17 @@
 
 				<!-- Authentication -->
 				<div class="loginform px-4">
-					<InputText id="email" class="form-control form-control-custom form-control-lg mb-3" @bind-Value="loginModel.Email" />
-					<ValidationMessage For="() => loginModel.Email" />
-						@* 
+					<InputText id="email" class="form-control form-control-custom form-control-lg mb-3" @bind-Value="_loginModel.Email" />
+					<ValidationMessage For="() => _loginModel.Email" />
+					@* 
 					<input class="form-control form-control-custom form-control-lg mb-3" @bind="loginModel.Email" placeholder="Email">
 						*@
 					<div class="position-relative">
 						<InputText id="password" 
-							type="password"
-								   class="form-control form-control-custom form-control-lg pe-5"
-								   @bind-Value="loginModel.Password" />
-						<ValidationMessage For="() => loginModel.Password" />
+						type="password"
+						class="form-control form-control-custom form-control-lg pe-5"
+						@bind-Value="_loginModel.Password" />
+						<ValidationMessage For="() => _loginModel.Password" />
 
 						@* <input type="@passwordInputType"
 						@bind="loginModel.Password"
@@ -131,10 +127,10 @@
 
 @code {
 	[CascadingParameter]
-	HttpContext httpContext { get; set; }
+	HttpContext _httpContext { get; set; }
 
 	[SupplyParameterFromForm]
-	public LogInViewModel loginModel { get; set; } = new();
+	public LogInViewModel _loginModel { get; set; } = new();
 
 	public string email = "";
 	public string password = "";
@@ -172,7 +168,7 @@
 			// //Console.WriteLine(Model.Email + " " + Model.Password);
 			// Console.WriteLine("aaaaa " + NavigationManager.BaseUri.ToString() + "login");
 			// await http.PostAsJsonAsync(NavigationManager.BaseUri + "login", loginModel);
-			
+
 		} catch (Exception ex) {
 			Console.WriteLine(ex.Message);
 			error = ex.Message;
@@ -182,60 +178,43 @@
 
 	private async Task LogInAsync()
 	{
-		try {
-
-			// Perform login logic here, such as checking credentials
-			UserAuth? userAuth = await _logInService.TryAuthenticateUserAsync(loginModel.Email, loginModel.Password);
-			if (userAuth == null) {
-				error = "Invalid email or password. Please try again.";
-				return;
-				// Handle failed login attempt (e.g., show error message)
-			}
-			string name = userAuth.Account == null ? "DefaultName" : userAuth.Account.AccountName;
-			string role = userAuth.Role.RoleName;
-			var claims = new List<Claim>
+		try
+		{
+			var redirectUrl = string.Empty;
+			//  Validate the credentials.
+			var email = (_loginModel.Email ?? string.Empty).Trim();
+			var password = (_loginModel.Password ?? string.Empty).Trim();
+			var userAuth = await _validationService.TryValidateUserAsync(email, password);
+			if (userAuth == null)
 			{
-				new Claim(ClaimTypes.NameIdentifier, loginModel.Email),
-				new Claim(ClaimTypes.Name, loginModel.Email),
-				new Claim(ClaimTypes.Role, role),
-				new Claim("accountId", userAuth.AccountId?.ToString() ?? "No Account")
-			};
-			var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-			var principal = new ClaimsPrincipal(identity);
+				//  Handle failed validation
+				//  Redirect to log in page.
+				error = "Invalid Username or Password";
+				//_signInService.RedirectToLogInPage();
+				redirectUrl = _signInService.RedirectToLogInPage();
+				_httpContext.Response.Redirect(redirectUrl);
+				return;
+			}
 
-			await httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
-			var user = httpContext.User;
-			Console.WriteLine($"User Identity IsAuthenticated: {user.Identity?.IsAuthenticated}");
-			Console.WriteLine($"User Identity Name: {user.Identity?.Name}");
+			//  Handle Sign In logic.
+			await _signInService.TrySignInAsync(userAuth);
 
-			Console.WriteLine(userAuth.Role.RoleId);
-			NavigateBasedOnRole(userAuth.Role.RoleId);
+			//	Redirect based on role.
+			redirectUrl = _signInService.RedirectBasedOnRole(userAuth.RoleId);
+			_httpContext.Response.Redirect(redirectUrl);
 
-
-		} catch (Exception ex) {
-			Console.WriteLine($"Error during login: {ex.Message}");
-			error = "An error occurred during login. Please try again.";
+			return;
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine("ERRORRRR: " + ex.Message);
+			//_signInService.RedirectToLogInPage();
+			var redirectUrl = _signInService.RedirectToLogInPage();
+			_httpContext.Response.Redirect(redirectUrl);
+			return;
+			//return Results.Redirect("/Landing_page");
 		}
 
 	}
 
-	/// <summary>
-	/// Handles Role-Based Access Control for log-in.
-	/// Navigates the home pages with User RoleIds.
-	/// </summary>
-	/// <param name="roleId"></param>
-	private void NavigateBasedOnRole(int roleId) 
-	{
-		if (_logInService.IsAdmin(roleId)) {
-			// go to admin home
-		} else if (_logInService.IsUser(roleId)) {
-			httpContext.Response.Redirect("/Client_home");
-			//NavigationManager.NavigateTo("/Client_home");
-		} else if (_logInService.IsEmployee(roleId)) {
-			// go to employee home
-		} else {
-			throw new Exception("User Role not Found.");
-		}
-
-	}
 }
