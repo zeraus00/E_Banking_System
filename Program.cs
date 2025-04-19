@@ -1,13 +1,11 @@
 using E_BankingSystem.Components;
 using Data;
-using Data.Enums;
 using Data.Seeders;
 using Data.Seeders.User;
 using Data.Seeders.Finance;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Components.Authorization;
 using Services;
-using System.Security.Claims;
 using ViewModels;
 using Microsoft.AspNetCore.Antiforgery;
 
@@ -30,7 +28,12 @@ builder.Services.AddRazorComponents()
 // Authentication Services
 builder.Services.AddHttpClient();
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<LogInService>();
+builder.Services.AddScoped<CredentialValidationService>();
+builder.Services.AddScoped<SignInService>();
+builder.Services.AddScoped<ClaimsHelperService>();
+builder.Services.AddScoped<AuthenticationStateProvider, NexusAuthenticationStateProvider>();
+builder.Services.AddScoped<NexusAuthenticationService>();
+builder.Services.AddScoped<RegistrationService>();
 
 builder.Services.AddAntiforgery(options =>
 {
@@ -130,79 +133,41 @@ app.MapGet("/get-csrf", (HttpContext context, IAntiforgery antiforgery) =>
     return Results.Ok(new { message = "CSRF token set in cookie." });
 });
 
-app.MapPost("/login", async (HttpContext httpContext, IAntiforgery antiforgery, LogInService logInService, LogInViewModel loginModel) =>
+
+app.MapPost("/login", async (
+    LogInViewModel _loginModel, 
+    CredentialValidationService _validationService, 
+    SignInService _signInService,
+    ClaimsHelperService _claimsHelperService) =>
 {
     try 
     {
-        await antiforgery.ValidateRequestAsync(httpContext);
-        //httpContext.Response.Headers.SetCookie = "bths=usr:mabudachi";
-        var email = (loginModel.Email ?? string.Empty).Trim();
-        var password = (loginModel.Password ?? string.Empty).Trim();
-        Console.WriteLine(email + " " + password);
-        Console.WriteLine(httpContext.Request.Scheme);
-
-        var userAuth = await logInService.TryAuthenticateUserAsync(email, password);
+        string redirectUrl = string.Empty;
+        //  Validate the credentials.
+        var email = (_loginModel.Email ?? string.Empty).Trim();
+        var password = (_loginModel.Password ?? string.Empty).Trim();
+        var userAuth = await _validationService.TryValidateUserAsync(email, password);
         if (userAuth == null)
         {
-            Console.WriteLine("userAuth is null");
-            //return Results.Redirect("/Home/Landing_page"); // Ensure no further processing occurs after redirect
-            httpContext.Response.Redirect("/Landing_page");
-            return;
+            //  Handle failed validation
+            //  Redirect to log in page.
+            //_signInService.RedirectToLogInPage();
+            //return;
+            redirectUrl = _signInService.RedirectToLogInPage();
+            return Results.Redirect(redirectUrl);
         }
 
-        var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.NameIdentifier, email),
-            new Claim(ClaimTypes.Name, email),
-            //new Claim("AccountNumber", userAuth.Account!.AccountNumber),
-            new Claim(ClaimTypes.Role, userAuth.Role.RoleName)
-        };
+        //  Handle Sign In logic.
+        await _signInService.TrySignInAsync(userAuth);
 
-        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-        var principal = new ClaimsPrincipal(identity);
-
-        var authProperties = new AuthenticationProperties
-        {
-            AllowRefresh = true,
-            ExpiresUtc = DateTimeOffset.Now.AddDays(1),
-            IsPersistent = true,
-        };
-
-        Console.WriteLine($"IsAuthenticated: {identity.IsAuthenticated}"); // Should be true
-        Console.WriteLine($"AuthenticationType: {identity.AuthenticationType}");
-
-        foreach (var claim in principal.Claims)
-        {
-            Console.WriteLine($"Claim Type: {claim.Type}, Value: {claim.Value}");
-        }
-
-        Console.WriteLine("Signing in user...");
-        await httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, authProperties);
-        Console.WriteLine("Sign-in complete.");
-
-        var user = httpContext.User;
-        Console.WriteLine($"User Identity IsAuthenticated: {user.Identity?.IsAuthenticated}");
-        Console.WriteLine($"User Identity Name: {user.Identity?.Name}");
-
-        string redirectUrl = userAuth.RoleId switch
-        {
-            (int)RoleTypes.Administrator => "/",  // URL for Administrator
-            (int)RoleTypes.User => "/Client_home", // URL for User
-            (int)RoleTypes.Employee => "/",       // URL for Employee
-            _ => "/Login_page"  // Default to Login page
-        };
-        Console.WriteLine(userAuth.Account!.AccountName);
-        Console.WriteLine(userAuth.Role.RoleId + ":" + (int)RoleTypes.User);
-        Console.WriteLine("Redirect Url: " + redirectUrl);
-
-        //return Results.Redirect(redirectUrl); // Ensure no further processing occurs after redirect
-        httpContext.Response.Redirect(redirectUrl);
-        return; 
+        redirectUrl = _signInService.RedirectBasedOnRole(userAuth.RoleId);
+        return Results.Redirect(redirectUrl); 
     } catch (Exception ex)
     {
         Console.WriteLine("ERRORRRR: "+ ex.Message);
-        return;
-        //return Results.Redirect("/Landing_page");
+        //_signInService.RedirectToLogInPage();
+        var redirectUrl = _signInService.RedirectToLogInPage();
+        return Results.Redirect(redirectUrl);
     }
 });
 

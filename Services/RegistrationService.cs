@@ -26,20 +26,24 @@ namespace Services
         }
 
 
-        public async Task RegisterAsync(string userFirstName, string? userMiddleName, string userLastName,
-            DateTime birthDate, int birthCityId, int birthProvinceId, int birthRegionId,
-            string house, string street, int barangayId, int cityId, int provinceId, int regionId, int postalCode,
-            int age, string sex, string contactNumber, string civilStatus, int ReligonId
+        public async Task RegisterAsync(string userFirstName, string? userMiddleName, string userLastName, string? userSuffix,
+                string fatherFirstName, string? fatherMiddleName, string fatherLastName, string? fatherSuffix,
+                string motherFirstName, string? motherMiddleName, string motherLastName, string? motherSuffix,
+                string beneficiaryFirstName, string? beneficiaryMiddleName, string beneficiaryLastName, string? beneficiarySuffix,
+                DateTime birthDate, int birthCityId, int birthProvinceId, int birthRegionId,
+                string houseNo, string street, int barangayId, int cityId, int provinceId, int regionId, int postalCode,
+                int age, string sex, string contactNumber, string Occupation, string taxIdentificationNumber, string civilStatus, string userReligion
             )
         {
-            Name UserName = await RegisterName("Lando", "Alon", "Bogart", null);
-            Name MotherName = await RegisterName("Lily", "Pronda", "Bogart", null);
-            Name FatherName = await RegisterName("Pando", "Pronda", "Bogart", null);
+            Name UserName = await RegisterName(userFirstName, userMiddleName, userLastName, userSuffix);
+            Name FatherName = await RegisterName(fatherFirstName, fatherMiddleName, fatherLastName, fatherSuffix);
+            Name MotherName = await RegisterName(motherFirstName, motherMiddleName, motherLastName, motherSuffix);
+            Name BeneficiaryName = await RegisterName(beneficiaryFirstName, beneficiaryMiddleName, beneficiaryLastName, beneficiarySuffix);
 
             BirthInfo UserBirthInfo = await RegisterBirthInfo(birthDate, birthCityId, birthProvinceId, birthRegionId);
-            Address UserAddress = await RegisterAddress("Blk 12", "Lot 12", barangayId, cityId, provinceId, regionId, postalCode);
-            Religion UserReligion = await RegisterReligion("Catholic");
-            
+            Address UserAddress = await RegisterAddress(houseNo, street, barangayId, cityId, provinceId, regionId, postalCode);
+            Religion UserReligion = await RegisterReligion(userReligion);
+
 
             UserInfo UserInfo = await RegisterUserInfo(
                 UserName.NameId,
@@ -50,39 +54,40 @@ namespace Services
                 UserReligion.ReligionId,
                 age,
                 sex,
-                "09123414", ///hard coded Contact number
-                "123456789", ///Hard coded Tax Identification Number
+                contactNumber,
+                Occupation,
+                taxIdentificationNumber, 
                 civilStatus
                 );
         }
 
 
-        public async Task<Name> RegisterName(string firstName, string? middleName, string lastName, string? suffix)
+        public async Task<Name> RegisterName(string userFirstName, string? userMiddleName, string userLastName, string? userSuffix)
         {
 
-            if (string.IsNullOrWhiteSpace(firstName)) 
+            if (string.IsNullOrWhiteSpace(userFirstName)) 
             {
                 throw new FieldMissingException("First Name is required.");
             }
 
-            if (string.IsNullOrWhiteSpace(lastName)) 
+            if (string.IsNullOrWhiteSpace(userLastName)) 
             {
                 throw new FieldMissingException($"Last Name is required.");
             }
 
             var nameBuilder = new NameBuilder();
             nameBuilder
-                .WithFirstName(firstName)
-                .WithLastName(lastName);
+                .WithFirstName(userFirstName)
+                .WithLastName(userLastName);
 
-            if (!string.IsNullOrWhiteSpace(middleName))
+            if (!string.IsNullOrWhiteSpace(userMiddleName))
             {
-                nameBuilder.WithMiddleName(middleName);
+                nameBuilder.WithMiddleName(userMiddleName);
             }
 
-            if (!string.IsNullOrWhiteSpace(suffix))
+            if (!string.IsNullOrWhiteSpace(userSuffix))
             {
-                nameBuilder.WithSuffix(suffix);
+                nameBuilder.WithSuffix(userSuffix);
             }
 
             Name UserName = nameBuilder.Build();
@@ -125,9 +130,9 @@ namespace Services
             return UserBirthInfo;
         }
 
-        public async Task<Address> RegisterAddress(string house, string street, int barangayId, int cityId, int provinceId, int regionId, int postalCode) 
+        public async Task<Address> RegisterAddress(string houseNo, string street, int barangayId, int cityId, int provinceId, int regionId, int postalCode) 
         {
-            if (string.IsNullOrWhiteSpace(house)) 
+            if (string.IsNullOrWhiteSpace(houseNo)) 
             {
                 throw new FieldMissingException("House is required.");
             }
@@ -162,7 +167,7 @@ namespace Services
 
             var AddressBuilder = new AddressBuilder();
             AddressBuilder
-                .WithHouse(house)
+                .WithHouse(houseNo)
                 .WithStreet(street)
                 .WithBarangayId(barangayId)
                 .WithCityId(cityId)
@@ -203,12 +208,18 @@ namespace Services
             int age,
             string sex,
             string contactNumber,
+            string Occupation,
             string taxIdentificationNumber,
             string civilStatus) 
         {
             if (string.IsNullOrWhiteSpace(contactNumber)) 
             {
                 throw new FieldMissingException("Contact number is required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(Occupation)) 
+            {
+                throw new FieldMissingException("Occupation is required.");
             }
 
             if (string.IsNullOrEmpty(taxIdentificationNumber)) 
@@ -231,6 +242,7 @@ namespace Services
                 .WithAge(age)
                 .WithSex(sex)
                 .WithContactNumber(contactNumber)
+                .WithOccupation(Occupation)
                 .WithTaxIdentificationNumber(taxIdentificationNumber)
                 .WithCivilStatus(civilStatus);
 

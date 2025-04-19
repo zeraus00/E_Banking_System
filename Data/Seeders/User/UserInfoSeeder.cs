@@ -12,33 +12,37 @@ namespace Data.Seeders.User
             _userInfoRepository = new UserInfoRepository(_context);
         }
 
-        Name name;
-        Name fatherName;
-        Name motherName;
+       
         UserInfo userInfo;
         public async Task SeedUserInfos()
         {
-            if (!await _context.Names.AnyAsync())
-            {
-                name = new NameBuilder()
+            Name name;
+            Name fatherName;
+            Name motherName;
+            name = new NameBuilder()
                     .WithFirstName("Bogart")
                     .WithMiddleName("Mon")
                     .WithLastName("Dela Mon")
                     .WithSuffix("Jr.")
                     .Build();
 
-                fatherName = new NameBuilder()
-                    .WithFirstName("Bogart")
-                    .WithMiddleName("Mon")
-                    .WithLastName("Dela Mon")
-                    .WithSuffix("Sr.")
-                    .Build();
+            fatherName = new NameBuilder()
+                .WithFirstName("Bogart")
+                .WithMiddleName("Mon")
+                .WithLastName("Dela Mon")
+                .WithSuffix("Sr.")
+                .Build();
 
-                motherName = new NameBuilder()
-                    .WithFirstName("Marie")
-                    .WithMiddleName("Tess")
-                    .WithLastName("Mon")
-                    .Build();
+            motherName = new NameBuilder()
+                .WithFirstName("Marie")
+                .WithMiddleName("Tess")
+                .WithLastName("Mon")
+                .Build();
+
+
+            if (!await _context.Names.AnyAsync())
+            {
+                
 
                 await _nameRepository.AddAsync(name);
                 await _nameRepository.AddAsync(fatherName);
@@ -56,6 +60,7 @@ namespace Data.Seeders.User
                     .WithFatherNameId(fatherName.NameId)
                     .WithMotherNameId(motherName.NameId)
                     .WithContactNumber("09669696969")
+                    .WithOccupation("Macho Dancer")
                     .WithTaxIdentificationNumber("696969696969")
                     .WithCivilStatus("Oppressed")
                     .Build();

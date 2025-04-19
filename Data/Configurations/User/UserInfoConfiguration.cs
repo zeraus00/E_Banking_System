@@ -55,6 +55,12 @@
                 .HasMaxLength(11)
                 .IsFixedLength();
 
+            //  Occupation (Required; Field Length=50)
+            UsersInfo
+                .Property(ui => ui.Occupation)
+                .IsRequired()
+                .HasMaxLength(50);
+
             //  TaxIdentificationNumber (Required; MaxLength=12)
             UsersInfo
                 .Property(ui => ui.TaxIdentificationNumber)
