@@ -69,30 +69,6 @@ namespace Services
 
             //  Sign in the user
             await _httpContext.SignInAsync(_cookieScheme, principal, authProperties);
-
-
-            //  Check if user is authenticated
-            var user = _httpContext.User;
-
-            if (user.Identity == null || !user.Identity.IsAuthenticated)
-            {
-                //  Handle failed authentication here
-                this.RedirectToLogInPage();
-                return;
-            }
-
-            if (user.Identity.IsAuthenticated)
-            {
-                //  Handle successful authentication here
-                //  Redirect on successful authentication.
-                var roleIdClaim = claims.FirstOrDefault(x => x.Type == CustomClaimTypes.RoleId);
-                if (roleIdClaim != null)
-                {
-                    var roleId = Convert.ToInt32(roleIdClaim.Value);
-                    this.RedirectBasedOnRole(roleId);
-                }
-            }
-
             return;
         }
 
@@ -100,29 +76,24 @@ namespace Services
         /// Redirects the user based on their role id.
         /// </summary>
         /// <param name="roleId">The role ID of the user.</param>
-        public void RedirectBasedOnRole(int roleId)
+        public string RedirectBasedOnRole(int roleId)
         {
-            var user = _httpContext.User;
-            string redirectUrl = roleId switch
+            return roleId switch
             {
                 (int)RoleTypes.Administrator => "/",
                 (int)RoleTypes.User => "/Client_home",
                 (int)RoleTypes.Employee => "/",
                 _ => "/Login_page"
             };
-
-            _httpContext.Response.Redirect(redirectUrl);
-            return;
         }
 
         /// <summary>
         /// Redirects the unauthenticated user to the Landing page.
         /// Used when the user fails validation or authentication.
         /// </summary>
-        public void RedirectToLogInPage()
+        public string RedirectToLogInPage()
         {
-            _httpContext.Response.Redirect("/Login_page");
-            return;
+            return "/Login_page";
         }
     }
 }

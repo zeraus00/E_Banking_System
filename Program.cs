@@ -134,6 +134,7 @@ app.MapPost("/login", async (LogInViewModel _loginModel, CredentialValidationSer
 {
     try 
     {
+        string redirectUrl = string.Empty;
         //  Validate the credentials.
         var email = (_loginModel.Email ?? string.Empty).Trim();
         var password = (_loginModel.Password ?? string.Empty).Trim();
@@ -142,9 +143,10 @@ app.MapPost("/login", async (LogInViewModel _loginModel, CredentialValidationSer
         {
             //  Handle failed validation
             //  Redirect to log in page.
-            //  Return Results.Redirect("/Home/Landing_page"); // Ensure no further processing occurs after redirect
-            _signInService.RedirectToLogInPage();
-            return;
+            //_signInService.RedirectToLogInPage();
+            //return;
+            redirectUrl = _signInService.RedirectToLogInPage();
+            return Results.Redirect(redirectUrl);
         }
 
         //  Create a list of claims from User Authentication details.
@@ -153,14 +155,15 @@ app.MapPost("/login", async (LogInViewModel _loginModel, CredentialValidationSer
 
         //  Handle Sign In logic.
         await _signInService.TrySignInAsync(claims);
-        
-        return; 
+
+        redirectUrl = _signInService.RedirectBasedOnRole(userAuth.RoleId);
+        return Results.Redirect(redirectUrl); 
     } catch (Exception ex)
     {
         Console.WriteLine("ERRORRRR: "+ ex.Message);
-        _signInService.RedirectToLogInPage();
-        return;
-        //return Results.Redirect("/Landing_page");
+        //_signInService.RedirectToLogInPage();
+        var redirectUrl = _signInService.RedirectToLogInPage();
+        return Results.Redirect(redirectUrl);
     }
 });
 

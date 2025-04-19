@@ -132,7 +132,7 @@
 
 @code {
 	[CascadingParameter]
-	HttpContext httpContext { get; set; }
+	HttpContext _httpContext { get; set; }
 
 	[SupplyParameterFromForm]
 	public LogInViewModel _loginModel { get; set; } = new();
@@ -185,6 +185,7 @@
 	{
 		try
 		{
+			var redirectUrl = string.Empty;
 			//  Validate the credentials.
 			var email = (_loginModel.Email ?? string.Empty).Trim();
 			var password = (_loginModel.Password ?? string.Empty).Trim();
@@ -193,9 +194,10 @@
 			{
 				//  Handle failed validation
 				//  Redirect to log in page.
-				//  Return Results.Redirect("/Home/Landing_page"); // Ensure no further processing occurs after redirect
-				error = "Invalid Username or Password"; 
+				error = "Invalid Username or Password";
 				//_signInService.RedirectToLogInPage();
+				redirectUrl = _signInService.RedirectToLogInPage();
+				_httpContext.Response.Redirect(redirectUrl);
 				return;
 			}
 
@@ -206,12 +208,18 @@
 			//  Handle Sign In logic.
 			await _signInService.TrySignInAsync(claims);
 
+			//	Redirect based on role.
+			redirectUrl = _signInService.RedirectBasedOnRole(userAuth.RoleId);
+			_httpContext.Response.Redirect(redirectUrl);
+
 			return;
 		}
 		catch (Exception ex)
 		{
 			Console.WriteLine("ERRORRRR: " + ex.Message);
-			_signInService.RedirectToLogInPage();
+			//_signInService.RedirectToLogInPage();
+			var redirectUrl = _signInService.RedirectToLogInPage();
+			_httpContext.Response.Redirect(redirectUrl);
 			return;
 			//return Results.Redirect("/Landing_page");
 		}
