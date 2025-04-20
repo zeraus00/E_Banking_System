@@ -441,35 +441,7 @@
 	protected override async Task OnInitializedAsync()
 	{
 		await LoadRegionAsync();
-		//await BirthPlaceInitializedAsync();
 	}
-
-	// For birth place of user
-	/*private async Task BirthPlaceInitializedAsync()
-	{
-		await LoadBirthRegion();
-	}
-
-	private async Task LoadBirthRegion()
-	{
-		var birthRegionResponse = await HttpClient.GetFromJsonAsync<List<BirthInfo>>("https://psgc.gitlab.io/api/regions/");
-		birthRegions = birthRegionResponse ?? new List<BirthInfo>();
-		await LoadBirthProvince();
-	}
-
-	private async Task LoadBirthProvince()
-	{
-		var birthProvinceResponse = await HttpClient.GetFromJsonAsync<List<BirthInfo>>($"https://psgc.gitlab.io/api/regions/{selectedBirthRegion}/provinces/");
-		birthProvinces = birthProvinceResponse ?? new List<BirthInfo>();
-		await LoadBirthCities();
-	}
-
-	private async Task LoadBirthCities()
-	{
-		var birthCitiesReponse = await HttpClient.GetFromJsonAsync<List<BirthInfo>>($"https://psgc.gitlab.io/api/provinces/{selectedBirthProvince}/municipalities/");
-		birthCities = birthCitiesReponse ?? new List<BirthInfo>();
-	}
-	*/
 
 	// For Full address of user
 	private async Task LoadRegionAsync()
