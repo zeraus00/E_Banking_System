@@ -138,11 +138,12 @@ app.MapPost("/login", async (
     LogInViewModel _loginModel, 
     CredentialValidationService _validationService, 
     SignInService _signInService,
-    ClaimsHelperService _claimsHelperService) =>
+    ClaimsHelperService _claimsHelperService,
+    PageRedirectService _pageRedirectService) =>
 {
-    try 
+    try
     {
-        string redirectUrl = string.Empty;
+        var redirectUrl = string.Empty;
         //  Validate the credentials.
         var email = (_loginModel.Email ?? string.Empty).Trim();
         var password = (_loginModel.Password ?? string.Empty).Trim();
@@ -152,22 +153,30 @@ app.MapPost("/login", async (
             //  Handle failed validation
             //  Redirect to log in page.
             //_signInService.RedirectToLogInPage();
-            //return;
-            redirectUrl = _signInService.RedirectToLogInPage();
-            return Results.Redirect(redirectUrl);
+            redirectUrl = _pageRedirectService.GetRedirectToLogInPage();
+            _pageRedirectService.redirectWithHttpContext(redirectUrl);
+            //_httpContext.Response.Redirect(redirectUrl);
+            return;
         }
 
         //  Handle Sign In logic.
         await _signInService.TrySignInAsync(userAuth);
 
-        redirectUrl = _signInService.RedirectBasedOnRole(userAuth.RoleId);
-        return Results.Redirect(redirectUrl); 
-    } catch (Exception ex)
+        //	Redirect based on role.
+        redirectUrl = _pageRedirectService.GetRedirectBasedOnRole(userAuth.RoleId);
+        _pageRedirectService.redirectWithHttpContext(redirectUrl);
+
+        return;
+    }
+    catch (Exception ex)
     {
-        Console.WriteLine("ERRORRRR: "+ ex.Message);
+        Console.WriteLine("ERRORRRR: " + ex.Message);
         //_signInService.RedirectToLogInPage();
-        var redirectUrl = _signInService.RedirectToLogInPage();
-        return Results.Redirect(redirectUrl);
+
+        var redirectUrl = _pageRedirectService.GetRedirectToLogInPage();
+        _pageRedirectService.redirectWithHttpContext(redirectUrl);
+        return;
+        //return Results.Redirect("/Landing_page");
     }
 });
 

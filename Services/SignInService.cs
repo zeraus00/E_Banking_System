@@ -1,6 +1,4 @@
 ﻿using Data;
-using Data.Constants;
-using Data.Enums;
 using Data.Models.Authentication;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -16,15 +14,17 @@ namespace Services
     {
         private readonly HttpContext _httpContext;
         private readonly ClaimsHelperService _claimsHelperService;
+        private readonly NexusAuthenticationService _authenticationService;
 
         /// <summary>
         /// Constructor for the SignInService.
         /// </summary>
         /// <param name="accessor">accessor to httpcontext manage user session and authentication.</param>
-        public SignInService(IHttpContextAccessor accessor)
+        public SignInService(IHttpContextAccessor accessor, NexusAuthenticationService authenticationService)
         {
             _httpContext = accessor.HttpContext!;
             _claimsHelperService = new();
+            _authenticationService = authenticationService;
         }
 
         /// <summary>
@@ -46,6 +46,7 @@ namespace Services
 
             //  Sign in the user
             await _httpContext.SignInAsync(_claimsHelperService.cookieScheme, principal, authProperties);
+            _authenticationService.currentUser = principal;
             return;
         }
     }
