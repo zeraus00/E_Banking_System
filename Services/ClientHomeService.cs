@@ -53,13 +53,29 @@ namespace Services
         
         public Account? GetAccountSync(int accountId)
         {
-            var account = _accountRepository.GetAccountByIdSync(accountId);
+            var query = _accountRepository.ComposeAccountQuery(includeTransactions: true);
+            var account = _accountRepository.GetAccountByIdSync(accountId, query);
             return account;
         }
         
         public async Task<Account?> GetAccountAsync(int accountId)
         {
-            var account = await _accountRepository.GetAccountByIdAsync(accountId);
+            var query = _accountRepository.ComposeAccountQuery(includeTransactions: true);
+            var account = await _accountRepository.GetAccountByIdAsync(accountId, query);
+            return account;
+        }
+
+        public Account? GetAccountSync(string accountNumber)
+        {
+            var query = _accountRepository.ComposeAccountQuery(includeTransactions: true);
+            var account = _accountRepository.GetAccountByAccountNumberSync(accountNumber, query);
+            return account;
+        }
+
+        public async Task<Account?> GetAccountAsync(string accountNumber)
+        {
+            var query = _accountRepository.ComposeAccountQuery(includeTransactions: true);
+            var account = await _accountRepository.GetAccountByAccountNumberAsync(accountNumber, query);
             return account;
         }
 

@@ -1,6 +1,4 @@
 ﻿using Data;
-using Data.Constants;
-using Data.Enums;
 using Data.Models.Authentication;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -16,15 +14,17 @@ namespace Services
     {
         private readonly HttpContext _httpContext;
         private readonly ClaimsHelperService _claimsHelperService;
+        private readonly NexusAuthenticationService _authenticationService;
 
         /// <summary>
         /// Constructor for the SignInService.
         /// </summary>
         /// <param name="accessor">accessor to httpcontext manage user session and authentication.</param>
-        public SignInService(IHttpContextAccessor accessor)
+        public SignInService(IHttpContextAccessor accessor, NexusAuthenticationService authenticationService)
         {
             _httpContext = accessor.HttpContext!;
             _claimsHelperService = new();
+            _authenticationService = authenticationService;
         }
 
         /// <summary>
@@ -46,31 +46,8 @@ namespace Services
 
             //  Sign in the user
             await _httpContext.SignInAsync(_claimsHelperService.cookieScheme, principal, authProperties);
+            
             return;
-        }
-
-        /// <summary>
-        /// Redirects the user based on their role id.
-        /// </summary>
-        /// <param name="roleId">The role ID of the user.</param>
-        public string RedirectBasedOnRole(int roleId)
-        {
-            return roleId switch
-            {
-                (int)RoleTypes.Administrator => "/",
-                (int)RoleTypes.User => "/Client_home",
-                (int)RoleTypes.Employee => "/",
-                _ => "/Login_page"
-            };
-        }
-
-        /// <summary>
-        /// Redirects the unauthenticated user to the Landing page.
-        /// Used when the user fails validation or authentication.
-        /// </summary>
-        public string RedirectToLogInPage()
-        {
-            return "/Login_page";
         }
     }
 }

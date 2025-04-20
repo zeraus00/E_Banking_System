@@ -8,30 +8,13 @@
 @inject IHttpContextAccessor HttpContextAccessor
 @inject IJSRuntime JS
 @inject HttpClient http
-@inject CredentialValidationService _validationService
-@inject SignInService _signInService
 @inject ClaimsHelperService _claimsHelperService
+@inject CredentialValidationService _validationService
+@inject NexusAuthenticationStateProvider _nexusAuthenticationStateProvider
+@inject NexusAuthenticationService _authenticationService
+@inject PageRedirectService _pageRedirectService
+@inject SignInService _signInService
 @layout PlainLayout
-
-
-@* <EditForm Model="loginModel" OnValidSubmit="LogInAsync" FormName="LogInForm">
-	<DataAnnotationsValidator />
-	<ValidationSummary />
-
-	<div class="form-group">
-		<label for="email">Email</label>
-		<InputText id="email" class="form-control" @bind-Value="loginModel.Email" />
-		<ValidationMessage For="() => loginModel.Email" />
-	</div>
-
-	<div class="form-group">
-		<label for="password">Password</label>
-		<InputText id="password" type="password" class="form-control" @bind-Value="loginModel.Password" />
-		<ValidationMessage For="() => loginModel.Password" />
-	</div>
-
-	<button type="submit" class="btn btn-primary">Login</button>
-</EditForm> *@
 
 <EditForm Model="_loginModel" OnValidSubmit="LogInAsync" FormName="LogInForm">
 	<DataAnnotationsValidator />
@@ -190,9 +173,8 @@
 				//  Handle failed validation
 				//  Redirect to log in page.
 				error = "Invalid Username or Password";
-				//_signInService.RedirectToLogInPage();
-				redirectUrl = _signInService.RedirectToLogInPage();
-				_httpContext.Response.Redirect(redirectUrl);
+				redirectUrl = _pageRedirectService.GetRedirectToLogInPage();
+				_pageRedirectService.redirectWithHttpContext(redirectUrl);
 				return;
 			}
 
@@ -200,19 +182,18 @@
 			await _signInService.TrySignInAsync(userAuth);
 
 			//	Redirect based on role.
-			redirectUrl = _signInService.RedirectBasedOnRole(userAuth.RoleId);
-			_httpContext.Response.Redirect(redirectUrl);
+			redirectUrl = _pageRedirectService.GetRedirectBasedOnRole(userAuth.RoleId);
+			_pageRedirectService.redirectWithHttpContext(redirectUrl);
 
 			return;
 		}
 		catch (Exception ex)
 		{
 			Console.WriteLine("ERRORRRR: " + ex.Message);
-			//_signInService.RedirectToLogInPage();
-			var redirectUrl = _signInService.RedirectToLogInPage();
-			_httpContext.Response.Redirect(redirectUrl);
+
+			var redirectUrl = _pageRedirectService.GetRedirectToLogInPage();
+			_pageRedirectService.redirectWithHttpContext(redirectUrl);
 			return;
-			//return Results.Redirect("/Landing_page");
 		}
 
 	}
