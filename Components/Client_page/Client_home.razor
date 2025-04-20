@@ -100,7 +100,7 @@
             <section class="custom-card transactions">
                 <div class="d-flex justify-content-between align-items-center border-bottom">
                     <label class="fs-5 mb-3 fw-bold">Recent Transactions</label>
-                    <a href="/Recent_transactions" class="btn btn-link text-decoration-none">View All</a>
+                    <a href="/Transaction" class="btn btn-link text-decoration-none">View All</a>
                 </div>
 
                 <!-- Transactions List -->
@@ -136,10 +136,10 @@
     private ClaimsPrincipal? _user;
     private Account? Account;
     private UserInfo? UserInfo;
-    private string _clientName = "Bogart Banking";
-    private string _accountNumber = "1234-5678";
-    private decimal _currentBalance = 18500.75M;
-    private string _clientPhone = "0917-123-4567";
+    private string _clientName = string.Empty;
+    private string _accountNumber = string.Empty;
+    private decimal _currentBalance = 0.0m;
+    private string _clientPhone = string.Empty;
 
     private List<Transaction> recentTransactions = new()
     {
@@ -157,35 +157,13 @@
 
     protected override async Task OnInitializedAsync() 
     {
-        _authenticationService.UserChanged += (user) =>
-        {
-            StateHasChanged(); // refresh UI when user changes
-        };
-        // Console.WriteLine("IN CLIENT HOME PAGE: httpcontext");
-        // ClaimsPrincipal? _user0 = _httpContext.User;
-        // Console.WriteLine(_user0.Identity.IsAuthenticated);
-        // Console.WriteLine(_user0.FindFirst(u => u.Type == ClaimTypes.Name));
-        // Console.WriteLine(_user0.FindFirst(u => u.Type == CustomClaimTypes.AccountId));
+        
 
-        Console.WriteLine("IN CLIENT HOME PAGE: authstateprove");
         AuthenticationState authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
         _user = authState.User;
 
-        if (_user == null) {
-            Console.WriteLine("NULL");
-            return;
-        }
-        if (_user.Identity == null) {
-            Console.WriteLine("USER IS NULL");
-            return;
-        }
-        Console.WriteLine(_user.Identity.IsAuthenticated);
-        if (_user.Identity.IsAuthenticated)
+        if (_user.Identity!.IsAuthenticated)
         {
-            foreach (var claim in _user.Claims) {
-                Console.WriteLine($"{claim.Type} : {claim.Value}");
-            }
-
             int accountId = Convert.ToInt32(_user.FindFirst(c => c.Type == CustomClaimTypes.AccountId)?.Value ?? "0");
             Account = await _clientHomeService.GetAccountAsync(accountId);
             _clientName = Account != null ? Account.AccountName : _clientName;
@@ -195,22 +173,6 @@
             int userInfoId = Convert.ToInt32(_user.FindFirst(c => c.Type == CustomClaimTypes.UserInfoId)?.Value ?? "0");
             UserInfo = await _clientHomeService.GetUserInfoAsync(userInfoId);
             _clientPhone = UserInfo != null ? UserInfo.ContactNumber : _clientPhone;
-            if (_user == null)
-            {
-                Console.WriteLine("user is null1");
-            } else {
-                Console.WriteLine("user is not null!");
-            }
-            Console.WriteLine(accountId);
-            Console.WriteLine(userInfoId);
-            Console.WriteLine(_clientName);
-            Console.WriteLine(_accountNumber);
-            Console.WriteLine(_currentBalance);
-            Console.WriteLine(_clientPhone);
-            foreach (var claim in _user.Claims)
-            {
-                Console.WriteLine($"{claim.Type} : {claim.Value}");
-            }
         }
     }
 }

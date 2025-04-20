@@ -1,5 +1,10 @@
-﻿@page "/Account_opening"
+﻿@* @using Services
+@using Exceptions
+
+@page "/Account_opening"
 @inject NavigationManager NavigationManager
+@inject RegistrationService RegistrationService
+@inject HttpClient HttpClient
 @using Layout
 @layout PlainLayout
 
@@ -17,6 +22,10 @@
 				</NavLink>
 			</div>
 
+			@if (!string.IsNullOrEmpty(error))
+			{
+				<div class="alert alert-danger">@error</div>
+			}
 
 			<!-- Account Holder Details Border -->
 			<div class="d-flex align-items-center my-3">
@@ -64,22 +73,22 @@
 
 						<!-- First Name -->
 						<div class="col-3">
-							<input class="form-control form-control-sm" placeholder="First Name">
+							<input class="form-control form-control-sm" @bind="firstName" placeholder="First Name">
 						</div>
 
 						<!-- Middle Name -->
 						<div class="col-3">
-							<input class="form-control form-control-sm" placeholder="Middle Name">
+							<input class="form-control form-control-sm" @bind="middleName" placeholder="Middle Name">
 						</div>
 
 						<!-- Last Name -->
 						<div class="col-3">
-							<input class="form-control form-control-sm" placeholder="Last Name">
+							<input class="form-control form-control-sm" @bind="lastName" placeholder="Last Name">
 						</div>
 
 						<!-- Suffix Name -->
 						<div class="col-1">
-							<input class="form-control form-control-sm" placeholder="Suffix">
+							<input class="form-control form-control-sm" @bind="suffix" placeholder="Suffix">
 						</div>
 
 					</div>
@@ -130,16 +139,16 @@
 					<!-- Contact No -->
 					<div class="col">
 						<label class="text-light">Contact No.</label>
-						<input class="form-control form-control-sm" placeholder="Contact No." required>
+						<input class="form-control form-control-sm" @bind="contactNumber" placeholder="Contact No." required>
 					</div>
 
 					<!-- Email Address -->
 					<div class="col">
 						<label class="text-light">Email Address</label>
-						<input type="email" class="form-control form-control-sm" placeholder="Email" required>
+						<input type="email" class="form-control form-control-sm" @bind="email" placeholder="Email" required>
 					</div>
 				</div>
-			
+
 
 				<!-- Row 4 -->
 				<div class="row g-2 mt-2">
@@ -147,233 +156,433 @@
 					<!-- Full Address -->
 					<label class="text-light">Full Address</label>
 
-					<div class="row gx-2">
-						<!-- Province -->
-						<div class="col">
-							<select class="form-select form-select-sm" @bind="selectedProvince" required>
-								@foreach (var province in provinceOptions)
-								{
-									<option value="@province">@province</option>
-								}
-							</select>
-						</div>
-
-						<!-- Municipality -->
-						<div class="col">
-							<select class="form-select form-select-sm" @bind="selectedMunicipality" required>
-								@foreach (var municipality in municipalityOptions)
-								{
-									<option value="@municipality">@municipality</option>
-								}
-							</select>
-						</div>
-
-						<!-- Barangay -->
-						<div class="col">
-							<select class="form-select form-select-sm" @bind="selectedBarangay" required>
-								@foreach (var barangay in barangayOptions)
-								{
-									<option value="@barangay">@barangay</option>
-								}
-							</select>
-						</div>
-
-						<!-- Street No. -->
-						<div class="col">
-							<input class="form-control form-control-sm" placeholder="Street No." required>
-						</div>
-
-						<!-- House No. -->
-						<div class="col">
-							<input class="form-control form-control-sm" placeholder="House No." required>
-						</div>
-
+					<!-- Region -->
+					<div class="col">
+						<select class="form-select form-select-sm" @value="@selectedRegion" @onchange="async _ => await LoadProvinceAsync()" required>
+							@foreach (var r in regions)
+							{
+								<option value="@r.RegionId">@r.RegionName</option>
+							}
+						</select>
 					</div>
 
-
-					<!-- Row 5 -->
-					<div class="row g-2 mt-2">
-
-						<!-- Birth Place -->
-						<div class="col-3">
-							<label class="text-light">Birth Place</label>
-							<input class="form-control form-control-sm" placeholder="Birth Place" required>
-						</div>
-
-						<!-- Birth Date -->
-						<div class="col-3">
-							<label class="text-light">Birth Date</label>
-							<input class="form-control form-control-sm" type="date" placeholder="mm/dd/yyyy" required>
-						</div>
-
-						<!-- Occupation -->
-						<div class="col-3">
-							<label class="text-light">Occupation</label>
-							<input class="form-control form-control-sm" placeholder="Occupation" required>
-						</div>
+					<!-- Province -->
+					<div class="col">
+						<label class="text-light" style="visibility: hidden;">Province</label>
+						<select class="form-select form-select-sm" @value="@selectedProvince" @onchange="async _ => await LoadCitiesAsync()" required>
+							@foreach (var p in provinces)
+							{
+								<option value="@p.ProvinceId">@p.ProvinceName</option>
+							}
+						</select>
 					</div>
 
-
-					<div class="row g-2 mt-2">
-
-
-						<!-- Row 6 (Father's Name)-->
-						<div class="col-12">
-
-							<label class="text-light">Father's Name</label>
-							<div class="row g-2">
-								<div class="col-3">
-									<input class="form-control form-control-sm" placeholder="First Name">
-								</div>
-								<div class="col-3">
-									<input class="form-control form-control-sm" placeholder="Middle Name">
-								</div>
-								<div class="col-3">
-									<input class="form-control form-control-sm" placeholder="Last Name">
-								</div>
-								<div class="col-1">
-									<input class="form-control form-control-sm" placeholder="Suffix">
-								</div>
-							</div>
-						</div>
-
-
-						<!-- Row 7 (Mother's Name)-->
-						<div class="col-12">
-							<label class="text-light">Mother's Maiden Name</label>
-							<div class="row g-2">
-								<div class="col-3">
-									<input class="form-control form-control-sm" placeholder="First Name">
-								</div>
-								<div class="col-3">
-									<input class="form-control form-control-sm" placeholder="Middle Name">
-								</div>
-								<div class="col-3">
-									<input class="form-control form-control-sm" placeholder="Last Name">
-								</div>
-								<div class="col-1">
-									<input class="form-control form-control-sm" placeholder="Suffix">
-								</div>
-							</div>
-						</div>
-
-
-						<!-- Row 8 (Beneficiary's Name) -->
-						<div class="col-12">
-							<label class="text-light">Beneficiary's Name</label>
-							<div class="row g-2">
-								<div class="col-3">
-									<input class="form-control form-control-sm" placeholder="First Name">
-								</div>
-								<div class="col-3">
-									<input class="form-control form-control-sm" placeholder="Middle Name">
-								</div>
-								<div class="col-3">
-									<input class="form-control form-control-sm" placeholder="Last Name">
-								</div>
-								<div class="col-1">
-									<input class="form-control form-control-sm" placeholder="Suffix">
-								</div>
-							</div>
-						</div>
+					<!-- City -->
+					<div class="col">
+						<label class="text-light" style="visibility: hidden;">City</label>
+						<select class="form-select form-select-sm" @value="@selectedCity" @onchange="async _ => await LoadBarangaysAsync()" required>
+							@foreach (var c in cities)
+							{
+								<option value="@c.CityId">@c.CityName</option>
+							}
+						</select>
 					</div>
 
-					<div class="row g-3 mt-3">
-						<!-- Upload Government ID -->
-						<div class="col-md-4">
-							<label class="text-light">Upload Government Valid ID (Front & Back)</label>
-
-							<!-- View Button -->
-							<div class="d-flex gap-2">
-								<input type="file" class="btn btn-light btn-sm w-75" required />
-								<button class="btn btn-outline-light">View</button>
-							</div>
-						</div>
-
-						<!-- Upload 1x1 Picture -->
-						<div class="col-md-4">
-							<label class="text-light">Upload 1x1 Picture</label>
-
-							<!-- View BUtton -->
-							<div class="d-flex gap-2">
-								<input type="file" class="btn btn-light btn-sm w-75" required />
-								<button class="btn btn-outline-light">View</button>
-							</div>
-						</div>
+					<!-- Barangay -->
+					<div class="col-3">
+						<label class="text-light">Barangay</label>
+						<select class="form-select form-select-sm" @value="@selectedBarangay" required>
+							@foreach (var b in barangays)
+							{
+								<option value="@b.BarangayId">@b.BarangayName</option>
+							}
+						</select>
 					</div>
 
-					<!-- Terms and Conditions Checkbox -->
-					<div class="form-check d-flex justify-content-end mt-3">
-						<input class="form-check-input mx-2" type="checkbox" id="termsAndConditions" required>
-						<label class="form-check-label text-light" for="termsAndConditions">
-							I accept the terms and conditions
-						</label>
+					<!-- Street No. -->
+					<div class="col">
+						<input class="form-control form-control-sm" @bind="streetNo" placeholder="Street No." required>
 					</div>
 
-					<!-- Register Button -->
-					<div class="text-end mt-3">
-						<button class="btn btn-primary btn-secondary" @onclick="LoginAsync">Submit Application</button>
+					<!-- House No. -->
+					<div class="col">
+						<input class="form-control form-control-sm" @bind="houseNo" placeholder="House No." required>
 					</div>
 
 				</div>
+
+
+				<!-- Row 5 -->
+				<!--Birth Place address-->
+				<div class="row g-2 mt-3">
+
+					<!-- Region -->
+					<div class="col">
+						<label class="text-light">Birth Place</label>
+						<select class="form-select form-select-sm" @value="@selectedBirthRegion" @onchange="async _ => await LoadRegionAsync()" required>
+							@foreach (var r in regions)
+							{
+								<option value="@r.RegionId">@r.RegionName</option>
+							}
+						</select>
+					</div>
+
+					<!-- Province -->
+					<div class="col">
+						<label class="text-light" style="visibility: hidden;">Province</label>
+						<select class="form-select form-select-sm" @value="@selectedBirthProvince" @onchange="async _ => await LoadProvinceAsync()" required>
+							@foreach (var p in provinces)
+							{
+								<option value="@p.ProvinceId">@p.ProvinceName</option>
+							}
+						</select>
+					</div>
+
+					<!-- City -->
+					<div class="col">
+						<label class="text-light" style="visibility: hidden;">City</label>
+						<select class="form-select form-select-sm" @value="@selectedBirthCity" @onchange="async _ => await LoadCitiesAsync()" required>
+							@foreach (var c in cities)
+							{
+								<option value="@c.CityId">@c.CityName</option>
+							}
+						</select>
+					</div>
+
+					<!-- Barangay -->
+					<div class="col-3">
+						<label class="text-light">Barangay</label>
+						<select class="form-select form-select-sm" @bind="selectedBarangay" required>
+							@foreach (var b in barangays)
+							{
+								<option value="@b.BarangayId">@b.BarangayName</option>
+							}
+						</select>
+					</div>
+
+					<!-- Birth Date -->
+					<div class="col">
+						<label class="text-light">Birth Date</label>
+						<input class="form-control form-control-sm" @bind="birthDate" type="date" required>
+					</div>
+
+					<!-- Occupation -->
+					<div class="col">
+						<label class="text-light">Occupation</label>
+						<input class="form-control form-control-sm" @bind="Occupation" placeholder="Occupation" required>
+					</div>
+
+				</div>
+
+
+				<div class="row g-2 mt-2">
+
+
+					<!-- Row 6 (Father's Name)-->
+					<div class="col-12">
+
+						<label class="text-light">Father's Name</label>
+						<div class="row g-2">
+							<div class="col-3">
+								<input class="form-control form-control-sm" @bind="fatherFirstName" placeholder="First Name">
+							</div>
+							<div class="col-3">
+								<input class="form-control form-control-sm" @bind="fatherMiddleName" placeholder="Middle Name">
+							</div>
+							<div class="col-3">
+								<input class="form-control form-control-sm" @bind="fatherLastName" placeholder="Last Name">
+							</div>
+							<div class="col-1">
+								<input class="form-control form-control-sm" @bind="fatherSuffix" placeholder="Suffix">
+							</div>
+						</div>
+					</div>
+
+
+					<!-- Row 7 (Mother's Name)-->
+					<div class="col-12">
+						<label class="text-light">Mother's Maiden Name</label>
+						<div class="row g-2">
+							<div class="col-3">
+								<input class="form-control form-control-sm" @bind="motherFirstName" placeholder="First Name">
+							</div>
+							<div class="col-3">
+								<input class="form-control form-control-sm" @bind="motherMiddleName" placeholder="Middle Name">
+							</div>
+							<div class="col-3">
+								<input class="form-control form-control-sm" @bind="motherLastName" placeholder="Last Name">
+							</div>
+							<div class="col-1">
+								<input class="form-control form-control-sm" @bind="motherSuffix" placeholder="Suffix">
+							</div>
+						</div>
+					</div>
+
+
+					<!-- Row 8 (Beneficiary's Name) -->
+					<div class="col-12">
+						<label class="text-light">Beneficiary's Name</label>
+						<div class="row g-2">
+							<div class="col-3">
+								<input class="form-control form-control-sm" @bind="beneficiaryFirstName" placeholder="First Name">
+							</div>
+							<div class="col-3">
+								<input class="form-control form-control-sm" @bind="beneficiaryMiddleName" placeholder="Middle Name">
+							</div>
+							<div class="col-3">
+								<input class="form-control form-control-sm" @bind="beneficiaryLastName" placeholder="Last Name">
+							</div>
+							<div class="col-1">
+								<input class="form-control form-control-sm" @bind="beneficiarySuffix" placeholder="Suffix">
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="row g-3 mt-3">
+					<!-- Upload Government ID -->
+					<div class="col-md-4">
+						<label class="text-light">Upload Government Valid ID (Front & Back)</label>
+
+						<!-- View Button -->
+						<div class="d-flex gap-2">
+							<input type="file" class="btn btn-light btn-sm w-75" required />
+							<button class="btn btn-outline-light">View</button>
+						</div>
+					</div>
+
+					<!-- Upload 1x1 Picture -->
+					<div class="col-md-4">
+						<label class="text-light">Upload 1x1 Picture</label>
+
+						<!-- View BUtton -->
+						<div class="d-flex gap-2">
+							<input type="file" class="btn btn-light btn-sm w-75" required />
+							<button class="btn btn-outline-light">View</button>
+						</div>
+					</div>
+
+					<!-- TIN -->
+					<div class="col-md-3">
+						<label class="text-light">Tax Identification Number</label>
+						<input class="form-control" @bind="taxidentificationnumber" placeholder="Tax Identification Number">
+					</div>
+
+				</div>
+
+				<!-- Border -->
+				<div class="d-flex align-items-center mt-5 mb-3">
+					<span class="text-light me-2">Setup Sign In Credentials</span>
+					<div class="flex-grow-1">
+						<hr class="m-0" style="border: 1px solid white; opacity: 100%;" />
+					</div>
+				</div>
+
+				<!-- Credentials Inputs -->
+				<div class="row g-2 mb-3">
+
+					<!-- Username -->
+					<div class="col-3">
+						<label class="text-light">Username</label>
+						<input class="form-control form-control-sm" placeholder="Username" required>
+					</div>
+
+					<!-- Password -->
+					<div class="col-3">
+						<label class="text-light">Password</label>
+						<input type="password" class="form-control form-control-sm" placeholder="Password" required>
+					</div>
+				</div>
+
+				<!-- Terms and Conditions Checkbox -->
+				<div class="form-check d-flex justify-content-end mt-3">
+					<input class="form-check-input mx-2" type="checkbox" id="termsAndConditions" required>
+					<label class="form-check-label text-light" for="termsAndConditions">
+						I accept the terms and conditions
+					</label>
+				</div>
+
+				<!-- Register Button -->
+				<div class="text-end mt-3">
+					<button class="btn btn-primary btn-secondary" @onclick="LoginAsync">Submit Application</button>
+				</div>
+
 			</div>
 		</div>
 	</main>
 </div>
 
+
+
 @code {
+
+	private string error = string.Empty;
+
 	public string firstName = "";
 	public string middleName = "";
 	public string lastName = "";
-	public string error = "";
+	public string suffix = "";
 
-	private string selectedReligion;
-	private List<string> religionOptions = new List<string>
+	public int age;
+	public DateTime birthDate;
+	public string selectedBirthCity = "";
+	public string selectedBirthProvince = "";
+	public string selectedBirthRegion = "";
+
+	public string email = "";
+	public string selectedSex = "";
+	public string selectedCivilStatus = "";
+	public string selectedReligion = "";
+	public string contactNumber = "";
+	public string Occupation = "";
+
+	//address info
+	public string houseNo = "";
+	public string streetNo = "";
+	public string selectedRegion = "";
+	public string selectedProvince = "";
+	public string selectedCity = "";
+	public string selectedBarangay = "";
+
+	//Parents Name
+	public string fatherFirstName = "";
+	public string fatherMiddleName = "";
+	public string fatherLastName = "";
+	public string fatherSuffix = "";
+
+	public string motherFirstName = "";
+	public string motherMiddleName = "";
+	public string motherLastName = "";
+	public string motherSuffix = "";
+
+	public string beneficiaryFirstName = "";
+	public string beneficiaryMiddleName = "";
+	public string beneficiaryLastName = "";
+	public string beneficiarySuffix = "";
+	public string userName = "";
+	public string password = "";
+	public string taxidentificationnumber = "";
+
+	<!--user birth info address-->
+	private List<BirthInfo> birthRegions = new();
+	private List<BirthInfo> birthProvinces = new();
+	private List<BirthInfo> birthCities = new();
+	<!--user full address-->
+	private List<Region> regions = new List<Region>();
+	private List<Province> provinces = new List<Province>();
+	private List<City> cities = new List<City>();
+	private List<Barangay> barangays = new List<Barangay>();
+
+	protected override async Task OnInitializedAsync()
 	{
-		"Religion 1",
-		"Religion 2",
-		"Religion 3",
-		"Religion 4"
-	};
+		await LoadRegionAsync();
+	}
 
-	private string selectedProvince;
-	private string selectedMunicipality;
-	private string selectedBarangay;
-
-	private List<string> provinceOptions = new List<string>
+	// For Full address of user
+	private async Task LoadRegionAsync()
 	{
-		"Province 1",
-		"Province 2",
-		"Province 3",
-		"Province 4"
-	};
+		var regionResponse = await HttpClient.GetFromJsonAsync<List<Region>>("https://psgc.gitlab.io/api/regions/");
+		regions = regionResponse ?? new List<Region>();
+		await LoadProvinceAsync();
+	}
 
-	private List<string> municipalityOptions = new List<string>
+	private async Task LoadProvinceAsync()
 	{
-		"Municipality 1",
-		"Municipality 2",
-		"Municipality 3",
-		"Municipality 4"
-	};
+		var provinceResponse = await HttpClient.GetFromJsonAsync<List<Province>>($"https://psgc.gitlab.io/api/regions/{selectedRegion}/provinces/");
+		provinces = provinceResponse ?? new List<Province>();
+		await LoadCitiesAsync();
+	}
 
-	private List<string> barangayOptions = new List<string>
+	private async Task LoadCitiesAsync()
 	{
-		"Barangay 1",
-		"Barangay 2",
-		"Barangay 3",
-		"Barangay 4"
-	};
+		var citiesResponse = await HttpClient.GetFromJsonAsync<List<City>>($"https://psgc.gitlab.io/api/provinces/{selectedProvince}/municipalities/");
+		cities = citiesResponse ?? new List<City>();
+		await LoadBarangaysAsync();
+	}
 
-	private void LoginAsync()
+	private async Task LoadBarangaysAsync()
 	{
-		if (string.IsNullOrEmpty(firstName) || string.IsNullOrEmpty(lastName))
+		var barangaysResponse = await HttpClient.GetFromJsonAsync<List<Barangay>>($"https://psgc.gitlab.io/api/cities/{selectedCity}/barangays/");
+		barangays = barangaysResponse ?? new List<Barangay>();
+	}
+
+
+	private int GetIdFromSelected(string selectedCode, List<dynamic> options)
+	{
+		foreach (var item in options)
 		{
-			error = "Please fill in both the email and password.";
-			return;
+			if (item?.Code == selectedCode)
+			{
+				return item?.Id ?? 0;
+			}
 		}
 
-		error = "";
-		NavigationManager.NavigateTo("/Client_home_page");
+		return 0;
 	}
-}
 
+	///private int GetIdFromSelected(string selectedCode, List<dynamic> options)
+	///{
+		///var selected = options.FirstOrDefault(item => item.Code == selectedCode);
+		///return selected?.id ?? 0;
+	///}
+
+	private async Task LoginAsync()
+	{
+		try
+		{
+			await RegistrationService.RegisterAsync
+			(
+				userFirstName: firstName,
+				userMiddleName: middleName,
+				userLastName: lastName,
+				userSuffix: suffix,
+				birthDate: birthDate,
+				birthCityId: GetIdFromSelected(selectedBirthCity, birthCities.Cast<dynamic>().ToList()),
+				birthProvinceId: GetIdFromSelected(selectedBirthProvince, birthProvinces.Cast<dynamic>().ToList()),
+				birthRegionId: GetIdFromSelected(selectedBirthRegion, birthRegions.Cast<dynamic>().ToList()), 
+				houseNo: houseNo,
+				street: streetNo,
+				barangayId: GetIdFromSelected(selectedBarangay, barangays.Cast<dynamic>().ToList()),
+				cityId: GetIdFromSelected(selectedCity, cities.Cast<dynamic>().ToList()),
+				provinceId: GetIdFromSelected(selectedProvince, provinces.Cast<dynamic>().ToList()),
+				regionId: GetIdFromSelected(selectedRegion, regions.Cast<dynamic>().ToList()),
+				postalCode: 1000,
+				age: age,
+				sex: selectedSex,
+				contactNumber: contactNumber,
+				Occupation: Occupation,
+				email: email, 
+				civilStatus: selectedCivilStatus,
+				userReligion: 1,
+				fatherFirstName: fatherFirstName,
+				fatherMiddleName: fatherMiddleName,
+				fatherLastName: fatherLastName,
+				fatherSuffix: fatherSuffix,
+				motherFirstName: motherFirstName,
+				motherMiddleName: motherMiddleName,
+				motherLastName: motherLastName,
+				motherSuffix: motherSuffix,
+				beneficiaryFirstName: beneficiaryFirstName,
+				beneficiaryMiddleName: beneficiaryMiddleName,
+				beneficiaryLastName: beneficiaryLastName,
+				beneficiarySuffix: beneficiarySuffix,
+				userName: userName,
+				password: password,
+				taxidentificationnumber: taxidentificationnumber
+			);
+			NavigationManager.NavigateTo("/");
+
+		}
+
+		catch (MissingFieldException ex)
+		{
+			error = ex.Message;
+		}
+		catch (Exception ex)
+		{
+			error = "Error occurred: " + ex.Message;
+		}
+	}
+
+}
+ *@
