@@ -31,6 +31,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<CredentialValidationService>();
 builder.Services.AddScoped<SignInService>();
 builder.Services.AddScoped<ClaimsHelperService>();
+builder.Services.AddScoped<ClientHomeService>();
 builder.Services.AddScoped<AuthenticationStateProvider, NexusAuthenticationStateProvider>();
 builder.Services.AddScoped<NexusAuthenticationService>();
 
