@@ -46,7 +46,7 @@ namespace Services
 
             //  Sign in the user
             await _httpContext.SignInAsync(_claimsHelperService.cookieScheme, principal, authProperties);
-            _authenticationService.currentUser = principal;
+            
             return;
         }
     }

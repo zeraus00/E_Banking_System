@@ -5,21 +5,21 @@ namespace Services
 {
     public class NexusAuthenticationStateProvider : AuthenticationStateProvider
     {
-        private readonly IHttpContextAccessor _accessor;
         private readonly ClaimsHelperService _claimsHelperService;
         private AuthenticationState _authenticationState;
-        public NexusAuthenticationStateProvider (IHttpContextAccessor accessor, NexusAuthenticationService authenticationService )
+        public NexusAuthenticationStateProvider (NexusAuthenticationService authenticationService )
         {
-            _accessor = accessor;
             _claimsHelperService = new();
 
-            _authenticationState = new AuthenticationState(authenticationService.currentUser);
+            
 
             authenticationService.UserChanged += (newUser) =>
             {
                 _authenticationState = new AuthenticationState(newUser);
                 NotifyAuthenticationStateChanged(Task.FromResult(_authenticationState));
             };
+
+            _authenticationState = new AuthenticationState(authenticationService.currentUser);
         }
         public override Task<AuthenticationState> GetAuthenticationStateAsync() =>
             Task.FromResult(_authenticationState);
