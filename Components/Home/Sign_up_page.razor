@@ -14,219 +14,313 @@
 		<!-- Registration Box -->
 		<div class="card registration mt-3 p-4 shadow-lg">
 			<div class="d-flex justify-content-between align-items-center">
-				<h3 class="fw-bold text-light">User Registration</h3>
+				<h3 class="fw-bold text-light">Online Account Opening</h3>
 
 				<!-- Close Button -->
 				<NavLink href="/">
-					<button class="btn-close" aria-label="Close"></button> 
+					<button class="btn-close" aria-label="Close"></button>
 				</NavLink>
 			</div>
 
-			@if (!string.IsNullOrWhiteSpace(error))
+		@* 	@if (!string.IsNullOrEmpty(error))
 			{
-				<div class="alert alert-danger mt-2">@error</div>
-			}
+				<div class="alert alert-danger">@error</div>
+			} *@
+
+			<!-- Account Holder Details Border -->
+			<div class="d-flex align-items-center my-3">
+				<span class="text-light me-2">Account Holder's Details</span>
+				<div class="flex-grow-1">
+					<hr class="m-0" style="border: 1px solid white; opacity: 100%;">
+				</div>
+			</div>
 
 
 			<div class="information_box">
 
+
 				<!-- Row 1 -->
-				<div class="row g-2">
-					<div class="col-3">
-						<label class="text-light">First Name</label>
-						<input class="form-control" @bind="firstName" placeholder="First Name" required>
+				<div class="row g-2 mt-2">
+
+					<!-- Account Sub Type -->
+					<div class="col-2">
+						<label class="text-light">Account Sub-Type</label>
+						<select class="form-select form-select-sm" required>
+							<option>Personal Account</option>
+							<option>Joint Account</option>
+						</select>
 					</div>
-					<div class="col-3">
-						<label class="text-light">Middle Name</label>
-						<input class="form-control" @bind="middleName" placeholder="Middle Name">
-					</div>
-					<div class="col-3">
-						<label class="text-light">Last Name</label>
-						<input class="form-control" @bind="lastName" placeholder="Last Name" required>
-					</div>
-					<div class="col-1">
-						<label class="text-light">Suffix</label>
-						<input class="form-control" @bind="suffix" placeholder="Suffix">
+
+					<!-- Account Product Type -->
+					<div class="col-2">
+						<label class="text-light">Account Product Type</label>
+						<select class="form-select form-select-sm" required>
+							<option>Product Type 1</option>
+							<option>Product Type 2</option>
+							<option>Product Type 3</option>
+							<option>Product Type 4</option>
+						</select>
 					</div>
 				</div>
 
+
 				<!-- Row 2 -->
 				<div class="row g-2 mt-2">
+
+					<!-- Primary Accouunt Name -->
+					<label class="text-light">Primary Account Name</label>
+					<div class="row g-2">
+
+						<!-- First Name -->
+						<div class="col-3">
+							<input class="form-control form-control-sm" placeholder="First Name">
+						</div>
+
+						<!-- Middle Name -->
+						<div class="col-3">
+							<input class="form-control form-control-sm" placeholder="Middle Name">
+						</div>
+
+						<!-- Last Name -->
+						<div class="col-3">
+							<input class="form-control form-control-sm" placeholder="Last Name">
+						</div>
+
+						<!-- Suffix Name -->
+						<div class="col-1">
+							<input class="form-control form-control-sm" placeholder="Suffix">
+						</div>
+
+					</div>
+
+				</div>
+
+
+				<!-- Row 3 -->
+				<div class="row g-2 mt-2">
+
+					<!-- Age -->
 					<div class="col-1">
 						<label class="text-light">Age</label>
-						<input class="form-control" @bind="age" type="number" placeholder="Age" required>
+						<input class="form-control form-control-sm" type="number" placeholder="Age" required>
 					</div>
-					<div class="col-3">
-						<label class="text-light">Birth Date</label>
-						<input class="form-control" @bind="birthDate" type="date" placeholder="mm/dd/yyyy" required>
-					</div>
-					<div class="col-4">
-						<label class="text-light">Birth Place</label>
-						<input class="form-control" placeholder="Full Address" required>
-					</div>
-					<div class="col-2">
+
+					<!-- Sex -->
+					<div class="col-1">
 						<label class="text-light">Sex</label>
-						<select class="form-select" @bind="selectedSex" required>
+						<select class="form-select form-select-sm" required>
 							<option>Male</option>
 							<option>Female</option>
 						</select>
 					</div>
+
+					<!-- Civil  Status -->
 					<div class="col-2">
 						<label class="text-light">Civil Status</label>
-						<select class="form-select" @bind="selectedCivilStatus" required>
+						<select class="form-select form-select-sm" required>
 							<option>Single</option>
 							<option>Married</option>
 							<option>Separated</option>
 							<option>Widowed</option>
 						</select>
 					</div>
-				</div>
-
-				<!-- Row 3 -->
-				<div class="row g-2 mt-2">
 
 					<!-- Religion -->
-					<div class="col-3">
+					<div class="col">
 						<label class="text-light">Religion</label>
-						<select class="form-select" @bind="selectedReligion">
-							@foreach (var option in religionOptions)
-							{
-								<option value="@option">@option</option>
-							}
+						<select class="form-select form-select-sm" >
+							
 						</select>
 					</div>
 
-					<!--Region-->
-					<div class="col-3">
-						<label class="text-light">Region</label>
-						<select class="form-select" @onchange="async _ => await LoadProvinceAsync()" required>
-							@foreach (var r in regions)
-							{
-								<option value="@r.RegionId">@r.RegionName</option>
-							}
+					<!-- Contact No -->
+					<div class="col">
+						<label class="text-light">Contact No.</label>
+						<input class="form-control form-control-sm" placeholder="Contact No." required>
+					</div>
+
+					<!-- Email Address -->
+					<div class="col">
+						<label class="text-light">Email Address</label>
+						<input type="email" class="form-control form-control-sm" placeholder="Email" required>
+					</div>
+				</div>
+
+
+				<!-- Row 4 -->
+				<div class="row g-2 mt-2">
+
+					<!-- Full Address -->
+					<label class="text-light">Full Address</label>
+
+					<!-- Region -->
+					<div class="col">
+						<select class="form-select form-select-sm" >
+							
 						</select>
 					</div>
 
 					<!-- Province -->
-					<div class="col-3">
-						<label class="text-light">Province</label>
-						<select class="form-select" @onchange="async _ => await LoadCitiesAsync()" required>
-							@foreach (var p in provinces)
-							{
-								<option value="@p.ProvinceId">@p.ProvinceName</option>
-							}
+					<div class="col">
+						<label class="text-light" style="visibility: hidden;">Province</label>
+						<select class="form-select form-select-sm" >
+							
 						</select>
 					</div>
 
 					<!-- City -->
-					<div class="col-3">
-						<label class="text-light">City</label>
-						<select class="form-select" @onchange="async _ => await LoadBarangaysAsync()" required>
-							@foreach (var c in cities)
-							{
-								<option value="@c.CityId">@c.CityName</option>
-							}
+					<div class="col">
+						<label class="text-light" style="visibility: hidden;">City</label>
+						<select class="form-select form-select-sm" >
+							
 						</select>
 					</div>
 
 					<!-- Barangay -->
 					<div class="col-3">
 						<label class="text-light">Barangay</label>
-						<select class="form-select" @bind="selectedBarangay" required>
-							@foreach (var b in barangays)
-							{
-								<option value="@b.BarangayId">@b.BarangayName</option>
-							}
+						<select class="form-select form-select-sm" >
+							
 						</select>
 					</div>
 
+					<!-- Street No. -->
+					<div class="col">
+						<input class="form-control form-control-sm" >
+					</div>
+
+					<!-- House No. -->
+					<div class="col">
+						<input class="form-control form-control-sm" >
+					</div>
+
 				</div>
 
-				<!-- Row 4 -->
-				<div class="row g-2 mt-2">
-					<div class="col-3">
-						<label class="text-light">Street No.</label>
-						<input class="form-control" @bind="streetNo" placeholder="Street No." required>
+
+				<!-- Row 5 -->
+				<!--Birth Place address-->
+				<div class="row g-2 mt-3">
+
+					<!-- Region -->
+					<div class="col">
+						<label class="text-light">Birth Place</label>
+						<select class="form-select form-select-sm">
+							
+						</select>
 					</div>
-					<div class="col-3">
-						<label class="text-light">House No.</label>
-						<input class="form-control" @bind="houseNo" placeholder="House No." required>
+
+					<!-- Province -->
+					<div class="col">
+						<label class="text-light" style="visibility: hidden;">Province</label>
+						<select class="form-select form-select-sm" >
+							
+						</select>
 					</div>
-					<div class="col-3">
-						<label class="text-light">Email</label>
-						<input type="email" class="form-control" @bind="email" placeholder="Email" required>
+
+					<!-- City -->
+					<div class="col">
+						<label class="text-light" style="visibility: hidden;">City</label>
+						<select class="form-select form-select-sm" >
+							
+						</select>
 					</div>
+
+					<!-- Barangay -->
 					<div class="col-3">
-						<label class="text-light">Contact No.</label>
-						<input class="form-control" @bind="contactNumber" placeholder="Contact No." required>
+						<label class="text-light">Barangay</label>
+						<select class="form-select form-select-sm">
+							
+						</select>
 					</div>
+
+					<!-- Birth Date -->
+					<div class="col">
+						<label class="text-light">Birth Date</label>
+						<input class="form-control form-control-sm" type="date" required>
+					</div>
+
+					<!-- Occupation -->
+					<div class="col">
+						<label class="text-light">Occupation</label>
+						<input class="form-control form-control-sm" placeholder="Occupation" required>
+					</div>
+
 				</div>
 
-				<!-- Row 5 (Father's Name)-->
+
 				<div class="row g-2 mt-2">
+
+
+					<!-- Row 6 (Father's Name)-->
 					<div class="col-12">
+
 						<label class="text-light">Father's Name</label>
 						<div class="row g-2">
 							<div class="col-3">
-								<input class="form-control" @bind="fatherFirstName" placeholder="First Name">
+								<input class="form-control form-control-sm" placeholder="First Name">
 							</div>
 							<div class="col-3">
-								<input class="form-control" @bind="fatherMiddleName" placeholder="Middle Name">
+								<input class="form-control form-control-sm" placeholder="Middle Name">
 							</div>
 							<div class="col-3">
-								<input class="form-control" @bind="fatherLastName" placeholder="Last Name">
+								<input class="form-control form-control-sm" placeholder="Last Name">
 							</div>
 							<div class="col-1">
-								<input class="form-control" @bind="fatherSuffix" placeholder="Suffix">
+								<input class="form-control form-control-sm" placeholder="Suffix">
 							</div>
 						</div>
 					</div>
 
-					<!-- Row 6 (Mother's Name)-->
+
+					<!-- Row 7 (Mother's Name)-->
 					<div class="col-12">
 						<label class="text-light">Mother's Maiden Name</label>
 						<div class="row g-2">
 							<div class="col-3">
-								<input class="form-control" @bind="motherFirstName" placeholder="First Name">
+								<input class="form-control form-control-sm" placeholder="First Name">
 							</div>
 							<div class="col-3">
-								<input class="form-control" @bind="motherMiddleName" placeholder="Middle Name">
+								<input class="form-control form-control-sm" placeholder="Middle Name">
 							</div>
 							<div class="col-3">
-								<input class="form-control" @bind="motherLastName" placeholder="Last Name">
+								<input class="form-control form-control-sm" placeholder="Last Name">
 							</div>
 							<div class="col-1">
-								<input class="form-control" @bind="motherSuffix" placeholder="Suffix">
+								<input class="form-control form-control-sm" placeholder="Suffix">
 							</div>
 						</div>
 					</div>
 
-					<!-- Row 7 (Beneficiary's Name) -->
+
+					<!-- Row 8 (Beneficiary's Name) -->
 					<div class="col-12">
 						<label class="text-light">Beneficiary's Name</label>
 						<div class="row g-2">
 							<div class="col-3">
-								<input class="form-control" @bind="beneficiaryFirstName" placeholder="First Name">
+								<input class="form-control form-control-sm" placeholder="First Name">
 							</div>
 							<div class="col-3">
-								<input class="form-control" @bind="beneficiaryMiddleName" placeholder="Middle Name">
+								<input class="form-control form-control-sm" placeholder="Middle Name">
 							</div>
 							<div class="col-3">
-								<input class="form-control" @bind="beneficiaryLastName" placeholder="Last Name">
+								<input class="form-control form-control-sm" placeholder="Last Name">
 							</div>
 							<div class="col-1">
-								<input class="form-control" @bind="beneficiarySuffix" placeholder="Suffix">
+								<input class="form-control form-control-sm" placeholder="Suffix">
 							</div>
 						</div>
 					</div>
 				</div>
+			
 
 				<div class="row g-3 mt-3">
 					<!-- Upload Government ID -->
 					<div class="col-md-4">
 						<label class="text-light">Upload Government Valid ID (Front & Back)</label>
+
+						<!-- View Button -->
 						<div class="d-flex gap-2">
-							<input type="file" class="btn btn-light w-75" required />
+							<input type="file" class="btn btn-light btn-sm w-75" required />
 							<button class="btn btn-outline-light">View</button>
 						</div>
 					</div>
@@ -234,33 +328,60 @@
 					<!-- Upload 1x1 Picture -->
 					<div class="col-md-4">
 						<label class="text-light">Upload 1x1 Picture</label>
+
+						<!-- View BUtton -->
 						<div class="d-flex gap-2">
-							<input type="file" class="btn btn-light w-75" required />
+							<input type="file" class="btn btn-light btn-sm w-75" required />
 							<button class="btn btn-outline-light">View</button>
 						</div>
 					</div>
 				</div>
-
-				<!-- Terms and Conditions Checkbox -->
-				<div class="form-check d-flex justify-content-end mt-3">
-					<input class="form-check-input mx-2" type="checkbox" id="termsAndConditions" required>
-					<label class="form-check-label text-light" for="termsAndConditions">
-						I accept the terms and conditions
-					</label>
-				</div>
-
-				<!-- Register Button -->
-				<div class="text-end mt-3">
-					<button class="btn btn-primary btn-lg"> Register</button>
-				</div>
-
 			</div>
+
+				<!-- Border -->
+				<div class="d-flex align-items-center mt-5 mb-3">
+					<span class="text-light me-2">Setup Sign In Credentials</span>
+					<div class="flex-grow-1">
+						<hr class="m-0" style="border: 1px solid white; opacity: 100%;" />
+					</div>
+				</div>
+
+				<!-- Credentials Inputs -->
+				<div class="row g-2 mb-3">
+
+					<!-- Username -->
+					<div class="col-3">
+						<label class="text-light">Username</label>
+						<input class="form-control form-control-sm" placeholder="Username" required>
+					</div>
+
+					<!-- Password -->
+					<div class="col-3">
+						<label class="text-light">Password</label>
+						<input type="password" class="form-control form-control-sm" placeholder="Password" required>
+					</div>
+				</div>
+
+
+			<!-- Terms and Conditions Checkbox -->
+			<div class="form-check d-flex justify-content-end mt-3">
+				<input class="form-check-input mx-2" type="checkbox" id="termsAndConditions" required>
+				<label class="form-check-label text-light" for="termsAndConditions">
+					I accept the terms and conditions
+				</label>
+			</div>
+
+			<!-- Register Button -->
+			<div class="text-end mt-3">
+				<button class="btn btn-primary btn-secondary">Submit Application</button>
+			</div>
+
+		
 		</div>
 	</main>
 </div>
 
-
-
+@*
 @code {
 
 	private string error = string.Empty;
@@ -422,3 +543,4 @@
 
 }
 
+ *@
