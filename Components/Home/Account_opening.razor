@@ -1,4 +1,4 @@
-﻿@using Services
+﻿@* @using Services
 @using Exceptions
 
 @page "/Account_opening"
@@ -250,7 +250,7 @@
 					</div>
 
 					<!-- Barangay -->
-					@*<div class="col-3">
+					<div class="col-3">
 						<label class="text-light">Barangay</label>
 						<select class="form-select form-select-sm" @bind="selectedBarangay" required>
 							@foreach (var b in barangays)
@@ -258,7 +258,7 @@
 								<option value="@b.BarangayId">@b.BarangayName</option>
 							}
 						</select>
-					</div>*@
+					</div>
 
 					<!-- Birth Date -->
 					<div class="col">
@@ -573,3 +573,4 @@
 }
 
 
+ *@
