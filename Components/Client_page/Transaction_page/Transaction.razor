@@ -22,7 +22,8 @@
             <InputDate class="form-control" @bind-Value="endDate" />
         </div>
 
-        <button class="btn btn-primary shadow-sm">Filter</button>
+        <button class="btn btn-primary shadow-sm" @onclick="FilterTransactions">Filter</button>
+
 
     </div>
 
@@ -59,25 +60,41 @@
     private DateTime? startDate;
     private DateTime? endDate;
 
-    private List<TransactionRecord> recentTransactions = new()
+    private List<TransactionRecord> allTransactions = new();
+    private List<TransactionRecord> recentTransactions = new();
+
+    protected override void OnInitialized()
     {
-        new TransactionRecord
+        allTransactions = new List<TransactionRecord>
         {
-            Date = DateTime.Today.AddDays(-1),
-            Type = "Deposit",
-            Amount = 5000,
-            BalanceAfter = 25000
-        },
-        new TransactionRecord
-        {
-            Date = DateTime.Today,
-            Type = "Transfer",
-            Amount = 3000,
-            Receiver = "clientName",
-            Sender = "Sender 1",
-            BalanceAfter = 22000
-        }
-    };
+             new TransactionRecord
+            {
+                Date = DateTime.Today.AddDays(-1),
+                Type = "Deposit",
+                Amount = 5000,
+                BalanceAfter = 25000
+            },
+            new TransactionRecord
+            {
+                Date = DateTime.Today,
+                Type = "Transfer",
+                Amount = 3000,
+                Receiver = "clientName",
+                Sender = "Sender 1",
+                BalanceAfter = 22000
+            }
+        };
+        recentTransactions = allTransactions.ToList();
+    }
+
+    private void FilterTransactions()
+    {
+        recentTransactions = allTransactions
+        .Where(t =>
+            (!startDate.HasValue || t.Date >= startDate.Value.Date) &&
+            (!endDate.HasValue || t.Date <= endDate.Value.Date)
+        ).ToList();
+    }
 
     public class TransactionRecord
     {
