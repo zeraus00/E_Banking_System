@@ -263,13 +263,13 @@
 					<!-- Birth Date -->
 					<div class="col">
 						<label class="text-light">Birth Date</label>
-						<input class="form-control form-control-sm" type="date" required>
+						<input class="form-control form-control-sm" @bind="birthDate" type="date" required>
 					</div>
 
 					<!-- Occupation -->
 					<div class="col">
 						<label class="text-light">Occupation</label>
-						<input class="form-control form-control-sm" placeholder="Occupation" required>
+						<input class="form-control form-control-sm" @bind="Occupation" placeholder="Occupation" required>
 					</div>
 
 				</div>
@@ -353,13 +353,13 @@
 					<!-- Username -->
 					<div class="col-3">
 						<label class="text-light">Username</label>
-						<input class="form-control form-control-sm" placeholder="Username" required>
+						<input class="form-control form-control-sm" @bind="userName" placeholder="Username" required>
 					</div>
 
 					<!-- Password -->
 					<div class="col-3">
 						<label class="text-light">Password</label>
-						<input type="password" class="form-control form-control-sm" placeholder="Password" required>
+						<input type="password" class="form-control form-control-sm" @bind="password" placeholder="Password" required>
 					</div>
 				</div>
 
@@ -451,6 +451,8 @@
 	public string beneficiaryMiddleName = "";
 	public string beneficiaryLastName = "";
 	public string beneficiarySuffix = "";
+	public string userName = "";
+	public string password = "";
 
 	<!--user birth info address-->
 	private List<BirthInfo> birthRegions = new();
@@ -554,7 +556,9 @@
 				beneficiaryFirstName: beneficiaryFirstName,
 				beneficiaryMiddleName: beneficiaryMiddleName,
 				beneficiaryLastName: beneficiaryLastName,
-				beneficiarySuffix: beneficiarySuffix
+				beneficiarySuffix: beneficiarySuffix,
+				userName: userName,
+				password: password
 			);
 			NavigationManager.NavigateTo("/");
 
