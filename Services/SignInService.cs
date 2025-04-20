@@ -48,29 +48,5 @@ namespace Services
             await _httpContext.SignInAsync(_claimsHelperService.cookieScheme, principal, authProperties);
             return;
         }
-
-        /// <summary>
-        /// Redirects the user based on their role id.
-        /// </summary>
-        /// <param name="roleId">The role ID of the user.</param>
-        public string RedirectBasedOnRole(int roleId)
-        {
-            return roleId switch
-            {
-                (int)RoleTypes.Administrator => "/",
-                (int)RoleTypes.User => "/Client_home",
-                (int)RoleTypes.Employee => "/",
-                _ => "/Login_page"
-            };
-        }
-
-        /// <summary>
-        /// Redirects the unauthenticated user to the Landing page.
-        /// Used when the user fails validation or authentication.
-        /// </summary>
-        public string RedirectToLogInPage()
-        {
-            return "/Login_page";
-        }
     }
 }

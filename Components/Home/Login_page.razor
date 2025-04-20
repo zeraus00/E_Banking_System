@@ -8,9 +8,11 @@
 @inject IHttpContextAccessor HttpContextAccessor
 @inject IJSRuntime JS
 @inject HttpClient http
+@inject NexusAuthenticationStateProvider _authStateProv
 @inject CredentialValidationService _validationService
 @inject SignInService _signInService
 @inject ClaimsHelperService _claimsHelperService
+@inject PageRedirectService _pageRedirectService
 @layout PlainLayout
 
 
@@ -191,8 +193,9 @@
 				//  Redirect to log in page.
 				error = "Invalid Username or Password";
 				//_signInService.RedirectToLogInPage();
-				redirectUrl = _signInService.RedirectToLogInPage();
-				_httpContext.Response.Redirect(redirectUrl);
+				redirectUrl = _pageRedirectService.GetRedirectToLogInPage();
+				_pageRedirectService.redirectWithHttpContext(redirectUrl);
+				//_httpContext.Response.Redirect(redirectUrl);
 				return;
 			}
 
@@ -200,8 +203,8 @@
 			await _signInService.TrySignInAsync(userAuth);
 
 			//	Redirect based on role.
-			redirectUrl = _signInService.RedirectBasedOnRole(userAuth.RoleId);
-			_httpContext.Response.Redirect(redirectUrl);
+			redirectUrl = _pageRedirectService.GetRedirectBasedOnRole(userAuth.RoleId);
+			_pageRedirectService.redirectWithHttpContext(redirectUrl);
 
 			return;
 		}
@@ -209,8 +212,9 @@
 		{
 			Console.WriteLine("ERRORRRR: " + ex.Message);
 			//_signInService.RedirectToLogInPage();
-			var redirectUrl = _signInService.RedirectToLogInPage();
-			_httpContext.Response.Redirect(redirectUrl);
+
+			var redirectUrl = _pageRedirectService.GetRedirectToLogInPage();
+			_pageRedirectService.redirectWithHttpContext(redirectUrl);
 			return;
 			//return Results.Redirect("/Landing_page");
 		}
