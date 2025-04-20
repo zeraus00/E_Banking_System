@@ -2,24 +2,34 @@
 @inject NavigationManager NavigationManager
 @inject ClientHomeService _clientHomeService;
 @inject NexusAuthenticationStateProvider _authenticationStateProvider
+@inject NexusAuthenticationService _authenticationService
 
 <div class="page">
     <main>
+        <AuthorizeView Roles="@RoleNames.User">
+            <Authorized>
+                <header class="custom-card-clientpage clientheader py-4 d-flex justify-content-between align-items-start">
+                    <div class="px-5">
+                        <h5>Welcome Back</h5>
+                        <div class="d-flex align-items-center gap-4">
+                            <h2><strong>@(string.IsNullOrWhiteSpace(_clientName) ? "Client Name" : _clientName)</strong></h2>
+                            <h4 class="text-secondary">@($"{(string.IsNullOrWhiteSpace(_accountNumber) ? "XXXX-XXXX" : _accountNumber)}")</h4>
+                        </div>
+                    </div>
+
+                    <div class="notification img mx-5 my-auto">
+                        <img src="/bootstrap/Utilities/Bell.png" alt="Notification Bell" />
+                    </div>
+
+                </header>
+            </Authorized>
+            <NotAuthorized>
+                <p>Create unauthorized window here.</p>
+            </NotAuthorized>
+
+        </AuthorizeView>
         <!-- Header -->
-        <header class="custom-card-clientpage clientheader py-4 d-flex justify-content-between align-items-start">
-            <div class="px-5">
-                <h5>Welcome Back</h5>
-                <div class="d-flex align-items-center gap-4">
-                    <h2><strong>@(string.IsNullOrWhiteSpace(clientName) ? "Client Name" : clientName)</strong></h2>
-                <h4 class="text-secondary">@($"{(string.IsNullOrWhiteSpace(accountNumber) ? "XXXX-XXXX" : accountNumber)}")</h4>
-                </div>
-            </div>
 
-            <div class="notification img mx-5 my-auto">
-                <img src="/bootstrap/Utilities/Bell.png" alt="Notification Bell" />
-            </div>
-
-        </header>
 
         <!-- Main Section: Balance + Actions -->
         <div class="container mt-4">
@@ -30,13 +40,13 @@
                     <section class="custom-card balance text-start p-3 h-100 border rounded shadow-sm bg-white w-100">
                         <h3 class="fw-bold my-1">Current Balance:</h3>
                         <h4 class="justify-content-center text-center align-items-center">
-                            <span class="@(currentBalance >= 0 ? "text-success" : "text-danger")">
-                                @currentBalance.ToString("C")
+                            <span class="@(_currentBalance >= 0 ? "text-success" : "text-danger")">
+                                @_currentBalance.ToString("C")
                             </span>
                         </h4>
                         <div class="custom-card sm">
                             <p class="m-1">
-                                <strong>Phone:</strong> @(string.IsNullOrWhiteSpace(clientPhone) ? "N/A" : clientPhone)
+                                <strong>Phone:</strong> @(string.IsNullOrWhiteSpace(_clientPhone) ? "N/A" : _clientPhone)
                             </p>
                         </div>
                     </section>
@@ -93,7 +103,7 @@
                     <a href="/Recent_transactions" class="btn btn-link text-decoration-none">View All</a>
                 </div>
 
-                    <!-- Transactions List -->
+                <!-- Transactions List -->
                 <div class="container py-3 px-3">
                     @if (recentTransactions == null || !recentTransactions.Any())
                     {
@@ -120,11 +130,16 @@
 
 
 @code {
+    // [CascadingParameter]
+    // HttpContext? _httpContext { get; set; }
     // Mock data for demonstration — replace with real data from your backend
-    private string clientName = "Bogart Banking";
-    private string accountNumber = "1234-5678";
-    private decimal currentBalance = 18500.75M;
-    private string clientPhone = "0917-123-4567";
+    private ClaimsPrincipal? _user;
+    private Account? Account;
+    private UserInfo? UserInfo;
+    private string _clientName = "Bogart Banking";
+    private string _accountNumber = "1234-5678";
+    private decimal _currentBalance = 18500.75M;
+    private string _clientPhone = "0917-123-4567";
 
     private List<Transaction> recentTransactions = new()
     {
@@ -138,5 +153,64 @@
         public string Type { get; set; }
         public decimal Amount { get; set; }
         public DateTime Date { get; set; }
+    }
+
+    protected override async Task OnInitializedAsync() 
+    {
+        _authenticationService.UserChanged += (user) =>
+        {
+            StateHasChanged(); // refresh UI when user changes
+        };
+        // Console.WriteLine("IN CLIENT HOME PAGE: httpcontext");
+        // ClaimsPrincipal? _user0 = _httpContext.User;
+        // Console.WriteLine(_user0.Identity.IsAuthenticated);
+        // Console.WriteLine(_user0.FindFirst(u => u.Type == ClaimTypes.Name));
+        // Console.WriteLine(_user0.FindFirst(u => u.Type == CustomClaimTypes.AccountId));
+
+        Console.WriteLine("IN CLIENT HOME PAGE: authstateprove");
+        AuthenticationState authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
+        _user = authState.User;
+
+        if (_user == null) {
+            Console.WriteLine("NULL");
+            return;
+        }
+        if (_user.Identity == null) {
+            Console.WriteLine("USER IS NULL");
+            return;
+        }
+        Console.WriteLine(_user.Identity.IsAuthenticated);
+        if (_user.Identity.IsAuthenticated)
+        {
+            foreach (var claim in _user.Claims) {
+                Console.WriteLine($"{claim.Type} : {claim.Value}");
+            }
+
+            int accountId = Convert.ToInt32(_user.FindFirst(c => c.Type == CustomClaimTypes.AccountId)?.Value ?? "0");
+            Account = await _clientHomeService.GetAccountAsync(accountId);
+            _clientName = Account != null ? Account.AccountName : _clientName;
+            _accountNumber = Account != null ? Account.AccountNumber : _accountNumber;
+            _currentBalance = Account != null ? Account.Balance : _currentBalance;
+
+            int userInfoId = Convert.ToInt32(_user.FindFirst(c => c.Type == CustomClaimTypes.UserInfoId)?.Value ?? "0");
+            UserInfo = await _clientHomeService.GetUserInfoAsync(userInfoId);
+            _clientPhone = UserInfo != null ? UserInfo.ContactNumber : _clientPhone;
+            if (_user == null)
+            {
+                Console.WriteLine("user is null1");
+            } else {
+                Console.WriteLine("user is not null!");
+            }
+            Console.WriteLine(accountId);
+            Console.WriteLine(userInfoId);
+            Console.WriteLine(_clientName);
+            Console.WriteLine(_accountNumber);
+            Console.WriteLine(_currentBalance);
+            Console.WriteLine(_clientPhone);
+            foreach (var claim in _user.Claims)
+            {
+                Console.WriteLine($"{claim.Type} : {claim.Value}");
+            }
+        }
     }
 }
