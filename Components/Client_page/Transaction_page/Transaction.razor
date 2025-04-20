@@ -1,39 +1,54 @@
 ﻿@page "/Transaction"
 @inject NavigationManager NavigationManager
 
-<div class="container mt-4">
-    <h4 class="text-muted border-bottom pb-2">Account with paid loan</h4>
+<div class="main">
+    <header class="custom-card-clientpage clientheader py-4 align-items-start">
+        <div class="px-5">
+            <div class="d-flex align-items-center my-4">
+                <h2>Recent Transactions</h2>
+            </div>
+        </div>
+    </header>
 
-    <div class="d-flex align-items-center gap-2 my-3">
-        <InputDate class="form-control" @bind-Value="startDate" placeholder="Start Date" />
-        <InputDate class="form-control" @bind-Value="endDate" placeholder="End Date" />
-        <button class="btn btn-primary shadow-sm">Filter</button>
+    <div class="d-flex align-items-center gap-3 m-3 flex-wrap">
+
+        <div class="d-flex align-items-center gap-3">
+            <label class="text-light mb-0" style="white-space: nowrap;">Start Date</label>
+            <InputDate class="form-control" @bind-Value="startDate" />
+        </div>
+
+        <div class="d-flex align-items-center gap-3">
+            <label class="text-light mb-0" style="white-space: nowrap;">End Date</label>
+            <InputDate class="form-control" @bind-Value="endDate" />
+        </div>
+
+        <button class="btn btn-primary shadow-sm" @onclick="FilterTransactions">Filter</button>
+
+
     </div>
 
     <div class="table-responsive">
         <table class="table table-bordered text-center">
             <thead class="table-info">
                 <tr>
-                    <th>Name</th>
-                    <th>Account Number</th>
-                    <th>Loan Amount</th>
-                    <th>Loan Term</th>
-                    <th>Statement Date</th>
-                    <th></th>
+                    <th>Date</th>
+                    <th>Transaction Type</th>
+                    <th>Amount</th>
+                    <th>Receiver</th>
+                    <th>Sender</th>
+                    <th>Balance</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var account in paidLoanAccounts)
+                @foreach (var transaction in recentTransactions)
                 {
-                    <tr class="@((paidLoanAccounts.IndexOf(account) % 2 == 0 ? "bg-light" : ""))">
-                        <td>@account.Name</td>
-                        <td>@account.AccountNumber</td>
-                        <td>@account.LoanAmount.ToString("N0")</td>
-                        <td>@account.LoanTerm</td>
-                        <td>@account.StatementDate?.ToString("MM/dd/yy")</td>
-                        <td>
-                            <button class="btn btn-outline-info btn-sm px-3">View Status</button>
-                        </td>
+                    <tr class="bg-light">
+                        <td>@transaction.Date.ToString("MM/dd/yyyy")</td>
+                        <td>@transaction.Type</td>
+                        <td>@transaction.Amount.ToString("C0")</td>
+                        <td>@(transaction.Type == "Transfer" ? transaction.Receiver : "--")</td>
+                        <td>@(transaction.Type == "Transfer" ? transaction.Sender : "--")</td>
+                        <td>@transaction.BalanceAfter.ToString("C0")</td>
                     </tr>
                 }
             </tbody>
@@ -45,32 +60,49 @@
     private DateTime? startDate;
     private DateTime? endDate;
 
-    private List<LoanAccount> paidLoanAccounts = new()
-    {
-        new LoanAccount
-        {
-            Name = "Sample Name #1",
-            AccountNumber = "AAA-000000",
-            LoanAmount = 20000,
-            LoanTerm = "6 Months",
-            StatementDate = null
-        },
-        new LoanAccount
-        {
-            Name = "Sample Name #3",
-            AccountNumber = "AAA-000000",
-            LoanAmount = 40000,
-            LoanTerm = "12 Months",
-            StatementDate = null
-        }
-    };
+    private List<TransactionRecord> allTransactions = new();
+    private List<TransactionRecord> recentTransactions = new();
 
-    public class LoanAccount
+    protected override void OnInitialized()
     {
-        public string Name { get; set; }
-        public string AccountNumber { get; set; }
-        public int LoanAmount { get; set; }
-        public string LoanTerm { get; set; }
-        public DateTime? StatementDate { get; set; }
+        allTransactions = new List<TransactionRecord>
+        {
+             new TransactionRecord
+            {
+                Date = DateTime.Today.AddDays(-1),
+                Type = "Deposit",
+                Amount = 5000,
+                BalanceAfter = 25000
+            },
+            new TransactionRecord
+            {
+                Date = DateTime.Today,
+                Type = "Transfer",
+                Amount = 3000,
+                Receiver = "clientName",
+                Sender = "Sender 1",
+                BalanceAfter = 22000
+            }
+        };
+        recentTransactions = allTransactions.ToList();
+    }
+
+    private void FilterTransactions()
+    {
+        recentTransactions = allTransactions
+        .Where(t =>
+            (!startDate.HasValue || t.Date >= startDate.Value.Date) &&
+            (!endDate.HasValue || t.Date <= endDate.Value.Date)
+        ).ToList();
+    }
+
+    public class TransactionRecord
+    {
+        public DateTime Date { get; set; }
+        public string Type { get; set; }
+        public decimal Amount { get; set; }
+        public string Receiver { get; set; }
+        public string Sender { get; set; }
+        public decimal BalanceAfter { get; set; }
     }
 }

@@ -35,7 +35,9 @@ builder.Services.AddScoped<ClaimsHelperService>();
 builder.Services.AddScoped<ClientHomeService>();
 builder.Services.AddScoped<CredentialValidationService>();
 builder.Services.AddScoped<PageRedirectService>();
+builder.Services.AddScoped<RegistrationService>();
 builder.Services.AddScoped<SignInService>();
+
 
 builder.Services.AddAntiforgery(options =>
 {
