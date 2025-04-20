@@ -69,22 +69,22 @@
 
 						<!-- First Name -->
 						<div class="col-3">
-							<input class="form-control form-control-sm" placeholder="First Name">
+							<input class="form-control form-control-sm" @bind="firstName" placeholder="First Name">
 						</div>
 
 						<!-- Middle Name -->
 						<div class="col-3">
-							<input class="form-control form-control-sm" placeholder="Middle Name">
+							<input class="form-control form-control-sm" @bind="middleName" placeholder="Middle Name">
 						</div>
 
 						<!-- Last Name -->
 						<div class="col-3">
-							<input class="form-control form-control-sm" placeholder="Last Name">
+							<input class="form-control form-control-sm" @bind="lastName" placeholder="Last Name">
 						</div>
 
 						<!-- Suffix Name -->
 						<div class="col-1">
-							<input class="form-control form-control-sm" placeholder="Suffix">
+							<input class="form-control form-control-sm" @bind="suffix" placeholder="Suffix">
 						</div>
 
 					</div>
@@ -144,7 +144,7 @@
 						<input type="email" class="form-control form-control-sm" @bind="email" placeholder="Email" required>
 					</div>
 				</div>
-			
+
 
 				<!-- Row 4 -->
 				<div class="row g-2 mt-2">
@@ -209,15 +209,16 @@
 
 
 				<!-- Row 5 -->
+				<!--Birth Place address-->
 				<div class="row g-2 mt-3">
 
 					<!-- Region -->
 					<div class="col">
 						<label class="text-light">Birth Place</label>
-						<select class="form-select form-select-sm" @onchange="async _ => await LoadProvinceAsync()" required>
-							@foreach (var r in regions)
+						<select class="form-select form-select-sm" @onchange="async _ => await LoadBirthRegion()" required>
+							@foreach (var r in birthRegions)
 							{
-								<option value="@r.RegionId">@r.RegionName</option>
+								<option value="@r.RegionId">@r.Region</option>
 							}
 						</select>
 					</div>
@@ -225,10 +226,10 @@
 					<!-- Province -->
 					<div class="col">
 						<label class="text-light" style="visibility: hidden;">Province</label>
-						<select class="form-select form-select-sm" @onchange="async _ => await LoadCitiesAsync()" required>
-							@foreach (var p in provinces)
+						<select class="form-select form-select-sm" @onchange="async _ => await LoadBirthProvince()" required>
+							@foreach (var p in birthProvinces)
 							{
-								<option value="@p.ProvinceId">@p.ProvinceName</option>
+								<option value="@p.ProvinceId">@p.Province</option>
 							}
 						</select>
 					</div>
@@ -236,16 +237,16 @@
 					<!-- City -->
 					<div class="col">
 						<label class="text-light" style="visibility: hidden;">City</label>
-						<select class="form-select form-select-sm" @onchange="async _ => await LoadBarangaysAsync()" required>
-							@foreach (var c in cities)
+						<select class="form-select form-select-sm" @onchange="async _ => await LoadCitiesAsync()" required>
+							@foreach (var c in birthCities)
 							{
-								<option value="@c.CityId">@c.CityName</option>
+								<option value="@c.CityId">@c.City</option>
 							}
 						</select>
 					</div>
 
 					<!-- Barangay -->
-					<div class="col-3">
+					@*<div class="col-3">
 						<label class="text-light">Barangay</label>
 						<select class="form-select form-select-sm" @bind="selectedBarangay" required>
 							@foreach (var b in barangays)
@@ -253,7 +254,7 @@
 								<option value="@b.BarangayId">@b.BarangayName</option>
 							}
 						</select>
-					</div>
+					</div>*@
 
 					<!-- Birth Date -->
 					<div class="col">
@@ -268,7 +269,7 @@
 					</div>
 
 				</div>
-					
+
 
 				<div class="row g-2 mt-2">
 
@@ -423,12 +424,43 @@
 	public string beneficiaryLastName = "";
 	public string beneficiarySuffix = "";
 
+	<!--user birth info address-->
+	private List<BirthInfo> birthRegions = new List<BirthInfo>();
+	private List<BirthInfo> birthProvinces = new List<BirthInfo>();
+	private List<BirthInfo> birthCities = new List<BirthInfo>();
+
+	<!--user full address-->
 	private List<Region> regions = new List<Region>();
 	private List<Province> provinces = new List<Province>();
 	private List<City> cities = new List<City>();
 	private List<Barangay> barangays = new List<Barangay>();
 
 	// For birth place of user
+	private async Task BirthPlaceInitializedAsync()
+	{
+		await LoadBirthRegion();
+	}
+
+	private async Task LoadBirthRegion()
+	{
+		var birthRegionResponse = await HttpClient.GetFromJsonAsync<List<BirthInfo>>("https://psgc.gitlab.io/api/regions/");
+		birthRegions = birthRegionResponse ?? new List<BirthInfo>();
+		await LoadBirthProvince();
+	}
+
+	private async Task LoadBirthProvince()
+	{
+		var birthProvinceResponse = await HttpClient.GetFromJsonAsync<List<BirthInfo>>($"https://psgc.gitlab.io/api/regions/{selectedBirthRegion}/provinces/");
+		birthProvinces = birthProvinceResponse ?? new List<BirthInfo>();
+		await LoadBirthCities();
+	}
+
+	private async Task LoadBirthCities()
+	{
+		var birthCitiesReponse = await HttpClient.GetFromJsonAsync<List<BirthInfo>>($"https://psgc.gitlab.io/api/provinces/{selectedBirthProvince}/municipalities/");
+		birthCities = birthCitiesReponse ?? new List<BirthInfo>();
+	}
+
 
 	// For Full address of user
 	private async Task OnInitializedAsync()
@@ -493,9 +525,9 @@
 				userLastName: lastName,
 				userSuffix: suffix,
 				birthDate: birthDate,
-				birthCityId: 1,
-				birthProvinceId: 1,
-				birthRegionId: 1, 
+				birthCityId: GetIdFromSelected(selectedBirthCity, birthCities.Cast<dynamic>().ToList()),
+				birthProvinceId: GetIdFromSelected(selectedBirthProvince, birthProvinces.Cast<dynamic>().ToList()),
+				birthRegionId: GetIdFromSelected(selectedBirthRegion, selectedBirthRegion.Cast<dynamic>().ToList()), 
 				houseNo: houseNo,
 				street: streetNo,
 				barangayId: GetIdFromSelected(selectedBarangay, barangays.Cast<dynamic>().ToList()),
