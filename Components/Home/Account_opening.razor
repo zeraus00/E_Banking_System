@@ -22,6 +22,10 @@
 				</NavLink>
 			</div>
 
+			@if (!string.IsNullOrEmpty(error))
+			{
+				<div class="alert alert-danger">@error</div>
+			}
 
 			<!-- Account Holder Details Border -->
 			<div class="d-flex align-items-center my-3">
