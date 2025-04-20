@@ -29,6 +29,8 @@ builder.Services.AddRazorComponents()
 builder.Services.AddHttpClient();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<AuthenticationStateProvider, NexusAuthenticationStateProvider>();
+builder.Services.AddScoped<NexusAuthenticationStateProvider>();
+builder.Services.AddScoped<NexusAuthenticationService>();
 builder.Services.AddScoped<ClaimsHelperService>();
 builder.Services.AddScoped<ClientHomeService>();
 builder.Services.AddScoped<CredentialValidationService>();
