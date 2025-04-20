@@ -9,13 +9,13 @@ namespace Services
 
         public ClaimsPrincipal currentUser
         {
-            get { return _currentUser ?? new(); }
+            get { return _currentUser ?? new ClaimsPrincipal(); }
             set
             {
-                currentUser = value;
+                _currentUser = value;
                 if (UserChanged != null)
                 {
-                    UserChanged(currentUser);
+                    UserChanged(_currentUser);
                 }
             }
         }
