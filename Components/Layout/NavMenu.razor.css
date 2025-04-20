@@ -1,6 +1,6 @@
 .sidebar {
     width: 270px;
-    height: 100vh;
+    height: 100%;
     overflow-y: auto;
     background: #212B5E;
     position: sticky; 
@@ -11,7 +11,7 @@
     width: 6px;
 }
 
-.siddebar::-webkit-scrollbar-track{
+.sidebar::-webkit-scrollbar-track{
     background: transparent;
 }
 
