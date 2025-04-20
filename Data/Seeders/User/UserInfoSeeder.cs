@@ -13,9 +13,10 @@ namespace Data.Seeders.User
         }
 
        
-        UserInfo userInfo;
+        
         public async Task SeedUserInfos()
         {
+            UserInfo userInfo;
             Name name;
             Name fatherName;
             Name motherName;
