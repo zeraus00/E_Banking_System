@@ -115,9 +115,8 @@
 	[SupplyParameterFromForm]
 	public LogInViewModel _loginModel { get; set; } = new();
 
-	public string email = "";
-	public string password = "";
 	public string error = "";
+
 
 	private string passwordInputType = "password";
 	private string eyeIconClass = "bi-eye-slash";
@@ -133,6 +132,16 @@
 		{
 			passwordInputType = "password"; // Hide password
 			eyeIconClass = "bi-eye-slash"; // Change icon to closed eye
+		}
+	}
+
+	protected override async Task OnInitializedAsync() 
+	{
+		AuthenticationState authState = await _nexusAuthenticationStateProvider.GetAuthenticationStateAsync();
+		ClaimsPrincipal? user = authState.User;
+		if (user.Identity != null && user.Identity.IsAuthenticated) {
+			int roleId = Convert.ToInt32(user.FindFirst(c => c.Type == CustomClaimTypes.RoleId)?.Value ?? "0");
+			_pageRedirectService.redirectWithHttpContext(_pageRedirectService.GetRedirectBasedOnRole(roleId));
 		}
 	}
 
