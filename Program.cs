@@ -32,7 +32,7 @@ builder.Services.AddScoped<AuthenticationStateProvider, NexusAuthenticationState
 builder.Services.AddScoped<NexusAuthenticationStateProvider>();
 builder.Services.AddScoped<NexusAuthenticationService>();
 builder.Services.AddScoped<ClaimsHelperService>();
-builder.Services.AddScoped<ClientHomeService>();
+builder.Services.AddScoped<UserDataService>();
 builder.Services.AddScoped<CredentialValidationService>();
 builder.Services.AddScoped<PageRedirectService>();
 builder.Services.AddScoped<RegistrationService>();

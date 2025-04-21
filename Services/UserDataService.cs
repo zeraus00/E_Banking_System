@@ -5,11 +5,11 @@ using Data.Repositories.User;
 
 namespace Services
 {
-    public class ClientHomeService : Service
+    public class UserDataService : Service
     {
         private UserInfoRepository _userInfoRepository;
         private AccountRepository _accountRepository;
-        public ClientHomeService(EBankingContext context) : base(context)
+        public UserDataService(EBankingContext context) : base(context)
         {
             _userInfoRepository = new UserInfoRepository(_context);
             _accountRepository = new AccountRepository(_context);
