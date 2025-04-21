@@ -1,4 +1,5 @@
 ﻿using Exceptions;
+using Data.Constants;
 
 namespace Data.Repositories.User
 {
@@ -128,16 +129,19 @@ namespace Data.Repositories.User
         private string _civilStatus = string.Empty;
         private int? _religionId;
 
-        
         public UserInfoBuilder WithUserNameId(int userNameId)
         {
             _userNameId = userNameId;
             return this;
         }
 
-        public UserInfoBuilder WithProfilePicture(string filePath)
+        public UserInfoBuilder WithProfilePicture(byte[] profilePicture)
         {
             // add logic here for profile picture assignment
+            if (profilePicture.Length > ImageSize.OneMegaByte)
+                throw new ArgumentException($"Image exceeded maximum size {ImageSize.OneMegaByte}");
+
+            _profilePicture = profilePicture;
             return this;
         }
         public UserInfoBuilder WithAge(int age)
@@ -213,6 +217,7 @@ namespace Data.Repositories.User
             return new UserInfo
             {
                 UserNameId = _userNameId,
+                ProfilePicture = _profilePicture,
                 Age = _age,
                 Sex = _sex,
                 BirthInfoId = _birthInfoId,

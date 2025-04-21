@@ -1,4 +1,6 @@
-﻿namespace Data.Configurations.User
+﻿using Data.Constants;
+
+namespace Data.Configurations.User
 {
     public class UserInfoConfiguration : IEntityTypeConfiguration<UserInfo>
     {
@@ -25,7 +27,7 @@
             UsersInfo
                 .Property(a => a.ProfilePicture)
                 .HasColumnType("VARBINARY(MAX)")  
-                .HasMaxLength(1024 * 1024);
+                .HasMaxLength(ImageSize.OneMegaByte);
 
             //  Age (Required)
             UsersInfo
