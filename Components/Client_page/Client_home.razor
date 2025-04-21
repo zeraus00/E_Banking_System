@@ -164,13 +164,13 @@
         if (_user.Identity!.IsAuthenticated)
         {
             int accountId = Convert.ToInt32(_user.FindFirst(c => c.Type == CustomClaimTypes.AccountId)?.Value ?? "0");
-            Account = await _clientHomeService.GetAccountAsync(accountId);
+            Account = await _userDataService.GetAccountAsync(accountId);
             _clientName = Account != null ? Account.AccountName : _clientName;
             _accountNumber = Account != null ? Account.AccountNumber : _accountNumber;
             _currentBalance = Account != null ? Account.Balance : _currentBalance;
 
             int userInfoId = Convert.ToInt32(_user.FindFirst(c => c.Type == CustomClaimTypes.UserInfoId)?.Value ?? "0");
-            UserInfo = await _clientHomeService.GetUserInfoAsync(userInfoId);
+            UserInfo = await _userDataService.GetUserInfoAsync(userInfoId);
             _clientPhone = UserInfo != null ? UserInfo.ContactNumber : _clientPhone;
         }
     }
