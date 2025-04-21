@@ -1,4 +1,7 @@
 ﻿@inherits LayoutComponentBase
+@inject NexusAuthenticationStateProvider _authenticationStateProvider
+@inject NexusAuthenticationService _authenticationService
+
 <body>
     <!-- Main Top NavBar Layout -->
     <div class="nav-horizontal">
@@ -17,11 +20,24 @@
             <NavLink class="nav-link custom-nav-link mx-1 my-auto" href="About">
                 About
             </NavLink>
-            <NavLink class="nav-link" href="/Login_page">
-                <button type="button" class="nav-link button">
-                    Login
-                </button>
-            </NavLink>
+            <AuthorizeView Roles = "@RoleNames.User">
+                <Authorized>
+                    <NavLink class="nav-link" href="/Client_home">
+                        <button type="button" class="nav-link button">
+                            Home
+                        </button>
+                    </NavLink>
+                </Authorized>
+            </AuthorizeView>
+            <AuthorizeView>
+                <NotAuthorized>
+                    <NavLink class="nav-link" href="/Login_page">
+                        <button type="button" class="nav-link button">
+                            Log In
+                        </button>
+                    </NavLink>
+                </NotAuthorized>
+            </AuthorizeView>
         </nav>
 
     </div>
@@ -31,3 +47,13 @@
         @Body
     </div>
 </body>
+
+
+@code {
+    private ClaimsPrincipal? _user;
+
+    protected override async Task OnInitializedAsync() {
+        AuthenticationState authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
+        _user = authState.User;
+    }
+}
