@@ -7,26 +7,31 @@ namespace Services
 {
     public class UserDataService : Service
     {
-        private UserInfoRepository _userInfoRepository;
-        private AccountRepository _accountRepository;
-        public UserDataService(EBankingContext context) : base(context)
-        {
-            _userInfoRepository = new UserInfoRepository(_context);
-            _accountRepository = new AccountRepository(_context);
-        }
-
+        public UserDataService(IDbContextFactory<EBankingContext> contextFactory) : base(contextFactory) { }
 
         public UserInfo? GetUserInfoSync(int userInfoId)
         {
-            var query = _userInfoRepository.ComposeQuery(includeName: true);
-            var userInfo = _userInfoRepository.GetUserInfoByIdSync(userInfoId, query);
-            return userInfo;
+            using (var dbContext = _contextFactory.CreateDbContext())
+            {
+                UserInfoRepository userInfoRepo = new UserInfoRepository(dbContext);
+
+                IQueryable<UserInfo> query = userInfoRepo.ComposeQuery(includeName: true);
+                UserInfo? userInfo = userInfoRepo.GetUserInfoByIdSync(userInfoId, query);
+                
+                return userInfo;
+            }
         }
         public async Task<UserInfo?> GetUserInfoAsync(int userInfoId)
         {
-            var query = _userInfoRepository.ComposeQuery(includeName: true);
-            var userInfo = await _userInfoRepository.GetUserInfoByIdAsync(userInfoId, query);
-            return userInfo;
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                UserInfoRepository userInfoRepo = new UserInfoRepository(dbContext);
+
+                IQueryable<UserInfo> query = userInfoRepo.ComposeQuery(includeName: true);
+                UserInfo? userInfo = await userInfoRepo.GetUserInfoByIdAsync(userInfoId, query);
+
+                return userInfo;
+            }
         }
         public string? GetUserFullName(UserInfo? userInfo)
         {
@@ -53,30 +58,56 @@ namespace Services
         
         public Account? GetAccountSync(int accountId)
         {
-            var query = _accountRepository.ComposeAccountQuery(includeTransactions: true);
-            var account = _accountRepository.GetAccountByIdSync(accountId, query);
-            return account;
+            using (var dbContext = _contextFactory.CreateDbContext())
+            {
+                AccountRepository accountRepo = new AccountRepository(dbContext);
+
+
+                IQueryable<Account> query = accountRepo.ComposeAccountQuery(includeTransactions: true);
+                Account? account = accountRepo.GetAccountByIdSync(accountId, query);
+
+                return account;
+            }
         }
-        
+
         public async Task<Account?> GetAccountAsync(int accountId)
         {
-            var query = _accountRepository.ComposeAccountQuery(includeTransactions: true);
-            var account = await _accountRepository.GetAccountByIdAsync(accountId, query);
-            return account;
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                AccountRepository accountRepo = new AccountRepository(dbContext);
+
+
+                IQueryable<Account> query = accountRepo.ComposeAccountQuery(includeTransactions: true);
+                Account? account = await accountRepo.GetAccountByIdAsync(accountId, query);
+
+                return account;
+            }
         }
 
         public Account? GetAccountSync(string accountNumber)
         {
-            var query = _accountRepository.ComposeAccountQuery(includeTransactions: true);
-            var account = _accountRepository.GetAccountByAccountNumberSync(accountNumber, query);
-            return account;
+            using (var dbContext = _contextFactory.CreateDbContext())
+            {
+                AccountRepository accountRepo = new AccountRepository(dbContext);
+
+                IQueryable<Account> query = accountRepo.ComposeAccountQuery(includeTransactions: true);
+                Account? account = accountRepo.GetAccountByAccountNumberSync(accountNumber, query);
+                
+                return account;
+            }
         }
 
         public async Task<Account?> GetAccountAsync(string accountNumber)
         {
-            var query = _accountRepository.ComposeAccountQuery(includeTransactions: true);
-            var account = await _accountRepository.GetAccountByAccountNumberAsync(accountNumber, query);
-            return account;
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                AccountRepository accountRepo = new AccountRepository(dbContext);
+
+                IQueryable<Account> query = accountRepo.ComposeAccountQuery(includeTransactions: true);
+                Account? account = await accountRepo.GetAccountByAccountNumberAsync(accountNumber, query);
+
+                return account;
+            }
         }
 
     }

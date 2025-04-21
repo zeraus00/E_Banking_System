@@ -1,4 +1,6 @@
 ﻿using Data;
+using Data.Repositories.Finance;
+using Data.Repositories.User;
 
 namespace Services
 {
@@ -7,11 +9,11 @@ namespace Services
     /// </summary>
     public abstract class Service
     {
-        protected readonly EBankingContext _context;
+        protected readonly IDbContextFactory<EBankingContext> _contextFactory;
 
-        public Service(EBankingContext context)
+        public Service(IDbContextFactory<EBankingContext> contextFactory)
         {
-            _context = context;
+            _contextFactory = contextFactory;
         }
     }
 }
