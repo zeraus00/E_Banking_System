@@ -4,14 +4,10 @@
 @page "/Login_page"
 @* @rendermode InteractiveServer *@
 @inject NavigationManager NavigationManager
-@inject EBankingContext _context
-@inject IHttpContextAccessor HttpContextAccessor
 @inject IJSRuntime JS
 @inject HttpClient http
-@inject ClaimsHelperService _claimsHelperService
 @inject CredentialValidationService _validationService
 @inject NexusAuthenticationStateProvider _nexusAuthenticationStateProvider
-@inject NexusAuthenticationService _authenticationService
 @inject PageRedirectService _pageRedirectService
 @inject SignInService _signInService
 @layout PlainLayout
