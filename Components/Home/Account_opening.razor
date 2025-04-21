@@ -365,7 +365,7 @@
 					<!-- TIN -->
 					<div class="col-md-3">
 						<label class="text-light">Tax Identification Number</label>
-						<input class="form-control" @bind="tin" placeholder="Tax Identification Number">
+						<input class="form-control" @bind="taxIdentificationNumber" placeholder="Tax Identification Number">
 					</div>
 
 				</div>
@@ -461,7 +461,7 @@
 	public string beneficiarySuffix = "";
 	public string userName = "";
 	public string password = "";
-	public string tin = "";
+	public string taxIdentificationNumber = "";
 
 	<!--user birth info address-->
 	private List<BirthInfo> birthRegions = new();
@@ -568,7 +568,7 @@
 				beneficiarySuffix: beneficiarySuffix,
 				userName: userName,
 				password: password,
-				taxIdentificationNumber: tin
+				taxIdentificationNumber: taxIdentificationNumber
 			);
 			NavigationManager.NavigateTo("/");
 
