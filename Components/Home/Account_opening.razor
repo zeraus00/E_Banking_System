@@ -488,21 +488,21 @@
 
 	private async Task LoadProvinceAsync()
 	{
-		var provinceResponse = await HttpClient.GetFromJsonAsync<List<Province>>($"https://psgc.gitlab.io/api/regions/{selectedRegion}/provinces/");
+		var provinceResponse = await HttpClient.GetFromJsonAsync<List<Province>>("https://psgc.gitlab.io/api/regions/provinces/");
 		provinces = provinceResponse ?? new List<Province>();
 		await LoadCitiesAsync();
 	}
 
 	private async Task LoadCitiesAsync()
 	{
-		var citiesResponse = await HttpClient.GetFromJsonAsync<List<City>>($"https://psgc.gitlab.io/api/provinces/{selectedProvince}/municipalities/");
+		var citiesResponse = await HttpClient.GetFromJsonAsync<List<City>>("https://psgc.gitlab.io/api/provinces/municipalities/");
 		cities = citiesResponse ?? new List<City>();
 		await LoadBarangaysAsync();
 	}
 
 	private async Task LoadBarangaysAsync()
 	{
-		var barangaysResponse = await HttpClient.GetFromJsonAsync<List<Barangay>>($"https://psgc.gitlab.io/api/cities/{selectedCity}/barangays/");
+		var barangaysResponse = await HttpClient.GetFromJsonAsync<List<Barangay>>("https://psgc.gitlab.io/api/cities/barangays/");
 		barangays = barangaysResponse ?? new List<Barangay>();
 	}
 
