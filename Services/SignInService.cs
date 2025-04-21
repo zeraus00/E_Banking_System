@@ -20,10 +20,10 @@ namespace Services
         /// Constructor for the SignInService.
         /// </summary>
         /// <param name="accessor">accessor to httpcontext manage user session and authentication.</param>
-        public SignInService(IHttpContextAccessor accessor, NexusAuthenticationService authenticationService)
+        public SignInService(IHttpContextAccessor accessor, ClaimsHelperService claimsHelperService, NexusAuthenticationService authenticationService)
         {
             _httpContext = accessor.HttpContext!;
-            _claimsHelperService = new();
+            _claimsHelperService = claimsHelperService;
             _authenticationService = authenticationService;
         }
 
