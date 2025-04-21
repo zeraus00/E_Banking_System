@@ -520,6 +520,13 @@
 		return 0;
 	}
 
+	private List<string> religionOptions = new List<string>
+	{
+		"Religion 1",
+		"Religion 2",
+		"Religion 3",
+		"Religion 4"
+	};
 	///private int GetIdFromSelected(string selectedCode, List<dynamic> options)
 	///{
 		///var selected = options.FirstOrDefault(item => item.Code == selectedCode);
@@ -553,7 +560,7 @@
 				Occupation: Occupation,
 				email: email, 
 				civilStatus: selectedCivilStatus,
-				userReligion: 1,
+				userReligion: selectedReligion,
 				fatherFirstName: fatherFirstName,
 				fatherMiddleName: fatherMiddleName,
 				fatherLastName: fatherLastName,
