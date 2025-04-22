@@ -6,9 +6,10 @@
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JS
 @inject HttpClient http
+@inject ClaimsHelperService _claimsHelper
 @inject CredentialValidationService _validationService
 @inject NexusAuthenticationStateProvider _nexusAuthenticationStateProvider
-@inject PageRedirectService _pageRedirectService
+@inject PageRedirectService _redirectService
 @inject SignInService _signInService
 @layout PlainLayout
 
@@ -132,9 +133,8 @@
 	{
 		AuthenticationState authState = await _nexusAuthenticationStateProvider.GetAuthenticationStateAsync();
 		ClaimsPrincipal? user = authState.User;
-		if (user.Identity != null && user.Identity.IsAuthenticated) {
-			int roleId = Convert.ToInt32(user.FindFirst(c => c.Type == CustomClaimTypes.RoleId)?.Value ?? "0");
-			_pageRedirectService.redirectWithHttpContext(_pageRedirectService.GetRedirectBasedOnRole(roleId));
+		if (_claimsHelper.IsAuthenticated(user)) {
+			_redirectService.RedirectBasedOnRole(user);
 		}
 	}
 
@@ -175,8 +175,8 @@
 				//  Handle failed validation
 				//  Redirect to log in page.
 				error = "Invalid Username or Password";
-				redirectUrl = _pageRedirectService.GetRedirectToLogInPage();
-				_pageRedirectService.redirectWithHttpContext(redirectUrl);
+				redirectUrl = _redirectService.GetRedirectToLogInPage();
+				_redirectService.redirectWithHttpContext(redirectUrl);
 				return;
 			}
 
@@ -184,8 +184,8 @@
 			await _signInService.TrySignInAsync(userAuth);
 
 			//	Redirect based on role.
-			redirectUrl = _pageRedirectService.GetRedirectBasedOnRole(userAuth.RoleId);
-			_pageRedirectService.redirectWithHttpContext(redirectUrl);
+			redirectUrl = _redirectService.GetRedirectBasedOnRole(userAuth.RoleId);
+			_redirectService.redirectWithHttpContext(redirectUrl);
 
 			return;
 		}
@@ -193,8 +193,8 @@
 		{
 			Console.WriteLine("ERRORRRR: " + ex.Message);
 
-			var redirectUrl = _pageRedirectService.GetRedirectToLogInPage();
-			_pageRedirectService.redirectWithHttpContext(redirectUrl);
+			var redirectUrl = _redirectService.GetRedirectToLogInPage();
+			_redirectService.redirectWithHttpContext(redirectUrl);
 			return;
 		}
 
