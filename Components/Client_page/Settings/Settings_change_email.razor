@@ -1,51 +1,98 @@
-﻿@page "/Settings_change_email"
+﻿@using ViewModels;
+
+@page "/Settings_change_email"
 @inject NavigationManager NavigationManager
 
+
+@inject ClaimsHelperService claimsHelper
+@inject NexusAuthenticationStateProvider authenticationStateProvider
+@inject PageRedirectService redirectService
+
 <div class="page">
-	<main>
-		<!-- Header -->
-		<header class="custom-card-clientpage clientheader py-4 align-items-start">
-			<div class="px-5">
-				<div class="d-flex align-items-center my-4">
-					<h2>Update Email</h2>
+	<AuthorizeView Roles="@RoleNames.User" Context="_">
+		<Authorized>
+			<main>
+				<!-- Header -->
+				<header class="custom-card-clientpage clientheader py-4 align-items-start">
+					<div class="px-5">
+						<div class="d-flex align-items-center my-4">
+							<h2>Update Email</h2>
+						</div>
+					</div>
+				</header>
+
+				<!-- Main Content -->
+				<div class="card registration shadow mt-3">
+					<div class="mt-3 mx-5">
+
+						<!-- Password Conditions -->
+						<h5 class="text-start fw-light text-light my-3">
+							Enter your new email address.
+						</h5>
+						<ul class="fs-6 fw-light">
+							<li>
+								A verification email will be sent to the new email address.
+								Click the URL in the verification email to complete the procedure.
+							</li>
+						</ul>
+					</div>
+					<EditForm Model="loginModel" OnValidSubmit="ValidateEmail" FormName="ChangeEmailConfirm">
+						<DataAnnotationsValidator />
+						<!-- Password Fields -->
+						<div class="loginform sm mt-1">
+
+							<InputText class="form-control form-control-custom form-control-lg mb-3" type="email" @bind-Value="loginModel.Email" placeholder="New Email Address" />
+							<ValidationMessage For="() => loginModel.Email" />
+							<input class="form-control form-control-custom form-control-lg mb-3" type="email" @bind="emailConfirm" placeholder="Confirm New Email Address">
+						</div>
+
+						<!-- Change Password Button -->
+						<div class="mt-3 text-center">
+							<NavLink class="w-25 mx-auto" href="/Settings_page">
+								<button class="btn btn-danger w-25">Cancel</button>
+							</NavLink>
+							<button type="submit" class="btn btn-primary w-25">Send Verification Email</button>
+						</div>
+					</EditForm>
+
 				</div>
-			</div>
-		</header>
-
-		<!-- Main Content -->
-		<div class="card registration shadow mt-3">
-			<div class="mt-3 mx-5">
-
-				<!-- Password Conditions -->
-				<h5 class="text-start fw-light text-light my-3">
-					Enter your new email address. 
-				</h5>
-				<ul class="fs-6 fw-light">
-					<li>
-						A verification email will be sent to the new email address.
-						Click the URL in the verification email to complete the procedure.
-					</li>
-				</ul>
-			</div>
-
-			<!-- Password Fields -->
-			<div class="loginform sm mt-1">
-				<input class="form-control form-control-custom form-control-lg mb-3" type="email" placeholder="New Email Address">
-				<input class="form-control form-control-custom form-control-lg mb-3" type="email" placeholder="Confirm New Email Address">
-			</div>
-
-			<!-- Change Password Button -->
-			<div class="mt-3 text-center">
-				<NavLink class="w-25 mx-auto" href="/Settings_page">
-					<button class="btn btn-danger w-25">Cancel</button>
-				</NavLink>
-				<NavLink class="w-25 mx-auto" href="/Settings_page">
-					<button class="btn btn-primary w-25">Send Verification Email</button>
-				</NavLink>
-			</div>
-		
-		</div>
-	</main>
-
-
+			</main>
+		</Authorized>
+	</AuthorizeView>
 </div>
+
+@code 
+{
+	[SupplyParameterFromForm]
+	private LogInViewModel loginModel { get; set; } = new();
+	private string emailNew = string.Empty;
+	private string emailConfirm = string.Empty;
+
+	private string error = string.Empty;
+
+	private ClaimsPrincipal? user;
+
+	protected override async Task OnInitializedAsync()
+	{
+		//  Get Authentication state
+		AuthenticationState authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+		user = authState.User;
+
+		//  Redirect to Landing Page if not authenticated.
+		redirectService.RedirectIfNotAuthenticated(user);
+	}
+
+	private void ValidateEmail() 
+	{
+		if (loginModel.Email!.Equals(emailConfirm)) 
+		{
+			//	Handle email verification logic here.
+
+			redirectService.redirectWithHttpContext("/Client_home");
+			return;
+		} else 
+		{
+			error = "Emails do not match.";
+		}
+	}
+}

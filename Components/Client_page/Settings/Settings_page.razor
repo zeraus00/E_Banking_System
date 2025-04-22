@@ -1,74 +1,131 @@
 ﻿@page "/Settings_page"
+
 @inject NavigationManager NavigationManager
+@inject ClaimsHelperService _claimsHelper
+@inject NexusAuthenticationStateProvider _authenticationStateProvider
+@inject PageRedirectService _redirectService
+@inject UserDataService _userDataService
 
 <div class="page">
-    <main>
+	<AuthorizeView Roles="@RoleNames.User">
+		<Authorized>
+			<main>
 
-        <!-- Header -->
-        <header class="custom-card-clientpage clientheader py-4 align-items-start">
-            <div class="px-5">
-                <div class="d-flex align-items-center my-4">
-                    <h2>Settings</h2>
-                </div>
-            </div>
-        </header>
+				<!-- Header -->
+				<header class="custom-card-clientpage clientheader py-4 align-items-start">
+					<div class="px-5">
+						<div class="d-flex align-items-center my-4">
+							<h2>Settings</h2>
+						</div>
+					</div>
+				</header>
 
-        <!-- Settings Main Content -->
-        <div class="container-fluid text-white px-4 py-5">
+				<!-- Settings Main Content -->
+				<div class="container-fluid text-white px-4 py-5">
 
-            <div class="card registration shadow-lg p-5">
-                <!-- Profile Section -->
-                <div class="d-flex align-items-center mb-4">
-                    <div class="rounded-circle bg-secondary" style="width: 80px; height: 80px;"></div>
-                    <div class="ms-3">
-                        <h5 class="mb-1">sampleName</h5>
-                        <small class="text-muted">accountID</small>
-                    </div>
-                </div>
+					<div class="card registration shadow-lg p-5">
+						<!-- Profile Section -->
+						<div class="d-flex align-items-center mb-4">
+							<div class="rounded-circle bg-secondary" style="width: 80px; height: 80px;"></div>
+							<div class="ms-3">
+								<h5 class="mb-1">@clientName</h5>
+								<small class="text-muted">@accountNumber</small>
+							</div>
+						</div>
 
-                <!-- Email -->
-                <div class="mb-3 border-bottom pb-2 d-flex justify-content-between align-items-center">
-                    <div>
-                        <label class="form-label text-muted">Email Address</label>
-                        <div>sampleEmail</div>
-                    </div>
-                    <NavLink class="custom-nav-link" href="/Settings_email_password">
-                        <button class="btn btn-link text-decoration-none text-light">Change</button>
-                    </NavLink>
-                </div>
+						<!-- Email -->
+						<div class="mb-3 border-bottom pb-2 d-flex justify-content-between align-items-center">
+							<div>
+								<label class="form-label text-muted">Email Address</label>
+								<div>@email</div>
+							</div>
+							<NavLink class="custom-nav-link" href="/Settings_email_password">
+								<button class="btn btn-link text-decoration-none text-light">Change</button>
+							</NavLink>
+						</div>
 
-                <!-- Contact Number -->
-                <div class="mb-3 border-bottom pb-2 d-flex justify-content-between align-items-center">
-                    <div>
-                        <label class="form-label text-muted">Contact No.</label>
-                        <div>+63 000 0000</div>
-                    </div>
-                    <NavLink class="custom-nav-link" href="/Settings_contact_password">
-                        <button class="btn btn-link text-decoration-none text-light">Change</button>
-                    </NavLink>
-                </div>
+						<!-- Contact Number -->
+						<div class="mb-3 border-bottom pb-2 d-flex justify-content-between align-items-center">
+							<div>
+								<label class="form-label text-muted">Contact No.</label>
+								<div>@contactNo</div>
+							</div>
+							<NavLink class="custom-nav-link" href="/Settings_contact_password">
+								<button class="btn btn-link text-decoration-none text-light">Change</button>
+							</NavLink>
+						</div>
 
-                <!-- Password -->
-                <div class="border-bottom pb-2 d-flex justify-content-between align-items-center">
-                    <div>
-                        <label class="form-label text-muted">Password</label>
-                        <div>**********</div>
-                    </div>
-                    <NavLink class="custom-nav-link" href="/Settings_password_otp">
-                        <button class="btn btn-link text-decoration-none text-light">Change</button>
-                    </NavLink>
-                </div>
+						<!-- Password -->
+						<div class="border-bottom pb-2 d-flex justify-content-between align-items-center">
+							<div>
+								<label class="form-label text-muted">Password</label>
+								<div>**********</div>
+							</div>
+							<NavLink class="custom-nav-link" href="/Settings_password_otp">
+								<button class="btn btn-link text-decoration-none text-light">Change</button>
+							</NavLink>
+						</div>
 
-                <!-- Go Back Navlink -->
-                <section class="d-flex justify-content-end align-items-end">
-                    <a href="/Client_home" class="btn btn-primary btn-lg mt-5 mb-3">
-                       ← Go Back
-                    </a>
-                </section>
-            </div>
-        </div>
+						<!-- Go Back Navlink -->
+						<section class="d-flex justify-content-end align-items-end">
+							<a href="/Client_home" class="btn btn-primary btn-lg mt-5 mb-3">
+								← Go Back
+							</a>
+						</section>
+					</div>
+				</div>
 
-    </main>
-
-	}
+			</main>
+		</Authorized>
+	</AuthorizeView>
 </div>
+
+@code 
+{
+	private ClaimsPrincipal? user;
+	private Account? Account;
+	private UserInfo? UserInfo;
+
+	private string email = string.Empty;
+	private int accountId;
+	private int userInfoId;
+
+	private string accountNumber = string.Empty;
+	private string clientName = string.Empty;
+	private decimal currentBalance = 0.0m;
+	private string contactNo = string.Empty;
+
+
+	protected override async Task OnInitializedAsync()
+	{
+		//  Get Authentication State
+		AuthenticationState authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
+		user = authState.User;
+
+		//  Redirect to Landing Page if not authenticated
+		_redirectService.RedirectIfNotAuthenticated(user);
+
+		//	Retrieve email from claims
+		email = _claimsHelper.GetClaimValue(user, ClaimTypes.Name) ?? string.Empty;
+		//  Retrieve account id from claims
+		accountId = Convert.ToInt32(_claimsHelper.GetClaimValue(user, CustomClaimTypes.AccountId) ?? "0");
+		//	Retrieve userinfo id from claims
+		userInfoId = Convert.ToInt32(_claimsHelper.GetClaimValue(user, CustomClaimTypes.UserInfoId) ?? "0");
+
+		//  Retrieve account from db.
+		Account = await _userDataService.GetAccountAsync(accountId);
+		if (Account is not null)
+		{
+			accountNumber = Account.AccountNumber;
+			currentBalance = Account.Balance;
+		}
+
+		//	Retrieve userinfo from db.
+		UserInfo = await _userDataService.GetUserInfoAsync(userInfoId);
+		if (UserInfo is not null) 
+		{
+			clientName = _userDataService.GetUserFullName(UserInfo) ?? "Name not found.";
+			contactNo = UserInfo.ContactNumber;
+		}
+	}
+}
