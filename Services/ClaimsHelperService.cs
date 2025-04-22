@@ -58,5 +58,10 @@ namespace Services
                 new Claim(CustomClaimTypes.UserInfoId, userInfoId)
             };
         }
+
+        public bool IsAuthenticated(ClaimsPrincipal? user)
+        {
+            return user?.Identity?.IsAuthenticated == true;
+        }
     }
 }
