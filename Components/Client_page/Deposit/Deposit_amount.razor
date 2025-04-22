@@ -1,5 +1,10 @@
 ﻿@page "/Deposit_amount"
+
 @inject NavigationManager NavigationManager
+@inject ClaimsHelperService _claimsHelper
+@inject NexusAuthenticationStateProvider _authenticationStateProvider
+@inject PageRedirectService _redirectService
+@inject UserDataService _userDataService
 
 
 <div class="page">
@@ -13,7 +18,7 @@
             <section class="d-flex justify-content-end align-items-end mx-5 gap-2">
                 <p class="fs-6 fw-lighter align-text-bottom">Current Balance: </p>
                 <div class="custom-card-clientpage current-balance d-flex align-items-center justify-content-center">
-                    currentBalance
+                    @currentBalance
                 </div>
             </section>
         </header>
@@ -28,8 +33,8 @@
 
                 <div class="d-flex justify-content-between mx-5">
                     <div class="d-flex flex-column text-start mb-0">
-                        <h5 class="mb-1">clientName</h5>
-                        <p class="mb-0">accountNumber</p>
+                        <h5 class="mb-1">@clientName</h5>
+                        <p class="mb-0">@accountNumber</p>
                     </div>             
                     
 
@@ -48,3 +53,45 @@
         </div>
     </main>
 </div>
+
+@code {
+    private ClaimsPrincipal? user;
+    private Account? Account;
+
+    private int accountId;
+
+    private string accountNumber = string.Empty;
+    private string clientName = string.Empty;
+    private decimal currentBalance = 0.0m;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        //  Get Authentication State
+        AuthenticationState authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
+        user = authState.User;
+
+        //  Redirect to Landing Page if not authenticated
+        _redirectService.RedirectIfNotAuthenticated(user);
+
+
+        //  Retrieve account id from claims
+        accountId = Convert.ToInt32(_claimsHelper.GetClaimValue(user, CustomClaimTypes.AccountId) ?? "0");
+
+        //  Retriev account from db.
+        Account = await _userDataService.GetAccountAsync(accountId);
+
+        if (Account is not null)
+        {
+            accountNumber = Account.AccountNumber;
+            clientName = Account.AccountName;
+            currentBalance = Account.Balance;
+        }
+    }
+
+
+    // private async Task Deposit()
+    // {
+    //     //  Put deposit logic here.
+    // }
+}
