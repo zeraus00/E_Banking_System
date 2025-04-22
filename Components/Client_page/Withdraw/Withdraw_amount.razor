@@ -1,49 +1,100 @@
 ﻿@page "/Withdraw_amount"
-@inject NavigationManager NavigationManager
 
+@inject NavigationManager NavigationManager
+@inject ClaimsHelperService _claimsHelper
+@inject NexusAuthenticationStateProvider _authenticationStateProvider
+@inject PageRedirectService _redirectService
+@inject UserDataService _userDataService
 
 <div class="page">
-    <main>
-        <header class="custom-card-clientpage clientheader py-4 align-items-start">
-            <div class="px-5">
-                <div class="d-flex align-items-center my-4">
-                    <h2>Withdraw</h2>
-                </div>
-            </div>
-            <section class="d-flex justify-content-end align-items-end mx-5 gap-2">
-                <p class="fs-6 fw-lighter align-text-bottom">Current Balance: </p>
-                <div class="custom-card-clientpage current-balance d-flex align-items-center justify-content-center">
-                    currentBalance
-                </div>
-            </section>
-        </header>
-
-        <div class="container">
-            <section class="card registration shadow-lg d-flex flex-column mt-4 p-3">
-                <h3 class="mx-3 my-3 ">Enter Withdrawal Amount</h3>
-                <div class="input-group px-4 mb-4">
-                    <span class="input-group-text fs-2">$</span>
-                    <input type="number" class="form-control form-control-custom form-control-lg fs-2" placeholder="000-000" />
-                </div>
-
-                <div class="d-flex justify-content-between mx-5">
-                    <div class="d-flex flex-column text-start mb-0">
-                        <h5 class="mb-1">clientName</h5>
-                        <p class="mb-0">accountNumber</p>
+    <AuthorizeView Roles="@RoleNames.User">
+        <Authorized>
+            <main>
+                <header class="custom-card-clientpage clientheader py-4 align-items-start">
+                    <div class="px-5">
+                        <div class="d-flex align-items-center my-4">
+                            <h2>Withdraw</h2>
+                        </div>
                     </div>
-             
-                    <div class="text-end mt-3">
-                        <NavLink class="w-25" href="/Withdraw_confirmation">
-                            <button class="btn btn-primary btn-lg w-100 mb-2">Continue</button>
-                        </NavLink>
-                        <NavLink class="w-25" href="/Client_home">
-                            <button class="btn btn-danger btn-lg w-100">Cancel</button>
-                        </NavLink>
-                    </div>
+                    <section class="d-flex justify-content-end align-items-end mx-5 gap-2">
+                        <p class="fs-6 fw-lighter align-text-bottom">Current Balance: </p>
+                        <div class="custom-card-clientpage current-balance d-flex align-items-center justify-content-center">
+                            @currentBalance
+                        </div>
+                    </section>
+                </header>
 
+                <div class="container">
+                    <section class="card registration shadow-lg d-flex flex-column mt-4 p-3">
+                        <h3 class="mx-3 my-3 ">Enter Withdrawal Amount</h3>
+                        <div class="input-group px-4 mb-4">
+                            <span class="input-group-text fs-2">$</span>
+                            <input type="number" class="form-control form-control-custom form-control-lg fs-2" placeholder="000-000" />
+                        </div>
+
+                        <div class="d-flex justify-content-between mx-5">
+                            <div class="d-flex flex-column text-start mb-0">
+                                <h5 class="mb-1">@clientName</h5>
+                                <p class="mb-0">@accountNumber</p>
+                            </div>
+
+                            <div class="text-end mt-3">
+                                <NavLink class="w-25" href="/Withdraw_confirmation">
+                                    <button class="btn btn-primary btn-lg w-100 mb-2">Continue</button>
+                                </NavLink>
+                                <NavLink class="w-25" href="/Client_home">
+                                    <button class="btn btn-danger btn-lg w-100">Cancel</button>
+                                </NavLink>
+                            </div>
+
+                        </div>
+
+                    </section>
                 </div>
-
-            </section>
-        </div>
-    </main>
+            </main>
+        </Authorized>
+    </AuthorizeView>
+    
 </div>
+
+@code {
+    private ClaimsPrincipal? user;
+    private Account? Account;
+
+    private int accountId;
+
+    private string accountNumber = string.Empty;
+    private string clientName = string.Empty;
+    private decimal currentBalance = 0.0m;
+
+
+    protected override async Task OnInitializedAsync() 
+    {
+        //  Get Authentication State
+        AuthenticationState authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
+        user = authState.User;
+
+        //  Redirect to Landing Page if not authenticated
+        _redirectService.RedirectIfNotAuthenticated(user);
+
+
+        //  Retrieve account id from claims
+        accountId = Convert.ToInt32(_claimsHelper.GetClaimValue(user, CustomClaimTypes.AccountId) ?? "0");
+
+        //  Retriev account from db.
+        Account = await _userDataService.GetAccountAsync(accountId);
+
+        if (Account is not null) 
+        {
+            accountNumber = Account.AccountNumber;
+            clientName = Account.AccountName;
+            currentBalance = Account.Balance;
+        }
+    }
+
+    
+    // private async Task Withdraw() 
+    // {
+    //     //  Put withraw logic here.
+    // }
+}
