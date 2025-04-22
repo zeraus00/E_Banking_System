@@ -1,5 +1,6 @@
 ﻿@page "/Transaction"
 @inject NavigationManager NavigationManager
+@rendermode InteractiveServer
 
 <div class="main">
     <header class="custom-card-clientpage clientheader py-4 align-items-start">
@@ -23,11 +24,12 @@
         </div>
 
         <button class="btn btn-primary shadow-sm" @onclick="FilterTransactions">Filter</button>
+        <button class="btn btn-danger shadow-sm" @onclick="ClearFilter">Clear Filter</button>
 
 
     </div>
 
-    <div class="table-responsive">
+    <div class="table-responsive m-4 rounded">
         <table class="table table-bordered text-center">
             <thead class="table-info">
                 <tr>
@@ -71,6 +73,7 @@
     private List<TransactionRecord> allTransactions = new();
     private List<TransactionRecord> Transactions = new();
 
+    //mockup data
     protected override void OnInitialized()
     {
         allTransactions = new List<TransactionRecord>
@@ -110,6 +113,13 @@
             (!startDate.HasValue || t.Date >= startDate.Value.Date) &&
             (!endDate.HasValue || t.Date <= endDate.Value.Date)
         ).ToList();
+    }
+
+    private void ClearFilter()
+    {
+        startDate = null;
+        endDate = null;
+        Transactions = allTransactions.ToList();
     }
 
     public class TransactionRecord
