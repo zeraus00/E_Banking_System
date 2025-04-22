@@ -125,6 +125,7 @@ namespace Data.Repositories.User
         private int _motherNameId;
         private string _contactNumber = string.Empty;
         private string _occupation = string.Empty;
+        private byte[]? _governmentId; //nullable for now
         private string _taxIdentificationNumber = string.Empty;
         private string _civilStatus = string.Empty;
         private int? _religionId;
@@ -137,7 +138,6 @@ namespace Data.Repositories.User
 
         public UserInfoBuilder WithProfilePicture(byte[] profilePicture)
         {
-            // add logic here for profile picture assignment
             if (profilePicture.Length > ImageSize.OneMegaByte)
                 throw new ArgumentException($"Image exceeded maximum size {ImageSize.OneMegaByte}");
 
@@ -190,6 +190,15 @@ namespace Data.Repositories.User
             _occupation = occupation.Trim();
             return this;
         }
+
+        public UserInfoBuilder WithGovernmentId(byte[] governmentid)
+        {
+            if (governmentid.Length > ImageSize.OneMegaByte)
+                throw new ArgumentException($"Image exceeded maximum size {ImageSize.OneMegaByte}");
+
+            _governmentId = governmentid;
+            return this;
+        }
         public UserInfoBuilder WithTaxIdentificationNumber(string taxIdentificationNumber)
         {
             _taxIdentificationNumber = taxIdentificationNumber.Trim();
@@ -227,6 +236,7 @@ namespace Data.Repositories.User
                 ContactNumber = _contactNumber,
                 Occupation = _occupation,
                 TaxIdentificationNumber = _taxIdentificationNumber,
+                GovernmentId = _governmentId,
                 CivilStatus = _civilStatus,
                 ReligionId = _religionId
             };

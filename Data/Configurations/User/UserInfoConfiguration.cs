@@ -63,6 +63,12 @@ namespace Data.Configurations.User
                 .IsRequired()
                 .HasMaxLength(50);
 
+            //  GovernmentId (Required but nullable for now; MaxSize:1MB)
+            UsersInfo
+                .Property(a => a.GovernmentId)
+                .HasColumnType("VARBINARY(MAX)")
+                .HasMaxLength(ImageSize.OneMegaByte);
+
             //  TaxIdentificationNumber (Required; MaxLength=12)
             UsersInfo
                 .Property(ui => ui.TaxIdentificationNumber)

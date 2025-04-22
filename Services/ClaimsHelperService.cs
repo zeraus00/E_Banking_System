@@ -58,5 +58,15 @@ namespace Services
                 new Claim(CustomClaimTypes.UserInfoId, userInfoId)
             };
         }
+
+        public string? GetClaimValue(ClaimsPrincipal user, string claimType)
+        {
+            return user.FindFirst(c => c.Type == claimType)?.Value;
+        }
+
+        public bool IsAuthenticated(ClaimsPrincipal? user)
+        {
+            return user?.Identity?.IsAuthenticated == true;
+        }
     }
 }

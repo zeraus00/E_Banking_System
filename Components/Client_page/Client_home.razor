@@ -1,8 +1,8 @@
 ﻿@page "/Client_home"
 @inject NavigationManager NavigationManager
-@inject UserDataService _userDataService;
+@inject ClaimsHelperService _claimsHelper
+@inject UserDataService _userDataService
 @inject NexusAuthenticationStateProvider _authenticationStateProvider
-@inject NexusAuthenticationService _authenticationService
 @inject PageRedirectService _pageRedirectService
 
 <div class="page">
@@ -157,23 +157,35 @@
 
     protected override async Task OnInitializedAsync() 
     {
+        //  Get Authentication state
         AuthenticationState authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
         _user = authState.User;
-        if (_user.Identity == null || !_user.Identity.IsAuthenticated)
-        {
-            _pageRedirectService.redirectWithHttpContext("/");
-        }
-        if (_user.Identity!.IsAuthenticated)
-        {
-            int accountId = Convert.ToInt32(_user.FindFirst(c => c.Type == CustomClaimTypes.AccountId)?.Value ?? "0");
-            Account = await _userDataService.GetAccountAsync(accountId);
-            _clientName = Account != null ? Account.AccountName : _clientName;
-            _accountNumber = Account != null ? Account.AccountNumber : _accountNumber;
-            _currentBalance = Account != null ? Account.Balance : _currentBalance;
 
-            int userInfoId = Convert.ToInt32(_user.FindFirst(c => c.Type == CustomClaimTypes.UserInfoId)?.Value ?? "0");
-            UserInfo = await _userDataService.GetUserInfoAsync(userInfoId);
-            _clientPhone = UserInfo != null ? UserInfo.ContactNumber : _clientPhone;
+        //  Redirect to Landing Page if not authenticated.
+        _pageRedirectService.RedirectIfNotAuthenticated(_user);
+
+        //  Retrieve account id from claims.
+        int accountId = Convert.ToInt32(_claimsHelper.GetClaimValue(_user, CustomClaimTypes.AccountId) ?? "0");
+
+        //  Retrieve account from db.
+        Account = await _userDataService.GetAccountAsync(accountId);
+
+        if (Account is not null) {
+            _clientName = Account.AccountName;
+            _accountNumber = Account.AccountNumber;
+            _currentBalance = Account.Balance;
         }
+
+        //  Retrieve userinfo id from claims.
+        int userInfoId = Convert.ToInt32(_claimsHelper.GetClaimValue(_user, CustomClaimTypes.UserInfoId) ?? "0");
+        
+        //  Retrieve userinfo from db.
+        UserInfo = await _userDataService.GetUserInfoAsync(userInfoId);
+        
+        if (UserInfo is not null)
+        {
+            _clientPhone = UserInfo.ContactNumber;
+        }
+
     }
 }
