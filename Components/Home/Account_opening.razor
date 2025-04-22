@@ -240,7 +240,7 @@
 
 					<!-- City -->
 					<div class="col">
-						<label class="text-light" style="visibility: hidden;">City</label>
+						<label class="text-light" >City</label>
 						<select class="form-select form-select-sm" @value="@selectedBirthCity" @onchange="async _ => await LoadCitiesAsync()" required>
 							@foreach (var c in cities)
 							{
