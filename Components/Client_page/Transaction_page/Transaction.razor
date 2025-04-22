@@ -5,7 +5,7 @@
     <header class="custom-card-clientpage clientheader py-4 align-items-start">
         <div class="px-5">
             <div class="d-flex align-items-center my-4">
-                <h2>Recent Transactions</h2>
+                <h2>Transactions</h2>
             </div>
         </div>
     </header>
@@ -32,23 +32,31 @@
             <thead class="table-info">
                 <tr>
                     <th>Date</th>
+                    <th>Time</th>
+                    <th>Account Number</th>
                     <th>Transaction Type</th>
                     <th>Amount</th>
-                    <th>Receiver</th>
-                    <th>Sender</th>
-                    <th>Balance</th>
+                    <th>Receiver ID</th>
+                    <th>Sender ID</th>
+                    <th>Previous Balance</th>
+                    <th>New Balance</th>
+                    <th>Transaction Fee</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var transaction in recentTransactions)
+                @foreach (var transaction in Transactions)
                 {
                     <tr class="bg-light">
                         <td>@transaction.Date.ToString("MM/dd/yyyy")</td>
+                        <td>@transaction.Time.ToString(@"hh\:mm\:ss")</td>
+                        <td>@transaction.AccountNo.ToString()</td>
                         <td>@transaction.Type</td>
                         <td>@transaction.Amount.ToString("C0")</td>
-                        <td>@(transaction.Type == "Transfer" ? transaction.Receiver : "--")</td>
-                        <td>@(transaction.Type == "Transfer" ? transaction.Sender : "--")</td>
-                        <td>@transaction.BalanceAfter.ToString("C0")</td>
+                        <td>@(transaction.Type == "Transfer" ? transaction.ReceiverID : "--")</td>
+                        <td>@(transaction.Type == "Transfer" ? transaction.SenderID : "--")</td>
+                        <td>@transaction.previousBalance.ToString("C0")</td>
+                        <td>@transaction.newBalance.ToString("C0")</td>
+                        <td>@transaction.transactionFee.ToString("C0")</td>
                     </tr>
                 }
             </tbody>
@@ -61,7 +69,7 @@
     private DateTime? endDate;
 
     private List<TransactionRecord> allTransactions = new();
-    private List<TransactionRecord> recentTransactions = new();
+    private List<TransactionRecord> Transactions = new();
 
     protected override void OnInitialized()
     {
@@ -70,26 +78,34 @@
              new TransactionRecord
             {
                 Date = DateTime.Today.AddDays(-1),
+                Time = DateTime.Now.TimeOfDay,
+                AccountNo = 12345678,
                 Type = "Deposit",
                 Amount = 5000,
-                BalanceAfter = 25000
+                previousBalance = 25000,
+                newBalance = 25000,
+                transactionFee = 22
             },
             new TransactionRecord
             {
                 Date = DateTime.Today,
+                Time = DateTime.Now.TimeOfDay,
+                AccountNo = 12345678,
                 Type = "Transfer",
                 Amount = 3000,
-                Receiver = "clientName",
-                Sender = "Sender 1",
-                BalanceAfter = 22000
+                ReceiverID = "clientName",
+                SenderID = "Sender 1",
+                previousBalance = 22000,
+                newBalance = 22000,
+                transactionFee = 20
             }
         };
-        recentTransactions = allTransactions.ToList();
+        Transactions = allTransactions.ToList();
     }
 
     private void FilterTransactions()
     {
-        recentTransactions = allTransactions
+        Transactions = allTransactions
         .Where(t =>
             (!startDate.HasValue || t.Date >= startDate.Value.Date) &&
             (!endDate.HasValue || t.Date <= endDate.Value.Date)
@@ -99,10 +115,14 @@
     public class TransactionRecord
     {
         public DateTime Date { get; set; }
+        public TimeSpan Time { get; set; }
+        public int AccountNo { get; set; }
         public string Type { get; set; }
         public decimal Amount { get; set; }
-        public string Receiver { get; set; }
-        public string Sender { get; set; }
-        public decimal BalanceAfter { get; set; }
+        public string ReceiverID { get; set; }
+        public string SenderID { get; set; }
+        public decimal previousBalance { get; set; }
+        public decimal newBalance { get; set; }
+        public decimal transactionFee { get; set; }
     }
 }

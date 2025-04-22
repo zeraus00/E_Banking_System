@@ -1,5 +1,6 @@
 ﻿using Exceptions;
 using Data;
+using Data.Enums;
 using Data.Repositories.User;
 using Data.Repositories.Auth;
 using Data.Models.User;
@@ -9,25 +10,7 @@ namespace Services
 {
     public class RegistrationService : Service
     {
-        NameRepository _nameRepository;
-        UserInfoRepository _userInfoRepository;
-        UserInfoBuilder _userInfoBuilder;
-        BirthInfoRepository _birthInfoRepository;
-        AddressRepository _addressRepository;
-        ReligionRepository _religionRepository;
-        UserAuthRepository _userAuthRepository;
-
-
-        public RegistrationService(EBankingContext context) : base(context)
-        {
-            _userInfoRepository = new UserInfoRepository(_context);
-            _nameRepository = new NameRepository(_context);
-            _userInfoBuilder = new UserInfoBuilder();
-            _birthInfoRepository = new BirthInfoRepository(_context);
-            _addressRepository = new AddressRepository(_context);
-            _religionRepository = new ReligionRepository(_context);
-            _userAuthRepository = new UserAuthRepository(_context);
-        }
+        public RegistrationService(IDbContextFactory<EBankingContext> contextFactory) : base(contextFactory) { }
 
 
         public async Task RegisterAsync(string userFirstName, string? userMiddleName, string userLastName, string? userSuffix,
@@ -100,9 +83,14 @@ namespace Services
             }
 
             Name UserName = nameBuilder.Build();
-            await _nameRepository.AddAsync(UserName);
-            await _nameRepository.SaveChangesAsync();
-            return UserName;
+
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                NameRepository nameRepo = new NameRepository(dbContext);
+                await nameRepo.AddAsync(UserName);
+                await nameRepo.SaveChangesAsync();
+                return UserName;
+            }
         }
 
         public async Task<BirthInfo> RegisterBirthInfo(DateTime birthDate, int birthCityId, int birthProvinceId, int birthRegiodId) 
@@ -134,9 +122,14 @@ namespace Services
             .WithRegionId(birthRegiodId);
 
             BirthInfo UserBirthInfo = birthInfoBuilder.Build();
-            await _birthInfoRepository.AddAsync(UserBirthInfo);
-            await _birthInfoRepository.SaveChangesAsync();
-            return UserBirthInfo;
+
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                BirthInfoRepository birthInfoRepo = new BirthInfoRepository(dbContext);
+                await birthInfoRepo.AddAsync(UserBirthInfo);
+                await birthInfoRepo.SaveChangesAsync();
+                return UserBirthInfo;
+            }
         }
 
         public async Task<Address> RegisterAddress(string houseNo, string street, int barangayId, int cityId, int provinceId, int regionId, int postalCode) 
@@ -184,10 +177,16 @@ namespace Services
                 .WithRegionId(regionId)
                 .WithPostalCode(postalCode);
 
+
             Address UserAddress = AddressBuilder.Build();
-            await _addressRepository.AddAsync(UserAddress);
-            await _addressRepository.SaveChangesAsync();
-            return UserAddress;
+
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                AddressRepository addressRepo = new AddressRepository(dbContext);
+                await addressRepo.AddAsync(UserAddress);
+                await addressRepo.SaveChangesAsync();
+                return UserAddress;
+            }
         }
 
         public async Task<Religion> RegisterReligion(string religionName) 
@@ -202,9 +201,14 @@ namespace Services
                 .WithReligionName(religionName);
 
             Religion UserReligion = ReligionBuilder.Build();
-            await _religionRepository.AddAsync(UserReligion);
-            await _religionRepository.SaveChangesAsync();
-            return UserReligion;
+
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                ReligionRepository religionRepo = new ReligionRepository(dbContext);
+                await religionRepo.AddAsync(UserReligion);
+                await religionRepo.SaveChangesAsync();
+                return UserReligion;
+            }
         }
 
         public async Task<UserInfo> RegisterUserInfo(
@@ -259,12 +263,6 @@ namespace Services
                 throw new FieldMissingException("Password is required.");
             }
 
-            //check for existing user by username
-            var existingUser = await _userAuthRepository.GetUserAuthByUserNameOrEmailAsync(userName);
-            if (existingUser != null)
-            {
-                throw new DuplicateWaitObjectException("Username is already exists.");
-            }
 
             var UserInfoBuilder = new UserInfoBuilder();
             UserInfoBuilder
@@ -282,20 +280,39 @@ namespace Services
                 .WithCivilStatus(civilStatus);
 
             UserInfo UserInfo = UserInfoBuilder.Build();
-            await _userInfoRepository.AddAsync(UserInfo);
-            await _userInfoRepository.SaveChangesAsync();
+
 
             var UserAuthBuilder = new UserAuthBuilder()
-                .WithRoleId(2)
+               .WithRoleId((int) RoleTypes.User)
                .WithUserInfoId(UserInfo.UserInfoId)
                .WithUserName(userName)
                .WithPassword(password);
 
             UserAuth userAuth = UserAuthBuilder.Build();
-            await _userAuthRepository.AddAsync(userAuth);
-            await _userAuthRepository.SaveChangesAsync();
 
-            return UserInfo;
+
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                UserAuthRepository userAuthRepo = new UserAuthRepository(dbContext);
+                UserInfoRepository userInfoRepo = new UserInfoRepository(dbContext);
+
+                //check for existing user by username
+                var existingUser = await userAuthRepo.GetUserAuthByUserNameOrEmailAsync(userName);
+
+                if (existingUser != null)
+                {
+                    throw new DuplicateWaitObjectException("Username is already exists.");
+                }
+
+
+                await userInfoRepo.AddAsync(UserInfo);
+                await userInfoRepo.SaveChangesAsync();
+
+                await userAuthRepo.AddAsync(userAuth);
+                await userAuthRepo.SaveChangesAsync();
+
+                return UserInfo;
+            }
         }
 
     }

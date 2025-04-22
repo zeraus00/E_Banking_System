@@ -3,6 +3,7 @@
 @inject UserDataService _userDataService;
 @inject NexusAuthenticationStateProvider _authenticationStateProvider
 @inject NexusAuthenticationService _authenticationService
+@inject PageRedirectService _pageRedirectService
 
 <div class="page">
     <main>
@@ -156,11 +157,12 @@
 
     protected override async Task OnInitializedAsync() 
     {
-        
-
         AuthenticationState authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
         _user = authState.User;
-
+        if (_user.Identity == null || !_user.Identity.IsAuthenticated)
+        {
+            _pageRedirectService.redirectWithHttpContext("/");
+        }
         if (_user.Identity!.IsAuthenticated)
         {
             int accountId = Convert.ToInt32(_user.FindFirst(c => c.Type == CustomClaimTypes.AccountId)?.Value ?? "0");

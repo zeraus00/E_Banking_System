@@ -7,10 +7,7 @@ namespace Services
 {
     public class CredentialValidationService : Service
     {
-        private UserAuthRepository _userAuthRepository;
-        public CredentialValidationService(EBankingContext context) : base(context) {
-            _userAuthRepository = new UserAuthRepository(_context);
-        }
+        public CredentialValidationService(IDbContextFactory<EBankingContext> contextFactory) : base(contextFactory) { }
         // create a passwordhasher object here!
 
         /// <summary>
@@ -30,16 +27,21 @@ namespace Services
             string trimmedEmail = email.Trim();
             string trimmedPassword = password.Trim();
 
-            var query = _userAuthRepository.QueryIncludeAll();
-            var userAuth = _userAuthRepository
-                .GetUserAuthByUserNameOrEmailSync(trimmedEmail, query);
-
-            if (userAuth == null || !this.IsPasswordValid(userAuth, trimmedPassword))
+            using (var dbContext = _contextFactory.CreateDbContext())
             {
-                return null;
-            }
+                UserAuthRepository userAuthRepo = new UserAuthRepository(dbContext);
 
-            return userAuth;
+                IQueryable<UserAuth> query = userAuthRepo.QueryIncludeAll();
+                UserAuth? userAuth = userAuthRepo.GetUserAuthByUserNameOrEmailSync(trimmedEmail, query);
+
+                if (userAuth == null || !this.IsPasswordValid(userAuth, trimmedPassword))
+                {
+                    return null;
+                }
+
+                return userAuth;
+
+            }
         }
 
         /// <summary>
@@ -59,16 +61,21 @@ namespace Services
             string trimmedEmail = email.Trim();
             string trimmedPassword = password.Trim();
 
-            var query = _userAuthRepository.QueryIncludeAll();
-            var userAuth = await _userAuthRepository
-                .GetUserAuthByUserNameOrEmailAsync(trimmedEmail, query);
-
-            if (userAuth == null || !this.IsPasswordValid(userAuth, trimmedPassword))
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
-                return null;
-            }
+                UserAuthRepository userAuthRepo = new UserAuthRepository(dbContext);
 
-            return userAuth;
+                IQueryable<UserAuth> query = userAuthRepo.QueryIncludeAll();
+                UserAuth? userAuth = await userAuthRepo.GetUserAuthByUserNameOrEmailAsync(trimmedEmail, query);
+
+                if (userAuth == null || !this.IsPasswordValid(userAuth, trimmedPassword))
+                {
+                    return null;
+                }
+
+                return userAuth;
+
+            }
         }
 
         /// <summary>

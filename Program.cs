@@ -8,17 +8,17 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Services;
 using ViewModels;
 using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-// DbContext
-builder.Services.AddDbContext<EBankingContext>(options =>
+// DbContext;
+builder.Services.AddDbContextFactory<EBankingContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
-    sqloptions => sqloptions.CommandTimeout(100)));
-
-
+    sqloptions => sqloptions.CommandTimeout(100))
+    );
 builder.Services.AddRazorPages();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -66,15 +66,18 @@ var app = builder.Build();
 // Apply any pending migrations and seed the database
 using (var scope = app.Services.CreateScope())
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<EBankingContext>();
+    var contextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<EBankingContext>>();
+    await using (var dbContext = await contextFactory.CreateDbContextAsync())
+    {
 
-    //dbContext.Database.EnsureDeleted();
-    dbContext.Database.EnsureCreated();
-    // Apply migrations (this will create or update the database schema)
-    // dbContext.Database.Migrate();
+        //dbContext.Database.EnsureDeleted();
+        dbContext.Database.EnsureCreated();
+        // Apply migrations (this will create or update the database schema)
+        // dbContext.Database.Migrate();
+    }
 
     // Seed data (this ensures that only new data is added)
-    await SeedData(dbContext);
+    await SeedData(contextFactory);
 }
 
 
@@ -192,25 +195,27 @@ app.MapRazorComponents<App>()
 app.Run();
 
 
-static async Task SeedData(EBankingContext context)
+static async Task SeedData(IDbContextFactory<EBankingContext> contextFactory)
 {
+    await using (var dbContext = await contextFactory.CreateDbContextAsync())
+    {
+        AuthSeeder authSeeders = new AuthSeeder(dbContext);
+        AccountSeeder accountSeeders = new AccountSeeder(dbContext);
+        AccountTypeSeeder accountTypeSeeders = new AccountTypeSeeder(dbContext);
+        NameSeeder nameSeeders = new NameSeeder(dbContext);
+        UserInfoSeeder userInfoSeeders = new UserInfoSeeder(dbContext);
 
 
-    AuthSeeder authSeeders = new AuthSeeder(context);
-    AccountSeeder accountSeeders = new AccountSeeder(context);
-    AccountTypeSeeder accountTypeSeeders = new AccountTypeSeeder(context);
-    NameSeeder nameSeeders = new NameSeeder(context);
-    UserInfoSeeder userInfoSeeders = new UserInfoSeeder(context);
+        // Seed AccountTypes
+        await accountTypeSeeders.SeedAccountTypes();
+        // Seed Accounts
+        await accountSeeders.SeedAccounts();
+        // Seed Names and UsersInfo
+        await userInfoSeeders.SeedUserInfos();
+        // Seed roles
+        await authSeeders.SeedRoles();
+        // Seed users
+        await authSeeders.SeedUsersAuth();
+    }
 
-    
-    // Seed AccountTypes
-    await accountTypeSeeders.SeedAccountTypes();
-    // Seed Accounts
-    await accountSeeders.SeedAccounts();
-    // Seed Names and UsersInfo
-    await userInfoSeeders.SeedUserInfos();
-    // Seed roles
-    await authSeeders.SeedRoles();
-    // Seed users
-    await authSeeders.SeedUsersAuth();
 }
