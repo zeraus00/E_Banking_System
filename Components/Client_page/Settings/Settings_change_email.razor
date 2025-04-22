@@ -36,14 +36,15 @@
 							</li>
 						</ul>
 					</div>
-					<EditForm Model="loginModel" OnValidSubmit="ValidateEmail" FormName="ChangeEmailConfirm">
+					<EditForm Model="emailChangeModel" OnValidSubmit="ValidateEmail" FormName="ChangeEmailConfirm">
 						<DataAnnotationsValidator />
 						<!-- Password Fields -->
 						<div class="loginform sm mt-1">
 
-							<InputText class="form-control form-control-custom form-control-lg mb-3" type="email" @bind-Value="loginModel.Email" placeholder="New Email Address" />
-							<ValidationMessage For="() => loginModel.Email" />
-							<input class="form-control form-control-custom form-control-lg mb-3" type="email" @bind="emailConfirm" placeholder="Confirm New Email Address">
+							<InputText class="form-control form-control-custom form-control-lg mb-3" type="email" @bind-Value="emailChangeModel.EmailNew" placeholder="New Email Address" />
+							<ValidationMessage For="() => emailChangeModel.EmailNew" />
+							<InputText class="form-control form-control-custom form-control-lg mb-3" type="email" @bind-Value="emailChangeModel.EmailConfirm" placeholder="Confirm New Email Address" />
+							<ValidationMessage For="() => emailChangeModel.EmailNew" />
 						</div>
 
 						<!-- Change Password Button -->
@@ -64,9 +65,7 @@
 @code 
 {
 	[SupplyParameterFromForm]
-	private LogInViewModel loginModel { get; set; } = new();
-	private string emailNew = string.Empty;
-	private string emailConfirm = string.Empty;
+	private EmailChangeViewModel emailChangeModel { get; set; } = new();
 
 	private string error = string.Empty;
 
@@ -84,7 +83,7 @@
 
 	private void ValidateEmail() 
 	{
-		if (loginModel.Email!.Equals(emailConfirm)) 
+		if (emailChangeModel.EmailNew!.Equals(emailChangeModel.EmailConfirm)) 
 		{
 			//	Handle email verification logic here.
 
