@@ -1,7 +1,10 @@
 ﻿@using Layout
-
+@inject IHttpContextAccessor accessor
 @page "/Logout_page"
 @inject NavigationManager NavigationManager
+@inject NexusAuthenticationStateProvider authenticationStateProvider
+@inject ClaimsHelperService claimsHelper
+@inject PageRedirectService redirectService
 
 <div class="page">
 	<main>
@@ -14,9 +17,22 @@
 			</div>
 			<!-- Sign In Button -->
 			<div class="mb-2 mx-auto px-4 w-100">
-				<button type="submit" class="btn btn-primary w-100">Sign In</button>
+				<NavLink class="btn btn-primary w-100" href="/">Back to Home Page.</NavLink>
 			</div>
 
 		</div>
 	</main>
 </div>
+
+@code 
+{
+	protected override async Task OnInitializedAsync() 
+	{
+		AuthenticationState authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+		var user = authState.User;
+
+		redirectService.RedirectIfNotAuthenticated(user);
+
+		await accessor.HttpContext!.SignOutAsync();
+	}
+}
