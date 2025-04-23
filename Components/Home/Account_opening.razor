@@ -166,7 +166,7 @@
 						<select class="form-select form-select-sm" @value="@selectedRegion" @onchange="async _ => await LoadProvinceAsync()" required>
 							@foreach (var r in regions)
 							{
-								<option value="@r.RegionId">@r.RegionName</option>
+								<option value="@r.code">@r.regionName</option>
 							}
 						</select>
 					</div>
@@ -177,7 +177,7 @@
 						<select class="form-select form-select-sm" @value="@selectedProvince" @onchange="async _ => await LoadCitiesAsync()" required>
 							@foreach (var p in provinces)
 							{
-								<option value="@p.ProvinceId">@p.ProvinceName</option>
+								<option value="@p.code">@p.name</option>
 							}
 						</select>
 					</div>
@@ -188,7 +188,7 @@
 						<select class="form-select form-select-sm" @value="@selectedCity" @onchange="async _ => await LoadBarangaysAsync()" required>
 							@foreach (var c in cities)
 							{
-								<option value="@c.code.ToString()">@c.name.ToString()</option>
+								<option value="@c.code">@c.name</option>
 							}
 						</select>
 					</div>
@@ -199,7 +199,7 @@
 						<select class="form-select form-select-sm" @value="@selectedBarangay" required>
 							@foreach (var b in barangays)
 							{
-								<option value="@b.BarangayId">@b.BarangayName</option>
+								<option value="@b.code">@b.name</option>
 							}
 						</select>
 					</div>
@@ -230,7 +230,7 @@
 						<select class="form-select form-select-sm" @value="@selectedBirthRegion" @onchange="async _ => await LoadRegionAsync()" required>
 							@foreach (var r in regions)
 							{
-								<option value="@r.RegionId">@r.RegionName</option>
+								<option value="@r.code">@r.regionName</option>
 							}
 						</select>
 					</div>
@@ -241,7 +241,7 @@
 						<select class="form-select form-select-sm" @value="@selectedBirthProvince" @onchange="async _ => await LoadProvinceAsync()" required>
 							@foreach (var p in provinces)
 							{
-								<option value="@p.ProvinceId">@p.ProvinceName</option>
+								<option value="@p.code">@p.name</option>
 							}
 						</select>
 					</div>
@@ -252,12 +252,12 @@
 						<select class="form-select form-select-sm" @value="@selectedBirthCity" @onchange="async _ => await LoadCitiesAsync()" required>
 							@foreach (var c in cities)
 							{
-								<option value="@c.code.ToString()">@c.name.ToString()</option>
+								<option value="@c.code">@c.name.ToString()</option>
 							}
 						</select>
 					</div>
 
-					<!-- Barangay -->
+					@*<!-- Barangay -->
 					<div class="col-3">
 						<label class="text-light">Barangay</label>
 						<select class="form-select form-select-sm" @bind="selectedBarangay" required>
@@ -266,7 +266,7 @@
 								<option value="@b.BarangayId">@b.BarangayName</option>
 							}
 						</select>
-					</div>
+					</div>*@
 
 					<!-- Birth Date -->
 					<div class="col">
@@ -476,10 +476,10 @@
 	private List<BirthInfo> birthProvinces = new();
 	private List<BirthInfo> birthCities = new();
 	<!--user full address-->
-	private List<Region> regions = new List<Region>();
-	private List<Province> provinces = new List<Province>();
+	private List<RegionViewModel>? regions = new List<RegionViewModel>();
+	private List<ProvinceViewModel>? provinces = new List<ProvinceViewModel>();
 	private List<CityViewModel>? cities = new List<CityViewModel>();
-	private List<Barangay> barangays = new List<Barangay>();
+	private List<BarangayViewModel>? barangays = new List<BarangayViewModel>();
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -489,15 +489,21 @@
 	// For Full address of user
 	private async Task LoadRegionAsync()
 	{
-		var regionResponse = await HttpClient.GetFromJsonAsync<List<Region>>("https://psgc.gitlab.io/api/regions/");
-		regions = regionResponse ?? new List<Region>();
+		//var regionResponse = await HttpClient.GetFromJsonAsync<List<Region>>("https://psgc.gitlab.io/api/regions/");
+		//regions = regionResponse ?? new List<Region>();
+		var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/regions/");
+		regions = JsonSerializer.Deserialize<List<RegionViewModel>>(json);
+		if (regions is null) return;
 		await LoadProvinceAsync();
 	}
 
 	private async Task LoadProvinceAsync()
 	{
-		var provinceResponse = await HttpClient.GetFromJsonAsync<List<Province>>($"https://psgc.gitlab.io/api/regions/");
-		provinces = provinceResponse ?? new List<Province>();
+		//var provinceResponse = await HttpClient.GetFromJsonAsync<List<Province>>($"https://psgc.gitlab.io/api/regions/");
+		//provinces = provinceResponse ?? new List<Province>();
+		var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/provinces/");
+		provinces = JsonSerializer.Deserialize<List<ProvinceViewModel>>(json);
+		if (provinces is null) return;
 		await LoadCitiesAsync();
 	}
 
@@ -505,7 +511,7 @@
 	{
 		// var citiesResponse = await HttpClient.GetFromJsonAsync<List<City>>($"https://psgc.gitlab.io/api/provinces/");
 		// cities = citiesResponse ?? new List<City>();
-		var json = await HttpClient.GetStringAsync($"https://psgc.gitlab.io/api/cities/");
+		var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/municipalities/");
 		cities = JsonSerializer.Deserialize<List<CityViewModel>>(json);
 		if (cities is null) return;
 		await LoadBarangaysAsync();
@@ -513,8 +519,11 @@
 
 	private async Task LoadBarangaysAsync()
 	{
-		var barangaysResponse = await HttpClient.GetFromJsonAsync<List<Barangay>>($"https://psgc.gitlab.io/api/municipalities/");
-		barangays = barangaysResponse ?? new List<Barangay>();
+		//var barangaysResponse = await HttpClient.GetFromJsonAsync<List<Barangay>>($"https://psgc.gitlab.io/api/municipalities/");
+		//barangays = barangaysResponse ?? new List<Barangay>();
+		var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/barangays/");
+		barangays = JsonSerializer.Deserialize<List<BarangayViewModel>>(json);
+		if (barangays is null) return;
 	}
 
 
