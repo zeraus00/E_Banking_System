@@ -5,6 +5,7 @@
 @inject NexusAuthenticationStateProvider _authenticationStateProvider
 @inject PageRedirectService _redirectService
 @inject UserDataService _userDataService
+@using Helpers;
 
 <div class="page">
     <AuthorizeView Roles = "@RoleNames.User">

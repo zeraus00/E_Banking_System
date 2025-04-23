@@ -10,7 +10,7 @@ namespace Helpers
             {
                 return phone;
             }
-            return Regex.Replace(phone, @"(\d{4})(\d{3})(\d+)", "$1 $2 $3");
+            return Regex.Replace(phone, @"(\d{4})(\d{3})(\d+)", "$1-$2-$3");
         }
 
         public static string AccountNumberFormatter(string accountNumber)
@@ -19,7 +19,7 @@ namespace Helpers
             {
                 return accountNumber;
             }
-            return Regex.Replace(accountNumber, @"(\d{3})(\d{3})(\d{3})(\w+)", "$1 $2 $3 $4");
+            return Regex.Replace(accountNumber, @"(\d{3})(\d{3})(\d{3})(\w+)", "$1-$2-$3-$4");
         }
     }
 }

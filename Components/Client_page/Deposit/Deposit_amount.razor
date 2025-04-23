@@ -5,7 +5,7 @@
 @inject NexusAuthenticationStateProvider _authenticationStateProvider
 @inject PageRedirectService _redirectService
 @inject UserDataService _userDataService
-
+@using Helpers;
 
 <div class="page">
     <main>
@@ -34,7 +34,7 @@
                 <div class="d-flex justify-content-between mx-5">
                     <div class="d-flex flex-column text-start mb-0">
                         <h5 class="mb-1">@clientName</h5>
-                        <p class="mb-0">@accountNumber</p>
+                        <p class="mb-0">@FormatHelper.AccountNumberFormatter(accountNumber)</p>
                     </div>             
                     
 
