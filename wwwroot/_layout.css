@@ -75,6 +75,7 @@ main {
     background-color: white;
     display: flex;
     align-items: center;
+    position: relative;
 }
 
     .custom-card-clientpage.clientheader {

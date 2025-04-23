@@ -52,12 +52,39 @@
 .notification {
     display: flex;
     padding-right: 20px;
+    position: relative;
 }
 
     .notification img {
         height: 35px;
         width: 35px;
         object-fit: contain;
+        cursor: pointer;
+    }
+
+.notification-popup {
+    position: absolute;
+    top: 70px;
+    right: 0;
+    transform: translateX(10%);
+    background-color: white;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    min-width: 200px;
+}
+
+
+    .notification-popup::before {
+        content: '';
+        position: absolute;
+        top: -10px;
+        right: 15px;
+        transform: translateX(-37px);
+        border-width: 5px;
+        border-style: solid;
+        border-color: transparent transparent white transparent;
     }
 
 .nav-container {
