@@ -27,6 +27,7 @@
              *  Cities (many-to-one)
              *  Provinces (many-to-one)
              *  Regions (many-to-one)
+             *  UsersInfo (one-to-many)
              */
             BirthInfos
                 .HasOne(b => b.City)

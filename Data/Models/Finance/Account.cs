@@ -6,7 +6,7 @@
     {
         /*  Table Properties    */
         public int AccountId { get; set; }                          // Primary Key
-        public int AccountTypeId { get; set; }                      // FK to AccountTypes; Required; Checking, Savings, etc.
+        public int AccountTypeId { get; set; }                      // FK to AccountTypes; 
         public string AccountNumber { get; set; } = string.Empty;   // Required
         public string AccountName { get; set; } = string.Empty;     // Required; MaxLength=30
         public string AccountStatus { get; set; } = string.Empty;   // Required; Open, Closed, Suspended

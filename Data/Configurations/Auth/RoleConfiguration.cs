@@ -21,6 +21,11 @@
                 .Property(r => r.RoleName)
                 .IsRequired()
                 .HasMaxLength(50);
+
+            /*
+             *  Relationships
+             *  UsersAuth (one-to-many)
+             */
         }
 
     }

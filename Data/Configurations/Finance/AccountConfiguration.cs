@@ -60,8 +60,9 @@
 
             /*
              *  Relationships
-             *  Accounts (self-referencing many-to-one)
-             *  UersAuth (many-to-many)
+             *  AccountTypes (many-to-one)
+             *  LinkedBeneficiary Accounts (self-referencing many-to-one)
+             *  UsersAuth (many-to-many)
              *  Transactions (one-to-many)
              *  Loans (one-to-many)
              *  LoanTransactions (one-to-many)
