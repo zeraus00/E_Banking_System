@@ -162,6 +162,46 @@ namespace Data.Repositories.Auth
         }
 
         /// <summary>
+        /// Checks if the username already exists.
+        /// </summary>
+        /// <param name="username">The username to be checked.</param>
+        /// <returns>True if the username exists.</returns>
+        public bool IsUsernameExistsSync(string username)
+        {
+            return _context.UsersAuth.FirstOrDefault(ua => ua.UserName == username) is not null;
+        }
+
+        /// <summary>
+        /// Checks asynchronously if the username already exists.
+        /// </summary>
+        /// <param name="username">The username to be checked.</param>
+        /// <returns>True if the username exists.</returns>
+        public async Task<bool> IsUserNameExistsAsync(string username)
+        {
+            return (await _context.UsersAuth.FirstOrDefaultAsync(ua => ua.UserName == username)) is not null;
+        }
+
+        /// <summary>
+        /// Checks if the email already exists.
+        /// </summary>
+        /// <param name="email">The email to be checked.</param>
+        /// <returns>True if the email exists.</returns>
+        public bool IsEmailExistsSync(string email)
+        {
+            return _context.UsersAuth.FirstOrDefault(ua => ua.Email == email) is not null;
+        }
+
+        /// <summary>
+        /// Checks asynchronously if the email already exists.
+        /// </summary>
+        /// <param name="email">The email to be checked.</param>
+        /// <returns>True if the email exists.</returns>
+        public async Task<bool> IsEmailExistsAsync(string email)
+        {
+            return (await _context.UsersAuth.FirstOrDefaultAsync(ua => ua.Email == email)) is not null;
+        }
+
+        /// <summary>
         /// Retrieves a UserAuth entry by roleId asynchronously.
         /// Optionally accepts a pre-composed IQueryable with desired includes (e.g., Role, Account).
         /// </summary>
