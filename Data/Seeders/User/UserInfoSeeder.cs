@@ -55,6 +55,7 @@ namespace Data.Seeders.User
             if (!await _context.UsersInfo.AnyAsync())
             {
                 userInfo = new UserInfoBuilder()
+                    .WithUserAuthId(2)
                     .WithUserNameId(name.NameId)
                     .WithAge(25)
                     .WithSex("Unicorn")

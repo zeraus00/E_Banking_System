@@ -88,9 +88,16 @@
         //  Redirect to Landing Page if not authenticated
         _redirectService.RedirectIfNotAuthenticated(user);
 
+        //  Retrieve userAuth id from claims.
+        var userAuthId = Convert.ToInt32(_claimsHelper.GetClaimValue(user, ClaimTypes.NameIdentifier) ?? "0");
 
-        //  Retrieve account id from claims
-        accountId = Convert.ToInt32(_claimsHelper.GetClaimValue(user, CustomClaimTypes.AccountId) ?? "0");
+        // //  Retrieve account id list from userAuthObject
+        // List<int>? accountIds = await _userDataService.GetAccountIdListAsync(userAuthId);
+
+        // //  Retreive account id from list.
+        // var accountId = accountIds?[0] ?? 5;
+
+        var accountId = await _userDataService.GetFirstAccountAsync(userAuthId) ?? 0;
 
         //  Retriev account from db.
         Account = await _userDataService.GetAccountAsync(accountId);

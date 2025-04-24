@@ -61,7 +61,7 @@
             /*
              *  Relationships
              *  Accounts (self-referencing many-to-one)
-             *  UersAuth (one-to-many)
+             *  UersAuth (many-to-many)
              *  Transactions (one-to-many)
              *  Loans (one-to-many)
              *  LoanTransactions (one-to-many)

@@ -83,6 +83,7 @@ namespace Data.Configurations.User
 
             /*  
              *  Configure Relationships
+             *  UsersAuth (one-to-one) (principal)
              *  Names: UserName (one to one)
              *  Names: FatherName (many to one)
              *  Names: MotherName (many to one)
@@ -91,7 +92,11 @@ namespace Data.Configurations.User
              *  Religions (many-to-one)
              *  CustomersAuth (one-to-many)
              */
-
+            UsersInfo
+                .HasOne(ui => ui.UserAuth)
+                .WithOne(ua => ua.UserInfo)
+                .HasForeignKey<UserInfo>(ui => ui.UserAuthId)
+                .OnDelete(DeleteBehavior.Restrict);
             UsersInfo
                 .HasOne(ui => ui.UserName)
                 .WithOne(n => n.UserInUsersInfo)

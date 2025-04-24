@@ -1,4 +1,5 @@
 ﻿using Data.Repositories.Auth;
+using Data.Repositories.Finance;
 
 namespace Data.Seeders
 {
@@ -35,17 +36,18 @@ namespace Data.Seeders
         {
             if (!await _context.UsersAuth.AnyAsync())
             {
+                var accountRepository = new AccountRepository(_context);
                 var userAuthRepository = new UserAuthRepository(_context);
                 var userAuthBuilder = new UserAuthBuilder();
 
-                var users = new List<(int roleId, int? accountId, int? userInfoId, string userName, string email, string password)>
+                var users = new List<(int roleId, string userName, string email, string password)>
                 {
-                    (1, null, null, "admin", "admin@gmail.com", "admin123"),
-                    (2, 1, 1, "user", "user@gmail.com", "user123"),
-                    (3, null, null, "employee", "employee@gmail.com", "employee123")
+                    (1, "admin", "admin@gmail.com", "admin123"),
+                    (2, "user", "user@gmail.com", "user123"),
+                    (3, "employee", "employee@gmail.com", "employee123")
                 };
 
-                foreach (var (roleId, accountId, userInfoId, userName, email, password) in users)
+                foreach (var (roleId, userName, email, password) in users)
                 {
                     userAuthBuilder
                         .WithRoleId(roleId)
@@ -53,20 +55,19 @@ namespace Data.Seeders
                         .WithEmail(email)
                         .WithPassword(password);
 
-                    if (accountId.HasValue)
-                    {
-                        userAuthBuilder
-                            .WithAccountId(accountId.Value);
-                    }
-                    if (userInfoId.HasValue)
-                    {
-                        userAuthBuilder
-                            .WithUserInfoId(userInfoId.Value);
-                    }
-
                     var userAuth = userAuthBuilder.Build();
+
+                    Console.WriteLine("USERAUTH BUILT");
+
                     await userAuthRepository.AddAsync(userAuth);
                 }
+
+                await _context.SaveChangesAsync();
+                var account = await accountRepository.GetAccountByIdAsync(1);
+                var userAuth2 = await userAuthRepository.GetUserAuthByIdAsync(2);
+
+                account!.UsersAuth.Add(userAuth2!);
+                userAuth2!.Accounts.Add(account!);
 
                 await _context.SaveChangesAsync();
             }

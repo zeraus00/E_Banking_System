@@ -145,7 +145,7 @@ app.MapPost("/login", async (
     LogInViewModel _loginModel, 
     CredentialValidationService _validationService, 
     SignInService _signInService,
-    ClaimsHelperService _claimsHelperService,
+    ClaimsHelperService _claimsHelperServiceensure,
     PageRedirectService _pageRedirectService) =>
 {
     try
@@ -210,12 +210,13 @@ static async Task SeedData(IDbContextFactory<EBankingContext> contextFactory)
         await accountTypeSeeders.SeedAccountTypes();
         // Seed Accounts
         await accountSeeders.SeedAccounts();
-        // Seed Names and UsersInfo
-        await userInfoSeeders.SeedUserInfos();
         // Seed roles
         await authSeeders.SeedRoles();
         // Seed users
         await authSeeders.SeedUsersAuth();
+
+        // Seed Names and UsersInfo
+        await userInfoSeeders.SeedUserInfos();
     }
 
 }

@@ -50,8 +50,8 @@
             /*  
              *  Configure Relationships
              *  Roles (many-to-one)
-             *  Accounts (many-to-one)
-             *  UsersInfo (many-to-one)
+             *  Accounts (many-to-many)
+             *  UsersInfo (one-to-one) (child)
              */
             UsersAuth
                 .HasOne(ua => ua.Role)
@@ -59,16 +59,13 @@
                 .HasForeignKey(ua => ua.RoleId)
                 .OnDelete(DeleteBehavior.Restrict);
             UsersAuth
-                .HasOne(ua => ua.Account)
+                .HasMany(ua => ua.Accounts)
                 .WithMany(acc => acc.UsersAuth)
-                .HasForeignKey(ua => ua.AccountId)
-                .OnDelete(DeleteBehavior.Restrict);
-            UsersAuth
-                .HasOne(ua => ua.UserInfo)
-                .WithMany(ui => ui.UsersAuth)
-                .HasForeignKey(ua => ua.UserInfoId)
-                .OnDelete(DeleteBehavior.SetNull);
-
+                .UsingEntity<Dictionary<string, int>>(
+                    "UserAuthAccount",
+                    j => j.HasOne<Account>().WithMany().HasForeignKey("AccountId").OnDelete(DeleteBehavior.Restrict),
+                    j => j.HasOne<UserAuth>().WithMany().HasForeignKey("UserAuthId").OnDelete(DeleteBehavior.Restrict)
+                );
         }
     }
 }

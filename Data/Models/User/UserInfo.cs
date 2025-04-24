@@ -3,7 +3,8 @@
     // UsersInfo Table
     public class UserInfo
     {
-        public int UserInfoId { get; set; }                                 // Primary Key        
+        public int UserInfoId { get; set; }                                 // Primary Key
+        public int UserAuthId { get; set; }                                 // Foreign Key to UserAuth
         public int UserNameId { get; set; }                                 // Foreign Key to Names
         public byte[]? ProfilePicture { get; set; }                         // User image
         public int Age { get; set; }                                        // Required
@@ -21,12 +22,12 @@
 
 
         /*  Navigation Properties   */
-        public BirthInfo? BirthInfo { get; set; } 
-        public Address? Address { get; set; }
+        public UserAuth UserAuth { get; set; } = null!;
         public Name UserName { get; set; } = null!;
         public Name FatherName { get; set; } = null!;
         public Name MotherName { get; set; } = null!;
+        public BirthInfo? BirthInfo { get; set; } 
+        public Address? Address { get; set; }
         public Religion Religion { get; set; } = null!;
-        public ICollection<UserAuth> UsersAuth { get; set; } = new List<UserAuth>(); 
     }
 }

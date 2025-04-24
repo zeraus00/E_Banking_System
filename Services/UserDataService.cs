@@ -1,4 +1,5 @@
 ﻿using Data;
+using Data.Repositories.Auth;
 using Data.Repositories.Finance;
 using Data.Repositories.User;
 
@@ -56,6 +57,66 @@ namespace Services
             return fullName.Trim();
         }
         
+        public int? GetFirstAccountSync(int userAuthId)
+        {
+            var accountIdList = this.GetAccountIdListSync(userAuthId);
+            return accountIdList?[0] ?? null;
+        }
+
+        public async Task<int?> GetFirstAccountAsync(int userAuthId)
+        {
+            var accountIdList = await this.GetAccountIdListAsync(userAuthId);
+            return accountIdList?[0] ?? null;
+        }
+
+        public List<int>? GetAccountIdListSync(int userAuthId)
+        {
+            List<int> accountIdList = new();
+            using (var dbContext = _contextFactory.CreateDbContext())
+            {
+                UserAuthRepository userAuthRepo = new UserAuthRepository(dbContext);
+
+                var query = userAuthRepo.ComposeQuery(includeAccounts: true);
+                var userAuth = userAuthRepo.GetUserAuthByIdSync(userAuthId, query);
+                
+                if (userAuth is null)
+                {
+                    return null;
+                }
+
+                foreach(var account in userAuth.Accounts)
+                {
+                    accountIdList.Add(account.AccountId);
+                }
+
+                return accountIdList;
+            }
+        }
+
+        public async Task<List<int>?> GetAccountIdListAsync(int userAuthId)
+        {
+            List<int> accountIdList = new();
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                UserAuthRepository userAuthRepo = new UserAuthRepository(dbContext);
+
+                var query = userAuthRepo.ComposeQuery(includeAccounts: true);
+                var userAuth = await userAuthRepo.GetUserAuthByIdAsync(userAuthId, query);
+
+                if (userAuth is null)
+                {
+                    return null;
+                }
+
+                foreach (var account in userAuth.Accounts)
+                {
+                    accountIdList.Add(account.AccountId);
+                }
+
+                return accountIdList;
+            }
+        }
+
         public Account? GetAccountSync(int accountId)
         {
             using (var dbContext = _contextFactory.CreateDbContext())

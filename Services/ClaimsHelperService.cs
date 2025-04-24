@@ -45,8 +45,7 @@ namespace Services
         public List<Claim> ConvertToClaimsList(UserAuth userAuth)
         {
             var roleId = userAuth.RoleId.ToString();
-            var accountId = (userAuth.AccountId ?? 0).ToString();
-            var userInfoId = (userAuth.UserInfoId ?? 0).ToString();
+            var userInfoId = (userAuth.UserInfo?.UserInfoId ?? 0).ToString();
 
             return new List<Claim>
             {
@@ -54,7 +53,6 @@ namespace Services
                 new Claim(ClaimTypes.Name, userAuth.Email),
                 new Claim(ClaimTypes.Role, userAuth.Role.RoleName),
                 new Claim(CustomClaimTypes.RoleId, roleId),
-                new Claim(CustomClaimTypes.AccountId, accountId),
                 new Claim(CustomClaimTypes.UserInfoId, userInfoId)
             };
         }

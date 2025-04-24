@@ -71,6 +71,7 @@ namespace Data.Repositories.User
         public IQueryable<UserInfo> QueryIncludeAll()
         {
             return this.ComposeQuery(
+                includeUserAuth: true,
                 includeName: true,
                 includeBirthInfo: true,
                 includeFatherName: true,
@@ -89,6 +90,7 @@ namespace Data.Repositories.User
         /// <param name="includeReligion">Whether to include the related Religion entity.</param>
         /// <returns>An IQueryable of UserInfo with optional includes.</returns>
         public IQueryable<UserInfo> ComposeQuery(
+            bool includeUserAuth = false,
             bool includeName = false,
             bool includeBirthInfo = false,
             bool includeFatherName = false,
@@ -100,6 +102,7 @@ namespace Data.Repositories.User
                 .UsersInfo
                 .AsQueryable();
 
+            if (includeUserAuth) { query = query.Include(ui => ui.UserAuth); }
             if (includeName) { query = query.Include(ui => ui.UserName); }
             if (includeBirthInfo) { query = query.Include(ui => ui.BirthInfo); }
             if (includeFatherName) { query = query.Include(ui => ui.FatherName); }
@@ -116,6 +119,7 @@ namespace Data.Repositories.User
     public class UserInfoBuilder
     {
         private int _userNameId;
+        private int _userAuthId;
         private byte[]? _profilePicture; //nullable for now
         private int _age;
         private string _sex = string.Empty;
@@ -136,6 +140,11 @@ namespace Data.Repositories.User
             return this;
         }
 
+        public UserInfoBuilder WithUserAuthId(int userAuthId)
+        {
+            _userAuthId = userAuthId;
+            return this;
+        }
         public UserInfoBuilder WithProfilePicture(byte[] profilePicture)
         {
             if (profilePicture.Length > ImageSize.OneMegaByte)
@@ -225,6 +234,7 @@ namespace Data.Repositories.User
         {
             return new UserInfo
             {
+                UserAuthId = _userAuthId,
                 UserNameId = _userNameId,
                 ProfilePicture = _profilePicture,
                 Age = _age,

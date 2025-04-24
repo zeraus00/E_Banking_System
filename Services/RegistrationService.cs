@@ -20,7 +20,7 @@ namespace Services
                 DateTime birthDate, int birthCityId, int birthProvinceId, int birthRegionId,
                 string houseNo, string street, int barangayId, int cityId, int provinceId, int regionId, int postalCode,
                 int age, string sex, string contactNumber, string Occupation, string taxIdentificationNumber, string civilStatus, string userReligion,
-                string userName, string email, string password
+                string username, string email, string password
             )
         {
             Name UserName = await RegisterName(userFirstName, userMiddleName, userLastName, userSuffix);
@@ -28,6 +28,7 @@ namespace Services
             Name MotherName = await RegisterName(motherFirstName, motherMiddleName, motherLastName, motherSuffix);
             Name BeneficiaryName = await RegisterName(beneficiaryFirstName, beneficiaryMiddleName, beneficiaryLastName, beneficiarySuffix);
 
+            UserAuth userAuth = await RegisterUserAuth(username, email, password);
             BirthInfo UserBirthInfo = await RegisterBirthInfo(birthDate, birthCityId, birthProvinceId, birthRegionId);
             Address UserAddress = await RegisterAddress(houseNo, street, barangayId, cityId, provinceId, regionId, postalCode);
             Religion UserReligion = await RegisterReligion(userReligion);
@@ -35,6 +36,7 @@ namespace Services
 
 
             UserInfo UserInfo = await RegisterUserInfo(
+                userAuth.UserAuthId,
                 UserName.NameId,
                 MotherName.NameId,
                 FatherName.NameId,
@@ -46,10 +48,7 @@ namespace Services
                 contactNumber,
                 Occupation,
                 taxIdentificationNumber, 
-                civilStatus,
-                userName,
-                email,
-                password
+                civilStatus
                 );
         }
 
@@ -211,7 +210,51 @@ namespace Services
             }
         }
 
+        public async Task<UserAuth> RegisterUserAuth(string username, string email, string password)
+        {
+            if (string.IsNullOrWhiteSpace(username))
+            {
+                throw new FieldMissingException("Username is required.");
+            }
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                throw new FieldMissingException("Email is required.");
+            }
+            if (string.IsNullOrWhiteSpace(password))
+            {
+                throw new FieldMissingException("Password is required.");
+            }
+
+            var UserAuthBuilder = new UserAuthBuilder()
+               .WithRoleId((int)RoleTypes.User)
+               .WithUserName(username)
+               .WithPassword(password);
+
+            UserAuth userAuth = UserAuthBuilder.Build();
+
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                UserAuthRepository userAuthRepo = new UserAuthRepository(dbContext);
+
+
+                //  check for existing userauth
+                var existingUserEmail = await userAuthRepo.GetUserAuthByUserNameOrEmailAsync(email);
+                var existingUserUserName = await userAuthRepo.GetUserAuthByUserNameOrEmailAsync(username);
+
+                if (existingUserEmail is not null || existingUserUserName is not null)
+                {
+                    throw new EmailAlreadyExistException(email ?? username);
+                }
+
+
+                await userAuthRepo.AddAsync(userAuth);
+                await userAuthRepo.SaveChangesAsync();
+                return userAuth;
+            }
+        }
+
         public async Task<UserInfo> RegisterUserInfo(
+            int userAuthId,
             int userNameId,
             int motherNameId,
             int fatherNameId,
@@ -223,10 +266,7 @@ namespace Services
             string contactNumber,
             string Occupation,
             string taxIdentificationNumber,
-            string civilStatus,
-            string userName,
-            string email,
-            string password
+            string civilStatus
             ) 
         {
             if (string.IsNullOrWhiteSpace(contactNumber)) 
@@ -248,24 +288,10 @@ namespace Services
                 throw new FieldMissingException("Civil Status is required.");
             }
 
-            if (string.IsNullOrWhiteSpace(userName))
-            {
-                throw new FieldMissingException("Username is Required.");
-            }
-
-            if (string.IsNullOrWhiteSpace(email))
-            {
-                throw new FieldMissingException("Email is required.");
-            }
-
-            if (string.IsNullOrWhiteSpace(password))
-            {
-                throw new FieldMissingException("Password is required.");
-            }
-
 
             var UserInfoBuilder = new UserInfoBuilder();
             UserInfoBuilder
+                .WithUserAuthId(userAuthId)
                 .WithUserNameId(userNameId)
                 .WithMotherNameId(motherNameId)
                 .WithFatherNameId(fatherNameId)
@@ -282,34 +308,15 @@ namespace Services
             UserInfo UserInfo = UserInfoBuilder.Build();
 
 
-            var UserAuthBuilder = new UserAuthBuilder()
-               .WithRoleId((int) RoleTypes.User)
-               .WithUserInfoId(UserInfo.UserInfoId)
-               .WithUserName(userName)
-               .WithPassword(password);
-
-            UserAuth userAuth = UserAuthBuilder.Build();
+            
 
 
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
-                UserAuthRepository userAuthRepo = new UserAuthRepository(dbContext);
                 UserInfoRepository userInfoRepo = new UserInfoRepository(dbContext);
-
-                //check for existing user by username
-                var existingUser = await userAuthRepo.GetUserAuthByUserNameOrEmailAsync(userName);
-
-                if (existingUser != null)
-                {
-                    throw new DuplicateWaitObjectException("Username is already exists.");
-                }
-
 
                 await userInfoRepo.AddAsync(UserInfo);
                 await userInfoRepo.SaveChangesAsync();
-
-                await userAuthRepo.AddAsync(userAuth);
-                await userAuthRepo.SaveChangesAsync();
 
                 return UserInfo;
             }

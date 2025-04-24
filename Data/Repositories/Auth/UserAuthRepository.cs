@@ -195,19 +195,19 @@ namespace Data.Repositories.Auth
         /// <returns>An IQueryable of UserAuth with all includes.</returns>
         public IQueryable<UserAuth> QueryIncludeAll()
         {
-            return this.ComposeQuery(includeRole: true, includeAccount: true, includeUserInfo: true);
+            return this.ComposeQuery(includeRole: true, includeAccounts: true, includeUserInfo: true);
         }
 
         /// <summary>
         /// Builds an IQueryable for querying the UsersAuth table with optional related entities.
         /// </summary>
         /// <param name="includeRole">Whether to include the related Role entity.</param>
-        /// <param name="includeAccount">Whether to include the related Account entity.</param>
+        /// <param name="includeAccounts">Whether to include the related Accounts.</param>
         /// <param name="includeUserInfo">Whether to include the related UserInfo entity.</param>
         /// <returns>An IQueryable of UserAuth with optional includes.</returns>
         public IQueryable<UserAuth> ComposeQuery(
                 bool includeRole = false,
-                bool includeAccount = false,
+                bool includeAccounts = false,
                 bool includeUserInfo = false
                 )
         {
@@ -215,7 +215,7 @@ namespace Data.Repositories.Auth
                 .UsersAuth
                 .AsQueryable();
             if (includeRole) { query = query.Include(ua => ua.Role); }
-            if (includeAccount) { query = query.Include(ua => ua.Account); }
+            if (includeAccounts) { query = query.Include(ua => ua.Accounts); }
             if (includeUserInfo) { query = query.Include(ua => ua.UserInfo); }
 
             return query;
@@ -229,8 +229,6 @@ namespace Data.Repositories.Auth
 public class UserAuthBuilder
 {
     private int _roleId;
-    private int? _accountId;
-    private int? _userInfoId;
     private string _userName = string.Empty;
     private string _email = string.Empty;
     private string _password = string.Empty;
@@ -243,28 +241,6 @@ public class UserAuthBuilder
     public UserAuthBuilder WithRoleId(int roleId)
     {
         _roleId = roleId;
-        return this;
-    }
-
-    /// <summary>
-    /// Specify the AccountId
-    /// </summary>
-    /// <param name="accountId"></param>
-    /// <returns></returns>
-    public UserAuthBuilder WithAccountId(int accountId)
-    {
-        _accountId = accountId;
-        return this;
-    }
-
-    /// <summary>
-    /// Specify the UserInfoId
-    /// </summary>
-    /// <param name="userInfoId"></param>
-    /// <returns></returns>
-    public UserAuthBuilder WithUserInfoId(int userInfoId)
-    {
-        _userInfoId = userInfoId;
         return this;
     }
 
@@ -311,8 +287,6 @@ public class UserAuthBuilder
         return new UserAuth
         {
             RoleId = _roleId,
-            AccountId = _accountId,
-            UserInfoId = _userInfoId,
             UserName = _userName,
             Email = _email,
             Password = _password
