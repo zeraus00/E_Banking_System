@@ -23,16 +23,38 @@
                         </div>
                     </div>
 
-                    <div class="d-flex align-items-center justify-content-center me-5 pt-3 position-relative notification">
-                        <img src="/bootstrap/Utilities/Bell.png" alt="Notification Bell" @onclick="ToggleNotification" />
+                    <!-- Notifications -->
+                    <div class="d-flex align-items-center justify-content-center me-5 pt-3 position-relative notification" tabindex="0" @onblur="() => showNotifications = false">
+                        <img src="/bootstrap/Utilities/Bell.png" alt="Notification Bell" role="button" tabindex="0" @onclick="ToggleNotification" />
                         @if (showNotifications)
                         {
                             <div class="notification-popup">
-                                <p>New notification!</p>
+                                <div class="d-flex justify-content-between align-items-baseline border-bottom">
+                                    <label class="mb-3 fw-bold text-dark">Recent Notifications</label>
+                                    <a href="/Notifications" class="nav-link text-decoration-none">View All</a>
+                                </div>
+
+                                <!-- Notification List -->
+                                <div class="container pt-3 px-3">
+                                    @if (recentNotifications == null || !recentNotifications.Any())
+                                    {
+                                        <p class="text-muted">You have no recent notifications.</p>
+                                    }
+                                    else
+                                    {
+                                        @foreach (var notif in recentNotifications.Take(3))
+                                        {
+                                            <div class="mb-3 border-bottom pb-2 text-dark">
+                                                <p class="m-0">
+                                                    On <strong>@notif.Date.ToShortDateString()</strong>, <strong>@notif.Sender</strong> sent a notification involving <strong>@notif.Amount.ToString("C")</strong>.
+                                                </p>
+                                            </div>
+                                        }
+                                    }
+                                </div>
                             </div>
                         }
                     </div>
-
 
                 </header>
                 <!-- Header -->
@@ -158,6 +180,20 @@
     private void ToggleNotification()
     {
         showNotifications = !showNotifications;
+    }
+
+    private List<Notifications> recentNotifications = new()
+    {
+        new Notifications { Sender = "Bank Admin", Amount = 500.00M, Date = DateTime.Now.AddDays(-1) },
+        new Notifications { Sender = "System", Amount = 1200.00M, Date = DateTime.Now.AddDays(-2) },
+        new Notifications { Sender = "Loan Department", Amount = 3000.00M, Date = DateTime.Now.AddDays(-3) }
+    };
+
+    public class Notifications
+    {
+        public string Sender { get; set; }
+        public decimal Amount { get; set; }
+        public DateTime Date { get; set; }
     }
 
     private List<Transaction> recentTransactions = new()
