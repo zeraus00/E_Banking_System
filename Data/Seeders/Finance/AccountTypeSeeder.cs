@@ -17,10 +17,8 @@ namespace Data.Seeders.Finance
                 var accountTypeBuilder = new AccountTypeBuilder();
                 var accountTypeNames = new[]
                 {
-                    "Checking Account",
-                    "Savings Account",
-                    "Joint Account",
-                    "Loan Account"
+                    "Personal Account",
+                    "Joint Account"
                 };
                 
                 foreach (var accountTypeName in accountTypeNames)
