@@ -5,6 +5,9 @@ using System.Security.Claims;
 
 namespace Services
 {
+    /// <summary>
+    /// Handles redirection logic.
+    /// </summary>
     public class PageRedirectService
     {
         private readonly IHttpContextAccessor _accessor;

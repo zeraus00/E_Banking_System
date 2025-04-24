@@ -57,11 +57,22 @@ namespace Services
             };
         }
 
+        /// <summary>
+        /// Retrieves the claim value of the specified type from the claim principal.
+        /// </summary>
+        /// <param name="user">The ClaimsPrincipal</param>
+        /// <param name="claimType">The claim type to be retrieved</param>
+        /// <returns>The claim or null if it doesn't exist.</returns>
         public string? GetClaimValue(ClaimsPrincipal user, string claimType)
         {
             return user.FindFirst(c => c.Type == claimType)?.Value;
         }
 
+        /// <summary>
+        /// Checks if the user is authenticated.
+        /// </summary>
+        /// <param name="user">The ClaimsPrincipal.</param>
+        /// <returns>True if user is authenticated.</returns>
         public bool IsAuthenticated(ClaimsPrincipal? user)
         {
             return user?.Identity?.IsAuthenticated == true;
