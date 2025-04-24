@@ -39,6 +39,11 @@
                 .Property(n => n.Suffix)
                 .HasMaxLength(10)
                 .IsRequired(false);
+
+            /*
+             *  Relationships
+             *  UsersInfo(one-to-many)
+             */
         }
 
 

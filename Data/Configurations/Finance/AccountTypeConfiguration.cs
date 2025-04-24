@@ -21,6 +21,11 @@
                 .Property(at => at.AccountTypeName)
                 .HasMaxLength(20)
                 .IsRequired();
+
+            /*
+             *  Relationships
+             *  Accounts (one-to-many)
+             */
         }
     }
 }

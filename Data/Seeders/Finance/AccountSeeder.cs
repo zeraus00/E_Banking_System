@@ -16,7 +16,8 @@ namespace Data.Seeders.Finance
             if (!await _context.Accounts.AnyAsync())
             {
                 var account = new AccountBuilder()
-                    .WithAccountType((int)AccountTypes.CheckingAccount)
+                    .WithAccountType((int)AccountTypes.PersonalAcocunt)
+                    .WithAccountProductTypeId((int)AccountProductTypes.Checking)
                     .WithAccountNumber("123456789ABC")
                     .WithAccountName("Bogart Dela Mon")
                     .WithAccountStatus("Active")
