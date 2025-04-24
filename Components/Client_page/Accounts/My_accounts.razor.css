@@ -20,7 +20,7 @@
 .carousel-card {
     display: flex;
     flex-direction: column;
-    min-width: 400px;
+    min-width: 500px;
     background-color: white;
     border: 1px solid #ccc;
     border-radius: 12px;
