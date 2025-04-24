@@ -27,6 +27,7 @@
              */
             modelBuilder.ApplyConfiguration(new AccountConfiguration());
             modelBuilder.ApplyConfiguration(new AccountTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new AccountProductTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LoanConfiguration());
             modelBuilder.ApplyConfiguration(new LoanTransactionConfiguration());
             modelBuilder.ApplyConfiguration(new LoanTypeConfiguration());
@@ -70,6 +71,7 @@
         //  Finance
         public DbSet<Account> Accounts { get; set; }
         public DbSet<AccountType> AccountTypes { get; set; }
+        public DbSet<AccountProductType> AccountProductTypes { get; set; }
         public DbSet<Loan> Loans { get; set; }
         public DbSet<LoanTransaction> LoanTransactions { get; set; }
         public DbSet<LoanType> LoanTypes { get; set; }

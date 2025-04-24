@@ -1,4 +1,5 @@
-﻿using Exceptions;
+﻿using Data.Models.Finance;
+using Exceptions;
 using Microsoft.Identity.Client;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
@@ -147,6 +148,7 @@ namespace Data.Repositories.Finance
     public class AccountBuilder
     {
         private int _accountTypeId;
+        private int _accountProductTypeId;
         private string _accountNumber = string.Empty;
         private string _accountName = string.Empty;
         private string _accountStatus = string.Empty;
@@ -158,6 +160,12 @@ namespace Data.Repositories.Finance
         public AccountBuilder WithAccountType(int accountTypeId)
         {
             _accountTypeId = accountTypeId;
+            return this;
+        }
+
+        public AccountBuilder WithAccountProductTypeId(int accountProductTypeId)
+        {
+            _accountProductTypeId = accountProductTypeId;
             return this;
         }
 
@@ -211,6 +219,7 @@ namespace Data.Repositories.Finance
             return new Account
             {
                 AccountTypeId = _accountTypeId,
+                AccountProductTypeId = _accountProductTypeId,
                 AccountNumber = _accountNumber,
                 AccountName = _accountName,
                 AccountStatus = _accountStatus,

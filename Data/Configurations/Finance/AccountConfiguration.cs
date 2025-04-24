@@ -61,6 +61,7 @@
             /*
              *  Relationships
              *  AccountTypes (many-to-one)
+             *  AccountProductTypes (many-to-one)
              *  LinkedBeneficiary Accounts (self-referencing many-to-one)
              *  UsersAuth (many-to-many)
              *  Transactions (one-to-many)
@@ -72,6 +73,12 @@
                 .HasOne(a => a.AccountType)
                 .WithMany(at => at.Accounts)
                 .HasForeignKey(a => a.AccountTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            Accounts
+                .HasOne(a => a.AccountProductType)
+                .WithMany(apt => apt.Accounts)
+                .HasForeignKey(a => a.AccountProductTypeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             Accounts
