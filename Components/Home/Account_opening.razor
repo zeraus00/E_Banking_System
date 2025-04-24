@@ -4,6 +4,7 @@
 
 
 @page "/Account_opening"
+@rendermode InteractiveServer
 @inject NavigationManager NavigationManager
 @inject RegistrationService RegistrationService
 @inject HttpClient HttpClient
@@ -163,7 +164,7 @@
 					<!-- Region -->
 					<div class="col">
 						<label class="text-light">Region</label>
-						<select class="form-select form-select-sm" @value="@selectedRegion" @onchange="async _ => await LoadProvinceAsync()" required>
+						<select class="form-select form-select-sm" value="@selectedRegion" @onchange="async _ => await LoadProvinceAsync(_)" required>
 							@foreach (var r in regions)
 							{
 								<option value="@r.code">@r.regionName</option>
@@ -174,8 +175,8 @@
 					<!-- Province -->
 					<div class="col">
 						<label class="text-light">Province</label>
-						<select class="form-select form-select-sm" @value="@selectedProvince" @onchange="async _ => await LoadCitiesAsync()" required>
-							@foreach (var p in provinces)
+						<select class="form-select form-select-sm" value="@selectedProvince" @onchange="async _ => await LoadCitiesAsync()" required>
+							@foreach (var p in provincesFromRegion)
 							{
 								<option value="@p.code">@p.name</option>
 							}
@@ -185,7 +186,7 @@
 					<!-- City -->
 					<div class="col">
 						<label class="text-light">City</label>
-						<select class="form-select form-select-sm" @value="@selectedCity" @onchange="async _ => await LoadBarangaysAsync()" required>
+						<select class="form-select form-select-sm" value="@selectedCity" @onchange="async _ => await LoadBarangaysAsync()" required>
 							@foreach (var c in cities)
 							{
 								<option value="@c.code">@c.name</option>
@@ -196,7 +197,7 @@
 					<!-- Barangay -->
 					<div class="col-3">
 						<label class="text-light">Barangay</label>
-						<select class="form-select form-select-sm" @value="@selectedBarangay" required>
+						<select class="form-select form-select-sm" value="@selectedBarangay" required>
 							@foreach (var b in barangays)
 							{
 								<option value="@b.code">@b.name</option>
@@ -227,7 +228,7 @@
 					<!-- Region -->
 					<div class="col">
 						<label class="text-light">Region</label>
-						<select class="form-select form-select-sm" @value="@selectedBirthRegion" @onchange="async _ => await LoadRegionAsync()" required>
+						<select class="form-select form-select-sm" value="@selectedBirthRegion" @onchange="LoadRegionAsync" required>
 							@foreach (var r in regions)
 							{
 								<option value="@r.code">@r.regionName</option>
@@ -238,7 +239,7 @@
 					<!-- Province -->
 					<div class="col">
 						<label class="text-light">Province</label>
-						<select class="form-select form-select-sm" @value="@selectedBirthProvince" @onchange="async _ => await LoadProvinceAsync()" required>
+						<select class="form-select form-select-sm" value="@selectedBirthProvince" @onchange="LoadProvinceAsync" required>
 							@foreach (var p in provinces)
 							{
 								<option value="@p.code">@p.name</option>
@@ -249,7 +250,7 @@
 					<!-- City -->
 					<div class="col">
 						<label class="text-light" >City</label>
-						<select class="form-select form-select-sm" @value="@selectedBirthCity" @onchange="async _ => await LoadCitiesAsync()" required>
+						<select class="form-select form-select-sm" value="@selectedBirthCity" @onchange="LoadCitiesAsync" required>
 							@foreach (var c in cities)
 							{
 								<option value="@c.code">@c.name.ToString()</option>
@@ -478,6 +479,9 @@
 	<!--user full address-->
 	private List<RegionViewModel>? regions = new List<RegionViewModel>();
 	private List<ProvinceViewModel>? provinces = new List<ProvinceViewModel>();
+
+	private List<ProvinceViewModel>? provincesFromRegion = new();	//	use this for the drop down selection
+
 	private List<CityViewModel>? cities = new List<CityViewModel>();
 	private List<BarangayViewModel>? barangays = new List<BarangayViewModel>();
 
@@ -494,17 +498,36 @@
 		var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/regions/");
 		regions = JsonSerializer.Deserialize<List<RegionViewModel>>(json);
 		if (regions is null) return;
+
 		await LoadProvinceAsync();
 	}
 
-	private async Task LoadProvinceAsync()
+	//	Pass the ChangeEventArgs instance ONLY FOR drop down selections that need updating.
+	private async Task LoadProvinceAsync(ChangeEventArgs? e = null)
 	{
-		//var provinceResponse = await HttpClient.GetFromJsonAsync<List<Province>>($"https://psgc.gitlab.io/api/regions/");
-		//provinces = provinceResponse ?? new List<Province>();
+		
+		//	Get the value of the selection
+		selectedRegion = e?.Value?.ToString() ?? "";
+
+		//	Get the provinces from the api.
 		var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/provinces/");
 		provinces = JsonSerializer.Deserialize<List<ProvinceViewModel>>(json);
 		if (provinces is null) return;
-		await LoadCitiesAsync();
+
+		//	Get the list of provinces with the selected region's region code
+		provincesFromRegion = provinces.Where(p => p.regionCode.ToString() == selectedRegion).ToList();
+
+		//	Default the selection to the first option each time provinces are updated.
+		if (provincesFromRegion.Any()) 
+		{
+			selectedProvince = provincesFromRegion[0].code.ToString();
+		} else
+		{
+			selectedProvince = string.Empty;
+		}
+
+		//	Rerender component
+		StateHasChanged();
 	}
 
 	private async Task LoadCitiesAsync()
@@ -514,7 +537,7 @@
 		var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/municipalities/");
 		cities = JsonSerializer.Deserialize<List<CityViewModel>>(json);
 		if (cities is null) return;
-		await LoadBarangaysAsync();
+
 	}
 
 	private async Task LoadBarangaysAsync()
