@@ -498,8 +498,6 @@
 		var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/regions/");
 		regions = JsonSerializer.Deserialize<List<RegionViewModel>>(json);
 		if (regions is null) return;
-
-		await LoadProvinceAsync();
 	}
 
 	//	Pass the ChangeEventArgs instance ONLY FOR drop down selections that need updating.
