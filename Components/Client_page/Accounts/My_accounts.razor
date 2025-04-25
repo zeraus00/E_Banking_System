@@ -1,6 +1,9 @@
 ﻿@page "/My_accounts"
 
 @inject NavigationManager NavigationManager
+@inject ClaimsHelperService _claimsHelper
+@inject NexusAuthenticationStateProvider _authenticationStateProvider
+@inject UserDataService _userDataService
 
 <div class="page">
     <main>
@@ -23,73 +26,34 @@
                 <div class="carousel">
 
                     <!-- Balance Card -->
-                    <section class="carousel-card text-start p-3 border shadow-sm h-100">
-                        <h3 class="fw-bold mt-3">Account Name</h3>
+                    @if (accounts is not null && accounts.Any()) 
+                    {
+                        foreach (var account in accounts)
+                        {
+                            <section class="carousel-card text-start p-3 border shadow-sm h-100">
+                                <h3 class="fw-bold mt-3">@account.AccountName</h3>
+                                <h5 class="text-light fw-lighter m-0">@account.AccountNumber</h5>
 
-                        <hr />
+                                <hr />
 
-                        <div class="d-flex justify-content-between mt-3">
-                            <p class="w-100">Available Balance:</p>
-                            <p class="text-success w-100">availableBalance</p>
-                        </div>
+                                <div class="d-flex justify-content-between mt-3">
+                                    <p class="w-100">Available Balance:</p>
+                                    <p class="text-success w-100">@account.Balance</p>
+                                </div>
 
-                        <div class="d-flex justify-content-between">
-                            <p class="w-100">Current Balance:</p>
-                            <p class="text-success w-100">currentBalance</p>
-                        </div>
+                                <div class="d-flex justify-content-between">
+                                    <p class="w-100">Current Balance:</p>
+                                    <p class="text-success w-100">@account.Balance</p>
+                                </div>
 
-                        <div class="custom-card sm mb-0 pb-0">
-                            <p class="m-1">
-                                <strong>Contact No.:</strong> _clientPhone
-                            </p>
-                        </div>
-                    </section>
-
-
-                    <section class="carousel-card text-start p-3 border shadow-sm h-100">
-                        <h3 class="fw-bold mt-3">Account Name</h3>
-
-                        <hr />
-
-                        <div class="d-flex justify-content-between mt-3">
-                            <p class="w-100">Available Balance:</p>
-                            <p class="text-success w-100">availableBalance</p>
-                        </div>
-
-                        <div class="d-flex justify-content-between">
-                            <p class="w-100">Current Balance:</p>
-                            <p class="text-success w-100">currentBalance</p>
-                        </div>
-
-                        <div class="custom-card sm mb-0 pb-0">
-                            <p class="m-1">
-                                <strong>Contact No.:</strong> _clientPhone
-                            </p>
-                        </div>
-                    </section>
-
-
-                    <section class="carousel-card text-start p-3 border shadow-sm h-100">
-                        <h3 class="fw-bold mt-3">Account Name</h3>
-
-                        <hr/>
-
-                        <div class="d-flex justify-content-between mt-3">
-                            <p class="w-100">Available Balance:</p>
-                            <p class="text-success w-100">availableBalance</p>
-                        </div>
-
-                        <div class="d-flex justify-content-between">
-                            <p class="w-100">Current Balance:</p>
-                            <p class="text-success w-100">currentBalance</p>
-                        </div>
-
-                        <div class="custom-card sm mb-0 pb-0">
-                            <p class="m-1">
-                                <strong>Contact No.:</strong> _clientPhone
-                            </p>
-                        </div>
-                    </section>
+                                <div class="custom-card sm mb-0 pb-0">
+                                    <p class="m-1">
+                                        <strong>Contact No.:</strong> @(userInfo?.ContactNumber ?? "09123456789")
+                                    </p>
+                                </div>
+                            </section>
+                        }
+                    }
 
                 </div>
             </section>
@@ -101,5 +65,23 @@
 </div>
 
 @code {
-    
+    private ClaimsPrincipal? user;
+    private List<Account>? accounts = new();
+    private UserInfo? userInfo;
+
+    protected override async Task OnInitializedAsync() 
+    {
+        //  Get Authentication state
+        AuthenticationState authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
+        user = authState.User;
+
+        //  Retrieve ids from claims
+        var userAuthId = Convert.ToInt32(_claimsHelper.GetClaimValue(user, ClaimTypes.NameIdentifier) ?? "0");
+        var userInfoId = Convert.ToInt32(_claimsHelper.GetClaimValue(user, CustomClaimTypes.UserInfoId) ?? "0");
+
+        //  Retrieve account list
+        accounts = await _userDataService.GetAccountListAsync(userAuthId);
+        userInfo = await _userDataService.GetUserInfoAsync(userInfoId);
+
+    }
 }

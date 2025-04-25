@@ -98,6 +98,32 @@ namespace Services
             return accountIdList?[0] ?? null;
         }
 
+        public List<Account>? GetAccountListSync(int userAuthId)
+        {
+            using (var dbContext = _contextFactory.CreateDbContext())
+            {
+                UserAuthRepository userAuthRepo = new UserAuthRepository(dbContext);
+
+                var query = userAuthRepo.ComposeQuery(includeAccounts: true);
+                var userAuth = userAuthRepo.GetUserAuthByIdSync(userAuthId, query);
+
+                return userAuth?.Accounts.ToList() ?? null;
+            }
+        }
+
+        public async Task<List<Account>?> GetAccountListAsync(int userAuthId)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                UserAuthRepository userAuthRepo = new UserAuthRepository(dbContext);
+
+                var query = userAuthRepo.ComposeQuery(includeAccounts: true);
+                var userAuth = await userAuthRepo.GetUserAuthByIdAsync(userAuthId, query);
+
+                return userAuth?.Accounts.ToList() ?? null;
+            }
+        }
+
         /// <summary>
         /// Retrieves a list of the account ids associated with the user auth id.
         /// </summary>
