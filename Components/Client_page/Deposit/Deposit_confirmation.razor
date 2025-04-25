@@ -3,7 +3,6 @@
 
 @inject NavigationManager NavigationManager
 @inject ClaimsHelperService _claimsHelper
-@inject NexusAuthenticationStateProvider _authenticationStateProvider
 @inject PageRedirectService _redirectService
 @inject UserDataService _userDataService
 @using Helpers;
@@ -67,6 +66,9 @@
 
 @code
 {
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationState { get; set; } = default!;
+
     private ClaimsPrincipal? user;
     private Account? Account;
 
@@ -78,7 +80,7 @@
     protected override async Task OnInitializedAsync()
     {
         //  Get Authentication State
-        AuthenticationState authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
+        AuthenticationState authState = await authenticationState;
         user = authState.User;
 
         //  Retrieve userAuth id from claims.

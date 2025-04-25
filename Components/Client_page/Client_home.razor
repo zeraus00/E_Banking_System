@@ -4,7 +4,6 @@
 @inject NavigationManager NavigationManager
 @inject ClaimsHelperService _claimsHelper
 @inject UserDataService _userDataService
-@inject NexusAuthenticationStateProvider _authenticationStateProvider
 @rendermode InteractiveServer
 @using System.Text.RegularExpressions;
 @using Helpers;
@@ -155,7 +154,8 @@
 
 
 @code {
-    // [CascadingParameter]
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationState { get; set; } = default!;
     // HttpContext? _httpContext { get; set; }
     // Mock data for demonstration — replace with real data from your backend
     private ClaimsPrincipal? _user;
@@ -204,7 +204,7 @@
     protected override async Task OnInitializedAsync() 
     {
         //  Get Authentication state
-        AuthenticationState authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
+        AuthenticationState authState = await authenticationState;
         _user = authState.User;
 
         //  Retrieve userAuth id from claims.
