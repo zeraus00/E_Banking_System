@@ -1,4 +1,6 @@
 ﻿@page "/Transaction"
+@attribute [Authorize(Roles="User")]
+
 @inject NavigationManager NavigationManager
 @rendermode InteractiveServer
 

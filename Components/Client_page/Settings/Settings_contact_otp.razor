@@ -1,4 +1,5 @@
 ﻿@page "/Settings_contact_otp"
+@attribute [Authorize(Roles = "User")]
 
 @inject NavigationManager NavigationManager
 @inject ClaimsHelperService claimsHelper

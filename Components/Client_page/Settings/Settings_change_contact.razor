@@ -1,8 +1,9 @@
 ﻿@using ViewModels;
 
 @page "/Settings_change_contact"
-@inject NavigationManager NavigationManager
+@attribute [Authorize(Roles = "User")]
 
+@inject NavigationManager NavigationManager
 @inject ClaimsHelperService claimsHelper
 @inject NexusAuthenticationStateProvider authenticationStateProvider
 @inject PageRedirectService redirectService
@@ -73,9 +74,6 @@
 		//  Get Authentication state
 		AuthenticationState authState = await authenticationStateProvider.GetAuthenticationStateAsync();
 		user = authState.User;
-
-		//  Redirect to Landing Page if not authenticated.
-		redirectService.RedirectIfNotAuthenticated(user);
 	}
 
 	private void ValidateContact()
