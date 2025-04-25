@@ -20,9 +20,9 @@
         private decimal _amount;
         private decimal _previousBalance;
         private decimal _newBalance;
-        private DateTime _transactionDate;
-        private TimeSpan _transactionTime;
-        private decimal _transactionFee;
+        private DateTime _transactionDate;     //  Default value curdate
+        private TimeSpan _transactionTime;     //  Default value curent time
+        private decimal _transactionFee;       //  Default value 0
 
         #region Builder Methods
         public TransactionBuilder WithAccountId(int accountId)
@@ -73,17 +73,21 @@
         /// <returns></returns>
         public Transaction Build()
         {
-            return new Transaction
+            var transaction = new Transaction
             {
                 AccountId = _accountId,
                 TransactionTypeId = _transactionTypeId,
                 Amount = _amount,
                 PreviousBalance = _previousBalance,
-                NewBalance = _newBalance,
-                TransactionDate = _transactionDate,
-                TransactionTime = _transactionTime,
-                TransactionFee = _transactionFee
+                NewBalance = _newBalance
             };
+
+            if (_transactionDate != default) transaction.TransactionDate = _transactionDate;
+            if (_transactionTime != default) transaction.TransactionTime = _transactionTime;
+            if (_transactionFee != default) transaction.TransactionFee = _transactionFee;
+
+            return transaction;
         }
+
     }
 }
