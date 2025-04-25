@@ -55,13 +55,6 @@
     position: relative;
 }
 
-    .notification img {
-        height: 35px;
-        width: 35px;
-        object-fit: contain;
-        cursor: pointer;
-    }
-
     .notification:focus {
         outline: none;
     }
@@ -86,7 +79,7 @@
         position: absolute;
         top: -10px;
         right: 15px;
-        transform: translateX(-37px);
+        transform: translateX(-48px);
         border-width: 5px;
         border-style: solid;
         border-color: transparent transparent white transparent;
