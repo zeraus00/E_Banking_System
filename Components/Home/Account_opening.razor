@@ -176,7 +176,7 @@
 					<!-- Province -->
 					<div class="col">
 						<label class="text-light">Province</label>
-						<select class="form-select form-select-sm" value="@selectedProvince" @onchange="async _ => await LoadCitiesAsync()" required>
+						<select class="form-select form-select-sm" value="@selectedProvince" @onchange="async _ => await LoadCitiesAsync(_)" required>
 							<option value="" disabled hidden>@provincePlaceHolder</option>
 							@foreach (var p in provincesFromRegion)
 							{
@@ -188,7 +188,7 @@
 					<!-- City -->
 					<div class="col">
 						<label class="text-light">City</label>
-						<select class="form-select form-select-sm" value="@selectedCity" @onchange="async _ => await LoadBarangaysAsync()" required>
+						<select class="form-select form-select-sm" value="@selectedCity" @onchange="async _ => await LoadBarangaysAsync(_)" required>
 							<option value="" disabled hidden>@cityPlaceHolder</option>
 							@foreach (var c in citiesFromProvince)
 							{
@@ -503,7 +503,7 @@
 	// For Full address of user
 	private async Task LoadRegionAsync()
 	{
-		//var regionResponse = await HttpClient.GetFromJsonAsync<List<Region>>("https://psgc.gitlab.io/api/regions/");
+		//var regionResponse = await HttpClient.GetFromJsonAsync<List<Region>>("https://psgc.gitlab.io/api/cities/");
 		//regions = regionResponse ?? new List<Region>();
 		var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/regions/");
 		regions = JsonSerializer.Deserialize<List<RegionViewModel>>(json);
