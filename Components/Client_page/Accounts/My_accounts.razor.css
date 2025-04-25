@@ -1,0 +1,42 @@
+﻿.container{
+    width: 600px;
+}
+
+.carousel{
+    display: grid;
+    grid-auto-flow: column;
+    scroll-behavior: auto;
+    gap: 1.2rem;
+    overflow-y: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+}
+
+.carousel::-webkit-scrollbar{
+    display: none;
+}
+
+.carousel-card {
+    display: flex;
+    flex-direction: column;
+    min-width: 500px;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    padding: 1rem;
+    scroll-snap-align: start;
+    color:  black;
+}
+
+.custom-card {
+    background-color: white;
+    display: flex;
+}
+
+    .custom-card.sm {
+        background-color: #E0E0E0;
+        font-weight: lighter;
+        width: 100%;
+        border-radius: 5px;
+    }
