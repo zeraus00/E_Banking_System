@@ -1,8 +1,8 @@
 ﻿@page "/My_accounts"
+@attribute [Authorize(Roles = "User")]
 
 @inject NavigationManager NavigationManager
 @inject ClaimsHelperService _claimsHelper
-@inject NexusAuthenticationStateProvider _authenticationStateProvider
 @inject UserDataService _userDataService
 
 <div class="page">
@@ -98,6 +98,10 @@
 
 
 @code {
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationState { get; set; } = default!;
+
+
     private ClaimsPrincipal? user;
     private List<Account>? accounts = new();
     private UserInfo? userInfo;
@@ -105,7 +109,7 @@
     protected override async Task OnInitializedAsync() 
     {
         //  Get Authentication state
-        AuthenticationState authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
+        AuthenticationState authState = await authenticationState;
         user = authState.User;
 
         //  Retrieve ids from claims

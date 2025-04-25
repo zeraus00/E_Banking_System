@@ -5,7 +5,6 @@
 
 @inject NavigationManager NavigationManager
 @inject ClaimsHelperService claimsHelper
-@inject NexusAuthenticationStateProvider authenticationStateProvider
 @inject PageRedirectService redirectService
 
 <div class="page">
@@ -60,8 +59,11 @@
 
 </div>
 
-@code 
+@code
 {
+	[CascadingParameter]
+	private Task<AuthenticationState> authenticationState { get; set; } = default!;
+
 	[SupplyParameterFromForm]
 	ContactNumberChangeViewModel contactModel { get; set; } = new();
 
@@ -72,7 +74,7 @@
 	protected override async Task OnInitializedAsync()
 	{
 		//  Get Authentication state
-		AuthenticationState authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+		AuthenticationState authState = await authenticationState;
 		user = authState.User;
 	}
 
