@@ -26,12 +26,12 @@
         private int? _regionId;
         private int? _postalCode;
 
+        #region Builder Methods
         public AddressBuilder WithHouse(string house)
         {
             _house = house;
             return this;
         }
-
         public AddressBuilder WithStreet(string street)
         {
             _street = street;
@@ -67,6 +67,7 @@
             _postalCode = postalCode;
             return this;
         }
+        #endregion Builder Methods
 
         /// <summary>
         /// Builds the Address object with the specified properties

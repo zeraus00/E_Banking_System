@@ -28,6 +28,8 @@
         private DateTime _dueDate;
         private DateTime _updateDate;
         private DateTime _endDate;
+
+        #region Builder Methods
         public LoanBuilder WithAccountId(int accountId)
         {
             _accountId = accountId;
@@ -93,9 +95,10 @@
             _endDate = endDate;
             return this;
         }
+        #endregion Builder Methods
         /// <summary>
         /// Builds the Loan object with the specified properties
-        ///
+        /// </summary>
         public Loan Build()
         {
             return new Loan

@@ -11,32 +11,7 @@ namespace Data.Repositories.User
     {
         public UserInfoRepository(EBankingContext context) : base(context) { }
 
-
-        /// <summary>
-        /// Retrieves a UserInfo entry by its primary key.
-        /// Optionally accepts a pre-composed IQueryable with desired includes.
-        /// </summary>
-        /// <param name="userInfoId">The primary key of the UserInfo entity.</param>
-        /// <param name="query">
-        /// An optional IQueryable with includes already applied.
-        /// If null, a basic lookup using DbContext.Find is performed.
-        /// </param>
-        /// <returns>The UserInfo entity if found or null if not.</returns>
-        public UserInfo? GetUserInfoByIdSync(int userInfoId, IQueryable<UserInfo>? query = null)
-        {
-            UserInfo? userInfo;
-            if (query != null)
-            {
-                userInfo = query.FirstOrDefault(ui => ui.UserInfoId == userInfoId);
-            }
-            else
-            {
-                userInfo = _context
-                    .UsersInfo
-                    .Find(userInfoId);
-            }
-            return userInfo;
-        }
+        #region Read Methods
 
         /// <summary>
         /// Retrieves a UserInfo entry by its primary key asynchronously.
@@ -111,7 +86,11 @@ namespace Data.Repositories.User
 
             return query;
         }
-    } 
+
+        #endregion Read Methods
+
+
+    }
 
     /// <summary>
     /// Builder class for UserInfo
@@ -134,12 +113,12 @@ namespace Data.Repositories.User
         private string _civilStatus = string.Empty;
         private int? _religionId;
 
+        #region Builder Methods
         public UserInfoBuilder WithUserNameId(int userNameId)
         {
             _userNameId = userNameId;
             return this;
         }
-
         public UserInfoBuilder WithUserAuthId(int userAuthId)
         {
             _userAuthId = userAuthId;
@@ -158,31 +137,26 @@ namespace Data.Repositories.User
             _age = age;
             return this;
         }
-
         public UserInfoBuilder WithSex(string sex)
         {
             _sex = sex.Trim();
             return this;
         }
-
         public UserInfoBuilder WithBirthInfoId(int birthInfoId)
         {
             _birthInfoId = birthInfoId;
             return this;
         }
-
         public UserInfoBuilder WithAddressId(int addressId)
         {
             _addressId = addressId;
             return this;
         }
-
         public UserInfoBuilder WithFatherNameId(int fatherNameId)
         {
             _fatherNameId = fatherNameId;
             return this;
         }
-
         public UserInfoBuilder WithMotherNameId(int motherNameId)
         {
             _motherNameId = motherNameId;
@@ -193,13 +167,11 @@ namespace Data.Repositories.User
             _contactNumber = contactNumber.Trim();
             return this;
         }
-
         public UserInfoBuilder WithOccupation(string occupation)
         {
             _occupation = occupation.Trim();
             return this;
         }
-
         public UserInfoBuilder WithGovernmentId(byte[] governmentid)
         {
             if (governmentid.Length > ImageSize.OneMegaByte)
@@ -213,18 +185,17 @@ namespace Data.Repositories.User
             _taxIdentificationNumber = taxIdentificationNumber.Trim();
             return this;
         }
-
         public UserInfoBuilder WithCivilStatus(string civilStatus)
         {
             _civilStatus = civilStatus.Trim();
             return this;
         }
-
         public UserInfoBuilder WithReligion(int religionId)
         {
             _religionId = religionId;
             return this;
         }
+        #endregion Builder Methods
 
         /// <summary>
         /// Builds the UserInfo object with the specified properties

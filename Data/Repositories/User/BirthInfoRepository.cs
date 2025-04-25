@@ -24,29 +24,28 @@
         private int _provinceId;
         private int _regionId;
 
+        #region Builder Methods
         public BirthInfoBuilder WithBirthDate(DateTime birthDate)
         {
             _birthDate = birthDate;
             return this;
         }
-
         public BirthInfoBuilder WithCityId(int cityId)
         {
             _cityId = cityId;
             return this;
         }
-
         public BirthInfoBuilder WithProvinceId(int provinceId)
         {
             _provinceId = provinceId;
             return this;
         }
-
         public BirthInfoBuilder WithRegionId(int regionId)
         {
             _regionId = regionId;
             return this;
         }
+        #endregion Builder Methods
 
         /// <summary>
         /// Builds the BirthInfo object with the specified properties

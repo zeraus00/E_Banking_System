@@ -4,39 +4,12 @@ namespace Data.Repositories.Auth
 {
     /// <summary>
     /// Class for handling CRUD operations in UsersAuth table.
-    /// Contains both sync and async versions of each method.
     /// </summary>
     public class UserAuthRepository : Repository
     {
         public UserAuthRepository(EBankingContext context) : base(context) { }
 
-        /// <summary>
-        /// Retrieves a UserAuth entry by its primary key.
-        /// Optionally accepts a pre-composed IQueryable with desired includes (e.g., Role, Account).
-        /// </summary>
-        /// <param name="userAuthId">The primary key of the UserAuth entity.</param>
-        /// <param name="query">
-        /// An optional IQueryable with includes already applied.
-        /// If null, a basic lookup using DbContext.Find is performed.
-        /// </param>
-        /// <returns>The UserAuth entity if found or null if not.</returns>
-        public UserAuth? GetUserAuthByIdSync(int userAuthId, IQueryable<UserAuth>? query = null)
-        {
-            UserAuth? userAuth;
-
-            if (query != null)
-            {
-                userAuth = query.FirstOrDefault(ua => ua.UserAuthId == userAuthId);
-            }
-            else
-            {
-                userAuth = _context
-                    .Set<UserAuth>()
-                    .Find(userAuthId);
-            }
-            return userAuth;
-        }
-
+        #region Read Methods
         /// <summary>
         /// Retrieves a UserAuth entry asynchronously by its primary key.
         /// Optionally accepts a pre-composed IQueryable with desired includes (e.g., Role, Account).
@@ -65,52 +38,18 @@ namespace Data.Repositories.Auth
         }
 
         /// <summary>
-        /// Retrieves a UserAuth entry by UserName or Email.
-        /// Optionally accepts a pre-composed IQueryable with desired includes (e.g., Role, Account).
-        /// </summary>
-        /// <param name="userNameOrEmail">The username or email of the user to search for.</param>
-        /// <param name="query">
-        /// An optional IQueryable with includes already applied.
-        /// If null, a basic lookup using DbContext.Find is performed.
-        /// </param>
-        /// <returns>The UserAuth entity if found or null if not.</returns>
-        public UserAuth? GetUserAuthByUserNameOrEmailSync(string userNameOrEmail, IQueryable<UserAuth>? query = null)
-        {
-            var trimmedUserNameOrEmail = userNameOrEmail.Trim();
-            UserAuth? userAuth;
-
-            if (query != null)
-            {
-                userAuth = query
-                    .FirstOrDefault(
-                    ua => ua.UserName == trimmedUserNameOrEmail ||
-                          ua.Email == trimmedUserNameOrEmail
-                    );
-            }
-            else {
-                userAuth = _context
-                .UsersAuth
-                .FirstOrDefault(
-                    ua => ua.UserName == trimmedUserNameOrEmail ||
-                          ua.Email == trimmedUserNameOrEmail
-                );
-            }
-            return userAuth;
-        }
-
-        /// <summary>
         /// Retrieves a UserAuth entry by UserName or Email asynchronously.
         /// Optionally accepts a pre-composed IQueryable with desired includes (e.g., Role, Account).
         /// </summary>
-        /// <param name="userNameOrEmail">The username or email of the user to search for.</param>
+        /// <param name="usernameOrEmail">The username or email of the user to search for.</param>
         /// <param name="query">
         /// An optional IQueryable with includes already applied.
         /// If null, a basic lookup using DbContext.Find is performed.
         /// </param>
         /// <returns>The UserAuth entity if found or null if not.</returns>
-        public async Task<UserAuth?> GetUserAuthByUserNameOrEmailAsync(string userNameOrEmail, IQueryable<UserAuth>? query = null)
+        public async Task<UserAuth?> GetUserAuthByUserNameOrEmailAsync(string usernameOrEmail, IQueryable<UserAuth>? query = null)
         {
-            var trimmedUserNameOrEmail = userNameOrEmail.Trim();
+            var trimmedUserNameOrEmail = usernameOrEmail.Trim();
             UserAuth? userAuth;
 
             if (query != null)
@@ -133,43 +72,6 @@ namespace Data.Repositories.Auth
             return userAuth;
         }
 
-        /// <summary>
-        /// Retrieves a UserAuth entry by roleId.
-        /// Optionally accepts a pre-composed IQueryable with desired includes (e.g., Role, Account).
-        /// </summary>
-        /// <param name="roleId">The role ID of the users to search for.</param>
-        /// <param name="query">
-        /// An optional IQueryable with includes already applied.
-        /// If null, a basic lookup using DbContext.Find is performed.
-        /// </param>
-        /// <returns>A list of UserAuth entities associated with the specified roleId.</returns>
-        public List<UserAuth> GetUsersAuthByRoleIdSync(int roleId, IQueryable<UserAuth>? query = null)
-        {
-            List<UserAuth> usersAuth;
-            if (query != null)
-            {
-                usersAuth = query
-                    .Where(ua => ua.RoleId == roleId)
-                    .ToList();
-            } else
-            {
-                usersAuth = _context
-                .Set<UserAuth>()
-                .Where(ua => ua.RoleId == roleId)
-                .ToList();
-            }
-            return usersAuth;
-        }
-
-        /// <summary>
-        /// Checks if the username already exists.
-        /// </summary>
-        /// <param name="username">The username to be checked.</param>
-        /// <returns>True if the username exists.</returns>
-        public bool IsUsernameExistsSync(string username)
-        {
-            return _context.UsersAuth.FirstOrDefault(ua => ua.UserName == username) is not null;
-        }
 
         /// <summary>
         /// Checks asynchronously if the username already exists.
@@ -179,16 +81,6 @@ namespace Data.Repositories.Auth
         public async Task<bool> IsUserNameExistsAsync(string username)
         {
             return (await _context.UsersAuth.FirstOrDefaultAsync(ua => ua.UserName == username)) is not null;
-        }
-
-        /// <summary>
-        /// Checks if the email already exists.
-        /// </summary>
-        /// <param name="email">The email to be checked.</param>
-        /// <returns>True if the email exists.</returns>
-        public bool IsEmailExistsSync(string email)
-        {
-            return _context.UsersAuth.FirstOrDefault(ua => ua.Email == email) is not null;
         }
 
         /// <summary>
@@ -260,6 +152,54 @@ namespace Data.Repositories.Auth
 
             return query;
         }
+
+        #endregion Read Methods
+
+        #region Update Methods
+        /// <summary>
+        /// Updates the email address of a user identified by their user authentication ID.
+        /// </summary>
+        /// <param name="userAuthId">The ID of the user authentication record.</param>
+        /// <param name="email">The new email address to set.</param>
+        public async Task UpdateEmailAsync(int userAuthId, string email)
+        {
+            var userAuth = await this.GetUserAuthByIdAsync(userAuthId);
+            if (userAuth is not null) userAuth.Email = email;
+        }
+
+        /// <summary>
+        /// Updates the email address of a user identified by their username or current email.
+        /// </summary>
+        /// <param name="usernameOrEmail">The username or current email of the user.</param>
+        /// <param name="email">The new email address to set.</param>
+        public async Task UpdateEmailAsync(string usernameOrEmail, string email)
+        {
+            var userAuth = await this.GetUserAuthByUserNameOrEmailAsync(usernameOrEmail);
+            if (userAuth is not null) userAuth.Email = email;
+        }
+
+        /// <summary>
+        /// Updates the username of a user identified by their user authentication ID.
+        /// </summary>
+        /// <param name="userAuthId">The ID of the user authentication record.</param>
+        /// <param name="username">The new username to set.</param>
+        public async Task UpdateUsernameAsync(int userAuthId, string username)
+        {
+            var userAuth = await this.GetUserAuthByIdAsync(userAuthId);
+            if (userAuth is not null) userAuth.UserName = username;
+        }
+
+        /// <summary>
+        /// Updates the username of a user identified by their current username or email.
+        /// </summary>
+        /// <param name="usernameOrEmail">The current username or email of the user.</param>
+        /// <param name="username">The new username to set.</param>
+        public async Task UpdateUsernameAsync(string usernameOrEmail, string username)
+        {
+            var userAuth = await this.GetUserAuthByUserNameOrEmailAsync(usernameOrEmail);
+            if (userAuth is not null) userAuth.UserName = username;
+        }
+        #endregion Update Methods
     }
 }
 /// <summary>
@@ -273,6 +213,7 @@ public class UserAuthBuilder
     private string _email = string.Empty;
     private string _password = string.Empty;
 
+    #region Builder Methods
     /// <summary>
     /// Specify the RoleId
     /// </summary>
@@ -317,6 +258,8 @@ public class UserAuthBuilder
         _password = password.Trim();
         return this;
     }
+
+    #endregion Builder Methods
 
     /// <summary>
     /// Builds the UserAuth object with the specified properties

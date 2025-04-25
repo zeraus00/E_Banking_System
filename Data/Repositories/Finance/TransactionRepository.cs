@@ -24,6 +24,7 @@
         private TimeSpan _transactionTime;
         private decimal _transactionFee;
 
+        #region Builder Methods
         public TransactionBuilder WithAccountId(int accountId)
         {
             _accountId = accountId;
@@ -64,6 +65,7 @@
             _transactionFee = transactionFee;
             return this;
         }
+        #endregion Builder Methods
 
         /// <summary>
         /// Builds the Transaction object with the specified properties

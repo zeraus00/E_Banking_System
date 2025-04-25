@@ -11,40 +11,6 @@ namespace Services
         // create a passwordhasher object here!
 
         /// <summary>
-        /// Attempts to authenticate a user based on the provided email and password.
-        /// This method trims the input email and password, queries the repository for a matching user, 
-        /// and checks if the password is correct. If the credentials are valid, the corresponding 
-        /// <see cref="UserAuth"/> object is returned; otherwise, <c>null</c> is returned.
-        /// </summary>
-        /// <param name="email">The email address associated with the user account.</param>
-        /// <param name="password">The password provided for authentication.</param>
-        /// <returns>
-        /// A <see cref="UserAuth"/> object if authentication is successful; otherwise, <c>null</c> if
-        /// the credentials do not match or an error occurs during authentication.
-        /// </returns>
-        public UserAuth? TryValidateUserSync(string email, string password)
-        {
-            string trimmedEmail = email.Trim();
-            string trimmedPassword = password.Trim();
-
-            using (var dbContext = _contextFactory.CreateDbContext())
-            {
-                UserAuthRepository userAuthRepo = new UserAuthRepository(dbContext);
-
-                IQueryable<UserAuth> query = userAuthRepo.QueryIncludeAll();
-                UserAuth? userAuth = userAuthRepo.GetUserAuthByUserNameOrEmailSync(trimmedEmail, query);
-
-                if (userAuth == null || !this.IsPasswordValid(userAuth, trimmedPassword))
-                {
-                    return null;
-                }
-
-                return userAuth;
-
-            }
-        }
-
-        /// <summary>
         /// Attempts to authenticate a user asynchronously based on the provided email and password.
         /// This method trims the input email and password, queries the repository for a matching user, 
         /// and checks if the password is correct. If the credentials are valid, the corresponding 

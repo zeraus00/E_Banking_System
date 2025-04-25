@@ -26,6 +26,7 @@
         private TimeSpan _transactionTime;
         private string _notes = string.Empty;
 
+        #region Builder Methods
         public LoanTransactionBuilder WithAccountId(int accountId)
         {
             _accountId = accountId;
@@ -36,7 +37,6 @@
             _loanId = loanId;
             return this;
         }
-
         public LoanTransactionBuilder WithAmountPaid(decimal amountPaid)
         {
             _amountPaid = amountPaid;
@@ -47,42 +47,38 @@
             _remainingLoanBalance = remainingLoanBalance;
             return this;
         }
-
         public LoanTransactionBuilder WithInterestAmount(decimal interestAmount)
         {
             _interestAmount = interestAmount;
             return this;
         }
-
         public LoanTransactionBuilder WithPrincipalAmount(decimal principalAmount)
         {
             _principalAmount = principalAmount;
             return this;
         }
-
         public LoanTransactionBuilder WithDueDate(DateTime dueDate)
         {
             _dueDate = dueDate;
             return this;
         }
-
         public LoanTransactionBuilder WithTransactionDate(DateTime transactionDate)
         {
             _transactionDate = transactionDate;
             return this;
         }
-
         public LoanTransactionBuilder WithTransactionTime(TimeSpan transactionTime)
         {
             _transactionTime = transactionTime;
             return this;
         }
-
         public LoanTransactionBuilder WithNotes(string notes)
         {
             _notes = notes.Trim();
             return this;
         }
+        #endregion Builder Methods
+
         /// <summary>
         /// Builds the LoanTransaction object with the specified properties
         /// </summary>
