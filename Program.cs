@@ -5,6 +5,7 @@ using Data.Seeders.User;
 using Data.Seeders.Finance;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Services;
 using ViewModels;
 using Microsoft.AspNetCore.Antiforgery;
@@ -35,6 +36,7 @@ builder.Services.AddScoped<ClaimsHelperService>();
 builder.Services.AddScoped<UserDataService>();
 builder.Services.AddScoped<CredentialValidationService>();
 builder.Services.AddScoped<PageRedirectService>();
+builder.Services.AddScoped<ProtectedSessionStorage>();
 builder.Services.AddScoped<RegistrationService>();
 builder.Services.AddScoped<SignInService>();
 
