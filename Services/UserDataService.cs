@@ -6,10 +6,25 @@ using Data.Repositories.User;
 
 namespace Services
 {
+    /// <summary>
+    /// Service for user data retrieval.
+    /// </summary>
     public class UserDataService : Service
     {
+        /// <summary>
+        /// The constructor of the UserDataService.
+        /// Injects an IDbContextFactory that generates a new dbContext connection
+        /// for each method to avoid concurrency.
+        /// </summary>
+        /// <param name="contextFactory">The IDbContextFactory</param>
         public UserDataService(IDbContextFactory<EBankingContext> contextFactory) : base(contextFactory) { }
 
+        /// <summary>
+        /// Get UserInfo through userInfoId.
+        /// Includes the Name navigation property.
+        /// </summary>
+        /// <param name="userInfoId">The primary key of the UserInfo.</param>
+        /// <returns>The UserInfo if found. Null otherwise.</returns>
         public UserInfo? GetUserInfoSync(int userInfoId)
         {
             using (var dbContext = _contextFactory.CreateDbContext())
@@ -22,6 +37,13 @@ namespace Services
                 return userInfo;
             }
         }
+
+        /// <summary>
+        /// Get UserInfo through userInfoId asynchronously.
+        /// Includes the Name navigation property.
+        /// </summary>
+        /// <param name="userInfoId">The primary key of the UserInfo.</param>
+        /// <returns>The UserInfo if found. Null otherwise.</returns>
         public async Task<UserInfo?> GetUserInfoAsync(int userInfoId)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
@@ -34,6 +56,13 @@ namespace Services
                 return userInfo;
             }
         }
+
+        /// <summary>
+        /// Gets the user's full name from the UserInfo object.
+        /// The UserInfo instance MUST include the Name navigation property.
+        /// </summary>
+        /// <param name="userInfo">The UserInfo instance.</param>
+        /// <returns>A string containing the user's full name. Null if the userInfo is null.</returns>
         public string? GetUserFullName(UserInfo? userInfo)
         {
             if(userInfo == null)
@@ -69,6 +98,11 @@ namespace Services
             return accountIdList?[0] ?? null;
         }
 
+        /// <summary>
+        /// Retrieves a list of the account ids associated with the user auth id.
+        /// </summary>
+        /// <param name="userAuthId">The id of the user's authentication details.</param>
+        /// <returns>A list of the accounds associated witht the user.</returns>
         public List<int>? GetAccountIdListSync(int userAuthId)
         {
             List<int> accountIdList = new();
@@ -93,6 +127,11 @@ namespace Services
             }
         }
 
+        /// <summary>
+        /// Asynchronously retrieves a list of the account ids associated with the user auth id.
+        /// </summary>
+        /// <param name="userAuthId">The id of the user's authentication details.</param>
+        /// <returns>A list of the accounds associated witht the user.</returns>
         public async Task<List<int>?> GetAccountIdListAsync(int userAuthId)
         {
             List<int> accountIdList = new();
@@ -116,6 +155,11 @@ namespace Services
                 return accountIdList;
             }
         }
+        /// <summary>
+        /// Retrieves an account by its account id.
+        /// </summary>
+        /// <param name="accountId">The account's id/primary key.</param>
+        /// <returns>The account if found.</returns>
 
         public Account? GetAccountSync(int accountId)
         {
@@ -131,6 +175,11 @@ namespace Services
             }
         }
 
+        /// <summary>
+        /// Asynchronously retrieves an account by its account id.
+        /// </summary>
+        /// <param name="accountId">The account's id/primary key.</param>
+        /// <returns>The account if found.</returns>
         public async Task<Account?> GetAccountAsync(int accountId)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
@@ -145,6 +194,11 @@ namespace Services
             }
         }
 
+        /// <summary>
+        /// Retrieves an account by its account number.
+        /// </summary>
+        /// <param name="accountNumber">The account number.</param>
+        /// <returns>The account if found.</returns>
         public Account? GetAccountSync(string accountNumber)
         {
             using (var dbContext = _contextFactory.CreateDbContext())
@@ -158,6 +212,11 @@ namespace Services
             }
         }
 
+        /// <summary>
+        /// Asynchronously retrieves an account by its account number.
+        /// </summary>
+        /// <param name="accountNumber">The account number.</param>
+        /// <returns>The account if found.</returns>
         public async Task<Account?> GetAccountAsync(string accountNumber)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
