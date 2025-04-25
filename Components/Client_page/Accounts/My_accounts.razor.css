@@ -2,16 +2,25 @@
     width: 600px;
 }
 
-.carousel{
+.carousel-wrapper {
+    width: 100%;
+    overflow-x: hidden;
+}
+
+.carousel {
     display: grid;
     grid-auto-flow: column;
-    scroll-behavior: auto;
+    scroll-behavior: smooth;
     gap: 1.2rem;
-    overflow-y: auto;
+    overflow-x: auto;
     overscroll-behavior-x: contain;
     scroll-snap-type: x mandatory;
     scrollbar-width: none;
+    justify-content: start; 
+    margin-left: auto;
+    margin-right: auto;
 }
+
 
 .carousel::-webkit-scrollbar{
     display: none;
@@ -26,7 +35,7 @@
     border-radius: 12px;
     padding: 1rem;
     scroll-snap-align: start;
-    color:  black;
+    color: black;
 }
 
 .custom-card {
@@ -39,4 +48,32 @@
         font-weight: lighter;
         width: 100%;
         border-radius: 5px;
+    }
+
+.square-btn {
+    min-width: 70px;
+    min-height: 70px;
+    border-radius: 12px;
+    border-color: transparent;
+    color: white;
+    background-color: rgba(72,128,255,0.57);
+}
+
+    .square-btn:hover {
+        background-color: white;
+        color: black;
+    }
+
+.dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #ccc;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+    .dot:hover {
+        background-color: #555;
     }

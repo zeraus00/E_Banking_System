@@ -71,6 +71,12 @@ main {
         margin-right: 33%;
     }
 
+    .card.accounts {
+        text-align: left;
+        margin-right: 10%;
+        margin-left: 10%;
+    }
+
 .custom-card-clientpage {
     background-color: white;
     display: flex;
