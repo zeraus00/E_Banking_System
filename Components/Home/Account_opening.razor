@@ -176,7 +176,7 @@
 					<!-- Province -->
 					<div class="col">
 						<label class="text-light">Province</label>
-						<select class="form-select form-select-sm" value="@selectedProvince" @onchange="async _ => await LoadCitiesAsync()" required>
+						<select class="form-select form-select-sm" value="@selectedProvince" @onchange="async _ => await LoadCitiesAsync(_)" required>
 							<option value="" disabled hidden>@provincePlaceHolder</option>
 							@foreach (var p in provincesFromRegion)
 							{
@@ -188,9 +188,9 @@
 					<!-- City -->
 					<div class="col">
 						<label class="text-light">City</label>
-						<select class="form-select form-select-sm" value="@selectedCity" @onchange="async _ => await LoadBarangaysAsync()" required>
+						<select class="form-select form-select-sm" value="@selectedCity" @onchange="async _ => await LoadBarangaysAsync(_)" required>
 							<option value="" disabled hidden>@cityPlaceHolder</option>
-							@foreach (var c in cities)
+							@foreach (var c in citiesFromProvince)
 							{
 								<option value="@c.code">@c.name</option>
 							}
@@ -202,7 +202,7 @@
 						<label class="text-light">Barangay</label>
 						<select class="form-select form-select-sm" value="@selectedBarangay" required>
 							<option value="" disabled hidden>@barangayPlaceHolder</option>
-							@foreach (var b in barangays)
+							@foreach (var b in barangaysFromCities)
 							{
 								<option value="@b.code">@b.name</option>
 							}
@@ -489,11 +489,11 @@
 	<!--user full address-->
 	private List<RegionViewModel>? regions = new List<RegionViewModel>();
 	private List<ProvinceViewModel>? provinces = new List<ProvinceViewModel>();
-
 	private List<ProvinceViewModel>? provincesFromRegion = new();	//	use this for the drop down selection
-
 	private List<CityViewModel>? cities = new List<CityViewModel>();
+	private List<CityViewModel>? citiesFromProvince = new();
 	private List<BarangayViewModel>? barangays = new List<BarangayViewModel>();
+	private List<BarangayViewModel>? barangaysFromCities = new();
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -503,7 +503,7 @@
 	// For Full address of user
 	private async Task LoadRegionAsync()
 	{
-		//var regionResponse = await HttpClient.GetFromJsonAsync<List<Region>>("https://psgc.gitlab.io/api/regions/");
+		//var regionResponse = await HttpClient.GetFromJsonAsync<List<Region>>("https://psgc.gitlab.io/api/cities/");
 		//regions = regionResponse ?? new List<Region>();
 		var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/regions/");
 		regions = JsonSerializer.Deserialize<List<RegionViewModel>>(json);
@@ -513,7 +513,7 @@
 	//	Pass the ChangeEventArgs instance ONLY FOR drop down selections that need updating.
 	private async Task LoadProvinceAsync(ChangeEventArgs? e = null)
 	{
-		
+
 		//	Get the value of the selection
 		selectedRegion = e?.Value?.ToString() ?? "";
 
@@ -538,23 +538,54 @@
 		StateHasChanged();
 	}
 
-	private async Task LoadCitiesAsync()
+	private async Task LoadCitiesAsync(ChangeEventArgs? e = null)
 	{
-		// var citiesResponse = await HttpClient.GetFromJsonAsync<List<City>>($"https://psgc.gitlab.io/api/provinces/");
-		// cities = citiesResponse ?? new List<City>();
+
+		//	Get the value of the selection
+		selectedProvince = e?.Value?.ToString() ?? "";
+
+		//	Get the municipalities from the api.
 		var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/municipalities/");
 		cities = JsonSerializer.Deserialize<List<CityViewModel>>(json);
 		if (cities is null) return;
 
+		//	Get the list of provinces with the selected region's region code
+		citiesFromProvince = cities.Where(c => c.provinceCode.ToString() == selectedProvince).ToList();
+		//	Default the selection to the first option each time provinces are updated.
+		if (citiesFromProvince.Any())
+		{
+			selectedCity = citiesFromProvince[0].code.ToString();
+		}
+		else
+		{
+			selectedCity = string.Empty;
+		}
+
+		//	Rerender component
+		StateHasChanged();
 	}
 
-	private async Task LoadBarangaysAsync()
+	private async Task LoadBarangaysAsync(ChangeEventArgs? e = null)
 	{
 		//var barangaysResponse = await HttpClient.GetFromJsonAsync<List<Barangay>>($"https://psgc.gitlab.io/api/municipalities/");
 		//barangays = barangaysResponse ?? new List<Barangay>();
+		selectedCity = e?.Value?.ToString() ?? "";
 		var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/barangays/");
 		barangays = JsonSerializer.Deserialize<List<BarangayViewModel>>(json);
 		if (barangays is null) return;
+
+		barangaysFromCities = barangays.Where(b => b.municipalityCode.ToString() == selectedCity).ToList();
+		if (barangaysFromCities.Any())
+		{
+			selectedBarangay = barangaysFromCities[0].code.ToString();
+		}
+		else
+		{
+			selectedBarangay = string.Empty;
+		}
+
+		//	Rerender component
+		StateHasChanged();
 	}
 
 

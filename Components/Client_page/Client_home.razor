@@ -23,7 +23,8 @@
 
             <!-- Notifications -->
             <div class="d-flex align-items-center justify-content-center me-5 pt-3 position-relative notification" tabindex="0" @onblur="() => showNotifications = false">
-                <img src="/bootstrap/Utilities/Bell.png" alt="Notification Bell" role="button" tabindex="0" @onclick="ToggleNotification" />
+                <i class="@bellIcon" role="button" tabindex="0" @onclick="ToggleNotification" />
+
                 @if (showNotifications)
                 {
                     <div class="notification-popup">
@@ -172,6 +173,9 @@
     {
         showNotifications = !showNotifications;
     }
+
+    private string bellIcon =>
+        showNotifications ? "bi bi-bell-fill fs-3" : "bi bi-bell fs-3";
 
     private List<Notifications> recentNotifications = new()
     {
