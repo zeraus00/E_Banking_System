@@ -7,6 +7,8 @@
 
 <div class="page">
     <main>
+
+        <!-- Heaader -->
         <header class="custom-card-clientpage clientheader py-4 align-items-start">
             <div class="px-5">
                 <div class="d-flex align-items-center my-4">
@@ -14,67 +16,75 @@
                 </div>
             </div>
 
+            <!-- Settings Icon -->
             <div class="d-flex align-items-center justify-content-center me-5 pt-3">
                 <i class="bi bi-gear fs-3" role="button"></i>
             </div>
+
         </header>
 
+        <!-- Manage Accounts -->
         <div class="card accounts shadow-lg d-flex flex-column mt-4 p-3 justify-content-between">
             <h5 class="m-3">Manage Accounts</h5>
             <hr />
 
-            <section class="d-flex flex-column flex-md-row align-items-start m-4">
+            <section class="d-flex flex-column flex-md-row align-items-start gap-4 px-4 pt-2">
 
-                <button class="card position-absolute d-inline-flex align-items-center justify-content-center square-btn p-1 fs-1">
-                    +
-                </button>
+                <!-- Add Button -->
+                <div class="d-flex flex-column align-items-center">
+                    <button class="card square-btn d-inline-flex align-items-center justify-content-center p-1 fs-1 fw-bold">
+                        +
+                    </button>
+                </div>
 
-                <div class="carousel-wrapper position-relative">
-                    <div class="container d-flex">
-
+                <!-- Carousel Section -->
+                <div class="carousel-wrapper">
+                    <div class="container">
                         <div id="accountCarousel" class="carousel">
-                            <!-- Balance Card -->
-                            @if (accounts is not null && accounts.Any()) 
+
+                            <!-- Cards -->
+                            @if (accounts is not null && accounts.Any())
                             {
                                 foreach (var account in accounts)
                                 {
                                     <section class="carousel-card text-start p-3 border shadow-sm h-100">
                                         <h3 class="fw-bold mt-3">@account.AccountName</h3>
-                                        <h5 class="text-light fw-lighter m-0">@account.AccountNumber</h5>
-
+                                        <h5 class="fw-lighter m-0">@account.AccountNumber</h5>
                                         <hr />
-
                                         <div class="d-flex justify-content-between mt-3">
                                             <p class="w-100">Available Balance:</p>
                                             <p class="text-success w-100">@account.Balance</p>
                                         </div>
-
                                         <div class="d-flex justify-content-between">
                                             <p class="w-100">Current Balance:</p>
                                             <p class="text-success w-100">@account.Balance</p>
                                         </div>
-
                                         <div class="custom-card sm mb-0 pb-0">
                                             <p class="m-1">
                                                 <strong>Contact No.:</strong> @(userInfo?.ContactNumber ?? "09123456789")
                                             </p>
                                         </div>
                                     </section>
-
                                 }
                             }
+                        </div>
 
+                        <!-- Arrows (Pagination) -->
+@*                      <div class="carousel-pagination d-flex justify-content-between mt-3">
+                            <button class="carousel-control-prev" onclick="scrollCarousel('prev')">←</button>
+                            <button class="carousel-control-next" onclick="scrollCarousel('next')">→</button>
+                        </div>
+ *@
+                        
+                        <!-- Dots (Pagination) -->
+                        <div class="carousel-pagination d-flex justify-content-center mt-3">
+                            @for (int i = 0; i < accounts.Count; i++)
+                            {
+                                <button class="dot mx-1" onclick="scrollToCard(@i)"></button>
+                            }
                         </div>
 
                     </div>
-
-                    <div class="carousel-pagination d-flex justify-content-center mt-3">
-                        @for (int i = 0; i < accounts.Count; i++)
-                        {
-                            <button class="dot mx-1" onclick="scrollToCard(@i)"></button>
-                        }
-                    </div>
-
                 </div>
 
             </section>
@@ -86,16 +96,37 @@
 </div>
 
 <script>
-    function scrollToCard(index) {
+// Pagination Script
+     
+    let currentIndex = 0;
+
+    function scrollCarousel(direction) {
         const carousel = document.getElementById('accountCarousel');
-        const cardWidth = carousel.querySelector('.carousel-card').offsetWidth;
+        const cards = carousel.querySelectorAll('.carousel-card');
+
+        if (cards.length === 0) return;
+
+        // Calculate the next index based on the direction
+        if (direction === 'next') {
+            currentIndex = (currentIndex + 1) % cards.length;
+        } else if (direction === 'prev') {
+            currentIndex = (currentIndex - 1 + cards.length) % cards.length;
+        }
+
+        // Scroll to the new card
+        const card = cards[currentIndex];
+        const carouselLeft = carousel.getBoundingClientRect().left;
+        const cardLeft = card.getBoundingClientRect().left;
+
+        const scrollLeft = carousel.scrollLeft;
+        const offset = cardLeft - carouselLeft;
+
         carousel.scrollTo({
-            left: index * (cardWidth + 19),
+            left: scrollLeft + offset,
             behavior: 'smooth'
         });
     }
 </script>
-
 
 @code {
     [CascadingParameter]
