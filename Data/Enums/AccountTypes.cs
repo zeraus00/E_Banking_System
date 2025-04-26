@@ -2,7 +2,7 @@
 {
     public enum AccountTypes
     {
-        PersonalAcocunt = 1,
+        PersonalAccount = 1,
         JointAccount = 2,
     }
 }
