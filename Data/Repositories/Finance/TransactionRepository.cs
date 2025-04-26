@@ -8,6 +8,48 @@
     public class TransactionRepository : Repository
     {
         public TransactionRepository(EBankingContext context) : base(context) { }
+
+        public async Task<List<Transaction>> GetTransactionsAsListAsync(int mainAccountId, IQueryable<Transaction>? query = null)
+        {
+            List<Transaction> transactionsList = new();
+
+            if (query is not  null)
+            {
+                transactionsList = await query
+                     .Where(t => t.MainAccountId == mainAccountId ||
+                                 t.CounterAccountId == mainAccountId)
+                     .ToListAsync();
+            } else
+            {
+                transactionsList = await _context.Transactions
+                    .Where(t => t.MainAccountId == mainAccountId ||
+                                t.CounterAccountId == mainAccountId)
+                    .ToListAsync();
+            }
+
+            return transactionsList;
+        }
+
+        public IQueryable<Transaction> QueryIncludeAll()
+        {
+            return this.ComposeQuery(true, true, true);
+        }
+
+        public IQueryable<Transaction> ComposeQuery(
+            bool includeTransactionType = false,
+            bool includeMainAccount = false,
+            bool includeCounterAccount = false
+            )
+        {
+            IQueryable<Transaction> query = _context.Transactions.AsQueryable();
+            if (includeTransactionType) 
+                query = query.Include(t => t.TransactionType);
+            if (includeMainAccount)
+                query = query.Include(t => t.MainAccount);
+            if (includeCounterAccount)
+                query = query.Include(t => t.CounterAccount);
+            return query;
+        }
     }
 
     /// <summary>

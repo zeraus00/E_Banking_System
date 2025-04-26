@@ -115,12 +115,26 @@
     {
         if (firstRender) 
         {
-            TransactionSession transactionSession = await _storageService.FetchSessionAsync<TransactionSession>(SessionSchemes.WithdrawScheme);
-            currentBalance = transactionSession.CurrentBalance;
-            withdrawAmount = transactionSession.Amount;
-            transactionNumber = transactionSession.TransactionNumber;
-            date = transactionSession.TransactionDate;
-            StateHasChanged();
+            try 
+            {
+                //  Fetch session from storage.
+                //  Throws SessionNotFoundException if session is not found.
+                TransactionSession transactionSession = await _storageService.FetchSessionAsync<TransactionSession>(SessionSchemes.WithdrawScheme);
+
+                //  Set display data.
+                currentBalance = transactionSession.CurrentBalance;
+                withdrawAmount = transactionSession.Amount;
+                transactionNumber = transactionSession.TransactionNumber;
+                date = transactionSession.TransactionDate;
+
+                //  Reload component.
+                StateHasChanged();
+            } 
+            catch (SessionNotFoundException) 
+            {
+                //  Redirect to client home if users try to access the page without an ongoing transaction session.
+                _redirectService.redirectWithNavigationManager(PageRoutes.ClientHome);
+            }
         }
     }
 
@@ -128,7 +142,7 @@
     {
         try 
         {
-            //  Fetch session from session storage.
+            //  Process withdraw transaction.
             await _transactionService.ProcessTransactionAsync(SessionSchemes.WithdrawScheme);
 
             //  Redirect to withdraw receipt page.

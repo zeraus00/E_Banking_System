@@ -72,7 +72,13 @@ namespace Services
             var accountIdList = await this.GetAccountIdListAsync(userAuthId);
             return accountIdList?[0] ?? null;
         }
-
+        /// <summary>
+        /// Retrieves a list of accounts associated with the specified user authentication ID.
+        /// </summary>
+        /// <param name="userAuthId">The ID of the user authentication record to retrieve accounts for.</param>
+        /// <returns>
+        /// A list of <see cref="Account"/> objects if found; otherwise, <c>null</c> if the user authentication record does not exist.
+        /// </returns>
         public async Task<List<Account>?> GetAccountListAsync(int userAuthId)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
@@ -85,7 +91,27 @@ namespace Services
                 return userAuth?.Accounts.ToList() ?? null;
             }
         }
+        /// <summary>
+        /// Retrieves a list of transactions associated with the specified account ID.
+        /// </summary>
+        /// <param name="accountId">The ID of the account whose transactions are to be retrieved.</param>
+        /// <returns>
+        /// A list of <see cref="Transaction"/> objects associated with the given account.
+        /// </returns>
+        public async Task<List<Transaction>> GetAccountTransactions(int accountId)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                //  Define repository requirements
+                var transactionRepository = new TransactionRepository(dbContext);
 
+                //  Include TransactionType navigation property in query.
+                var query = transactionRepository.ComposeQuery(includeTransactionType: true, includeMainAccount: true);
+
+                //  Return the list of transactions.
+                return (await transactionRepository.GetTransactionsAsListAsync(accountId, query));
+            }
+        }
         /// <summary>
         /// Asynchronously retrieves a list of the account ids associated with the user auth id.
         /// </summary>

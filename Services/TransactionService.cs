@@ -55,8 +55,8 @@ namespace Services
                 Account mainAccount = await this.GetAccountAsync(dbContext, mainAccountId);
 
                 /*  Get Transaction Date and Time.  */
-                DateTime transactionDate = DateTime.UtcNow;
-                TimeSpan transactionTime = transactionDate.TimeOfDay;
+                DateTime transactionDate = DateTime.UtcNow.Date;
+                TimeSpan transactionTime = DateTime.UtcNow.TimeOfDay;
 
                 /*  Generate Transaction Number */
                 string accountNumber = mainAccount.AccountNumber;
@@ -261,7 +261,7 @@ namespace Services
 
                 /*  Update Session  */
                 await _storageService
-                    .StoreSessionAsync<TransactionSession>(SessionSchemes.WithdrawScheme, updatedTransactionSession);
+                    .StoreSessionAsync<TransactionSession>(sessionScheme, updatedTransactionSession);
             }
         }
         /// <summary>
@@ -344,6 +344,7 @@ namespace Services
                 await transactionRepository.SaveChangesAsync();
             }
         }
+
         private async Task<Account> GetAccountAsync(EBankingContext dbContext, int accountId)
         {
 

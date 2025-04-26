@@ -4,6 +4,7 @@ using Data.Enums;
 using Data.Repositories.User;
 using Data.Repositories.Auth;
 using Data.Models.User;
+using Data.Repositories.Finance;
 
 
 namespace Services
@@ -13,7 +14,7 @@ namespace Services
         public RegistrationService(IDbContextFactory<EBankingContext> contextFactory) : base(contextFactory) { }
 
 
-        public async Task RegisterAsync(string userFirstName, string? userMiddleName, string userLastName, string? userSuffix,
+        public async Task RegisterAsync(string accountType, string accountProductType, string userFirstName, string? userMiddleName, string userLastName, string? userSuffix,
                 string fatherFirstName, string? fatherMiddleName, string fatherLastName, string? fatherSuffix,
                 string motherFirstName, string? motherMiddleName, string motherLastName, string? motherSuffix,
                 string beneficiaryFirstName, string? beneficiaryMiddleName, string beneficiaryLastName, string? beneficiarySuffix,
@@ -23,6 +24,8 @@ namespace Services
                 string username, string email, string password
             )
         {
+            AccountType userAccountType = await UserAccountType(accountType);
+            AccountProductType userAccProductType = await RegisterAccountProductType(accountProductType);
             Name UserName = await RegisterName(userFirstName, userMiddleName, userLastName, userSuffix);
             Name FatherName = await RegisterName(fatherFirstName, fatherMiddleName, fatherLastName, fatherSuffix);
             Name MotherName = await RegisterName(motherFirstName, motherMiddleName, motherLastName, motherSuffix);
@@ -37,6 +40,8 @@ namespace Services
 
             UserInfo UserInfo = await RegisterUserInfo(
                 userAuth.UserAuthId,
+                userAccountType.AccountTypeId,
+                userAccProductType.AccountProductTypeId,
                 UserName.NameId,
                 MotherName.NameId,
                 FatherName.NameId,
@@ -255,6 +260,8 @@ namespace Services
 
         public async Task<UserInfo> RegisterUserInfo(
             int userAuthId,
+            int userAccType,
+            int userAccProductType,
             int userNameId,
             int motherNameId,
             int fatherNameId,
@@ -321,6 +328,51 @@ namespace Services
                 return UserInfo;
             }
         }
+
+        public async Task<AccountProductType> RegisterAccountProductType(string accountProductType) 
+        {
+            if (string.IsNullOrWhiteSpace(accountProductType)) 
+            {
+                throw new FieldAccessException("Account product type is required.");
+            }
+
+            var accountProductTypeBuilder = new AccountProductTypeBuilder();
+            accountProductTypeBuilder
+                .WithAccountProductTypeName(accountProductType);
+
+            AccountProductType userAccountProductType = accountProductTypeBuilder.Build();
+
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                AccountProductTypeRepository accProductTypeRepo = new AccountProductTypeRepository(dbContext);
+                await accProductTypeRepo.AddAsync(userAccountProductType);
+                await accProductTypeRepo.SaveChangesAsync(); 
+                return userAccountProductType;
+            }
+        }
+
+        public async Task<AccountType> UserAccountType(string accountType) 
+        {
+            if (string.IsNullOrWhiteSpace(accountType)) 
+            {
+                throw new FieldAccessException("Account Type is required.");
+            }
+
+            var accountTypeBuilder = new AccountTypeBuilder();
+            accountTypeBuilder
+                .WithAccountTypeName(accountType);
+
+            AccountType userAccountType = accountTypeBuilder.Build();
+
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync()) 
+            {
+                AccountTypeRepository accTypeRepo = new AccountTypeRepository(dbContext);
+                await accTypeRepo.AddAsync(userAccountType);
+                await accTypeRepo.SaveChangesAsync();
+                return userAccountType;
+            }
+        }
+
 
     }
 }

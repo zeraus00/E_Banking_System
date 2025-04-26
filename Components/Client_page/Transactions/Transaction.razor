@@ -1,8 +1,10 @@
 ﻿@page "/Transaction"
 @attribute [Authorize(Roles="User")]
 
-@inject NavigationManager NavigationManager
+
 @rendermode InteractiveServer
+@inject NavigationManager NavigationManager
+@inject UserDataService _userDataService
 
 <div class="main">
     <header class="custom-card-clientpage clientheader py-4 align-items-start">
@@ -86,7 +88,7 @@
 
     private List<TransactionRecord> allTransactions = new();
     private List<TransactionRecord> Transactions = new();
-
+    private List<Transaction> transactionList = new();
     //mockup data
     protected override void OnInitialized()
     {
