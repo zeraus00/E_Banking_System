@@ -39,12 +39,9 @@
                         <p class="mb-0">@date</p>
                         <p class="mb-0">@confirmationNumber</p>
                     </div>
-                    <section class="w-25">
+                    <div class="w-25">
                         <button class="btn btn-primary btn-lg w-100" @onclick="GoHome">Go Home</button>
-                    </section>
-                    @* <NavLink class="w-25" href="/Client_home">
-                        <button class="btn btn-primary btn-lg w-100">Go Home</button>
-                    </NavLink> *@
+                    </div>
                 </div>
             </section>
         </div>
@@ -91,20 +88,33 @@
             accountNumber = Account.AccountNumber;
             clientName = Account.AccountName;
         }
-
-        
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender) 
     {
         if (firstRender) 
         {
-            TransactionSession transactionSession = await _storageService.FetchSessionAsync<TransactionSession>(SessionSchemes.WithdrawScheme);
-            currentBalance = transactionSession.CurrentBalance;
-            withdrawAmount = transactionSession.Amount;
-            date = transactionSession.TransactionDate;
-            confirmationNumber = transactionSession.ConfirmationNumber ?? "CONFIRMATION_NUMBER_MISSING";
-            StateHasChanged();
+            try 
+            {   
+                //  Fetch transaction session details from session storage.
+                //  Throws SessionNotFoundException if session is not found.
+                TransactionSession transactionSession = await _storageService.FetchSessionAsync<TransactionSession>(SessionSchemes.WithdrawScheme);
+
+                //  Set display data.
+                currentBalance = transactionSession.CurrentBalance;
+                withdrawAmount = transactionSession.Amount;
+                date = transactionSession.TransactionDate;
+                confirmationNumber = transactionSession.ConfirmationNumber ?? "CONFIRMATION_NUMBER_MISSING";
+
+                //  Reload component.
+                StateHasChanged();
+
+            } 
+            catch (SessionNotFoundException) 
+            {
+                //  Redirect to client home if users try to access the page without an ongoing transaction session.
+                _redirectService.redirectWithNavigationManager(PageRoutes.ClientHome);
+            }
         }
     }
 
