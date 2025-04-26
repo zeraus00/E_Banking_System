@@ -1,4 +1,4 @@
-﻿@page "/My_accounts"
+﻿@page "/Manage_accounts"
 @attribute [Authorize(Roles = "User")]
 
 @inject NavigationManager NavigationManager
@@ -13,7 +13,7 @@
         <header class="custom-card-clientpage clientheader py-4 align-items-start">
             <div class="px-5">
                 <div class="d-flex align-items-center my-4">
-                    <h2>My Accounts</h2>
+                    <h2>Manage Accounts</h2>
                 </div>
             </div>
 
@@ -24,19 +24,15 @@
 
             <section class="d-flex flex-column flex-md-row align-items-start gap-4 px-4 pt-2">
 
-                <!-- Edit Button -->
+                <!-- Add Button -->
                 <div class="d-flex flex-column align-items-center mt-3">
-                    <NavLink href="Manage_accounts">
-                        <button class="card square-btn d-inline-flex align-items-center justify-content-center p-1 fs-3">
-                            <i class="bi bi-pen"></i>
-                        </button>
-                    </NavLink>
+                    <button class="card square-btn d-inline-flex align-items-center justify-content-center p-1 fs-1 fw-bold">
+                        +
+                    </button>
                 </div>
 
                 <!-- Carousel Component -->
-                <div class="flex-grow-1 d-flex justify-content-center">
-                    <AccountCarousel Accounts="accounts" UserInfo="userInfo" IsEditable="false" />
-                </div>
+                <AccountCarousel Accounts="accounts" UserInfo="userInfo" IsEditable="true" />
 
             </section>
 
@@ -55,7 +51,7 @@
     private List<Account>? accounts = new();
     private UserInfo? userInfo;
 
-    protected override async Task OnInitializedAsync() 
+    protected override async Task OnInitializedAsync()
     {
         //  Get Authentication state
         AuthenticationState authState = await authenticationState;

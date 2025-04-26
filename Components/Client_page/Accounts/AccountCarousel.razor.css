@@ -1,0 +1,16 @@
+﻿.container {
+    width: 100%;
+    max-width: 600px;
+}
+
+.custom-card {
+    background-color: white;
+    display: flex;
+}
+
+    .custom-card.sm {
+        background-color: #E0E0E0;
+        font-weight: lighter;
+        width: 100%;
+        border-radius: 5px;
+    }
