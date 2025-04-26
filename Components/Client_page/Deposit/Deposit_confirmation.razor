@@ -1,9 +1,12 @@
 ﻿@page "/Deposit_confirmation"
 @attribute [Authorize(Roles = "User")]
 
+@rendermode InteractiveServer
 @inject NavigationManager NavigationManager
 @inject ClaimsHelperService _claimsHelper
 @inject PageRedirectService _redirectService
+@inject SessionStorageService _storageService
+@inject TransactionService _transactionService
 @inject UserDataService _userDataService
 @using Helpers;
 
@@ -27,7 +30,7 @@
             <section class="card registration shadow-lg d-flex flex-column my-4 p-3">
                 <div class="mx-auto text-center p-4">
                     <h5>Deposit Amount</h5>
-                    <h1 class="fw-bolder py-3 mb-2">DepositAmount</h1>
+                    <h1 class="fw-bolder py-3 mb-2">@depositAmount</h1>
                 </div>
 
                 <div class="d-flex justify-content-between mx-5">
@@ -35,17 +38,17 @@
                         <h5 class="mb-1 fw-bold">@clientName</h5>
                         <p class="m-0">@FormatHelper.AccountNumberFormatter(accountNumber)</p>
                         <p class="m-0">@date</p>
-                        <p class="m-0">confirmationNumber</p>
+                        <p class="m-0">@transactionNumber</p>
                     </div>
 
                     <section class="d-flex flex-column form-check d-flex justify-content-end mt-3">
                         <div class="text-end mt-3">
-                            <NavLink class="w-25" href="/Deposit_receipt">
-                                <button class="btn btn-primary btn-lg w-100 mb-2">Confirm</button>
-                            </NavLink>
-                            <NavLink class="w-25" href="/Deposit_amount">
-                                <button class="btn btn-warning btn-lg w-100 mb-3">Go Back</button>
-                            </NavLink>
+                            <div class="w-25">
+                                <button class="btn btn-primary btn-lg w-100 mb-2" @onclick="ConfirmDeposit">Confirm</button>
+                            </div>
+                            <div class="w-25">
+                                <button class="btn btn-warning btn-lg w-100 mb-3" @onclick="CancelDeposit">Go Back</button>
+                            </div>
                         </div>
 
                         <div class="pb-2">
@@ -72,10 +75,15 @@
     private ClaimsPrincipal? user;
     private Account? Account;
 
+    private int accountId;
     private string accountNumber = string.Empty;
     private string clientName = string.Empty;
-    private decimal currentBalance = 0.0m;
+    private decimal currentBalance = 0.00m;
+    private decimal depositAmount = 0.00m;
+    private string transactionNumber = string.Empty;
     private DateTime? date;
+
+    private string error = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -92,7 +100,7 @@
         // //  Retreive account id from list.
         // var accountId = accountIds?[0] ?? 5;
 
-        var accountId = await _userDataService.GetFirstAccountAsync(userAuthId) ?? 0;
+        accountId = await _userDataService.GetFirstAccountAsync(userAuthId) ?? 0;
 
         //  Retriev account from db.
         Account = await _userDataService.GetAccountAsync(accountId);
@@ -101,8 +109,56 @@
         {
             accountNumber = Account.AccountNumber;
             clientName = Account.AccountName;
-            currentBalance = Account.Balance;
-            date = DateTime.UtcNow;
         }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender) 
+    {
+        if (firstRender) 
+        {
+            try 
+            {
+                //  Fetch transaction session details from session storage.
+                //  Throws SessionNotFoundException if sesion is not found.
+                TransactionSession transactionSession = await _storageService.FetchSessionAsync<TransactionSession>(SessionSchemes.DepositScheme);
+
+                //  Set display data.
+                currentBalance = transactionSession.CurrentBalance;
+                depositAmount = transactionSession.Amount;
+                date = transactionSession.TransactionDate;
+                transactionNumber = transactionSession.TransactionNumber;
+
+                //  Reload component.
+                StateHasChanged();
+            }
+            catch (SessionNotFoundException)
+            {
+                //  Redirect user to client home if there is no ongoing transaction session.
+                _redirectService.redirectWithNavigationManager(PageRoutes.ClientHome);
+            }
+        }
+    }
+
+    private async Task ConfirmDeposit() 
+    {
+        try
+        {
+            //  Process deposit transaction.
+            await _transactionService.ProcessTransactionAsync(SessionSchemes.DepositScheme);
+
+            //  Redirect to deposit receipt page.
+            _redirectService.redirectWithNavigationManager(PageRoutes.DepositReceipt);
+        } catch (AccountNotFoundException)
+        {
+            error = "Error resolving database. Please try again later.";
+        }
+    }
+
+    private async Task CancelDeposit()
+    {
+        //  Persist cancelled transaction to database and delete transaction details from session.
+        await _storageService.DeleteSessionAsync(SessionSchemes.DepositScheme);
+
+        _redirectService.redirectWithNavigationManager(PageRoutes.ClientHome);
     }
 }
