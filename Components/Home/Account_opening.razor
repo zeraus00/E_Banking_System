@@ -1,6 +1,7 @@
 ﻿@using Services
 @using Exceptions
 @using System.Text.Json;
+@using Data.Constants
 
 
 @page "/Account_opening"
@@ -48,20 +49,24 @@
 					<!-- Account Sub Type -->
 					<div class="col-2">
 						<label class="text-light">Account Sub-Type</label>
-						<select class="form-select form-select-sm" required>
-							<option>Personal Account</option>
-							<option>Joint Account</option>
+						<select class="form-select form-select-sm" @bind="selectedAccountTypeName" required>
+							<option value="" disabled hidden>--select account type--</option>
+							@foreach (var accountType in accountTypeNames.AccountTypeNameList)
+							{
+								<option value="@accountType">@accountType</option>
+							}
 						</select>
 					</div>
 
 					<!-- Account Product Type -->
 					<div class="col-2">
 						<label class="text-light">Account Product Type</label>
-						<select class="form-select form-select-sm" required>
-							<option>Product Type 1</option>
-							<option>Product Type 2</option>
-							<option>Product Type 3</option>
-							<option>Product Type 4</option>
+						<select class="form-select form-select-sm" @bind="selectedAccountProductTypeName" required>
+							<option value="" disabled hidden>-- Select Product Type --</option>
+							@foreach (var productType in accountProductTypeNames.AccountProductTypeNameList)
+							{
+								<option value="@productType">@productType</option>
+							}
 						</select>
 					</div>
 				</div>
@@ -76,22 +81,22 @@
 
 						<!-- First Name -->
 						<div class="col-3">
-							<input class="form-control form-control-sm" @bind="firstName" placeholder="First Name">
+							<input class="form-control form-control-sm" @bind="userFirstName" placeholder="First Name">
 						</div>
 
 						<!-- Middle Name -->
 						<div class="col-3">
-							<input class="form-control form-control-sm" @bind="middleName" placeholder="Middle Name">
+							<input class="form-control form-control-sm" @bind="userMiddleName" placeholder="Middle Name">
 						</div>
 
 						<!-- Last Name -->
 						<div class="col-3">
-							<input class="form-control form-control-sm" @bind="lastName" placeholder="Last Name">
+							<input class="form-control form-control-sm" @bind="userLastName" placeholder="Last Name">
 						</div>
 
 						<!-- Suffix Name -->
 						<div class="col-1">
-							<input class="form-control form-control-sm" @bind="suffix" placeholder="Suffix">
+							<input class="form-control form-control-sm" @bind="userSuffix" placeholder="Suffix">
 						</div>
 
 					</div>
@@ -212,7 +217,7 @@
 					<!-- Street No. -->
 					<div class="col">
 						<label class="text-light">Street No.</label>
-						<input class="form-control form-control-sm" @bind="streetNo" placeholder="Street No." required>
+						<input class="form-control form-control-sm" @bind="street" placeholder="Street No." required>
 					</div>
 
 					<!-- House No. -->
@@ -400,7 +405,7 @@
 					<!-- Username -->
 					<div class="col-3">
 						<label class="text-light">Username</label>
-						<input class="form-control form-control-sm" placeholder="Username" required>
+						<input class="form-control form-control-sm" @bind="userName" placeholder="Username" required>
 					</div>
 
 					<!-- Password -->
@@ -434,13 +439,28 @@
 
 	private string error = string.Empty;
 
-	public string firstName = string.Empty;
-	public string middleName = string.Empty;
-	public string lastName = string.Empty;
-	public string suffix = string.Empty;
+	private AccountTypeNames accountTypeNames = new();
+	private AccountProductTypeNames accountProductTypeNames = new();
+
+	private string selectedAccountTypeName = string.Empty;
+	private string selectedAccountProductTypeName = string.Empty;
+	public int accountTypeId;
+	public int accountProductTypeId;
+
+	public int regionId;
+	public int provinceId;
+	public int cityId;
+	public int barangayId;
+	public string userFirstName = string.Empty;
+	public string userMiddleName = string.Empty;
+	public string userLastName = string.Empty;
+	public string userSuffix = string.Empty;
 
 	public int age;
 	public DateTime birthDate;
+	public int birthCityId;
+	public int birthProvinceId;
+	public int birthRegionId;
 	public string selectedBirthCity = string.Empty;
 	public string selectedBirthProvince = string.Empty;
 	public string selectedBirthRegion = string.Empty;
@@ -454,11 +474,13 @@
 
 	//address info
 	public string houseNo = string.Empty;
-	public string streetNo = string.Empty;
+	public string street = string.Empty;
 	public string selectedRegion = string.Empty;
 	public string selectedProvince = string.Empty;
 	public string selectedCity = string.Empty;
 	public string selectedBarangay = string.Empty;
+	public string userPostalCode = string.Empty;
+	public int postalCode;
 
 	//drop down selection place holders
 	public const string regionPlaceHolder = "--Select Region--";
@@ -658,46 +680,48 @@
 	{
 		try
 		{
-			await RegistrationService.RegisterAsync
-			(
-				userFirstName: firstName,
-				userMiddleName: middleName,
-				userLastName: lastName,
-				userSuffix: suffix,
-				birthDate: birthDate,
-				birthCityId: GetIdFromSelected(selectedBirthCity, birthCities.Cast<dynamic>().ToList()),
-				birthProvinceId: GetIdFromSelected(selectedBirthProvince, birthProvinces.Cast<dynamic>().ToList()),
-				birthRegionId: GetIdFromSelected(selectedBirthRegion, birthRegions.Cast<dynamic>().ToList()), 
-				houseNo: houseNo,
-				street: streetNo,
-				barangayId: GetIdFromSelected(selectedBarangay, barangays.Cast<dynamic>().ToList()),
-				cityId: GetIdFromSelected(selectedCity, cities.Cast<dynamic>().ToList()),
-				provinceId: GetIdFromSelected(selectedProvince, provinces.Cast<dynamic>().ToList()),
-				regionId: GetIdFromSelected(selectedRegion, regions.Cast<dynamic>().ToList()),
-				postalCode: 1000,
-				age: age,
-				sex: selectedSex,
-				contactNumber: contactNumber,
-				Occupation: Occupation,
-				email: email, 
-				civilStatus: selectedCivilStatus,
-				userReligion: selectedReligion,
-				fatherFirstName: fatherFirstName,
-				fatherMiddleName: fatherMiddleName,
-				fatherLastName: fatherLastName,
-				fatherSuffix: fatherSuffix,
-				motherFirstName: motherFirstName,
-				motherMiddleName: motherMiddleName,
-				motherLastName: motherLastName,
-				motherSuffix: motherSuffix,
-				beneficiaryFirstName: beneficiaryFirstName,
-				beneficiaryMiddleName: beneficiaryMiddleName,
-				beneficiaryLastName: beneficiaryLastName,
-				beneficiarySuffix: beneficiarySuffix,
-				username: userName,
-				password: password,
-				taxIdentificationNumber: taxIdentificationNumber
-			);
+			accountTypeId = accountTypeNames.AccountTypeNameList.IndexOf(selectedAccountTypeName) + 1;
+			accountProductTypeId = accountProductTypeNames.AccountProductTypeNameList.IndexOf(selectedAccountProductTypeName) + 1;
+
+			regionId = GetIdFromSelected(selectedRegion, regions.Cast<dynamic>().ToList());
+			provinceId = GetIdFromSelected(selectedProvince, provinces.Cast<dynamic>().ToList());
+			cityId = GetIdFromSelected(selectedCity, cities.Cast<dynamic>().ToList());
+			barangayId = GetIdFromSelected(selectedBarangay, barangays.Cast<dynamic>().ToList()); 
+
+			birthRegionId = GetIdFromSelected(selectedBirthRegion, regions.Cast<dynamic>().ToList());
+			birthProvinceId = GetIdFromSelected(selectedBirthProvince, provinces.Cast<dynamic>().ToList());
+			birthCityId = GetIdFromSelected(selectedBirthCity, cities.Cast<dynamic>().ToList());
+
+			Account userAccount = await RegistrationService.RegisterAccount(accountTypeId, accountProductTypeId);
+			Name UserName = await RegistrationService.RegisterName(userFirstName, userMiddleName, userLastName, userSuffix);
+			Name FatherName = await RegistrationService.RegisterName(fatherFirstName, fatherMiddleName, fatherLastName, fatherSuffix);
+			Name MotherName = await RegistrationService.RegisterName(motherFirstName, motherMiddleName, motherLastName, motherSuffix);
+			Name BeneficiaryName = await RegistrationService.RegisterName(beneficiaryFirstName, beneficiaryMiddleName, beneficiaryLastName, beneficiarySuffix);
+
+			UserAuth userAuth = await RegistrationService.RegisterUserAuth(userName, email, password);
+			BirthInfo UserBirthInfo = await RegistrationService.RegisterBirthInfo(birthDate, birthCityId, birthProvinceId, birthRegionId);
+			Address UserAddress = await RegistrationService.RegisterAddress(houseNo, street, barangayId, cityId, provinceId, regionId, postalCode);
+			Religion UserReligion = await RegistrationService.RegisterReligion(selectedReligion);
+
+
+
+			UserInfo UserInfo = await RegistrationService.RegisterUserInfo(
+				userAuth.UserAuthId,
+				userAccount.AccountTypeId,
+				userAccount.AccountProductTypeId,
+				UserName.NameId,
+				MotherName.NameId,
+				FatherName.NameId,
+				UserBirthInfo.BirthInfoId,
+				UserAddress.AddressId,
+				UserReligion.ReligionId,
+				age,
+				selectedSex,
+				contactNumber,
+				Occupation,
+				taxIdentificationNumber,
+				selectedCivilStatus
+				);
 			NavigationManager.NavigateTo("/");
 
 		}
