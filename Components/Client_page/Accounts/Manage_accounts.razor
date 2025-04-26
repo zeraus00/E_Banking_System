@@ -1,4 +1,4 @@
-﻿@page "/Manage_accounts"
+﻿@* @page "/Manage_accounts"
 @attribute [Authorize(Roles = "User")]
 
 @inject NavigationManager NavigationManager
@@ -24,11 +24,24 @@
 
             <section class="d-flex flex-column flex-md-row align-items-start gap-4 px-4 pt-2">
 
-                <!-- Add Button -->
-                <div class="d-flex flex-column align-items-center mt-3">
-                    <a href="/Add_account" class="card square-btn d-inline-flex align-items-center justify-content-center p-1 fs-1 fw-bold text-decoration-none">
-                        +
-                    </a>
+                <!-- Left Column: Add + Go Back buttons -->
+                <div class="d-flex flex-column align-items-center justify-content-between">
+
+                    <!-- Edit Button -->
+                    <div class="d-flex flex-column align-items-center mt-3">
+                        <NavLink href="My_accounts">
+                            <button class="card bg-secondary square-btn d-inline-flex align-items-center justify-content-center p-1 fs-3">
+                                <i class="bi bi-pen-fill"></i>
+                            </button>
+                        </NavLink>
+                    </div>
+
+                    <!-- Add Button (top) -->
+                    <div class="mt-3 mb-5">
+                        <a href="/Add_account" class="card square-btn d-inline-flex align-items-center justify-content-center p-1 fs-1 fw-bold text-decoration-none">
+                            +
+                        </a>
+                    </div>
                 </div>
 
                 <!-- Carousel Component -->
@@ -66,4 +79,4 @@
         userInfo = await _userDataService.GetUserInfoAsync(userInfoId);
 
     }
-}
+} *@
