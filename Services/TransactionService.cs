@@ -214,8 +214,25 @@ namespace Services
                 /*  Add main transaction to database  */
                 await transactionRepository.AddAsync(mainTransaction);
                 
-                //  Save changes to account and transaction.
+                /*  Save changes to account and transaction.    */
                 await transactionRepository.SaveChangesAsync();
+
+                TransactionSession updatedTransactionSession = new TransactionSession
+                {
+                    TransactionTypeId = transactionTypeId,
+                    TransactionNumber = transactionNumber,
+                    TransactionDate = transactionDate,
+                    TransactionTime = transactionTime,
+                    MainAccountId = mainAccountId,
+                    Amount = amount,
+                    CurrentBalance = mainAccount.Balance,
+                    ConfirmationNumber = confirmationNumber,
+                    CounterAccountId = counterAccountId
+                };
+
+                /*  Update Session  */
+                await _storageService
+                    .StoreSessionAsync<TransactionSession>(SessionSchemes.WithdrawScheme, updatedTransactionSession);
             }
         }
 
