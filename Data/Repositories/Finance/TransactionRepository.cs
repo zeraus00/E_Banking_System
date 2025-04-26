@@ -15,8 +15,12 @@
     /// </summary>
     public class TransactionBuilder
     {
-        private int _accountId;
         private int _transactionTypeId;
+        private string _transactionNumber = string.Empty;
+        private string _status = string.Empty;
+        private string? _confirmationNumber = null;
+        private int _mainAccountId;
+        private int? _counterAccountId = null;
         private decimal _amount;
         private decimal _previousBalance;
         private decimal _newBalance;
@@ -25,14 +29,34 @@
         private decimal _transactionFee;       //  Default value 0
 
         #region Builder Methods
-        public TransactionBuilder WithAccountId(int accountId)
-        {
-            _accountId = accountId;
-            return this;
-        }
         public TransactionBuilder WithTransactionTypeId(int transactionTypeId)
         {
             _transactionTypeId = transactionTypeId;
+            return this;
+        }
+        public TransactionBuilder WithTransactionNumber(string transactionNumber)
+        {
+            _transactionNumber = transactionNumber;
+            return this;
+        }
+        public TransactionBuilder WithStatus(string status)
+        {
+            _status = status;
+            return this;
+        }
+        public TransactionBuilder WithConfirmationNumber(string confirmationNumber)
+        {
+            _confirmationNumber = confirmationNumber;
+            return this;
+        }
+        public TransactionBuilder WithMainAccountId(int accountId)
+        {
+            _mainAccountId = accountId;
+            return this;
+        }
+        public TransactionBuilder WithCounterAccountId(int counterAccountId)
+        {
+            _counterAccountId = counterAccountId;
             return this;
         }
         public TransactionBuilder WithAmount(decimal amount)
@@ -75,8 +99,12 @@
         {
             var transaction = new Transaction
             {
-                AccountId = _accountId,
                 TransactionTypeId = _transactionTypeId,
+                TransactionNumber = _transactionNumber,
+                Status = _status,
+                ConfirmationNumber = _confirmationNumber,
+                MainAccountId = _mainAccountId,
+                CounterAccountId = _counterAccountId,
                 Amount = _amount,
                 PreviousBalance = _previousBalance,
                 NewBalance = _newBalance

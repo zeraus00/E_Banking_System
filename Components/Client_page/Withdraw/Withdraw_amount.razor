@@ -1,10 +1,12 @@
 ﻿@page "/Withdraw_amount"
 @attribute [Authorize(Roles="User")]
 
-@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
 @inject ClaimsHelperService _claimsHelper
 @inject PageRedirectService _redirectService
 @inject UserDataService _userDataService
+@inject TransactionService _transactionService
+@inject PageRedirectService _redirectService
 @using Helpers;
 
 <div class="page">
@@ -28,7 +30,7 @@
                 <h3 class="mx-3 my-3 ">Enter Withdrawal Amount</h3>
                 <div class="input-group px-4 mb-4">
                     <span class="input-group-text fs-2">$</span>
-                    <input type="number" class="form-control form-control-custom form-control-lg fs-2" placeholder="000-000" />
+                    <input type="number" class="form-control form-control-custom form-control-lg fs-2" placeholder="000-000" @bind="withdrawAmount"/>
                 </div>
 
                 <div class="d-flex justify-content-between mx-5">
@@ -38,9 +40,10 @@
                     </div>
 
                     <div class="text-end mt-3">
-                        <NavLink class="w-25" href="/Withdraw_confirmation">
+                        <button class="btn btn-primary btn-lg w-100 mb-2" @onclick="InitiateWithdrawProcess">Continue</button>
+                        @* <NavLink class="w-25" href="/Withdraw_confirmation">
                             <button class="btn btn-primary btn-lg w-100 mb-2">Continue</button>
-                        </NavLink>
+                        </NavLink> *@
                         <NavLink class="w-25" href="/Client_home">
                             <button class="btn btn-danger btn-lg w-100">Cancel</button>
                         </NavLink>
@@ -60,9 +63,14 @@
     private ClaimsPrincipal? user;
     private Account? Account;
 
+    private int accountId;
     private string accountNumber = string.Empty;
     private string clientName = string.Empty;
     private decimal currentBalance = 0.0m;
+
+    private decimal withdrawAmount = 0.00m;
+
+    private string error = string.Empty;
 
 
     protected override async Task OnInitializedAsync() 
@@ -80,7 +88,7 @@
         // //  Retreive account id from list.
         // var accountId = accountIds?[0] ?? 5;
 
-        var accountId = await _userDataService.GetFirstAccountAsync(userAuthId) ?? 0;
+        accountId = await _userDataService.GetFirstAccountAsync(userAuthId) ?? 0;
 
         //  Retriev account from db.
         Account = await _userDataService.GetAccountAsync(accountId);
@@ -93,9 +101,23 @@
         }
     }
 
-    
-    // private async Task Withdraw() 
-    // {
-    //     //  Put withraw logic here.
-    // }
+    private async Task InitiateWithdrawProcess()
+    {
+        try
+        {
+            //  Save transaction session to session storage.
+            await _transactionService.InitiateTransaction(SessionSchemes.WithdrawScheme, accountId, (int)TransactionTypes.Withdrawal, withdrawAmount);
+
+            //  Redirect to withdraw confirmation page.
+            _redirectService.redirectWithNavigationManager(PageRoutes.WithdrawConfirmation);
+        } 
+        catch (AccountNotFoundException) 
+        {
+            error = "Error resolving database. Please try again later";
+        }
+        catch (InsufficientBalanceException)
+        {
+            error = "You do not have sufficient balance";
+        }
+    }
 }

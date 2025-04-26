@@ -23,7 +23,8 @@
         public Account? LinkedBeneficiaryAccount { get; set; }
         public ICollection<Account> LinkedSourceAccounts { get; set; } = new List<Account>();
         public ICollection<UserAuth> UsersAuth { get; set; } = new List<UserAuth>(); 
-        public ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();  
+        public ICollection<Transaction> MainTransactions { get; set; } = new List<Transaction>();
+        public ICollection<Transaction> CounterTransactions { get; set; } = new List<Transaction>();
         public ICollection<Loan> Loans { get; set; } = new List<Loan>(); 
         public ICollection<LoanTransaction> LoanTransactions { get; set; } = new List<LoanTransaction>(); 
     }

@@ -1,10 +1,12 @@
 ﻿@page "/Withdraw_confirmation"
 @attribute [Authorize(Roles = "User")]
 
-@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
 @inject ClaimsHelperService _claimsHelper
 @inject PageRedirectService _redirectService
 @inject UserDataService _userDataService
+@inject TransactionService _transactionService
+@inject SessionStorageService _storageService
 @using Helpers;
 
 <div class="page">
@@ -27,7 +29,7 @@
             <section class="card registration shadow-lg d-flex flex-column my-4 p-3">
                 <div class="mx-auto text-center p-4">
                     <h5>Withdraw Amount</h5>
-                    <h1 class="fw-bolder py-3 mb-2">WithdrawAmount</h1>
+                    <h1 class="fw-bolder py-3 mb-2">@withdrawAmount</h1>
                 </div>
 
                 <div class="d-flex justify-content-between mx-5">
@@ -35,14 +37,15 @@
                         <h5 class="mb-1 fw-bold">@clientName</h5>
                         <p class="m-0">@FormatHelper.AccountNumberFormatter(accountNumber)</p>
                         <p class="m-0">@date</p>
-                        <p class="m-0">confirmationNumber</p>
+                        <p class="m-0">@transactionNumber</p>
                     </div>
 
                     <section class="d-flex flex-column form-check d-flex justify-content-end mt-3">
                         <div class="text-end mt-3">
-                            <NavLink class="w-25" href="/Withdraw_receipt">
+                            <button class="btn btn-primary btn-lg w-100 mb-2" @onclick="ConfirmWithdraw">Confirm</button>
+                            @* <NavLink class="w-25" href="/Withdraw_receipt">
                                 <button class="btn btn-primary btn-lg w-100 mb-2">Confirm</button>
-                            </NavLink>
+                            </NavLink> *@
                             <NavLink class="w-25" href="/Withdraw_amount">
                                 <button class="btn btn-warning btn-lg w-100 mb-3">Go Back</button>
                             </NavLink>
@@ -73,8 +76,12 @@
 
     private string accountNumber = string.Empty;
     private string clientName = string.Empty;
-    private decimal currentBalance = 0.0m;
+    private decimal currentBalance = 0.00m;
+    private decimal withdrawAmount = 0.00m;
+    private string transactionNumber = string.Empty;
     private DateTime? date;
+
+    private string error = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -100,8 +107,41 @@
         {
             accountNumber = Account.AccountNumber;
             clientName = Account.AccountName;
-            currentBalance = Account.Balance;
-            date = DateTime.UtcNow;
+        }
+
+        
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender) 
+    {
+        if (firstRender) 
+        {
+            TransactionSession transactionSession = await _storageService.FetchSessionAsync<TransactionSession>(SessionSchemes.WithdrawScheme);
+            currentBalance = transactionSession.CurrentBalance;
+            withdrawAmount = transactionSession.Amount;
+            transactionNumber = transactionSession.TransactionNumber;
+            date = transactionSession.TransactionDate;
+            StateHasChanged();
+        }
+    }
+
+    private async Task ConfirmWithdraw()
+    {
+        try 
+        {
+            //  Fetch session from session storage.
+            await _transactionService.ProcessTransactionAsync(SessionSchemes.WithdrawScheme);
+
+            //  Redirect to withdraw receipt page.
+            _redirectService.redirectWithNavigationManager(PageRoutes.WithdrawReceipt);
+        } 
+        catch (AccountNotFoundException)
+        {
+            error = "Error resolving database. Please try again later";
+        }
+        catch (InsufficientBalanceException)
+        {
+            error = "You do not have sufficient balance";
         }
     }
 }

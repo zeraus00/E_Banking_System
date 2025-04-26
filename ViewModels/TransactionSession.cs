@@ -4,6 +4,8 @@
     {
         public int TransactionTypeId { get; set; }
         public string TransactionNumber { get; set; } = string.Empty;
+        public DateTime TransactionDate { get; set; }
+        public TimeSpan TransactionTime { get; set; }
         public int MainAccountId { get; set; }
         public decimal Amount { get; set; }
         public decimal CurrentBalance { get; set; }
