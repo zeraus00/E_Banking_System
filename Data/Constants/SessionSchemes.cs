@@ -2,6 +2,6 @@
 {
     public class SessionSchemes
     {
-        public const string WithdrawTransactionSession = "WithdrawTransactionSession";
+        public const string WithdrawScheme = "WithdrawScheme";
     }
 }
