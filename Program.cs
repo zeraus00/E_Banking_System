@@ -30,15 +30,16 @@ builder.Services.AddRazorComponents()
 builder.Services.AddHttpClient();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<AuthenticationStateProvider, NexusAuthenticationStateProvider>();
-builder.Services.AddScoped<NexusAuthenticationStateProvider>();
-builder.Services.AddScoped<NexusAuthenticationService>();
 builder.Services.AddScoped<ClaimsHelperService>();
-builder.Services.AddScoped<UserDataService>();
 builder.Services.AddScoped<CredentialValidationService>();
+builder.Services.AddScoped<NexusAuthenticationService>();
 builder.Services.AddScoped<PageRedirectService>();
 builder.Services.AddScoped<ProtectedSessionStorage>();
 builder.Services.AddScoped<RegistrationService>();
+builder.Services.AddScoped<SessionStorageService>();
 builder.Services.AddScoped<SignInService>();
+builder.Services.AddScoped<TransactionService>();
+builder.Services.AddScoped<UserDataService>();
 
 
 builder.Services.AddAntiforgery(options =>
