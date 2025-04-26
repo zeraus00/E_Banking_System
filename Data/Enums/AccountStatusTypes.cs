@@ -1,0 +1,14 @@
+﻿namespace Data.Enums
+{
+    public enum AccountStatusTypes
+    {
+        Active = 1,
+        Pending = 2,
+        Inactive = 3,
+        Dormant = 4,
+        Closed = 5,
+        Suspended = 6,
+        Frozen = 7,
+        Restricted = 8
+    }
+}

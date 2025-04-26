@@ -16,11 +16,11 @@ namespace Data.Seeders.Finance
             if (!await _context.Accounts.AnyAsync())
             {
                 var account = new AccountBuilder()
-                    .WithAccountType((int)AccountTypes.PersonalAcocunt)
+                    .WithAccountType((int)AccountTypes.PersonalAccount)
                     .WithAccountProductTypeId((int)AccountProductTypes.Checking)
                     .WithAccountNumber("123456789ABC")
-                    .WithAccountName("Bogart Dela Mon")
-                    .WithAccountStatus("Active")
+                    .WithAccountName("Bogart Dela Mon Sr.")
+                    .WithAccountStatus((int)AccountStatusTypes.Active)
                     .WithBalance(696969)
                     .Build();
                 await _accountRepository.AddAsync(account);

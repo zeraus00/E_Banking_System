@@ -131,22 +131,22 @@ namespace Data.Repositories.Finance
         /// Asynchronously updates the account status of an account identified by its ID.
         /// </summary>
         /// <param name="accountId">The unique identifier of the account to update.</param>
-        /// <param name="accountStatus">The new account status to set for the account.</param>
-        public async Task AccountStatusUpdateAsync(int accountId, string accountStatus)
+        /// <param name="accountStatusTypeId">The new account status to set for the account.</param>
+        public async Task AccountStatusUpdateAsync(int accountId, int accountStatusTypeId)
         {
             var account = await this.GetAccountByIdAsync(accountId);
-            if (account is not null) account.AccountStatus = accountStatus;
+            if (account is not null) account.AccountStatusTypeId = accountStatusTypeId;
         }
 
         /// <summary>
         /// Asynchronously updates the account status of an account identified by its account number.
         /// </summary>
         /// <param name="accountNumber">The account number of the account to update.</param>
-        /// <param name="accountStatus">The new account status to set for the account.</param>
-        public async Task AccountStatusUpdateAsync(string accountNumber, string accountStatus)
+        /// <param name="accountStatusTypeId">The new account status to set for the account.</param>
+        public async Task AccountStatusUpdateAsync(string accountNumber, int accountStatusTypeId)
         {
             var account = await this.GetAccountByAccountNumberAsync(accountNumber);
-            if (account is not null) account.AccountStatus = accountStatus;
+            if (account is not null) account.AccountStatusTypeId = accountStatusTypeId;
         }
         #endregion Account Status Update
 
@@ -212,7 +212,7 @@ namespace Data.Repositories.Finance
         private int _accountProductTypeId;
         private string _accountNumber = string.Empty;
         private string _accountName = string.Empty;
-        private string _accountStatus = string.Empty;
+        private int _accountStatusTypeId;
         private decimal _balance = 0.0m;
         private int? _linkedBeneficiaryId;
         private DateTime _dateOpened = DateTime.UtcNow;
@@ -244,9 +244,9 @@ namespace Data.Repositories.Finance
             return this;
         }
 
-        public AccountBuilder WithAccountStatus(string accountStatus)
+        public AccountBuilder WithAccountStatus(int accountStatusTypeId)
         {
-            _accountStatus = accountStatus.Trim();
+            _accountStatusTypeId = accountStatusTypeId;
             return this;
         }
 
@@ -286,7 +286,7 @@ namespace Data.Repositories.Finance
                 AccountProductTypeId = _accountProductTypeId,
                 AccountNumber = _accountNumber,
                 AccountName = _accountName,
-                AccountStatus = _accountStatus,
+                AccountStatusTypeId = _accountStatusTypeId,
                 Balance = _balance,
                 DateOpened = _dateOpened,
                 DateClosed = _dateClosed

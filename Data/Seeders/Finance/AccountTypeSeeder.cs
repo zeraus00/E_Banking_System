@@ -1,4 +1,6 @@
 ﻿using Data.Repositories.Finance;
+using Data.Enums;
+using Data.Constants;
 
 namespace Data.Seeders.Finance
 {
@@ -6,10 +8,12 @@ namespace Data.Seeders.Finance
     {
         AccountTypeRepository _accountTypeRepository;
         AccountProductTypeRepository _accountProductTypeRepository;
+        AccountStatusTypeRepository _accountStatusTypeRepository;
         public AccountTypeSeeder(EBankingContext context) : base(context)
         {
             _accountTypeRepository = new AccountTypeRepository(_context);
             _accountProductTypeRepository = new AccountProductTypeRepository(_context);
+            _accountStatusTypeRepository = new AccountStatusTypeRepository(_context);
         }
 
         public async Task SeedAccountTypes()
@@ -49,6 +53,36 @@ namespace Data.Seeders.Finance
                         .WithAccountProductTypeName(accountProductTypeName)
                         .Build();
                     await _accountProductTypeRepository.AddAsync(accountProductType);
+                }
+
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task SeedAccountStatusTypes()
+        {
+            if (!await _context.AccountStatusTypes.AnyAsync())
+            {
+                var accountStatusTypeBuilder = new AccountStatusTypeBuilder();
+                var statusTypeList = new List<string>
+                {
+                    AccountStatusTypeNames.Active,
+                    AccountStatusTypeNames.Pending,
+                    AccountStatusTypeNames.Inactive,
+                    AccountStatusTypeNames.Dormant,
+                    AccountStatusTypeNames.Closed,
+                    AccountStatusTypeNames.Suspended,
+                    AccountStatusTypeNames.Frozen,
+                    AccountStatusTypeNames.Restricted
+                };
+
+                foreach(var typeName in statusTypeList)
+                {
+                    var type = new AccountStatusTypeBuilder()
+                        .WithAccountStatusTypeName(typeName)
+                        .Build();
+
+                    await _accountStatusTypeRepository.AddAsync(type);
                 }
 
                 await _context.SaveChangesAsync();

@@ -6,11 +6,11 @@
     {
         /*  Table Properties    */
         public int AccountId { get; set; }                          // Primary Key
-        public int AccountTypeId { get; set; }                      // FK to AccountTypes; 
-        public int AccountProductTypeId { get; set; }               // FK to AccountProductTypes;
+        public int AccountTypeId { get; set; }                      // FK to AccountTypes
+        public int AccountProductTypeId { get; set; }               // FK to AccountProductTypes
         public string AccountNumber { get; set; } = string.Empty;   // Required
         public string AccountName { get; set; } = string.Empty;     // Required; MaxLength=30
-        public string AccountStatus { get; set; } = string.Empty;   // Required; Open, Closed, Suspended
+        public int AccountStatusTypeId { get; set; }                // FK to AccountStatusTypes
         public decimal Balance { get; set; } = 0.0m;                // Required; Default 0.0
         public int? LinkedBeneficiaryId { get; set; }               // Self reference fk
         public DateTime DateOpened { get; set; } = DateTime.UtcNow; // Required; Default DateTime.UtcNow
@@ -20,6 +20,7 @@
         /*  Navigation Properties   */
         public AccountType AccountType { get; set; } = null!;
         public AccountProductType AccountProductType { get; set; } = null!;
+        public AccountStatusType AccountStatusType { get; set; } = null!;
         public Account? LinkedBeneficiaryAccount { get; set; }
         public ICollection<Account> LinkedSourceAccounts { get; set; } = new List<Account>();
         public ICollection<UserAuth> UsersAuth { get; set; } = new List<UserAuth>(); 

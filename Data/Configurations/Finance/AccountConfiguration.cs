@@ -34,11 +34,10 @@
                 .IsRequired()
                 .HasMaxLength(30);
 
-            //  AccountStatus (Required; MaxLength=10)
+            //  AccountStatus (Required)
             Accounts
-                .Property(a => a.AccountStatus)
-                .IsRequired()
-                .HasMaxLength(10);
+                .Property(a => a.AccountStatusTypeId)
+                .IsRequired();
 
             //  Balance (Required; DECIMAL(18,2); Default 0.0m)
             Accounts
@@ -62,6 +61,7 @@
              *  Relationships
              *  AccountTypes (many-to-one)
              *  AccountProductTypes (many-to-one)
+             *  AccountStatusTypes (many-to-one)
              *  LinkedBeneficiary Accounts (self-referencing many-to-one)
              *  UsersAuth (many-to-many)
              *  Transactions (one-to-many)
@@ -79,6 +79,12 @@
                 .HasOne(a => a.AccountProductType)
                 .WithMany(apt => apt.Accounts)
                 .HasForeignKey(a => a.AccountProductTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            Accounts
+                .HasOne(a => a.AccountStatusType)
+                .WithMany(ast => ast.Accounts)
+                .HasForeignKey(a => a.AccountStatusTypeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             Accounts
