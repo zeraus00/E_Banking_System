@@ -80,7 +80,7 @@
     protected override async Task OnInitializedAsync()
     {
         //  Get Authentication State
-        AuthenticationState authState = await _authenticationState;
+        AuthenticationState authState = await authenticationState;
         user = authState.User;
 
 

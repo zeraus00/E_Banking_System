@@ -1,8 +1,6 @@
 ﻿@inject IWebHostEnvironment Env
 @inject UserDataService _userDataService;
 @inject ClaimsHelperService _claimsHelper
-@inject NexusAuthenticationStateProvider _authenticationStateProvider
-@inject NexusAuthenticationService _authenticationService
 
 <AuthorizeView Roles = "User, Administrator, Employee">
     <Authorized>
@@ -91,11 +89,14 @@
 
         </nav>
     </Authorized>
-    
+
 </AuthorizeView>
 
 
 @code {
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationState { get; set; } = default!;
+
     private ClaimsPrincipal? _user;
     private UserInfo? UserInfo;
     private string _fullName = string.Empty;
@@ -103,7 +104,7 @@
 
     protected override async Task OnInitializedAsync() 
     {
-        AuthenticationState authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
+        AuthenticationState authState = await authenticationState;
         _user = authState.User;
 
 

@@ -77,6 +77,9 @@
 
 @code 
 {
+	[CascadingParameter]
+	private Task<AuthenticationState> _authenticationState { get; set; } = default!;
+
 	private ClaimsPrincipal? user;
 	private Account? Account;
 	private UserInfo? UserInfo;

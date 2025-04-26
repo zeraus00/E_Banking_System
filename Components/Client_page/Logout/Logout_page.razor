@@ -2,7 +2,6 @@
 @inject IHttpContextAccessor accessor
 @page "/Logout_page"
 @inject NavigationManager NavigationManager
-@inject NexusAuthenticationStateProvider authenticationStateProvider
 @inject ClaimsHelperService claimsHelper
 @inject PageRedirectService redirectService
 
@@ -24,11 +23,14 @@
 	</main>
 </div>
 
-@code 
+@code
 {
+	[CascadingParameter]
+	private Task<AuthenticationState> authenticationState { get; set; } = default!;
+
 	protected override async Task OnInitializedAsync() 
 	{
-		AuthenticationState authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+		AuthenticationState authState = await authenticationState;
 		var user = authState.User;
 
 		redirectService.RedirectIfNotAuthenticated(user);

@@ -8,7 +8,6 @@
 @inject HttpClient http
 @inject ClaimsHelperService _claimsHelper
 @inject CredentialValidationService _validationService
-@inject NexusAuthenticationStateProvider _nexusAuthenticationStateProvider
 @inject PageRedirectService _redirectService
 @inject SignInService _signInService
 @layout PlainLayout
@@ -106,6 +105,9 @@
 
 
 @code {
+	[CascadingParameter]
+	private Task<AuthenticationState> authenticationState { get; set; } = default!;
+
 	[SupplyParameterFromForm]
 	public LogInViewModel _loginModel { get; set; } = new();
 
@@ -131,7 +133,7 @@
 
 	protected override async Task OnInitializedAsync() 
 	{
-		AuthenticationState authState = await _nexusAuthenticationStateProvider.GetAuthenticationStateAsync();
+		AuthenticationState authState = await authenticationState;
 		ClaimsPrincipal? user = authState.User;
 		if (_claimsHelper.IsAuthenticated(user)) {
 			_redirectService.RedirectBasedOnRole(user);

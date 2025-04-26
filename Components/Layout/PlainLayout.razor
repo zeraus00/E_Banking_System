@@ -1,6 +1,4 @@
 ﻿@inherits LayoutComponentBase
-@inject NexusAuthenticationStateProvider _authenticationStateProvider
-@inject NexusAuthenticationService _authenticationService
 
 <body>
     <!-- Main Top NavBar Layout -->
@@ -48,12 +46,3 @@
     </div>
 </body>
 
-
-@code {
-    private ClaimsPrincipal? _user;
-
-    protected override async Task OnInitializedAsync() {
-        AuthenticationState authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
-        _user = authState.User;
-    }
-}
