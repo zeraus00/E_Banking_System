@@ -18,6 +18,16 @@
                     <h5 class="text-light fw-lighter m-0">
                         @(string.IsNullOrWhiteSpace(_accountNumber) ? "XXXX-XXXX-XXXX" : FormatHelper.AccountNumberFormatter(_accountNumber))
                     </h5>
+
+                    <div class="w-auto">
+                        <select class="form-select form-select-sm" required>
+                            <option>Account 1</option>
+                            <option>Account 2</option>
+                            <option>Account 3</option>
+                            <option>Account 4</option>
+                        </select>
+                    </div>
+
                 </div>
             </div>
 
