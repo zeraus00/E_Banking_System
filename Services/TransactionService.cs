@@ -3,6 +3,8 @@ using Data.Constants;
 using Data.Enums;
 using Data.Models.Finance;
 using Data.Repositories.Finance;
+using E_BankingSystem.Components.Client_page.Withdraw;
+using E_BankingSystem.Components.Pages;
 using Exceptions;
 using Microsoft.Identity.Client;
 using ViewModels;
@@ -26,111 +28,227 @@ namespace Services
             _storageService = storageService;
         }
 
-        public async Task<bool> InitiateWithdraw(int accountId, decimal withdrawAmount)
+        public async Task InitiateTransaction(
+            string sessionScheme,
+            int mainAccountId, 
+            int transactionTypeId, 
+            decimal amount, 
+            int? counterAccountId = null)
         {
-            try
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
-                await using (var dbContext = await _contextFactory.CreateDbContextAsync())
-                {
-                    //  Retrieve account from database.
-                    //  Throws AccountNotFoundException if account is not found.
-                    Account account = await this.GetAccountAsync(dbContext, accountId);
+                /*  Retrieve main account from database.    */
+                //  Throws AccountNotFoundException if account is not found.
+                Account mainAccount = await this.GetAccountAsync(dbContext, mainAccountId);
 
+                /*  Get Transaction Date and Time.  */
+                DateTime transactionDate = DateTime.UtcNow;
+                TimeSpan transactionTime = transactionDate.TimeOfDay;
+
+                /*  Generate Transaction Number */
+                string accountNumber = mainAccount.AccountNumber;
+                string transactionNumber = this.GenerateTransactionNumber(accountNumber, transactionDate);
+
+
+                /*  For Withdrawal or Outgoing Transfer Transaction Types   */
+                try
+                {
+                    //  Check for sufficient balance
                     //  Throws InsufficientBalanceException if balance is insufficient.
-                    this.EnsureSufficientBalance(account.Balance, withdrawAmount);
+                    this.EnsureSufficientBalance(transactionTypeId, mainAccount.Balance, amount);
+                }
+                catch (InsufficientBalanceException)
+                {
+                    /*  Handle Failed Transaction   */
+                    await this.TransactionDeniedOrCancelledAsync(
+                            transactionTypeId,
+                            transactionNumber,
+                            TransactionStatus.Denied,
+                            mainAccountId,
+                            amount,
+                            mainAccount.Balance,
+                            transactionDate,
+                            transactionTime
+                        );
 
-                    string accountNumber = account.AccountNumber;
-                    string transactionNumber = this.GenerateTransactionNumber(accountNumber);
+                    //  Rethrow exception
+                    throw;
+                }
 
-                    TransactionSession withdrawSession = new TransactionSession
+                /*  Store transaction details in the session object.    */
+                TransactionSession sessionObject = new TransactionSession
+                {
+                    TransactionTypeId = transactionTypeId,
+                    TransactionNumber = transactionNumber,
+                    TransactionDate = transactionDate,
+                    TransactionTime = transactionTime,
+                    MainAccountId = mainAccountId,
+                    Amount = amount,
+                    CurrentBalance = mainAccount.Balance,
+                    CounterAccountId = counterAccountId
+                };
+
+                
+
+                /*  Store session object to the session storage.    */
+                await _storageService
+                    .StoreSessionAsync(sessionScheme, sessionObject);
+            }
+        }
+
+        public async Task ProcessTransactionAsync(string sessionScheme)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+
+                /*  Define repository and builder requirements. */
+                var transactionRepository = new TransactionRepository(dbContext);
+
+                /*  Retrieve transaction details from session object */
+                //  Throws SessionNotFound if session is not found.
+                TransactionSession transactionSession = await _storageService.FetchSessionAsync<TransactionSession>(sessionScheme);
+                int transactionTypeId = transactionSession.TransactionTypeId;       //  TransactionTypeId
+                int mainAccountId = transactionSession.MainAccountId;               //  MainAccountId
+                string transactionNumber = transactionSession.TransactionNumber;    //  TransactionNumber
+                DateTime transactionDate = transactionSession.TransactionDate;      //  TransactionDate
+                TimeSpan transactionTime = transactionSession.TransactionTime;      //  TransactionTime
+                decimal amount = transactionSession.Amount;                         //  Amount
+                decimal currentBalance = transactionSession.CurrentBalance;         //  CurrentBalance
+
+                /*  Retrieve account from database  */
+                //  Throws AccountNotFoundException if account is not found.
+                Account mainAccount = await this.GetAccountAsync(dbContext, mainAccountId);
+
+                /*  For Withdrawal or Outgoing Transfer Transaction Types   */
+                //  Handle situations where account's balance is deducted in the background.
+                if (mainAccount.Balance != currentBalance)
+                {
+                    try
                     {
-                        TransactionTypeId = (int)TransactionTypes.Withdrawal,
-                        TransactionNumber = transactionNumber,
-                        MainAccountId = accountId,
-                        Amount = withdrawAmount,
-                        CurrentBalance = account.Balance
-                    };
-
-                    await _storageService.StoreSessionAsync(SessionSchemes.WithdrawTransactionSession, withdrawSession);
-
-                    return true;
+                        //  Ensure sufficient balance.
+                        //  Throws InsufficientBalanceException if balance is insufficient.
+                        this.EnsureSufficientBalance(transactionTypeId, mainAccount.Balance, amount);
+                        //Assign the account's new balance to current balance.
+                        currentBalance = mainAccount.Balance;
+                    } catch (InsufficientBalanceException)
+                    {
+                        /*  Handle Failed Transaction   */
+                        await this.TransactionDeniedOrCancelledAsync(
+                                transactionTypeId,
+                                transactionNumber,
+                                TransactionStatus.Denied,
+                                mainAccountId,
+                                amount,
+                                mainAccount.Balance,
+                                transactionDate,
+                                transactionTime
+                            );
+                        //  Rethrow exception
+                        throw;
+                    }
                 }
-            } catch (AccountNotFoundException)
-            {
-                Console.WriteLine("ACCOUNT NOT FOUND");
-                return false;
-            } catch (InsufficientBalanceException)
-            {
-                Console.WriteLine("INSUFFICIENT BALANCE");
-                return false;
-            }
-        }
 
-        public async Task Withdraw(int accountId, decimal withdrawAmount)
-        {
-            try
-            {
-                await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+                /*  Generate Confirmation Number    */
+                string confirmationNumber = this.GenerateConfirmationNumber(transactionDate);
+
+
+                /*  Balance operations   */
+                decimal previousBalance = currentBalance;       
+                decimal newBalance = this
+                    .calculateBalanceByTransactionType(transactionTypeId, currentBalance, amount);
+                this.UpdateAccountBalance(mainAccount, newBalance);
+
+                /*  Build main transaction entry */
+                TransactionBuilder mainTransactionBuilder = new TransactionBuilder();
+                mainTransactionBuilder
+                    .WithTransactionTypeId(transactionTypeId)
+                    .WithTransactionNumber(transactionNumber)
+                    .WithStatus(TransactionStatus.Confirmed)
+                    .WithConfirmationNumber(confirmationNumber)
+                    .WithMainAccountId(mainAccountId)
+                    .WithAmount(amount)
+                    .WithPreviousBalance(previousBalance)
+                    .WithNewBalance(newBalance)
+                    .WithTransactionDate(transactionDate)
+                    .WithTransactionTime(transactionTime);
+
+                /*  For Incoming Transfer or Outgoing Transfer Transaction Types    */
+                //  Retrieve counterAccount as needed.
+                int? counterAccountId = transactionSession.CounterAccountId;
+
+                if (counterAccountId is int id)
+                    mainTransactionBuilder.WithCounterAccountId(id);
+
+                Transaction mainTransaction = mainTransactionBuilder.Build();
+
+                //  Handle Outgoing Transfers
+                bool isOutgoingTransfer = transactionTypeId is (int) TransactionTypes.Outgoing_Transfer;
+                if (counterAccountId is int counterId && isOutgoingTransfer)
                 {
-                    //  Retrieve account from database.
-                    var account = await this.GetAccountAsync(dbContext, accountId);
-                    if (account is null) throw new AccountNotFoundException(accountId);
+                    /*  Retrieve counter account from the database  */
+                    //  Throws AccountNotFoundException if account not found.
+                    Account counterAccount = await this.GetAccountAsync(dbContext, counterId);
 
-                    //  Check if balance is sufficient.
-                    if (account.Balance < withdrawAmount) throw new InsufficientBalanceException();
+                    decimal previousCounterBalance = counterAccount.Balance;
+                    decimal newCounterBalance = counterAccount.Balance + amount;
+                    this.UpdateAccountBalance(counterAccount, newCounterBalance);
 
-                    //  Process withdraw transaction.
-                    await this.ProcessTransactionAsync(dbContext, account, (int) TransactionTypes.Withdrawal, withdrawAmount);
+                    Transaction counterTransaction = new TransactionBuilder()
+                        .WithTransactionTypeId((int)TransactionTypes.Incoming_Transfer)
+                        .WithTransactionNumber(transactionNumber)
+                        .WithStatus(TransactionStatus.Confirmed)
+                        .WithConfirmationNumber(confirmationNumber)
+                        .WithMainAccountId(counterId)
+                        .WithCounterAccountId(mainAccountId)
+                        .WithAmount(amount)
+                        .WithPreviousBalance(previousCounterBalance)
+                        .WithNewBalance(newCounterBalance)
+                        .WithTransactionDate(transactionDate)
+                        .WithTransactionTime(transactionTime)
+                        .Build();
+
+                    /*  Add counter transaction to database  */
+                    await transactionRepository.AddAsync(counterTransaction);
                 }
 
-            } catch (AccountNotFoundException)
-            {
-                Console.WriteLine("""
-                        
-
-                            ERROR : ACCOUNT COULD NOT BE RESOLVED.
-
-
-                    """);
-            } catch (InsufficientBalanceException)
-            {
-                Console.WriteLine($"""
-
-
-                            ERROR : INSUFFICIENT BALANCE.
-
-
-                    """);
+                /*  Add main transaction to database  */
+                await transactionRepository.AddAsync(mainTransaction);
+                
+                //  Save changes to account and transaction.
+                await transactionRepository.SaveChangesAsync();
             }
-            
         }
 
-        public async Task Deposit(int accountId, decimal depositAmount)
+        public async Task TransactionDeniedOrCancelledAsync(
+            int transactionTypeId,
+            string transactionNumber,
+            string status,
+            int accountId,
+            decimal amount,
+            decimal balance,
+            DateTime transactionDate,
+            TimeSpan transactionTime)
         {
-            try
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
-                await using (var dbContext = await _contextFactory.CreateDbContextAsync())
-                {
-                    //  Retrieve account from database.
-                    var account = await this.GetAccountAsync(dbContext, accountId);
-                    if (account is null) throw new AccountNotFoundException(accountId);
+                var transactionRepository = new TransactionRepository(dbContext);
 
-                    //  Process transaction.
-                    await this.ProcessTransactionAsync(dbContext, account, (int)TransactionTypes.Deposit, depositAmount);
-                }
-            } catch (AccountNotFoundException)
-            {
+                Transaction failedTransaction = new TransactionBuilder()
+                    .WithTransactionTypeId(transactionTypeId)
+                    .WithTransactionNumber(transactionNumber)
+                    .WithStatus(status)
+                    .WithMainAccountId(accountId)
+                    .WithAmount(amount)
+                    .WithPreviousBalance(balance)
+                    .WithNewBalance(balance)
+                    .WithTransactionDate(transactionDate)
+                    .WithTransactionTime(transactionTime)
+                    .Build();
 
-                Console.WriteLine("""
-
-
-                            ERROR : ACCOUNT COULD NOT BE RESOLVED.
-
-
-                    """);
+                await transactionRepository.AddAsync(failedTransaction);
+                await transactionRepository.SaveChangesAsync();
             }
         }
-
         private async Task<Account> GetAccountAsync(EBankingContext dbContext, int accountId)
         {
 
@@ -138,41 +256,19 @@ namespace Services
             var account = await accountRepository.GetAccountByIdAsync(accountId);
             return account ?? throw new AccountNotFoundException(accountId);
         }
-
-        private async Task ProcessTransactionAsync(EBankingContext dbContext, Account mainAccount, int transactionTypeId, decimal amount, string counterAccountNumber = "")
+        private void EnsureSufficientBalance(int transactionTypeId, decimal balance, decimal deductionAmount)
         {
-            //  Define repository and builder requirements.
-            var transactionRepository = new TransactionRepository(dbContext);
-            var transactionBuilder = new TransactionBuilder();
+            bool isDeducting = transactionTypeId is (int)TransactionTypes.Withdrawal
+                    or (int)TransactionTypes.Outgoing_Transfer;
 
-            //  Calculate previous and new balance
-            decimal previousBalance = mainAccount.Balance;
-            decimal newBalance = this.calculateBalanceByTransactionType(transactionTypeId, mainAccount.Balance, amount);
-
-            //  Assign new balance to account
-            mainAccount.Balance = newBalance;
-
-            //  Build transaction entry
-            var withdrawTransaction = transactionBuilder
-                .WithAccountId(mainAccount.AccountId)
-                .WithTransactionTypeId(transactionTypeId)
-                .WithAmount(amount)
-                .WithPreviousBalance(previousBalance)
-                .WithNewBalance(newBalance);
-
-            //  Add counteraccountnumber if necessary
-
-            //  Add new transaction entry
-            await transactionRepository.AddAsync(withdrawTransaction);
-
-            //  Save changes to account and transaction.
-            await transactionRepository.SaveChangesAsync();
-        }
-
-        private void EnsureSufficientBalance(decimal balance, decimal deductionAmount)
-        {
-            if (balance < deductionAmount)
+            if (isDeducting && balance < deductionAmount)
+            {
                 throw new InsufficientBalanceException();
+            }
+        }
+        private void UpdateAccountBalance(Account account, decimal newBalance)
+        {
+            account.Balance = newBalance;
         }
         private decimal calculateBalanceByTransactionType(int transactionTypeId, decimal balance, decimal amount)
         {
@@ -185,15 +281,14 @@ namespace Services
                 _ => throw new ArgumentException("INVALID TRANSACTION TYPE ID.")
             };
         }
-
-        private string GenerateTransactionNumber(string accountNumber)
+        private string GenerateTransactionNumber(string accountNumber, DateTime transactionDate)
         {
-            return $"TXN-{accountNumber[^4..]}{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString().Substring(0,6).ToUpper()}";
+            return $"TXN-{accountNumber[^4..]}{transactionDate:yyyyMMddHHmmssfff}-{Guid.NewGuid().ToString().Substring(0, 6).ToUpper()}";
+        }
+        private string GenerateConfirmationNumber(DateTime transactionDate)
+        {
+            return $"CONFIRM-{transactionDate:yyyyMMddHHmmss}{Random.Shared.Next(100000, 999999)}";
         }
 
-        private string GenerateConfirmationNumber()
-        {
-            return $"CONFIRM-{DateTime.UtcNow:yyyyMMdd}{Random.Shared.Next(100000,999999)}";
-        }
     }
 }
