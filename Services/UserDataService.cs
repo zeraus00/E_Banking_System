@@ -98,7 +98,7 @@ namespace Services
         /// <returns>
         /// A list of <see cref="Transaction"/> objects associated with the given account.
         /// </returns>
-        public async Task<List<Transaction>> GetAccountTransactions(int accountId)
+        public async Task<List<Transaction>> GetRecentAccountTransactionsAsync(int accountId, int transactionCount)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
@@ -109,7 +109,10 @@ namespace Services
                 var query = transactionRepository.ComposeQuery(includeTransactionType: true, includeMainAccount: true);
 
                 //  Return the list of transactions.
-                return (await transactionRepository.GetTransactionsAsListAsync(accountId, query));
+                var transactionList = await transactionRepository.GetTransactionsAsListAsync(accountId, query);
+                transactionList.Reverse();
+                ;
+                return transactionList.Take(transactionCount).ToList();
             }
         }
         /// <summary>
