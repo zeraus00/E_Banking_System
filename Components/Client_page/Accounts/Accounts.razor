@@ -1,4 +1,4 @@
-﻿@* @page "/Manage_accounts"
+﻿@page "/Accounts"
 @attribute [Authorize(Roles = "User")]
 
 @inject NavigationManager NavigationManager
@@ -13,70 +13,76 @@
         <header class="custom-card-clientpage clientheader py-4 align-items-start">
             <div class="px-5">
                 <div class="d-flex align-items-center my-4">
-                    <h2>Manage Accounts</h2>
+                    <h2>My Accounts</h2>
                 </div>
             </div>
-
         </header>
 
-        <!-- Manage Accounts -->
+        <!-- Manage Accounts Section -->
         <div class="card accounts shadow-lg d-flex flex-column mt-4 p-3 justify-content-between">
 
             <section class="d-flex flex-column flex-md-row align-items-start gap-4 px-4 pt-2">
 
-                <!-- Left Column: Add + Go Back buttons -->
-                <div class="d-flex flex-column align-items-center justify-content-between">
+                <!-- Left Column: Edit + Add Buttons -->
+                <div class="d-flex flex-column align-items-center justify-content-between" style="position: relative; width: 100px;">
 
-                    <!-- Edit Button -->
+                    <!-- Edit Toggle Button -->
                     <div class="d-flex flex-column align-items-center mt-3">
-                        <NavLink href="My_accounts">
-                            <button class="card bg-secondary square-btn d-inline-flex align-items-center justify-content-center p-1 fs-3">
-                                <i class="bi bi-pen-fill"></i>
-                            </button>
-                        </NavLink>
+                        <button class="card square-btn d-inline-flex align-items-center justify-content-center p-1 fs-3"
+                                @onclick="ToggleEdit">
+                            <i class="@EditIcon"></i>
+                        </button>
                     </div>
 
-                    <!-- Add Button (top) -->
+                    <!-- Add Button -->
                     <div class="mt-3 mb-5">
                         <a href="/Add_account" class="card square-btn d-inline-flex align-items-center justify-content-center p-1 fs-1 fw-bold text-decoration-none">
                             +
                         </a>
                     </div>
+
                 </div>
 
                 <!-- Carousel Component -->
-                <AccountCarousel Accounts="accounts" UserInfo="userInfo" IsEditable="true" />
+                <div class="flex-grow-1 d-flex justify-content-center">
+                    <AccountCarousel Accounts="accounts" UserInfo="userInfo" IsEditable="IsEditable" />
+                </div>
 
             </section>
 
         </div>
 
     </main>
-
 </div>
 
 @code {
     [CascadingParameter]
     private Task<AuthenticationState> authenticationState { get; set; } = default!;
 
-
     private ClaimsPrincipal? user;
     private List<Account>? accounts = new();
     private UserInfo? userInfo;
+    private bool IsEditable { get; set; } = false; // Default to view mode
 
     protected override async Task OnInitializedAsync()
     {
-        //  Get Authentication state
+        // Get Authentication state
         AuthenticationState authState = await authenticationState;
         user = authState.User;
 
-        //  Retrieve ids from claims
+        // Retrieve ids from claims
         var userAuthId = Convert.ToInt32(_claimsHelper.GetClaimValue(user, ClaimTypes.NameIdentifier) ?? "0");
         var userInfoId = Convert.ToInt32(_claimsHelper.GetClaimValue(user, CustomClaimTypes.UserInfoId) ?? "0");
 
-        //  Retrieve account list
+        // Retrieve account list
         accounts = await _userDataService.GetAccountListAsync(userAuthId);
         userInfo = await _userDataService.GetUserInfoAsync(userInfoId);
-
     }
-} *@
+
+    private void ToggleEdit()
+    {
+        IsEditable = !IsEditable;
+    }
+
+    private string EditIcon => IsEditable ? "bi bi-pen-fill" : "bi bi-pen";
+}

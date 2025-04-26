@@ -9,152 +9,164 @@
 @using Helpers;
 
 <div class="page">
-    <main>
-        <header class="custom-card-clientpage clientheader py-4 d-flex justify-content-between align-items-start">
-            <div class="px-5">
-                <h5>Welcome Back</h5>
-                <div class="d-flex align-items-baseline gap-4">
-                    <h2 class="m-0"><strong>@(string.IsNullOrWhiteSpace(_clientName) ? "Client Name" : _clientName)</strong></h2>
-                    <h5 class="text-light fw-lighter m-0">
+        <main>
+            <header class="custom-card-clientpage clientheader py-4 d-flex justify-content-between align-items-start">
+                <div class="px-5">
+                    <h5>Welcome Back</h5>
+                    <div class="d-flex align-items-baseline gap-4">
+                    <h2 class="m-0"><strong>@(string.IsNullOrWhiteSpace(_clientName) ? "clientName" : _clientName)</strong></h2>
+                        <h5 class="text-light fw-lighter m-0">
                         @(string.IsNullOrWhiteSpace(_accountNumber) ? "XXXX-XXXX-XXXX" : FormatHelper.AccountNumberFormatter(_accountNumber))
                     </h5>
-                </div>
-            </div>
 
-            <!-- Notifications -->
-            <div class="d-flex align-items-center justify-content-center me-5 pt-3 position-relative notification" tabindex="0" @onblur="() => showNotifications = false">
-                <i class="@bellIcon" role="button" tabindex="0" @onclick="ToggleNotification" />
-
-                @if (showNotifications)
-                {
-                    <div class="notification-popup">
-                        <div class="d-flex justify-content-between align-items-baseline border-bottom">
-                            <label class="mb-3 fw-bold text-dark">Recent Notifications</label>
-                            <a href="/Notifications" class="nav-link text-decoration-none">View All</a>
-                        </div>
-
-                        <!-- Notification List -->
-                        <div class="container pt-3 px-3">
-                            @if (recentNotifications == null || !recentNotifications.Any())
-                            {
-                                <p class="text-muted">You have no recent notifications.</p>
-                            }
-                            else
-                            {
-                                @foreach (var notif in recentNotifications.Take(3))
-                                {
-                                    <div class="mb-3 border-bottom pb-2 text-dark">
-                                        <p class="m-0">
-                                            On <strong>@notif.Date.ToShortDateString()</strong>, <strong>@notif.Sender</strong> sent a notification involving <strong>@notif.Amount.ToString("C")</strong>.
-                                        </p>
-                                    </div>
-                                }
-                            }
-                        </div>
+                    <div class="w-auto">
+                        <select class="form-select form-select-sm" required>
+                            <option>Account 1</option>
+                            <option>Account 2</option>
+                            <option>Account 3</option>
+                            <option>Account 4</option>
+                        </select>
                     </div>
-                }
+
+                </div>
             </div>
 
-        </header>
-        <!-- Header -->
-        <!-- Main Section: Balance + Actions -->
-        <div class="container mt-4">
-            <div class="row">
+                <!-- Notifications -->
+                <div class="d-flex align-items-center justify-content-center me-5 pt-3 position-relative notification" tabindex="0" @onblur="() => showNotifications = false">
+                    <i class="@bellIcon" role="button" tabindex="0" @onclick="ToggleNotification" />
 
-                <!-- Balance Card -->
-                <div class="col-12 col-md-5 px-5">
-                    <section class="custom-card balance text-start p-3 h-100 border rounded shadow-sm bg-white w-100">
-                        <h3 class="fw-bold my-1">Current Balance:</h3>
-                        <h4 class="justify-content-center text-center align-items-center">
-                            <span class="@(_currentBalance >= 0 ? "text-success" : "text-danger")">
-                                @_currentBalance.ToString("C")
-                            </span>
-                        </h4>
-                        <div class="custom-card sm">
-                            <p class="m-1">
-                                <strong>Contact No.:</strong> @(string.IsNullOrWhiteSpace(_clientPhone) ? "N/A" : FormatHelper.PhoneNumberFormatter(_clientPhone))
-                            </p>
-                        </div>
-                    </section>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="col-12 col-md-6 my-auto">
-                    <div class="row g-4">
-
-                        <!-- Withdraw -->
-                        <div class="col-6">
-                            <a href="/Withdraw_amount" class="nav-link button d-flex justify-content-between align-items-center shadow-sm h-100">
-                                Withdraw
-                                <img src="/bootstrap/Utilities/withdraw.png" alt="Withdraw Icon" style="width: 30px; height: 30px; " />
-                            </a>
-                        </div>
-
-                        <!-- Transfer -->
-                        <div class="col-6">
-                            <a href="/Transfer_amount" class="nav-link button d-flex justify-content-between align-items-center shadow-sm h-100">
-                                Transfer
-                                <img src="/bootstrap/Utilities/transfer.png" alt="Transfer Icon" style="width: 20px; height: 20px; " />
-                            </a>
-                        </div>
-
-                        <!-- Deposit -->
-                        <div class="col-6">
-                            <a href="/Deposit_amount" class="nav-link button d-flex justify-content-between align-items-center shadow-sm h-100">
-                                Deposit
-                                <img src="/bootstrap/Utilities/deposit.png" alt="Deposit Icon" style="width: 30px; height: 30px; " />
-                            </a>
-                        </div>
-
-                        <!-- Loan -->
-                        <div class="col-6">
-                            <a href="/Apply_loan" class="nav-link button d-flex justify-content-between align-items-center shadow-sm h-100">
-                                Apply Loan
-                                <img src="/bootstrap/Utilities/loan.png" alt="Loan Icon" style="width: 23px; height: 23px;" />
-                            </a>
-                        </div>
-
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-
-        <!-- Recent Transactions Section -->
-        <div class="container-md mt-4 px-5">
-            <section class="custom-card transactions">
-                <div class="d-flex justify-content-between align-items-center border-bottom">
-                    <label class="fs-5 mb-3 fw-bold">Recent Transactions</label>
-                    <a href="/Transaction" class="btn btn-link text-decoration-none">View All</a>
-                </div>
-
-                <!-- Transactions List -->
-                <div class="container py-3 px-3">
-                    @if (recentTransactions == null || !recentTransactions.Any())
+                    @if (showNotifications)
                     {
-                        <p class="text-muted">No transactions available.</p>
-                    }
-                    else
-                    {
-                        @foreach (var tx in recentTransactions.Take(3))
-                        {
-                            <div class="row fs-6 mb-2 border-bottom pb-2">
-                                <div class="col">@tx.Type</div>
-                                <div class="col text-end">@tx.Amount.ToString("C")</div>
-                                <div class="col text-end">@tx.Date.ToShortDateString()</div>
+                        <div class="notification-popup">
+                            <div class="d-flex justify-content-between align-items-baseline border-bottom">
+                                <label class="mb-3 fw-bold text-dark">Recent Notifications</label>
+                                <a href="/Notifications" class="nav-link text-decoration-none">View All</a>
                             </div>
-                        }
+
+                            <!-- Notification List -->
+                            <div class="container pt-3 px-3">
+                                @if (recentNotifications == null || !recentNotifications.Any())
+                                {
+                                    <p class="text-muted">You have no recent notifications.</p>
+                                }
+                                else
+                                {
+                                    @foreach (var notif in recentNotifications.Take(3))
+                                    {
+                                        <div class="mb-3 border-bottom pb-2 text-dark">
+                                            <p class="m-0">
+                                                On <strong>@notif.Date.ToShortDateString()</strong>, <strong>@notif.Sender</strong> sent a notification involving <strong>@notif.Amount.ToString("C")</strong>.
+                                            </p>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
                     }
                 </div>
 
-            </section>
-        </div>
-    </main>
+            </header>
+            <!-- Header -->
+            <!-- Main Section: Balance + Actions -->
+            <div class="container mt-4">
+                <div class="row">
+
+                    <!-- Balance Card -->
+                    <div class="col-12 col-md-5 px-5">
+                        <section class="custom-card balance text-start p-3 h-100 border rounded shadow-sm bg-white w-100">
+                            <h3 class="fw-bold my-1">Current Balance:</h3>
+                            <h4 class="justify-content-center text-center align-items-center">
+                                <span class="@(_currentBalance >= 0 ? "text-success" : "text-danger")">
+                                    @_currentBalance.ToString("C")
+                                </span>
+                            </h4>
+                            <div class="custom-card sm">
+                                <p class="m-1">
+                                    <strong>Contact No.:</strong> @(string.IsNullOrWhiteSpace(_clientPhone) ? "N/A" : FormatHelper.PhoneNumberFormatter(_clientPhone))
+                                </p>
+                            </div>
+                        </section>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="col-12 col-md-6 my-auto">
+                        <div class="row g-4">
+
+                            <!-- Withdraw -->
+                            <div class="col-6">
+                                <a href="/Withdraw_amount" class="nav-link button d-flex justify-content-between align-items-center shadow-sm h-100">
+                                    Withdraw
+                                    <img src="/bootstrap/Utilities/withdraw.png" alt="Withdraw Icon" style="width: 30px; height: 30px; " />
+                                </a>
+                            </div>
+
+                            <!-- Transfer -->
+                            <div class="col-6">
+                                <a href="/Transfer_amount" class="nav-link button d-flex justify-content-between align-items-center shadow-sm h-100">
+                                    Transfer
+                                    <img src="/bootstrap/Utilities/transfer.png" alt="Transfer Icon" style="width: 20px; height: 20px; " />
+                                </a>
+                            </div>
+
+                            <!-- Deposit -->
+                            <div class="col-6">
+                                <a href="/Deposit_amount" class="nav-link button d-flex justify-content-between align-items-center shadow-sm h-100">
+                                    Deposit
+                                    <img src="/bootstrap/Utilities/deposit.png" alt="Deposit Icon" style="width: 30px; height: 30px; " />
+                                </a>
+                            </div>
+
+                            <!-- Loan -->
+                            <div class="col-6">
+                                <a href="/Apply_loan" class="nav-link button d-flex justify-content-between align-items-center shadow-sm h-100">
+                                    Apply Loan
+                                    <img src="/bootstrap/Utilities/loan.png" alt="Loan Icon" style="width: 23px; height: 23px;" />
+                                </a>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+
+            <!-- Recent Transactions Section -->
+            <div class="container-md mt-4 px-5">
+                <section class="custom-card transactions">
+                    <div class="d-flex justify-content-between align-items-center border-bottom">
+                        <label class="fs-5 mb-3 fw-bold">Recent Transactions</label>
+                        <a href="/Transaction" class="btn btn-link text-decoration-none">View All</a>
+                    </div>
+
+                    <!-- Transactions List -->
+                    <div class="container py-3 px-3">
+                        @if (recentTransactions == null || !recentTransactions.Any())
+                        {
+                            <p class="text-muted">No transactions available.</p>
+                        }
+                        else
+                        {
+                        @foreach (var tx in recentTransactions)
+                            {
+                                <div class="row fs-6 mb-2 border-bottom pb-2">
+                                <div class="col">@tx.TransactionType.TransactionTypeName</div>
+                                    <div class="col text-end">@tx.Amount.ToString("C")</div>
+                                <div class="col text-end">@tx.TransactionDate.ToShortDateString()</div>
+                                </div>
+                            }
+                        }
+                    </div>
+
+                </section>
+            </div>
+        </main>
 </div>
 
 
 @code {
+    private bool isLoading = true;
+
     [CascadingParameter]
     private Task<AuthenticationState> authenticationState { get; set; } = default!;
     // HttpContext? _httpContext { get; set; }
@@ -191,19 +203,7 @@
         public DateTime Date { get; set; }
     }
 
-    private List<Transaction> recentTransactions = new()
-    {
-        new Transaction { Type = "Deposit", Amount = 5000.00M, Date = DateTime.Now.AddDays(-1) },
-        new Transaction { Type = "Withdrawal", Amount = 2000.00M, Date = DateTime.Now.AddDays(-3) },
-        new Transaction { Type = "Transfer", Amount = 1000.00M, Date = DateTime.Now.AddDays(-5) }
-    };
-
-    public class Transaction
-    {
-        public string Type { get; set; }
-        public decimal Amount { get; set; }
-        public DateTime Date { get; set; }
-    }
+    private List<Transaction> recentTransactions = new();
 
     protected override async Task OnInitializedAsync() 
     {
@@ -229,14 +229,15 @@
             _clientName = Account.AccountName;
             _accountNumber = Account.AccountNumber;
             _currentBalance = Account.Balance;
+            recentTransactions = await _userDataService.GetRecentAccountTransactionsAsync(accountId, 3);
         }
 
         //  Retrieve userinfo id from claims.
         int userInfoId = Convert.ToInt32(_claimsHelper.GetClaimValue(_user, CustomClaimTypes.UserInfoId) ?? "0");
-        
+
         //  Retrieve userinfo from db.
         UserInfo = await _userDataService.GetUserInfoAsync(userInfoId);
-        
+
         if (UserInfo is not null)
         {
             _clientPhone = UserInfo.ContactNumber;

@@ -1,6 +1,9 @@
 ﻿@using E_BankingSystem.Components.Client_page.Accounts
 
+<!-- Card Component -->
 <section class="carousel-card text-start p-3 border shadow-sm h-100">
+
+    <!-- Card Details -->
     @if (!isEditing)
     {
         <div class="d-flex justify-content-between">
@@ -9,6 +12,7 @@
                 <h5 class="fw-lighter m-0">@Account.AccountNumber</h5>
             </div>
 
+            <!-- Edit Button -->
             @if (IsEditable)
             {
                 <div class="d-flex align-items-end px-3">
@@ -17,20 +21,28 @@
             }
         </div>
         <hr />
+
+        <!-- Available Balance -->
         <div class="d-flex justify-content-between mt-3">
             <p class="w-100">Available Balance:</p>
             <p class="text-success w-100">@Account.Balance</p>
         </div>
+
+        <!-- Current Balance -->
         <div class="d-flex justify-content-between">
             <p class="w-100">Current Balance:</p>
             <p class="text-success w-100">@Account.Balance</p>
         </div>
+
+        <!-- Contact Number -->
         <div class="custom-card sm mb-0 pb-0">
             <p class="m-1">
                 <strong>Contact No.:</strong> @ContactNumber
             </p>
         </div>
     }
+
+    <!-- Edit Card Details -->
     else
     {
         <div class="form-group mb-2">
@@ -39,8 +51,8 @@
         </div>
 
         <div class="d-flex justify-content-end gap-2 mt-3">
-            <button class="btn btn-success btn-sm" @onclick="SaveChanges">Save</button>
             <button class="btn btn-secondary btn-sm" @onclick="CancelEditMode">Cancel</button>
+            <button class="btn btn-success btn-sm" @onclick="SaveChanges">Save</button>
         </div>
     }
 </section>
