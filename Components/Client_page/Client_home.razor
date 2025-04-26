@@ -17,9 +17,19 @@
                     <h2 class="m-0"><strong>@(string.IsNullOrWhiteSpace(_clientName) ? "clientName" : _clientName)</strong></h2>
                         <h5 class="text-light fw-lighter m-0">
                         @(string.IsNullOrWhiteSpace(_accountNumber) ? "XXXX-XXXX-XXXX" : FormatHelper.AccountNumberFormatter(_accountNumber))
-                        </h5>
+                    </h5>
+
+                    <div class="w-auto">
+                        <select class="form-select form-select-sm" required>
+                            <option>Account 1</option>
+                            <option>Account 2</option>
+                            <option>Account 3</option>
+                            <option>Account 4</option>
+                        </select>
                     </div>
+
                 </div>
+            </div>
 
                 <!-- Notifications -->
                 <div class="d-flex align-items-center justify-content-center me-5 pt-3 position-relative notification" tabindex="0" @onblur="() => showNotifications = false">
