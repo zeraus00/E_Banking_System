@@ -19,43 +19,64 @@
             </div>
         </header>
 
-        <div class="card registration shadow-lg d-flex flex-column mt-4 p-3">
-            <h2 class="m-3">Manage Accounts</h2>
+        <div class="card accounts shadow-lg d-flex flex-column mt-4 p-3 justify-content-between">
+            <h5 class="m-3">Manage Accounts</h5>
+            <hr />
 
-            <section class="container">
-                <div class="carousel">
+            <section class="d-flex flex-column flex-md-row align-items-start m-4">
 
-                    <!-- Balance Card -->
-                    @if (accounts is not null && accounts.Any()) 
-                    {
-                        foreach (var account in accounts)
+                <button class="card position-absolute d-inline-flex align-items-center justify-content-center square-btn p-1 fs-1">
+                    +
+                </button>
+
+                <div class="carousel-wrapper position-relative">
+                    <div class="container d-flex">
+
+                        <div id="accountCarousel" class="carousel">
+                            <!-- Balance Card -->
+                            @if (accounts is not null && accounts.Any()) 
+                            {
+                                foreach (var account in accounts)
+                                {
+                                    <section class="carousel-card text-start p-3 border shadow-sm h-100">
+                                        <h3 class="fw-bold mt-3">@account.AccountName</h3>
+                                        <h5 class="text-light fw-lighter m-0">@account.AccountNumber</h5>
+
+                                        <hr />
+
+                                        <div class="d-flex justify-content-between mt-3">
+                                            <p class="w-100">Available Balance:</p>
+                                            <p class="text-success w-100">@account.Balance</p>
+                                        </div>
+
+                                        <div class="d-flex justify-content-between">
+                                            <p class="w-100">Current Balance:</p>
+                                            <p class="text-success w-100">@account.Balance</p>
+                                        </div>
+
+                                        <div class="custom-card sm mb-0 pb-0">
+                                            <p class="m-1">
+                                                <strong>Contact No.:</strong> @(userInfo?.ContactNumber ?? "09123456789")
+                                            </p>
+                                        </div>
+                                    </section>
+
+                                }
+                            }
+
+                        </div>
+
+                    </div>
+
+                    <div class="carousel-pagination d-flex justify-content-center mt-3">
+                        @for (int i = 0; i < accounts.Count; i++)
                         {
-                            <section class="carousel-card text-start p-3 border shadow-sm h-100">
-                                <h3 class="fw-bold mt-3">@account.AccountName</h3>
-                                <h5 class="text-light fw-lighter m-0">@account.AccountNumber</h5>
-
-                                <hr />
-
-                                <div class="d-flex justify-content-between mt-3">
-                                    <p class="w-100">Available Balance:</p>
-                                    <p class="text-success w-100">@account.Balance</p>
-                                </div>
-
-                                <div class="d-flex justify-content-between">
-                                    <p class="w-100">Current Balance:</p>
-                                    <p class="text-success w-100">@account.Balance</p>
-                                </div>
-
-                                <div class="custom-card sm mb-0 pb-0">
-                                    <p class="m-1">
-                                        <strong>Contact No.:</strong> @(userInfo?.ContactNumber ?? "09123456789")
-                                    </p>
-                                </div>
-                            </section>
+                            <button class="dot mx-1" onclick="scrollToCard(@i)"></button>
                         }
-                    }
+                    </div>
 
                 </div>
+
             </section>
 
         </div>
@@ -63,6 +84,18 @@
     </main>
 
 </div>
+
+<script>
+    function scrollToCard(index) {
+        const carousel = document.getElementById('accountCarousel');
+        const cardWidth = carousel.querySelector('.carousel-card').offsetWidth;
+        carousel.scrollTo({
+            left: index * (cardWidth + 19),
+            behavior: 'smooth'
+        });
+    }
+</script>
+
 
 @code {
     [CascadingParameter]
