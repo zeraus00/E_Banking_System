@@ -42,13 +42,12 @@
 
                     <section class="d-flex flex-column form-check d-flex justify-content-end mt-3">
                         <div class="text-end mt-3">
-                            <button class="btn btn-primary btn-lg w-100 mb-2" @onclick="ConfirmWithdraw">Confirm</button>
-                            @* <NavLink class="w-25" href="/Withdraw_receipt">
-                                <button class="btn btn-primary btn-lg w-100 mb-2">Confirm</button>
-                            </NavLink> *@
-                            <NavLink class="w-25" href="/Withdraw_amount">
-                                <button class="btn btn-warning btn-lg w-100 mb-3">Go Back</button>
-                            </NavLink>
+                            <div class="w-25">
+                                <button class="btn btn-primary btn-lg w-100 mb-2" @onclick="ConfirmWithdraw">Confirm</button>
+                            </div>
+                            <div class="w-25">
+                                <button class="btn btn-warning btn-lg w-100 mb-3" @onclick="CancelWithdraw">Go Back</button>
+                            </div>
                         </div>
 
                         <div class="pb-2">
@@ -109,7 +108,7 @@
             clientName = Account.AccountName;
         }
 
-        
+
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender) 
@@ -143,5 +142,14 @@
         {
             error = "You do not have sufficient balance";
         }
+    }
+
+    private async Task CancelWithdraw()
+    {
+        //  Persist cancelled transaction to database and delete transaction details from session storage.
+        await _transactionService.TransactionCancelledAsync(SessionSchemes.WithdrawScheme);
+
+        //  Redirect to client home.
+        _redirectService.redirectWithNavigationManager(PageRoutes.ClientHome);
     }
 }

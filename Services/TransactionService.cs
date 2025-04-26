@@ -28,6 +28,19 @@ namespace Services
             _storageService = storageService;
         }
 
+        /// <summary>
+        /// Initiates a transaction by validating the account balance, generating a transaction number, 
+        /// and storing transaction details in session storage.
+        /// If the account's balance is insufficient, the transaction is denied.
+        /// </summary>
+        /// <param name="sessionScheme">The key used to identify the session storage.</param>
+        /// <param name="mainAccountId">The ID of the main account initiating the transaction.</param>
+        /// <param name="transactionTypeId">The ID representing the type of transaction (e.g., withdrawal, transfer).</param>
+        /// <param name="amount">The amount involved in the transaction.</param>
+        /// <param name="counterAccountId">The ID of the counterparty account for transfer transactions (optional).</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        /// <exception cref="AccountNotFoundException">Thrown if the main account cannot be found in the database.</exception>
+        /// <exception cref="InsufficientBalanceException">Thrown if the main account does not have sufficient balance for the transaction.</exception>
         public async Task InitiateTransaction(
             string sessionScheme,
             int mainAccountId, 
@@ -71,6 +84,9 @@ namespace Services
                             transactionTime
                         );
 
+                    /*  Delete transaction session from session storage */
+                    await _storageService.DeleteSessionAsync(sessionScheme);
+
                     //  Rethrow exception
                     throw;
                 }
@@ -95,7 +111,16 @@ namespace Services
                     .StoreSessionAsync(sessionScheme, sessionObject);
             }
         }
-
+        /// <summary>
+        /// Processes a transaction by validating the session data, checking balances, updating account balances, 
+        /// creating transaction records, and saving the results to the database.
+        /// If the user's balance is insufficient, the transaction is denied.
+        /// </summary>
+        /// <param name="sessionScheme">The key used to retrieve and update the transaction session from storage.</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        /// <exception cref="SessionNotFoundException">Thrown if the transaction session cannot be found in session storage.</exception>
+        /// <exception cref="AccountNotFoundException">Thrown if the main or counter account cannot be found in the database.</exception>
+        /// <exception cref="InsufficientBalanceException">Thrown if the main account does not have enough balance to complete the transaction.</exception>
         public async Task ProcessTransactionAsync(string sessionScheme)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
@@ -105,7 +130,7 @@ namespace Services
                 var transactionRepository = new TransactionRepository(dbContext);
 
                 /*  Retrieve transaction details from session object */
-                //  Throws SessionNotFound if session is not found.
+                //  Throws SessionNotFoundException if session is not found.
                 TransactionSession transactionSession = await _storageService.FetchSessionAsync<TransactionSession>(sessionScheme);
                 int transactionTypeId = transactionSession.TransactionTypeId;       //  TransactionTypeId
                 int mainAccountId = transactionSession.MainAccountId;               //  MainAccountId
@@ -143,6 +168,10 @@ namespace Services
                                 transactionDate,
                                 transactionTime
                             );
+
+                        /*  Delete transaction session from session storage */
+                        await _storageService.DeleteSessionAsync(sessionScheme);
+
                         //  Rethrow exception
                         throw;
                     }
@@ -235,7 +264,51 @@ namespace Services
                     .StoreSessionAsync<TransactionSession>(SessionSchemes.WithdrawScheme, updatedTransactionSession);
             }
         }
+        /// <summary>
+        /// Cancels an ongoing transaction by retrieving its session details, 
+        /// recording it as a cancelled transaction in the database, 
+        /// and deleting the corresponding session from session storage.
+        /// </summary>
+        /// <param name="sessionScheme">The session scheme used to retrieve and delete the transaction session.</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        public async Task TransactionCancelledAsync(string sessionScheme)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                /*  Fetch transaction session details from session storage  */
+                TransactionSession transactionSession = await _storageService.FetchSessionAsync<TransactionSession>(sessionScheme);
+                
+                /*  Call TransactionDeniedOrCancelledAsync  */
+                await this.TransactionDeniedOrCancelledAsync(
+                    transactionSession.TransactionTypeId,
+                    transactionSession.TransactionNumber,
+                    TransactionStatus.Cancelled,
+                    transactionSession.MainAccountId,
+                    transactionSession.Amount,
+                    transactionSession.CurrentBalance,
+                    transactionSession.TransactionDate,
+                    transactionSession.TransactionTime,
+                    transactionSession.CounterAccountId
+                    );
 
+                /*  Delete transaction session from session storage */
+                await _storageService.DeleteSessionAsync(sessionScheme);
+            }
+        }
+
+        /// <summary>
+        /// Records a denied or cancelled transaction in the database by creating a transaction entry 
+        /// without modifying the account balance.
+        /// </summary>
+        /// <param name="transactionTypeId">The ID representing the type of transaction attempted.</param>
+        /// <param name="transactionNumber">The unique transaction number assigned to the transaction.</param>
+        /// <param name="status">The status indicating why the transaction was not completed (e.g., Denied, Cancelled).</param>
+        /// <param name="accountId">The ID of the main account involved in the transaction.</param>
+        /// <param name="amount">The transaction amount that was attempted.</param>
+        /// <param name="balance">The current balance of the account at the time of the attempt.</param>
+        /// <param name="transactionDate">The date when the transaction was attempted.</param>
+        /// <param name="transactionTime">The time when the transaction was attempted.</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
         public async Task TransactionDeniedOrCancelledAsync(
             int transactionTypeId,
             string transactionNumber,
@@ -244,13 +317,14 @@ namespace Services
             decimal amount,
             decimal balance,
             DateTime transactionDate,
-            TimeSpan transactionTime)
+            TimeSpan transactionTime,
+            int? counterAccountId = null)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
                 var transactionRepository = new TransactionRepository(dbContext);
 
-                Transaction failedTransaction = new TransactionBuilder()
+                TransactionBuilder failedTransactionBuilder = new TransactionBuilder()
                     .WithTransactionTypeId(transactionTypeId)
                     .WithTransactionNumber(transactionNumber)
                     .WithStatus(status)
@@ -259,8 +333,12 @@ namespace Services
                     .WithPreviousBalance(balance)
                     .WithNewBalance(balance)
                     .WithTransactionDate(transactionDate)
-                    .WithTransactionTime(transactionTime)
-                    .Build();
+                    .WithTransactionTime(transactionTime);
+
+                if (counterAccountId is int id)
+                    failedTransactionBuilder.WithCounterAccountId(id);
+
+                Transaction failedTransaction = failedTransactionBuilder.Build();
 
                 await transactionRepository.AddAsync(failedTransaction);
                 await transactionRepository.SaveChangesAsync();
