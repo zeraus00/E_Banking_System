@@ -8,6 +8,7 @@
         public const string AccountOpening = "/Account_opening";
         public const string ClientHome = "/Client_home";
         public const string MyAccounts = "/My_accounts";
+        public const string ManageAccounts = "/Manage_accounts";
         public const string WithdrawAmount = "/Withdraw_amount";
         public const string WithdrawConfirmation = "/Withdraw_confirmation";
         public const string WithdrawReceipt = "/Withdraw_receipt";
