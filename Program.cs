@@ -212,6 +212,8 @@ static async Task SeedData(IDbContextFactory<EBankingContext> contextFactory)
 
         // Seed AccountTypes
         await accountTypeSeeders.SeedAccountTypes();
+        // Seed StatusTypes
+        await accountTypeSeeders.SeedAccountStatusTypes();
         // Seed Accounts
         await accountSeeders.SeedAccounts();
         // Seed TransactionTypes

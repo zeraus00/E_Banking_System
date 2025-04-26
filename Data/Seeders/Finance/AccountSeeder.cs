@@ -20,7 +20,7 @@ namespace Data.Seeders.Finance
                     .WithAccountProductTypeId((int)AccountProductTypes.Checking)
                     .WithAccountNumber("123456789ABC")
                     .WithAccountName("Bogart Dela Mon Sr.")
-                    .WithAccountStatus("Active")
+                    .WithAccountStatus((int)AccountStatusTypes.Active)
                     .WithBalance(696969)
                     .Build();
                 await _accountRepository.AddAsync(account);
