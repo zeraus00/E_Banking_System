@@ -190,9 +190,18 @@
 						</select>
 					</div>
 
-					<!-- City -->
+					<!-- Postal Code -->
 					<div class="col">
-						<label class="text-light">City</label>
+						<label class="text-light">Postal Code</label>
+						<select class="form-select form-select-sm" value="#" required>
+							<option value="" disabled hidden> # </option>
+							
+						</select>
+					</div>
+
+					<!-- Municipality/City -->
+					<div class="col">
+						<label class="text-light">Municipality/City</label>
 						<select class="form-select form-select-sm" value="@selectedCity" @onchange="async _ => await LoadBarangaysAsync(_)" required>
 							<option value="" disabled hidden>@cityPlaceHolder</option>
 							@foreach (var c in citiesFromProvince)
@@ -203,7 +212,7 @@
 					</div>
 
 					<!-- Barangay -->
-					<div class="col-3">
+					<div class="col">
 						<label class="text-light">Barangay</label>
 						<select class="form-select form-select-sm" value="@selectedBarangay" required>
 							<option value="" disabled hidden>@barangayPlaceHolder</option>
