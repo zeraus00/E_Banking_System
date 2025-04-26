@@ -4,6 +4,7 @@
     {
         public const string LandingPage = "/";
         public const string LogInPage = "/Login_page";
+        public const string LogOutPage = "/Logout_page";
         public const string AccountOpening = "/Account_opening";
         public const string ClientHome = "/Client_home";
         public const string MyAccounts = "/My_accounts";
