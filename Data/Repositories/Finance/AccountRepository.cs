@@ -115,7 +115,7 @@ namespace Data.Repositories.Finance
             if (includeLinkedBeneficiaryAccount) { query = query.Include(a => a.LinkedBeneficiaryAccount); }
             if (includeLinkedSourceAccounts) { query = query.Include(a => a.LinkedSourceAccounts); }
             if (includeUsersAuth) { query = query.Include(a => a.UsersAuth); }
-            if (includeTransactions) { query = query.Include(a => a.Transactions); }
+            if (includeTransactions) { query = query.Include(a => a.MainTransactions); }
             if (includeLoans) { query = query.Include(a => a.Loans); }
             if (includeLoanTransactions) { query = query.Include(a => a.LoanTransactions); }
 

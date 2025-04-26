@@ -21,6 +21,31 @@
                 .Property(t => t.TransactionTypeId)
                 .IsRequired();
 
+            //  TransactionNumber (Required, VARCHAR(32), FixedLength)
+            Transactions
+                .Property(t => t.TransactionNumber)
+                .HasMaxLength(32)
+                .IsFixedLength()
+                .IsRequired();
+
+            //  Status  (Required, MaxLength(20))
+            Transactions
+                .Property(t => t.Status)
+                .HasMaxLength(20)
+                .IsRequired();
+
+            //  ConfirmationNumber (Optional, VARCHAR(28), FixedLength)
+            Transactions
+                .Property(t => t.ConfirmationNumber)
+                .HasMaxLength(28)
+                .IsFixedLength()
+                .IsRequired(false);
+
+            //  CounterAccountId (Optional)
+            Transactions
+                .Property(t => t.CounterAccountId)
+                .IsRequired(false);
+
             //  Amount (Required, DECIMAL(18,2))
             Transactions
                 .Property(t => t.Amount)
@@ -55,13 +80,19 @@
 
             /*
              *  Configure Relationships
-             *  Accounts (many-to-one)
+             *  Accounts: MainAccount (many-to-one) 
+             *  Accounts: CounterAccount (many-to-one)
              *  TransactionTypes (many-to-one)
              */
             Transactions
-                .HasOne(t => t.Account)
-                .WithMany(a => a.Transactions)
-                .HasForeignKey(t => t.AccountId)
+                .HasOne(t => t.MainAccount)
+                .WithMany(a => a.MainTransactions)
+                .HasForeignKey(t => t.MainAccountId)
+                .OnDelete(DeleteBehavior.Restrict);
+            Transactions
+                .HasOne(t => t.CounterAccount)
+                .WithMany(a => a.CounterTransactions)
+                .HasForeignKey(t => t.CounterAccountId)
                 .OnDelete(DeleteBehavior.Restrict);
             Transactions
                 .HasOne(t => t.TransactionType)
