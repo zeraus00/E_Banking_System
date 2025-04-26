@@ -120,7 +120,10 @@
 
     private async Task GoHome() 
     {
+        //  Delete transaction session details from session storage.
         await _storageService.DeleteSessionAsync(SessionSchemes.WithdrawScheme);
+
+        //  Redirect user to client home.
         _redirectService.redirectWithNavigationManager(PageRoutes.ClientHome);
     }
 }
