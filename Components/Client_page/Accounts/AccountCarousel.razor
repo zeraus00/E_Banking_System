@@ -1,0 +1,55 @@
+﻿@using E_BankingSystem.Components.Client_page.Accounts
+
+<div class="flex-grow-1 d-flex justify-content-center container">
+    <div class="carousel-wrapper">
+        <div id="accountCarousel" class="carousel">
+            @if (Accounts is not null && Accounts.Any())
+            {
+                foreach (var account in Accounts)
+                {
+                    <AccountCard Account="account" ContactNumber="@(UserInfo?.ContactNumber ?? "09123456789")" IsEditable="IsEditable" />
+                }
+            }
+        </div>
+
+        <div class="carousel-pagination d-flex justify-content-center mt-3">
+            @for (int i = 0; i < Accounts.Count; i++)
+            {
+                <button class="dot mx-1" onclick="scrollToCard(@i)"></button>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    function scrollToCard(index) {
+        const carousel = document.getElementById('accountCarousel');
+        const cards = carousel.querySelectorAll('.carousel-card');
+
+        if (cards.length === 0 || !cards[index]) return;
+
+        const card = cards[index];
+        const carouselLeft = carousel.getBoundingClientRect().left;
+        const cardLeft = card.getBoundingClientRect().left;
+
+        const scrollLeft = carousel.scrollLeft;
+        const offset = cardLeft - carouselLeft;
+
+        carousel.scrollTo({
+            left: scrollLeft + offset,
+            behavior: 'smooth'
+        });
+    }
+</script>
+
+@code {
+    [Parameter]
+    public List<Account> Accounts { get; set; } = new List<Account>();
+
+    [Parameter]
+    public UserInfo? UserInfo { get; set; }
+
+    [Parameter]
+    public bool IsEditable { get; set; } = false;
+
+}
