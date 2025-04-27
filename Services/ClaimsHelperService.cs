@@ -49,8 +49,7 @@ namespace Services
 
             return new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, userAuth.UserAuthId.ToString()),
-                new Claim(ClaimTypes.Name, userAuth.Email),
+                new Claim(CustomClaimTypes.USERAUTH_ID, userAuth.UserAuthId.ToString()),
                 new Claim(ClaimTypes.Role, userAuth.Role.RoleName),
                 new Claim(CustomClaimTypes.ROLE_ID, roleId),
                 new Claim(CustomClaimTypes.USERINFO_ID, userInfoId)

@@ -100,7 +100,7 @@
 		user = authState.User;
 
 		//	Retrieve email from claims
-		email = _claimsHelper.GetClaimValue(user, ClaimTypes.Name) ?? string.Empty;
+		// email = _claimsHelper.GetClaimValue(user, ClaimTypes.Name) ?? string.Empty;
 		//  Retrieve userAuth id from claims.
 		var userAuthId = Convert.ToInt32(_claimsHelper.GetClaimValue(user, ClaimTypes.NameIdentifier) ?? "0");
 
