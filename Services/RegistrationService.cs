@@ -14,7 +14,12 @@ namespace Services
         public RegistrationService(IDbContextFactory<EBankingContext> contextFactory) : base(contextFactory) { }
 
 
-        public async Task RegisterAsync(string accountType, string accountProductType, string userFirstName, string? userMiddleName, string userLastName, string? userSuffix,
+        public async Task RegisterUserInfoAsync(UserAuth userAuthId) 
+        {
+
+        }
+
+        public async Task RegisterAsync(int accountTypeId, int accountProductTypeId, string userFirstName, string? userMiddleName, string userLastName, string? userSuffix,
                 string fatherFirstName, string? fatherMiddleName, string fatherLastName, string? fatherSuffix,
                 string motherFirstName, string? motherMiddleName, string motherLastName, string? motherSuffix,
                 string beneficiaryFirstName, string? beneficiaryMiddleName, string beneficiaryLastName, string? beneficiarySuffix,
@@ -24,8 +29,7 @@ namespace Services
                 string username, string email, string password
             )
         {
-            AccountType userAccountType = await UserAccountType(accountType);
-            AccountProductType userAccProductType = await RegisterAccountProductType(accountProductType);
+            Account userAccount = await RegisterAccount(accountTypeId, accountProductTypeId);
             Name UserName = await RegisterName(userFirstName, userMiddleName, userLastName, userSuffix);
             Name FatherName = await RegisterName(fatherFirstName, fatherMiddleName, fatherLastName, fatherSuffix);
             Name MotherName = await RegisterName(motherFirstName, motherMiddleName, motherLastName, motherSuffix);
@@ -40,8 +44,8 @@ namespace Services
 
             UserInfo UserInfo = await RegisterUserInfo(
                 userAuth.UserAuthId,
-                userAccountType.AccountTypeId,
-                userAccProductType.AccountProductTypeId,
+                userAccount.AccountTypeId,
+                userAccount.AccountProductTypeId,
                 UserName.NameId,
                 MotherName.NameId,
                 FatherName.NameId,
@@ -329,49 +333,37 @@ namespace Services
             }
         }
 
-        public async Task<AccountProductType> RegisterAccountProductType(string accountProductType) 
+        public async Task<Account> RegisterAccount(int accountTypeId,int accountProductTypeId) 
         {
-            if (string.IsNullOrWhiteSpace(accountProductType)) 
+            if (accountTypeId <= 0) 
+            {
+                throw new FieldMissingException("Account Type is required.");
+            }
+
+            if (accountProductTypeId <= 0) 
             {
                 throw new FieldAccessException("Account product type is required.");
             }
 
-            var accountProductTypeBuilder = new AccountProductTypeBuilder();
-            accountProductTypeBuilder
-                .WithAccountProductTypeName(accountProductType);
 
-            AccountProductType userAccountProductType = accountProductTypeBuilder.Build();
+
+            var accountBuilder = new AccountBuilder();
+            accountBuilder
+                .WithAccountType(accountTypeId)
+                .WithAccountProductTypeId(accountProductTypeId);
+
+            Account userAccount = accountBuilder.Build();
 
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
-                AccountProductTypeRepository accProductTypeRepo = new AccountProductTypeRepository(dbContext);
-                await accProductTypeRepo.AddAsync(userAccountProductType);
-                await accProductTypeRepo.SaveChangesAsync(); 
-                return userAccountProductType;
+                AccountRepository accountRepo = new AccountRepository(dbContext);
+                await accountRepo.AddAsync(userAccount);
+                await accountRepo.SaveChangesAsync(); 
+                return userAccount;
             }
         }
 
-        public async Task<AccountType> UserAccountType(string accountType) 
-        {
-            if (string.IsNullOrWhiteSpace(accountType)) 
-            {
-                throw new FieldAccessException("Account Type is required.");
-            }
-
-            var accountTypeBuilder = new AccountTypeBuilder();
-            accountTypeBuilder
-                .WithAccountTypeName(accountType);
-
-            AccountType userAccountType = accountTypeBuilder.Build();
-
-            await using (var dbContext = await _contextFactory.CreateDbContextAsync()) 
-            {
-                AccountTypeRepository accTypeRepo = new AccountTypeRepository(dbContext);
-                await accTypeRepo.AddAsync(userAccountType);
-                await accTypeRepo.SaveChangesAsync();
-                return userAccountType;
-            }
-        }
+        
 
 
     }

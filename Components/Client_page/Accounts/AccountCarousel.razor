@@ -1,17 +1,32 @@
 ﻿@using E_BankingSystem.Components.Client_page.Accounts
 
+<!-- Carousel Component -->
 <div class="flex-grow-1 d-flex justify-content-center container">
     <div class="carousel-wrapper">
+
+        <!-- Left Arrow -->
+        <button class="carousel-arrow left" @onclick="scrollLeft">
+            <i class="bi bi-chevron-left text-light"></i>
+        </button>
+
+        <!-- The Carousel Scroll Area -->
         <div id="accountCarousel" class="carousel">
             @if (Accounts is not null && Accounts.Any())
             {
                 foreach (var account in Accounts)
                 {
                     <AccountCard Account="account" ContactNumber="@(UserInfo?.ContactNumber ?? "09123456789")" IsEditable="IsEditable" />
+                    <AccountCard Account="account" ContactNumber="@(UserInfo?.ContactNumber ?? "09123456789")" IsEditable="IsEditable" />
                 }
             }
         </div>
 
+        <!-- Right Arrow -->
+        <button class="carousel-arrow right" @onclick="scrollRight">
+            <i class="bi bi-chevron-right text-light"></i>
+        </button>
+
+        <!-- Pagination Dots -->
         <div class="carousel-pagination d-flex justify-content-center mt-3">
             @for (int i = 0; i < Accounts.Count; i++)
             {
@@ -19,26 +34,40 @@
             }
         </div>
     </div>
+
 </div>
 
+
+<!-- JavaScript (Carousel Horizontal Scroll) -->
 <script>
+    function scrollCarousel(direction) {
+    const carousel = document.getElementById('accountCarousel');
+    const scrollAmount = 300;
+
+    if (direction === 'left') {
+    carousel.scrollBy({ left: -scrollAmount, behavior: 'smooth'});
+    } else if (direction === 'right') {
+    carousel.scrollBy({ left: scrollAmount, behavior: 'smooth'});
+    }
+    }
+
     function scrollToCard(index) {
-        const carousel = document.getElementById('accountCarousel');
-        const cards = carousel.querySelectorAll('.carousel-card');
+    const carousel = document.getElementById('accountCarousel');
+    const cards = carousel.querySelectorAll('.carousel-card');
 
-        if (cards.length === 0 || !cards[index]) return;
+    if (cards.length === 0 || !cards[index]) return;
 
-        const card = cards[index];
-        const carouselLeft = carousel.getBoundingClientRect().left;
-        const cardLeft = card.getBoundingClientRect().left;
+    const card = cards[index];
+    const carouselLeft = carousel.getBoundingClientRect().left;
+    const cardLeft = card.getBoundingClientRect().left;
 
-        const scrollLeft = carousel.scrollLeft;
-        const offset = cardLeft - carouselLeft;
+    const scrollLeft = carousel.scrollLeft;
+    const offset = cardLeft - carouselLeft;
 
-        carousel.scrollTo({
-            left: scrollLeft + offset,
-            behavior: 'smooth'
-        });
+    carousel.scrollTo({
+    left: scrollLeft + offset,
+    behavior: 'smooth'
+    });
     }
 </script>
 
@@ -52,4 +81,16 @@
     [Parameter]
     public bool IsEditable { get; set; } = false;
 
+    private void scrollLeft()
+    {
+        _ = JS.InvokeVoidAsync("scrollCarousel", "left");
+    }
+
+    private void scrollRight()
+    {
+        _ = JS.InvokeVoidAsync("scrollCarousel", "right");
+    }
+
+    [Inject]
+    private IJSRuntime JS { get; set; } = default;
 }

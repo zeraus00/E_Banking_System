@@ -1,4 +1,4 @@
-﻿@page "/Accounts"
+﻿@page "/Client_home"
 @attribute [Authorize(Roles = "User")]
 
 @inject NavigationManager NavigationManager
@@ -28,8 +28,7 @@
 
                     <!-- Edit Toggle Button -->
                     <div class="d-flex flex-column align-items-center mt-3">
-                        <button class="card square-btn d-inline-flex align-items-center justify-content-center p-1 fs-3"
-                                @onclick="ToggleEdit">
+                        <button class="@EditButtonClass" @onclick="ToggleEdit">
                             <i class="@EditIcon"></i>
                         </button>
                     </div>
@@ -85,4 +84,9 @@
     }
 
     private string EditIcon => IsEditable ? "bi bi-pen-fill" : "bi bi-pen";
+
+    private string EditButtonClass => IsEditable
+    ? "card square-btn d-inline-flex align-items-center justify-content-center p-1 fs-3 bg-secondary text-white"
+    : "card square-btn d-inline-flex align-items-center justify-content-center p-1 fs-3";
+
 }
