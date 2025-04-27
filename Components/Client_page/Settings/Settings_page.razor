@@ -113,7 +113,7 @@
 		var accountId = await _userDataService.GetFirstAccountAsync(userAuthId) ?? 0;
 		
 		//	Retrieve userinfo id from claims
-		userInfoId = Convert.ToInt32(_claimsHelper.GetClaimValue(user, CustomClaimTypes.UserInfoId) ?? "0");
+		userInfoId = Convert.ToInt32(_claimsHelper.GetClaimValue(user, CustomClaimTypes.USERINFO_ID) ?? "0");
 
 		//  Retrieve account from db.
 		Account = await _userDataService.GetAccountAsync(accountId);

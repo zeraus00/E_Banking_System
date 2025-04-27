@@ -133,7 +133,7 @@
             catch (SessionNotFoundException) 
             {
                 //  Redirect to client home if users try to access the page without an ongoing transaction session.
-                _redirectService.redirectWithNavigationManager(PageRoutes.ClientHome);
+                _redirectService.redirectWithNavigationManager(PageRoutes.CLIENT_HOME);
             }
         }
     }
@@ -146,7 +146,7 @@
             await _transactionService.ProcessTransactionAsync(SessionSchemes.WITHDRAW_SESSION);
 
             //  Redirect to withdraw receipt page.
-            _redirectService.redirectWithNavigationManager(PageRoutes.WithdrawReceipt);
+            _redirectService.redirectWithNavigationManager(PageRoutes.WITHDRAW_RECEIPT);
         } 
         catch (AccountNotFoundException)
         {
@@ -164,6 +164,6 @@
         await _transactionService.TransactionCancelledAsync(SessionSchemes.WITHDRAW_SESSION);
 
         //  Redirect to client home.
-        _redirectService.redirectWithNavigationManager(PageRoutes.ClientHome);
+        _redirectService.redirectWithNavigationManager(PageRoutes.CLIENT_HOME);
     }
 }

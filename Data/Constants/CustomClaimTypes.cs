@@ -2,7 +2,7 @@
 {
     public static class CustomClaimTypes
     {
-        public const string RoleId = "nexusbanking:role_id";
-        public const string UserInfoId = "nexusbanking:user_info_id";
+        public const string ROLE_ID = "nexusbanking:role_id";
+        public const string USERINFO_ID = "nexusbanking:user_info_id";
     }
 }

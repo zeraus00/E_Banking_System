@@ -108,7 +108,7 @@
             await _transactionService.InitiateTransaction(SessionSchemes.WITHDRAW_SESSION, accountId, (int)TransactionTypes.Withdrawal, withdrawAmount);
 
             //  Redirect to withdraw confirmation page.
-            _redirectService.redirectWithNavigationManager(PageRoutes.WithdrawConfirmation);
+            _redirectService.redirectWithNavigationManager(PageRoutes.WITHDRAW_CONFIRMATION);
         } 
         catch (AccountNotFoundException) 
         {

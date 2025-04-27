@@ -2,15 +2,15 @@
 {
     public class AccountProductTypeNames
     {
-        public const string Savings = "Savings";
-        public const string Checking = "Checking";
-        public const string Loan = "Loan";
+        public const string SAVINGS = "Savings";
+        public const string CHECKING = "Checking";
+        public const string LOAN = "Loan";
 
         public readonly List<string> AccountProductTypeNameList = new()
         {
-            Savings,
-            Checking,
-            Loan
+            SAVINGS,
+            CHECKING,
+            LOAN
         };
     }
 }

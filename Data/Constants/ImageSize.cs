@@ -2,6 +2,6 @@
 {
     public class ImageSize
     {
-        public const int OneMegaByte = 1024 * 1024;
+        public const int ONE_MEGA_BYTE = 1024 * 1024;
     }
 }

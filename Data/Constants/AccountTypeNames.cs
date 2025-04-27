@@ -2,13 +2,13 @@
 {
     public class AccountTypeNames
     {
-        public const string PersonalAccount = "Personal Account";
-        public const string JointAccount = "Joint Account";
+        public const string PERSONAL_ACCOUNT = "Personal Account";
+        public const string JOINT_ACCOUNT = "Joint Account";
 
         public readonly List<string> AccountTypeNameList = new()
         {
-            PersonalAccount,
-            JointAccount
+            PERSONAL_ACCOUNT,
+            JOINT_ACCOUNT
         };
     }
 }

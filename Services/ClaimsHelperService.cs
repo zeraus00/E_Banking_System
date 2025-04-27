@@ -52,8 +52,8 @@ namespace Services
                 new Claim(ClaimTypes.NameIdentifier, userAuth.UserAuthId.ToString()),
                 new Claim(ClaimTypes.Name, userAuth.Email),
                 new Claim(ClaimTypes.Role, userAuth.Role.RoleName),
-                new Claim(CustomClaimTypes.RoleId, roleId),
-                new Claim(CustomClaimTypes.UserInfoId, userInfoId)
+                new Claim(CustomClaimTypes.ROLE_ID, roleId),
+                new Claim(CustomClaimTypes.USERINFO_ID, userInfoId)
             };
         }
 

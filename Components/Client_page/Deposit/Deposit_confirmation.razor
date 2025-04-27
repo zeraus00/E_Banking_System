@@ -134,7 +134,7 @@
             catch (SessionNotFoundException)
             {
                 //  Redirect user to client home if there is no ongoing transaction session.
-                _redirectService.redirectWithNavigationManager(PageRoutes.ClientHome);
+                _redirectService.redirectWithNavigationManager(PageRoutes.CLIENT_HOME);
             }
         }
     }
@@ -147,7 +147,7 @@
             await _transactionService.ProcessTransactionAsync(SessionSchemes.DEPOSIT_SESSION);
 
             //  Redirect to deposit receipt page.
-            _redirectService.redirectWithNavigationManager(PageRoutes.DepositReceipt);
+            _redirectService.redirectWithNavigationManager(PageRoutes.DEPOSIT_RECEIPT);
         } catch (AccountNotFoundException)
         {
             error = "Error resolving database. Please try again later.";
@@ -159,6 +159,6 @@
         //  Persist cancelled transaction to database and delete transaction details from session.
         await _storageService.DeleteSessionAsync(SessionSchemes.DEPOSIT_SESSION);
 
-        _redirectService.redirectWithNavigationManager(PageRoutes.ClientHome);
+        _redirectService.redirectWithNavigationManager(PageRoutes.CLIENT_HOME);
     }
 }

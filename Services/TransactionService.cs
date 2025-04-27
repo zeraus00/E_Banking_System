@@ -76,7 +76,7 @@ namespace Services
                     await this.TransactionDeniedOrCancelledAsync(
                             transactionTypeId,
                             transactionNumber,
-                            TransactionStatus.Denied,
+                            TransactionStatus.DENIED,
                             mainAccountId,
                             amount,
                             mainAccount.Balance,
@@ -161,7 +161,7 @@ namespace Services
                         await this.TransactionDeniedOrCancelledAsync(
                                 transactionTypeId,
                                 transactionNumber,
-                                TransactionStatus.Denied,
+                                TransactionStatus.DENIED,
                                 mainAccountId,
                                 amount,
                                 mainAccount.Balance,
@@ -192,7 +192,7 @@ namespace Services
                 mainTransactionBuilder
                     .WithTransactionTypeId(transactionTypeId)
                     .WithTransactionNumber(transactionNumber)
-                    .WithStatus(TransactionStatus.Confirmed)
+                    .WithStatus(TransactionStatus.CONFIRMED)
                     .WithConfirmationNumber(confirmationNumber)
                     .WithMainAccountId(mainAccountId)
                     .WithAmount(amount)
@@ -225,7 +225,7 @@ namespace Services
                     Transaction counterTransaction = new TransactionBuilder()
                         .WithTransactionTypeId((int)TransactionTypes.Incoming_Transfer)
                         .WithTransactionNumber(transactionNumber)
-                        .WithStatus(TransactionStatus.Confirmed)
+                        .WithStatus(TransactionStatus.CONFIRMED)
                         .WithConfirmationNumber(confirmationNumber)
                         .WithMainAccountId(counterId)
                         .WithCounterAccountId(mainAccountId)
@@ -282,7 +282,7 @@ namespace Services
                 await this.TransactionDeniedOrCancelledAsync(
                     transactionSession.TransactionTypeId,
                     transactionSession.TransactionNumber,
-                    TransactionStatus.Cancelled,
+                    TransactionStatus.CANCELLED,
                     transactionSession.MainAccountId,
                     transactionSession.Amount,
                     transactionSession.CurrentBalance,

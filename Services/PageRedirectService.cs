@@ -44,7 +44,7 @@ namespace Services
         /// <param name="user"></param>
         public void RedirectBasedOnRole(ClaimsPrincipal user) 
         {
-            int roleId = Convert.ToInt32(user.FindFirst(c => c.Type == CustomClaimTypes.RoleId)?.Value ?? "0");
+            int roleId = Convert.ToInt32(user.FindFirst(c => c.Type == CustomClaimTypes.ROLE_ID)?.Value ?? "0");
             var redirectUrl = this.GetRedirectBasedOnRole(roleId);
             
             try
@@ -82,9 +82,9 @@ namespace Services
             return roleId switch
             {
                 (int)RoleTypes.Administrator => "/",
-                (int)RoleTypes.User => PageRoutes.ClientHome,       //  Client Home
+                (int)RoleTypes.User => PageRoutes.CLIENT_HOME,       //  Client Home
                 (int)RoleTypes.Employee => "/",
-                _ => PageRoutes.LandingPage                         //  Landing Page
+                _ => PageRoutes.LANDING_PAGE                         //  Landing Page
             };
         }
         /// <summary>
@@ -93,7 +93,7 @@ namespace Services
         /// </summary>
         public string GetRedirectToLogInPage()
         {
-            return PageRoutes.LogInPage;
+            return PageRoutes.LOG_IN_PAGE;
         }
     }
 }

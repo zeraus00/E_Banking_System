@@ -227,7 +227,7 @@
         }
 
         //  Retrieve userinfo id from claims.
-        int userInfoId = Convert.ToInt32(_claimsHelper.GetClaimValue(_user, CustomClaimTypes.UserInfoId) ?? "0");
+        int userInfoId = Convert.ToInt32(_claimsHelper.GetClaimValue(_user, CustomClaimTypes.USERINFO_ID) ?? "0");
 
         //  Retrieve userinfo from db.
         UserInfo = await _userDataService.GetUserInfoAsync(userInfoId);

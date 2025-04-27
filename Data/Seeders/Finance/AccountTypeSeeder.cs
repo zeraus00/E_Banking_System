@@ -67,13 +67,13 @@ namespace Data.Seeders.Finance
                 var statusTypeList = new List<string>
                 {
                     AccountStatusTypeNames.Active,
-                    AccountStatusTypeNames.Pending,
-                    AccountStatusTypeNames.Inactive,
-                    AccountStatusTypeNames.Dormant,
-                    AccountStatusTypeNames.Closed,
-                    AccountStatusTypeNames.Suspended,
-                    AccountStatusTypeNames.Frozen,
-                    AccountStatusTypeNames.Restricted
+                    AccountStatusTypeNames.PENDING,
+                    AccountStatusTypeNames.INACTIVE,
+                    AccountStatusTypeNames.DORMANT,
+                    AccountStatusTypeNames.CLOSED,
+                    AccountStatusTypeNames.SUSPENDED,
+                    AccountStatusTypeNames.FROZEN,
+                    AccountStatusTypeNames.RESTRICTED
                 };
 
                 foreach(var typeName in statusTypeList)

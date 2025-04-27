@@ -2,13 +2,13 @@
 {
     public class AccountStatusTypeNames
     {
-        public const string Active = "Active";
-        public const string Pending = "Pending";
-        public const string Inactive = "Inactive";
-        public const string Dormant = "Dormant";
-        public const string Closed = "Closed";
-        public const string Suspended = "Suspended";
-        public const string Frozen = "Frozen";
-        public const string Restricted = "Restricted";
+        public const string ACTIVE = "Active";
+        public const string PENDING = "Pending";
+        public const string INACTIVE = "Inactive";
+        public const string DORMANT = "Dormant";
+        public const string CLOSED = "Closed";
+        public const string SUSPENDED = "Suspended";
+        public const string FROZEN = "Frozen";
+        public const string RESTRICTED = "Restricted";
     }
 }
