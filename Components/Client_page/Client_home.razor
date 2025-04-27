@@ -214,12 +214,6 @@
         //  Retrieve userAuth id from claims.
         var userAuthId = Convert.ToInt32(_claimsHelper.GetClaimValue(_user, ClaimTypes.NameIdentifier) ?? "0");
 
-        // //  Retrieve account id list from userAuthObject
-        // List<int>? accountIds = await _userDataService.GetAccountIdListAsync(userAuthId);
-
-        // //  Retreive account id from list.
-        // var accountId = accountIds?[0] ?? 5;
-
         var accountId = await _userDataService.GetFirstAccountAsync(userAuthId) ?? 0;
 
         //  Retrieve account from db.
@@ -242,6 +236,5 @@
         {
             _clientPhone = UserInfo.ContactNumber;
         }
-
     }
 }
