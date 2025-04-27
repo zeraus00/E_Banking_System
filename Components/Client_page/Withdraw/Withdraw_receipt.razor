@@ -98,7 +98,7 @@
             {   
                 //  Fetch transaction session details from session storage.
                 //  Throws SessionNotFoundException if session is not found.
-                TransactionSession transactionSession = await _storageService.FetchSessionAsync<TransactionSession>(SessionSchemes.WithdrawScheme);
+                TransactionSession transactionSession = await _storageService.FetchSessionAsync<TransactionSession>(SessionSchemes.WITHDRAW_SESSION);
 
                 //  Set display data.
                 currentBalance = transactionSession.CurrentBalance;
@@ -121,7 +121,7 @@
     private async Task GoHome() 
     {
         //  Delete transaction session details from session storage.
-        await _storageService.DeleteSessionAsync(SessionSchemes.WithdrawScheme);
+        await _storageService.DeleteSessionAsync(SessionSchemes.WITHDRAW_SESSION);
 
         //  Redirect user to client home.
         _redirectService.redirectWithNavigationManager(PageRoutes.ClientHome);

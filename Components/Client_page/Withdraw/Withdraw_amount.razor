@@ -105,7 +105,7 @@
         try
         {
             //  Save transaction session to session storage.
-            await _transactionService.InitiateTransaction(SessionSchemes.WithdrawScheme, accountId, (int)TransactionTypes.Withdrawal, withdrawAmount);
+            await _transactionService.InitiateTransaction(SessionSchemes.WITHDRAW_SESSION, accountId, (int)TransactionTypes.Withdrawal, withdrawAmount);
 
             //  Redirect to withdraw confirmation page.
             _redirectService.redirectWithNavigationManager(PageRoutes.WithdrawConfirmation);

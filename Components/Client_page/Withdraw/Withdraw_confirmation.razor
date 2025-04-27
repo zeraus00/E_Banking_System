@@ -119,7 +119,7 @@
             {
                 //  Fetch session from storage.
                 //  Throws SessionNotFoundException if session is not found.
-                TransactionSession transactionSession = await _storageService.FetchSessionAsync<TransactionSession>(SessionSchemes.WithdrawScheme);
+                TransactionSession transactionSession = await _storageService.FetchSessionAsync<TransactionSession>(SessionSchemes.WITHDRAW_SESSION);
 
                 //  Set display data.
                 currentBalance = transactionSession.CurrentBalance;
@@ -143,7 +143,7 @@
         try 
         {
             //  Process withdraw transaction.
-            await _transactionService.ProcessTransactionAsync(SessionSchemes.WithdrawScheme);
+            await _transactionService.ProcessTransactionAsync(SessionSchemes.WITHDRAW_SESSION);
 
             //  Redirect to withdraw receipt page.
             _redirectService.redirectWithNavigationManager(PageRoutes.WithdrawReceipt);
@@ -161,7 +161,7 @@
     private async Task CancelWithdraw()
     {
         //  Persist cancelled transaction to database and delete transaction details from session storage.
-        await _transactionService.TransactionCancelledAsync(SessionSchemes.WithdrawScheme);
+        await _transactionService.TransactionCancelledAsync(SessionSchemes.WITHDRAW_SESSION);
 
         //  Redirect to client home.
         _redirectService.redirectWithNavigationManager(PageRoutes.ClientHome);

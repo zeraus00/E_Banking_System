@@ -120,7 +120,7 @@
             {
                 //  Fetch transaction session details from session storage.
                 //  Throws SessionNotFoundException if sesion is not found.
-                TransactionSession transactionSession = await _storageService.FetchSessionAsync<TransactionSession>(SessionSchemes.DepositScheme);
+                TransactionSession transactionSession = await _storageService.FetchSessionAsync<TransactionSession>(SessionSchemes.DEPOSIT_SESSION);
 
                 //  Set display data.
                 currentBalance = transactionSession.CurrentBalance;
@@ -144,7 +144,7 @@
         try
         {
             //  Process deposit transaction.
-            await _transactionService.ProcessTransactionAsync(SessionSchemes.DepositScheme);
+            await _transactionService.ProcessTransactionAsync(SessionSchemes.DEPOSIT_SESSION);
 
             //  Redirect to deposit receipt page.
             _redirectService.redirectWithNavigationManager(PageRoutes.DepositReceipt);
@@ -157,7 +157,7 @@
     private async Task CancelDeposit()
     {
         //  Persist cancelled transaction to database and delete transaction details from session.
-        await _storageService.DeleteSessionAsync(SessionSchemes.DepositScheme);
+        await _storageService.DeleteSessionAsync(SessionSchemes.DEPOSIT_SESSION);
 
         _redirectService.redirectWithNavigationManager(PageRoutes.ClientHome);
     }

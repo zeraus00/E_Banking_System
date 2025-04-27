@@ -105,7 +105,7 @@
         try 
         {
             //  Save transaction session to session storage.
-            await _transactionService.InitiateTransaction(SessionSchemes.DepositScheme, accountId, (int)TransactionTypes.Deposit, depositAmount);
+            await _transactionService.InitiateTransaction(SessionSchemes.DEPOSIT_SESSION, accountId, (int)TransactionTypes.Deposit, depositAmount);
 
             //  Redirect to deposit confirmation page.
             _redirectService.redirectWithNavigationManager(PageRoutes.DepositConfirmation);

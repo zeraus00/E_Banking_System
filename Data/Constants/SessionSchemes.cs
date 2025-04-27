@@ -2,7 +2,10 @@
 {
     public class SessionSchemes
     {
-        public const string WithdrawScheme = "WithdrawScheme";
-        public const string DepositScheme = "DepositScheme";
+        public const string USER_SESSION = "nexusbanking:user_session";
+        public const string WITHDRAW_SESSION = "nexusbanking:withdraw_session";
+        public const string DEPOSIT_SESSION = "nexusbanking:deposit_session";
+        public const string TRANSFER_SESSION = "nexusbanking:transfer_session";
+        public const string LOAN_PAYMENT_SESSION = "nexusbanking:loan_payment_session";
     }
 }
