@@ -1,5 +1,6 @@
 using E_BankingSystem.Components;
 using Data;
+using Data.Constants;
 using Data.Seeders;
 using Data.Seeders.User;
 using Data.Seeders.Finance;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Services;
+using System.Security.Claims;
 using ViewModels;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.Extensions.Options;
@@ -118,78 +120,7 @@ app.MapRazorPages();
 
 //app.UseMiddleware<StatisticMiddleWare>();
 
-app.MapGet("/currentuser", (HttpContext context) =>
-{
-    var user = context.User;
-    return user?.Identity?.Name ?? "No user found";
-});
-
-
-app.MapGet("/login2", (HttpContext ctx) =>
-{
-    ctx.Response.Headers["set-cookie"] = "auth=usr:anton";
-    return "ok";
-});
-app.MapGet("/get-csrf", (HttpContext context, IAntiforgery antiforgery) =>
-{
-    var tokens = antiforgery.GetAndStoreTokens(context);
-    context.Response.Cookies.Append("XSRF-TOKEN", tokens.RequestToken!, new CookieOptions
-    {
-        HttpOnly = false, // Required so JavaScript can read the cookie
-        Secure = true,
-        SameSite = SameSiteMode.Strict
-    });
-
-    return Results.Ok(new { message = "CSRF token set in cookie." });
-});
-
-
-app.MapPost("/login", async (
-    LogInViewModel _loginModel, 
-    CredentialValidationService _validationService, 
-    SignInService _signInService,
-    ClaimsHelperService _claimsHelperServiceensure,
-    PageRedirectService _pageRedirectService) =>
-{
-    try
-    {
-        var redirectUrl = string.Empty;
-        //  Validate the credentials.
-        var email = (_loginModel.Email ?? string.Empty).Trim();
-        var password = (_loginModel.Password ?? string.Empty).Trim();
-        var userAuth = await _validationService.TryValidateUserAsync(email, password);
-        if (userAuth == null)
-        {
-            //  Handle failed validation
-            //  Redirect to log in page.
-            //_signInService.RedirectToLogInPage();
-            redirectUrl = _pageRedirectService.GetRedirectToLogInPage();
-            _pageRedirectService.redirectWithHttpContext(redirectUrl);
-            //_httpContext.Response.Redirect(redirectUrl);
-            return;
-        }
-
-        //  Handle Sign In logic.
-        await _signInService.TrySignInAsync(userAuth);
-
-        //	Redirect based on role.
-        redirectUrl = _pageRedirectService.GetRedirectBasedOnRole(userAuth.RoleId);
-        _pageRedirectService.redirectWithHttpContext(redirectUrl);
-
-        return;
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine("ERRORRRR: " + ex.Message);
-        //_signInService.RedirectToLogInPage();
-
-        var redirectUrl = _pageRedirectService.GetRedirectToLogInPage();
-        _pageRedirectService.redirectWithHttpContext(redirectUrl);
-        return;
-        //return Results.Redirect("/Landing_page");
-    }
-});
-
+/*  ADD MINIMAL APIS HERE   */
 
 
 app.MapRazorComponents<App>()
