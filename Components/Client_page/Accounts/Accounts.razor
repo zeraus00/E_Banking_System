@@ -1,4 +1,4 @@
-﻿@page "/Client_home"
+﻿@page "/Accounts"
 @attribute [Authorize(Roles = "User")]
 
 @inject NavigationManager NavigationManager
@@ -18,36 +18,36 @@
             </div>
         </header>
 
-        <!-- Manage Accounts Section -->
-        <div class="card accounts shadow-lg d-flex flex-column mt-4 p-3 justify-content-between">
+        <!-- OUTER Flex Container -->
+        <div class="d-flex justify-content-center align-items-start mt-4">
 
-            <section class="d-flex flex-column flex-md-row align-items-start gap-4 px-4 pt-2">
+            <!-- Buttons Container (Positioned beside carousel) -->
+            <div class="ms-4 d-flex flex-column">
 
-                <!-- Left Column: Edit + Add Buttons -->
-                <div class="d-flex flex-column align-items-center justify-content-between" style="position: relative; width: 100px;">
-
-                    <!-- Edit Toggle Button -->
-                    <div class="d-flex flex-column align-items-center mt-3">
-                        <button class="@EditButtonClass" @onclick="ToggleEdit">
-                            <i class="@EditIcon"></i>
-                        </button>
-                    </div>
-
-                    <!-- Add Button -->
-                    <div class="mt-3 mb-5">
-                        <a href="/Add_account" class="card square-btn d-inline-flex align-items-center justify-content-center p-1 fs-1 fw-bold text-decoration-none">
-                            +
-                        </a>
-                    </div>
-
+                <!-- Edit Toggle Button -->
+                <div class="mt-5">
+                    <button class="@EditButtonClass" @onclick="ToggleEdit">
+                        <i class="@EditIcon"></i>
+                    </button>
                 </div>
+
+                <!-- Add Button -->
+                <div class="mt-3 mb-5">
+                    <a href="/Add_account" class="card square-btn d-inline-flex align-items-center justify-content-center p-1 fs-1 fw-bold text-decoration-none">
+                        +
+                    </a>
+                </div>
+            </div>
+
+            <!-- Manage Accounts Section -->
+            <div class="card accounts shadow-lg d-flex flex-column mt-4 p-3 justify-content-between overflow-hidden">
 
                 <!-- Carousel Component -->
                 <div class="flex-grow-1 d-flex justify-content-center">
                     <AccountCarousel Accounts="accounts" UserInfo="userInfo" IsEditable="IsEditable" />
                 </div>
 
-            </section>
+            </div>
 
         </div>
 
