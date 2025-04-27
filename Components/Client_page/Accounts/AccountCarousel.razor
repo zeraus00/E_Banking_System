@@ -2,7 +2,7 @@
 
 <!-- Carousel Component -->
 <div class="flex-grow-1 d-flex justify-content-center container">
-    <div class="carousel-wrapper">
+    <div class="carousel-wrapper px-5 py-2">
 
         <!-- Left Arrow -->
         <button class="carousel-arrow left" @onclick="scrollLeft">
@@ -10,7 +10,7 @@
         </button>
 
         <!-- The Carousel Scroll Area -->
-        <div id="accountCarousel" class="carousel">
+        <div id="accountCarousel" class="carousel position-relative">
             @if (Accounts is not null && Accounts.Any())
             {
                 foreach (var account in Accounts)
