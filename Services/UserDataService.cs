@@ -2,6 +2,7 @@
 using Data.Repositories.Auth;
 using Data.Repositories.Finance;
 using Data.Repositories.User;
+using Exceptions;
 
 
 namespace Services
@@ -38,25 +39,61 @@ namespace Services
             }
         }
 
+
         /// <summary>
         /// Gets the user's full name from the UserInfo object.
-        /// The UserInfo instance MUST include the Name navigation property.
+        /// If the UserInfo does not include the Name navigation property, queries the database using
+        /// the NameId provided in the UserInfo.
         /// </summary>
         /// <param name="userInfo">The UserInfo instance.</param>
         /// <returns>A string containing the user's full name. Null if the userInfo is null.</returns>
-        public string? GetUserFullName(UserInfo? userInfo)
+        public async Task<string> GetUserFullName(UserInfo? userInfo)
         {
-            if(userInfo == null)
+            //  If userInfo is null, throws a UserNotFoundException.
+            if(userInfo is null)
             {
-                return null;  // ex to be updated.
+                throw new UserNotFoundException(); 
             }
-            List<string?> names = new List<string?>
+
+            //  Initialize a list for the name parts.
+            List<string?> names = new();
+
+            //  Check if the navigation property of UserName is null.
+            //  If null, query the database for the Name using the NameId.
+            //  If not null, use the navigation property.
+            //  Fill out the list with the name's parts.
+            if(userInfo.UserName is null)
             {
-                userInfo.UserName.FirstName,
-                userInfo.UserName.MiddleName,
-                userInfo.UserName.LastName,
-                userInfo.UserName.Suffix
-            };
+                await using (var dbContext = await _contextFactory.CreateDbContextAsync()) 
+                {
+                    var nameRepo = new NameRepository(dbContext);
+                    Name? name = await nameRepo.GetNameByIdAsync(userInfo.UserNameId);
+                    if (name is null)
+                        throw new NameNotFoundException(userInfo.UserNameId);
+                    else
+                    {
+                        names = new List<string?>
+                        {
+                            name.FirstName,
+                            name.MiddleName,
+                            name.LastName,
+                            name.Suffix
+                        };
+                    }
+                }
+            } else
+            {
+
+                names = new List<string?>
+                {
+                    userInfo.UserName.FirstName,
+                    userInfo.UserName.MiddleName,
+                    userInfo.UserName.LastName,
+                    userInfo.UserName.Suffix
+                };
+            }
+
+            //  Concatenate the name parts into one string and return.
             string fullName = string.Empty;
 
             foreach (var name in names)

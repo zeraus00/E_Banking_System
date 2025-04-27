@@ -3,6 +3,11 @@
     public class NameRepository : Repository
     {
         public NameRepository(EBankingContext context) : base(context) { }
+
+        public async Task<Name?> GetNameByIdAsync(int nameId)
+        {
+            return (await _context.Names.FindAsync(nameId));
+        }
     }
     
     /// <summary>

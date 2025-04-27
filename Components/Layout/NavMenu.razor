@@ -112,7 +112,7 @@
         {
             int userInfoId = Convert.ToInt32(_user.FindFirst(c => c.Type == CustomClaimTypes.UserInfoId)?.Value ?? "0");
             UserInfo = await _userDataService.GetUserInfoAsync(userInfoId);
-            _fullName = _userDataService.GetUserFullName(UserInfo) ?? "Name not found";
+            _fullName = await _userDataService.GetUserFullName(UserInfo);
             _email = _user.FindFirst(c => c.Type == ClaimTypes.Name)?.Value ?? "Email not found";
         }
     }

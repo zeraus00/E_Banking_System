@@ -127,7 +127,7 @@
 		UserInfo = await _userDataService.GetUserInfoAsync(userInfoId);
 		if (UserInfo is not null) 
 		{
-			clientName = _userDataService.GetUserFullName(UserInfo) ?? "Name not found.";
+			clientName = await _userDataService.GetUserFullName(UserInfo);
 			contactNo = UserInfo.ContactNumber;
 		}
 	}
