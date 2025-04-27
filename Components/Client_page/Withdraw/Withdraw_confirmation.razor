@@ -26,6 +26,7 @@
         </header>
 
         <div class="container">
+
             <section class="card registration shadow-lg d-flex flex-column my-4 p-3">
                 <div class="mx-auto text-center p-4">
                     <h5>Withdraw Amount</h5>
@@ -33,6 +34,7 @@
                 </div>
 
                 <div class="d-flex justify-content-between mx-5">
+
                     <div class="d-flex flex-column text-start text-light mb-0">
                         <h5 class="mb-1 fw-bold">@clientName</h5>
                         <p class="m-0">@FormatHelper.AccountNumberFormatter(accountNumber)</p>
@@ -40,26 +42,26 @@
                         <p class="m-0">@transactionNumber</p>
                     </div>
 
-                    <section class="d-flex flex-column form-check d-flex justify-content-end mt-3">
-                        <div class="text-end mt-3">
-                            <div class="w-25">
+                    <section class="d-flex flex-column form-check d-flex justify-content-end mt-3 w-25">
+                        <div class="text-end mt-3 w-100">
+                            <div>
                                 <button class="btn btn-primary btn-lg w-100 mb-2" @onclick="ConfirmWithdraw">Confirm</button>
                             </div>
-                            <div class="w-25">
+                            <div>
                                 <button class="btn btn-warning btn-lg w-100 mb-3" @onclick="CancelWithdraw">Go Back</button>
                             </div>
                         </div>
-
-                        <div class="pb-2">
-                            <input class="form-check-input mx-2" type="checkbox" id="termsAndConditions required">
-                            <label class="form-check-label text-light mb-2" for="withdrawAmountVerification">
-                                Confirm the details are correct.
-                            </label>
-                        </div>
-
-
                     </section>
+
                 </div>
+
+                <div class="d-flex justify-content-end pb-2 mx-5">
+                    <input class="form-check-input mx-2" type="checkbox" id="termsAndConditions required">
+                    <label class="form-check-label text-light mb-2" for="withdrawAmountVerification">
+                        Confirm the details are correct.
+                    </label>
+                </div>
+
             </section>
         </div>
     </main>
