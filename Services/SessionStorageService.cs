@@ -30,7 +30,9 @@ namespace Services
         }
         public async Task<T> FetchSessionAsync<T>(string sessionScheme) where T : class
         {
-            return (await _sessionStorage.GetAsync<T>(sessionScheme)).Value ?? throw new SessionNotFoundException(sessionScheme);
+            var result = await _sessionStorage.GetAsync<T>(sessionScheme);
+            T? sessionObject = result.Success ? result.Value : throw new SessionNotFoundException(sessionScheme);
+            return sessionObject ?? throw new SessionNotFoundException(sessionScheme);
         }
 
         public async Task DeleteSessionAsync(string sessionScheme)
