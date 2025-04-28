@@ -138,6 +138,7 @@ static async Task SeedData(IDbContextFactory<EBankingContext> contextFactory)
         AccountSeeder accountSeeders = new AccountSeeder(dbContext);
         AccountTypeSeeder accountTypeSeeders = new AccountTypeSeeder(dbContext);
         TransactionTypesSeeder transactionTypesSeeder = new TransactionTypesSeeder(dbContext);
+        LoanTypeSeeder loanTypeSeeder = new LoanTypeSeeder(dbContext);
         NameSeeder nameSeeders = new NameSeeder(dbContext);
         UserInfoSeeder userInfoSeeders = new UserInfoSeeder(dbContext);
 
@@ -150,6 +151,8 @@ static async Task SeedData(IDbContextFactory<EBankingContext> contextFactory)
         await accountSeeders.SeedAccounts();
         // Seed TransactionTypes
         await transactionTypesSeeder.SeedTransactionTypes();
+        // Seed LoanTypes
+        await loanTypeSeeder.SeedLoanTypes();
         // Seed roles
         await authSeeders.SeedRoles();
         // Seed users
