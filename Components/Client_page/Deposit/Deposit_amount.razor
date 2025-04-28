@@ -38,8 +38,13 @@
 
                 <h3 class="mx-3 my-3 ">Enter Deposit Amount</h3>
                 <div class="input-group px-4 mb-4">
-                    <span class="input-group-text fs-2">$</span>
-                    <input type="number" class="form-control form-control-custom form-control-lg fs-2" @bind="@depositAmount" placeholder="000-000" />
+                    <span class="input-group-text fs-2">₱</span>
+                    <input 
+                        type="number" 
+                        class="form-control form-control-custom form-control-lg fs-2" 
+                        @bind="@depositAmount" placeholder="0.00" 
+                        @onfocus="ClearDefaultValue"
+                        @onblur="SetDefaultValue" />
                 </div>
 
                 <div class="d-flex justify-content-between mx-5">
@@ -71,7 +76,7 @@
     private string accountNumber = "Loading...";
     private string clientName = "Loading...";
     private decimal currentBalance = 0.00m;
-    private decimal depositAmount = 0.00m;
+    private decimal? depositAmount = null;
 
     private string error = string.Empty;
 
@@ -108,6 +113,22 @@
         }
     }
 
+    private void ClearDefaultValue()
+    {
+        if (!depositAmount.HasValue)
+        {
+            depositAmount = null;
+        }
+    }
+
+    private void SetDefaultValue()
+    {
+        if (!depositAmount.HasValue || depositAmount == 0.00m)
+        {
+            depositAmount = null;
+        }
+    }
+
     private async Task InitiateDepositProcess() 
     {
         try 
@@ -115,7 +136,7 @@
             if (depositAmount > 0)
             {
                 //  Save transaction session to session storage.
-                await transactionService.InitiateTransaction(SessionSchemes.DEPOSIT_SESSION, accountId, (int)TransactionTypes.Deposit, depositAmount);
+                await transactionService.InitiateTransaction(SessionSchemes.DEPOSIT_SESSION, accountId, (int)TransactionTypes.Deposit, depositAmount.Value);
 
                 //  Redirect to DEPOSIT_CONFIRMATION page.
                 redirectService.redirectWithNavigationManager(PageRoutes.DEPOSIT_CONFIRMATION);
