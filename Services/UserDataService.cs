@@ -190,12 +190,23 @@ namespace Services
         }
         /// <summary>
         /// Retrieves a list of transactions associated with the specified account ID.
+        /// Includes parameters for filtering the query.
         /// </summary>
         /// <param name="accountId">The ID of the account whose transactions are to be retrieved.</param>
+        /// <param name="transactionCount">The number of entries to be taken from the list.</param>
+        /// <param name="transactionTypeId">The ID of the type of transactions to be retrieved.</param>
+        /// <param name="transactionStartDate">The earliest date of transactions to be retrieved.</param>
+        /// <param name="transactionEndDate">The latest date of the transactions to be retrieved.</param>
         /// <returns>
         /// A list of <see cref="Transaction"/> objects associated with the given account.
         /// </returns>
-        public async Task<List<Transaction>> GetRecentAccountTransactionsAsync(int accountId, int transactionCount)
+        public async Task<List<Transaction>> GetRecentAccountTransactionsAsync(
+            int accountId, 
+            int? transactionCount = null,
+            int transactionTypeId = 0,
+            DateTime? transactionStartDate = null,
+            DateTime? transactionEndDate = null
+            )
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
@@ -203,13 +214,22 @@ namespace Services
                 var transactionRepository = new TransactionRepository(dbContext);
 
                 //  Include TransactionType navigation property in query.
-                var query = transactionRepository.ComposeQuery(includeTransactionType: true, includeMainAccount: true);
+                var query = transactionRepository
+                    .ComposeQuery(includeTransactionType: true, includeMainAccount: true, includeCounterAccount: true);
+                query = transactionRepository
+                    .FilterQuery(query, transactionTypeId, transactionStartDate, transactionEndDate);
+                
 
                 //  Return the list of transactions.
                 var transactionList = await transactionRepository.GetTransactionsAsListAsync(accountId, query);
                 transactionList.Reverse();
-                ;
-                return transactionList.Take(transactionCount).ToList();
+
+                // Check if 'transactionCount' is an integer and greater than 0
+                // If true, return the first 'count' number of elements from 'transactionList' as a list
+                // If false (either 'transactionCount' is not an integer or count <= 0), return the entire 'transactionList' as is
+                return transactionCount is int count  && count > 0
+                    ? transactionList.Take(count).ToList() 
+                    : transactionList;
             }
         }
         /// <summary>
