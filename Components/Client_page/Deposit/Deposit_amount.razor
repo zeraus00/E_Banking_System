@@ -59,7 +59,7 @@
 @code {
     private Account? Account;
 
-    public int accountId;
+    private int accountId;
     private string accountNumber = "Loading...";
     private string clientName = "Loading...";
     private decimal currentBalance = 0.00m;
@@ -80,6 +80,7 @@
                 accountNumber = userSession.ActiveAccountNumber;
                 clientName = userSession.ActiveAccountName;
 
+                //  Get account from database.
                 //  Throws AccountNotFoundException if account is not found.
                 Account = await userDataService.GetAccountAsync(accountId);
                 currentBalance = Account.Balance;
@@ -88,7 +89,7 @@
             }
             catch (SessionNotFoundException)
             {
-                //  Redirect to logging in page
+                //  Redirect to LOGGING_IN_PAGE page
                 redirectService.redirectWithNavigationManager(PageRoutes.LOGGING_IN_PAGE);
             }
             catch (AccountNotFoundException)
@@ -106,7 +107,7 @@
             //  Save transaction session to session storage.
             await transactionService.InitiateTransaction(SessionSchemes.DEPOSIT_SESSION, accountId, (int)TransactionTypes.Deposit, depositAmount);
 
-            //  Redirect to deposit confirmation page.
+            //  Redirect to DEPOSIT_CONFIRMATION page.
             redirectService.redirectWithNavigationManager(PageRoutes.DEPOSIT_CONFIRMATION);
         }
         catch (AccountNotFoundException)

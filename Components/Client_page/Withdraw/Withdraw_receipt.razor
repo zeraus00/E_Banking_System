@@ -83,7 +83,7 @@
             } 
             catch (SessionNotFoundException) 
             {
-                //  Redirect to client home if users try to access the page without an ongoing transaction session.
+                //  Redirect to CLIENT_HOME if users try to access the page without an ongoing transaction session.
                 redirectService.redirectWithNavigationManager(PageRoutes.CLIENT_HOME);
             }
         }
@@ -94,7 +94,7 @@
         //  Delete transaction session details from session storage.
         await sessionStorageService.DeleteSessionAsync(SessionSchemes.WITHDRAW_SESSION);
 
-        //  Redirect user to client home.
+        //  Redirect user to CLIENT_HOME.
         redirectService.redirectWithNavigationManager(PageRoutes.CLIENT_HOME);
     }
 }

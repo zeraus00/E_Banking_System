@@ -1,5 +1,5 @@
 ﻿@page  "/Add_account"
-@attribute [Authorize("User")]
+@attribute [Authorize(Roles = "User")]
 @rendermode InteractiveServer
 
 @inject NavigationManager NavigationManager
@@ -7,17 +7,17 @@
 @inject UserDataService userDataService
 
 <div class="page">
-    <main>
+	<main>
 
-        <!-- Header -->
-        <header class="custom-card-clientpage clientheader py-4 align-items-start">
-            <div class="px-5">
-                <div class="d-flex align-items-center my-4">
-                    <h2>Add Account</h2>
-                </div>
-            </div>
+		<!-- Header -->
+		<header class="custom-card-clientpage clientheader py-4 align-items-start">
+			<div class="px-5">
+				<div class="d-flex align-items-center my-4">
+					<h2>Add Account</h2>
+				</div>
+			</div>
 
-        </header>
+		</header>
 
 		<!-- New Account Box -->
 		<div class="card accounts shadow-lg d-flex flex-column my-4 py-3 px-5 justify-content-between">
@@ -71,6 +71,10 @@
 			</div>
 
 		</div>
-
 	</main>
 </div>
+
+@code
+{
+
+}
