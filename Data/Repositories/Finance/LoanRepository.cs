@@ -15,12 +15,15 @@
     /// </summary>
     public class LoanBuilder
     {
+        private string _loanNumber = string.Empty;
         private int _accountId;
         private int _loanTypeId;
+        private string _loanPurpose = string.Empty;
         private decimal _loanAmount;
         private decimal _interestRate;
         private int _loanTermMonths;
-        private decimal _monthlyPayment;
+        private int _paymentFrequency;
+        private decimal _paymentAmount;
         private decimal _remainingLoanBalance;
         private DateTime _applicationDate;
         private string _loanStatus = string.Empty;
@@ -28,8 +31,14 @@
         private DateTime _dueDate;
         private DateTime _updateDate;
         private DateTime _endDate;
+        private string _remarks = string.Empty;
 
         #region Builder Methods
+        public LoanBuilder WithLoanNumber(string loanNumber)
+        {
+            _loanNumber = loanNumber;
+            return this;
+        }
         public LoanBuilder WithAccountId(int accountId)
         {
             _accountId = accountId;
@@ -38,6 +47,11 @@
         public LoanBuilder WithLoanTypeId(int loanTypeId)
         {
             _loanTypeId = loanTypeId;
+            return this;
+        }
+        public LoanBuilder WithLoanPurpose(string loanPurpose)
+        {
+            _loanPurpose = loanPurpose;
             return this;
         }
         public LoanBuilder WithLoanAmount(decimal loanAmount)
@@ -55,9 +69,14 @@
             _loanTermMonths = loanTermMonths;
             return this;
         }
-        public LoanBuilder WithMonthlyPayment(decimal monthlyPayment)
+        public LoanBuilder WithPaymentFrequency(int paymentFrequency)
         {
-            _monthlyPayment = monthlyPayment;
+            _paymentFrequency = paymentFrequency;
+            return this;
+        }
+        public LoanBuilder WithMonthlyPayment(decimal paymentAmount)
+        {
+            _paymentAmount = paymentAmount;
             return this;
         }
         public LoanBuilder WithRemainingLoanBalance(decimal remainingLoanBalance)
@@ -95,6 +114,11 @@
             _endDate = endDate;
             return this;
         }
+        public LoanBuilder WithRemarks(string remarks)
+        {
+            _remarks = remarks;
+            return this;
+        }
         #endregion Builder Methods
         /// <summary>
         /// Builds the Loan object with the specified properties
@@ -103,19 +127,23 @@
         {
             return new Loan
             {
+                LoanNumber = _loanNumber,
                 AccountId = _accountId,
                 LoanTypeId = _loanTypeId,
+                LoanPurpose = _loanPurpose,
                 LoanAmount = _loanAmount,
                 InterestRate = _interestRate,
                 LoanTermMonths = _loanTermMonths,
-                MonthlyPayment = _monthlyPayment,
+                PaymentFrequency = _paymentFrequency,
+                PaymentAmount = _paymentAmount,
                 RemainingLoanBalance = _remainingLoanBalance,
                 ApplicationDate = _applicationDate,
                 LoanStatus = _loanStatus,
                 StartDate = _startDate,
                 DueDate = _dueDate,
                 UpdateDate = _updateDate,
-                EndDate = _endDate
+                EndDate = _endDate,
+                Remarks = _remarks
             };
         }
     }

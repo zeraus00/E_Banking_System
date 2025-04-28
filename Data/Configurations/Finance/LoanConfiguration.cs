@@ -16,9 +16,26 @@
                 .Property(l => l.LoanId)
                 .ValueGeneratedOnAdd();
 
+            //  LoanNumber (Required; Varchar(20))
+            Loans
+                .Property(l => l.LoanNumber)
+                .HasColumnType("VARCHAR (20)")
+                .IsFixedLength();
+
             //  AccountId (Foreign Key; Required)
             Loans
                 .Property(l => l.AccountId)
+                .IsRequired();
+
+            //  LoanTypeId (Foreign Key; Required)
+            Loans
+                .Property(l => l.LoanTypeId)
+                .IsRequired();
+
+            //  LoanPurpose (Required; Varchar(30)
+            Loans
+                .Property(l => l.LoanPurpose)
+                .HasColumnType("VARCHAR (30)")
                 .IsRequired();
 
             //  LoanAmount (Required; Decimal(18,2))
@@ -38,9 +55,14 @@
                 .Property(l => l.LoanTermMonths)
                 .IsRequired();
 
-            //  MonthlyPayment (Required; Decimal(18,2))
+            //  LoanTermFrequency (Required)
             Loans
-                .Property(l => l.MonthlyPayment)
+                .Property(l => l.PaymentFrequency)
+                .IsRequired();
+
+            //  PaymentAmount (Required; Decimal(18,2))
+            Loans
+                .Property(l => l.PaymentAmount)
                 .IsRequired()
                 .HasColumnType("DECIMAL (18, 2)");
 
@@ -81,6 +103,12 @@
             Loans
                 .Property(l => l.EndDate)
                 .IsRequired();
+
+            //  Remarks (Optional; MaxLength: 50
+            Loans
+                .Property(l => l.Remarks)
+                .HasMaxLength(50)
+                .IsRequired(false);
 
             /*  Configure Relationships  
              *  Accounts (many-to-one)
