@@ -1,0 +1,245 @@
+﻿@page "/ViewDetails"
+@rendermode InteractiveServer
+@inject NavigationManager NavigationManager
+
+<div class="card registration mt-3 p-4 shadow-lg">
+    <main>
+        <h3 class="fw-bold text-light">Confirmation of Details</h3>
+
+        <div class="row g-2 mt-2">
+            <div class="col-3">
+                <label class="text-light">First Name:</label>
+                <div class="form-control form-control-sm bg-light">[First Name here]</div>
+            </div>
+
+            <div class="col-3">
+                <label class="text-light">Middle Name:</label>
+                <div class="form-control form-control-sm bg-light">[Middle Name here]</div>
+            </div>
+
+            <div class="col-3">
+                <label class="text-light">Last Name:</label>
+                <div class="form-control form-control-sm bg-light">[Last Name here]</div>
+            </div>
+
+            <div class="col-1">
+                <label class="text-light">Suffix:</label>
+                <div class="form-control form-control-sm bg-light">[Suffix]</div>
+            </div>
+        </div>
+
+        <!-- Row 3 -->
+        <div class="row g-2 mt-2">
+            <div class="col-1">
+                <label class="text-light">Age</label>
+                <div class="form-control form-control-sm">[Age here]</div>
+            </div>
+
+            <div class="col-1">
+                <label class="text-light">Sex</label>
+                <div class="form-control form-control-sm">[Sex here]</div>
+            </div>
+
+            <div class="col-2">
+                <label class="text-light">Civil Status</label>
+                <div class="form-control form-control-sm">[Civil Status here]</div>
+            </div>
+
+            <div class="col">
+                <label class="text-light">Religion</label>
+                <div class="form-control form-control-sm">[Religion here]</div>
+            </div>
+
+            <div class="col">
+                <label class="text-light">Contact No.</label>
+                <div class="form-control form-control-sm">[Contact No. here]</div>
+            </div>
+
+            <div class="col">
+                <label class="text-light">Email Address</label>
+                <div class="form-control form-control-sm">[Email Address here]</div>
+            </div>
+        </div>
+
+        <!-- Row 4 -->
+        <div class="row g-2 mt-3">
+            <label class="text-light">Full Address</label>
+
+            <div class="col">
+                <label class="text-light">Region</label>
+                <div class="form-control form-control-sm">[Region here]</div>
+            </div>
+
+            <div class="col">
+                <label class="text-light">Province</label>
+                <div class="form-control form-control-sm">[Province here]</div>
+            </div>
+
+            <div class="col">
+                <label class="text-light">Postal Code</label>
+                <div class="form-control form-control-sm">[Postal Code here]</div>
+            </div>
+
+            <div class="col">
+                <label class="text-light">Municipality/City</label>
+                <div class="form-control form-control-sm">[Municipality/City here]</div>
+            </div>
+
+            <div class="col">
+                <label class="text-light">Barangay</label>
+                <div class="form-control form-control-sm">[Barangay here]</div>
+            </div>
+
+            <div class="col">
+                <label class="text-light">Street No.</label>
+                <div class="form-control form-control-sm">[Street No. here]</div>
+            </div>
+
+            <div class="col">
+                <label class="text-light">House No.</label>
+                <div class="form-control form-control-sm">[House No. here]</div>
+            </div>
+        </div>
+
+        <!-- Row 5 -->
+        <div class="row g-2 mt-3">
+            <label class="text-light">Birth Place</label>
+
+            <div class="col">
+                <label class="text-light">Region</label>
+                <div class="form-control form-control-sm">[Region here]</div>
+            </div>
+
+            <div class="col">
+                <label class="text-light">Province</label>
+                <div class="form-control form-control-sm">[Province here]</div>
+            </div>
+
+            <div class="col">
+                <label class="text-light">Municipality/City</label>
+                <div class="form-control form-control-sm">[Municipality/City here]</div>
+            </div>
+
+            <div class="col">
+                <label class="text-light">Birth Date</label>
+                <div class="form-control form-control-sm">[Birth Date here]</div>
+            </div>
+
+            <div class="col">
+                <label class="text-light">Occupation</label>
+                <div class="form-control form-control-sm">[Occupation here]</div>
+            </div>
+        </div>
+
+        <div class="row g-2 mt-2">
+            <!-- Row 6 (Father's Name)-->
+            <div class="col-12">
+                <label class="text-light">Father's Name</label>
+                <div class="row g-2">
+                    <div class="col-3">
+                        <div class="form-control form-control-sm">[First Name here]</div>
+                    </div>
+                    <div class="col-3">
+                        <div class="form-control form-control-sm">[Middle Name here]</div>
+                    </div>
+                    <div class="col-3">
+                        <div class="form-control form-control-sm">[Last Name here]</div>
+                    </div>
+                    <div class="col-1">
+                        <div class="form-control form-control-sm">[Suffix here]</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 7 (Mother's Name)-->
+            <div class="col-12">
+                <label class="text-light">Mother's Maiden Name</label>
+                <div class="row g-2">
+                    <div class="col-3">
+                        <div class="form-control form-control-sm">[First Name here]</div>
+                    </div>
+                    <div class="col-3">
+                        <div class="form-control form-control-sm">[Middle Name here]</div>
+                    </div>
+                    <div class="col-3">
+                        <div class="form-control form-control-sm">[Last Name here]</div>
+                    </div>
+                    <div class="col-1">
+                        <div class="form-control form-control-sm">[Suffix here]</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 8 (Beneficiary's Name) -->
+            <div class="col-12">
+                <label class="text-light">Beneficiary's Name</label>
+                <div class="row g-2">
+                    <div class="col-3">
+                        <div class="form-control form-control-sm">[First Name here]</div>
+                    </div>
+                    <div class="col-3">
+                        <div class="form-control form-control-sm">[Middle Name here]</div>
+                    </div>
+                    <div class="col-3">
+                        <div class="form-control form-control-sm">[Last Name here]</div>
+                    </div>
+                    <div class="col-1">
+                        <div class="form-control form-control-sm">[Suffix here]</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 mt-3">
+            <!-- Upload Government ID -->
+            <div class="col-md-4">
+                <label class="text-light">Upload Government Valid ID (Front & Back)</label>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-light w-75">View</button>
+                </div>
+            </div>
+
+            <!-- Upload 1x1 Picture -->
+            <div class="col-md-4">
+                <label class="text-light">Upload 1x1 Picture</label>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-light w-75">View</button>
+                </div>
+            </div>
+
+            <!-- TIN -->
+            <div class="col-md-3">
+                <label class="text-light">Tax Identification Number</label>
+                <div class="form-control form-control-sm">[First Name here]</div>
+            </div>
+        </div>
+
+        <!-- Border -->
+        <div class="d-flex align-items-center mt-5 mb-3">
+            <span class="text-light me-2">Sign In Credentials</span>
+            <div class="flex-grow-1">
+                <hr class="m-0" style="border: 1px solid white; opacity: 100%;" />
+            </div>
+        </div>
+
+        <!-- Credentials Inputs -->
+        <div class="row g-2 mb-3">
+            <div class="col-3">
+                <label class="text-light">Username</label>
+                <div class="form-control form-control-sm">[Username here]</div>
+            </div>
+
+            <div class="col-3">
+                <label class="text-light">Password</label>
+                <div class="form-control form-control-sm">[Password here]</div>
+            </div>
+        </div>
+
+        <!-- Register Button -->
+        <div class="d-flex justify-content-end gap-2 mt-3">
+            <button class="btn btn-danger btn-secondary fs-5 mx-2">Reject</button>
+            <button class="btn btn-warning btn-secondary fs-6 mx-2">Resubmission<br />Request</button>
+            <button class="btn btn-primary btn-secondary fs-5 mx-2">Approve</button>
+        </div>
+    </main>
+</div>
