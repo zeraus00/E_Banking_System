@@ -79,6 +79,7 @@
                 accountNumber = userSession.ActiveAccountNumber;
                 clientName = userSession.ActiveAccountName;
 
+                //  Get Account from database.
                 //  Throws AccountNotFoundException if account is not found.
                 Account Account = await userDataService.GetAccountAsync(accountId);
                 currentBalance = Account.Balance;
@@ -87,11 +88,11 @@
             }
             catch (SessionNotFoundException)
             {
+                //  Redirect to LOGGING_IN_PAGE
                 redirectService.redirectWithNavigationManager(PageRoutes.LOGGING_IN_PAGE);
             }
             catch (AccountNotFoundException)
             {
-                //  do something.
                 currentBalance = 0.00m;
                 error = "Error resolving database. Please try again later";
             }
@@ -105,7 +106,7 @@
             //  Save transaction session to session storage.
             await transactionService.InitiateTransaction(SessionSchemes.WITHDRAW_SESSION, accountId, (int)TransactionTypes.Withdrawal, withdrawAmount);
 
-            //  Redirect to withdraw confirmation page.
+            //  Redirect to WITHDRAW_CONFIRMATION page.
             redirectService.redirectWithNavigationManager(PageRoutes.WITHDRAW_CONFIRMATION);
         } 
         catch (AccountNotFoundException) 

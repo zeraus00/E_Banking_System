@@ -102,7 +102,7 @@
             } 
             catch (SessionNotFoundException) 
             {
-                //  Redirect to client home if users try to access the page without an ongoing transaction session.
+                //  Redirect to CLIENT_HOME if users try to access the page without an ongoing transaction session.
                 redirectService.redirectWithNavigationManager(PageRoutes.CLIENT_HOME);
             }
         }
@@ -115,7 +115,7 @@
             //  Process withdraw transaction.
             await transactionService.ProcessTransactionAsync(SessionSchemes.WITHDRAW_SESSION);
 
-            //  Redirect to withdraw receipt page.
+            //  Redirect to WITHDRAW_RECEIPT page.
             redirectService.redirectWithNavigationManager(PageRoutes.WITHDRAW_RECEIPT);
         } 
         catch (AccountNotFoundException)
@@ -133,7 +133,7 @@
         //  Persist cancelled transaction to database and delete transaction details from session storage.
         await transactionService.TransactionCancelledAsync(SessionSchemes.WITHDRAW_SESSION);
 
-        //  Redirect to client home.
+        //  Redirect to CLIENT_HOME.
         redirectService.redirectWithNavigationManager(PageRoutes.CLIENT_HOME);
     }
 }
