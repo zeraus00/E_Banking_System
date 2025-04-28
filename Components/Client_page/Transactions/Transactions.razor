@@ -152,10 +152,13 @@
     private async Task FilterTransactionsAsync()
     {
         //  Load the filtered transaction list from the database.
+        int transactionType = !string.IsNullOrWhiteSpace(selectedTransactionType) 
+            ? Convert.ToInt32(selectedTransactionType)
+            : 0;
         transactionList = await userDataService.GetRecentAccountTransactionsAsync(
             accountId,
             transactionCount: 50,
-            transactionTypeId: Convert.ToInt32(selectedTransactionType),
+            transactionTypeId: transactionType,
             transactionStartDate: startDate,
             transactionEndDate: endDate
         );
