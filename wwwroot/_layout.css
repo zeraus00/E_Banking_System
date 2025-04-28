@@ -22,6 +22,18 @@ main {
     padding: 0;
 }
 
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.top-bar-right {
+    display: flex;
+    gap: 10px;
+}
+
+
 .information-box {
     display: flex;
     flex-wrap: wrap;
@@ -35,6 +47,11 @@ main {
     background-color: white;
     padding-block: 12px;
     padding-inline: 12px;
+}
+
+.divider {
+    margin: 20px 0;
+    color: white;
 }
 
 .card {
@@ -275,7 +292,7 @@ main {
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background-color: #ccc;
+    background-color: #333;
     border: none;
     cursor: pointer;
     transition: background-color 0.3s ease;
@@ -283,6 +300,10 @@ main {
 
     .dot:hover {
         background-color: #555;
+    }
+
+    .dot.active {
+        background-color: #ccc;
     }
 
 @media (max-width: 768px) {
