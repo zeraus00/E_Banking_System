@@ -7,8 +7,7 @@
         public const string LOG_OUT_PAGE = "/Logout_page";
         public const string ACCOUNT_OPENING = "/Account_opening";
         public const string CLIENT_HOME = "/Client_home";
-        public const string MY_ACCOUNTS = "/My_accounts";
-        public const string MANAGE_ACCOUNTS = "/Manage_accounts";
+        public const string ACCOUNTS = "/Accounts";
         public const string WITHDRAW_AMOUNT = "/Withdraw_amount";
         public const string WITHDRAW_CONFIRMATION = "/Withdraw_confirmation";
         public const string WITHDRAW_RECEIPT = "/Withdraw_receipt";

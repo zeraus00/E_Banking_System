@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="Components\Home\Sign_up_page.razor" />
     <Content Remove="wwwroot\bootstrap\Utilities\profile.png" />
   </ItemGroup>
 

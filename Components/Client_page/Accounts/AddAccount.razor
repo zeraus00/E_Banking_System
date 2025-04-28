@@ -1,0 +1,75 @@
+﻿@page  "/AddAccount"
+
+@inject NavigationManager NavigationManager
+@inject ClaimsHelperService _claimsHelper
+@inject UserDataService _userDataService
+@rendermode InteractiveServer
+
+<div class="page">
+    <main>
+
+        <!-- Header -->
+        <header class="custom-card-clientpage clientheader py-4 align-items-start">
+            <div class="px-5">
+                <div class="d-flex align-items-center my-4">
+                    <h2>Add Account</h2>
+                </div>
+            </div>
+
+        </header>
+
+		<!-- New Account Box -->
+		<div class="card accounts shadow-lg d-flex flex-column my-4 py-3 px-5 justify-content-between">
+
+			<div class="d-flex justify-content-between align-items-center flex-wrap p-3">
+				<h4 class="fw-bold text-light">Enter Account Details</h4>
+
+				<!-- Close Button -->
+				<NavLink href="/Accounts">
+					<button class="btn-close" aria-label="Close"></button>
+				</NavLink>
+			</div>
+
+			<div class="information_box p-4">
+				<!-- Account Type -->
+
+				<div class="row mt-2">
+					<label class="text-light">Account Type</label>
+					<select class="form-select" placeholder="Account Type" required>
+						<option>Personal Account</option>
+						<option>Joint Account</option>
+					</select>
+				</div>
+
+				<!-- Account Number -->
+				<div class="row mt-2">
+					<label class="text-light">Account Number</label>
+					<input class="form-control" placeholder="Select Account Number">
+				</div>
+
+				<!-- Account Name -->
+				<div class="row mt-2">
+					<label class="text-light">Account Name</label>
+					<input class="form-control" placeholder="Enter Account Name" required>
+				</div>
+
+				<!-- Terms and Conditions -->
+				<div class="form-check d-flex justify-content-end mt-3">
+					<input class="form-check-input mx-2" type="checkbox" id="termsAndConditions" required>
+					<label class="form-check-label text-light" for="termsAndConditions">
+						I accept the terms and conditions
+					</label>
+				</div>
+
+				<!-- Submit -->
+				<div class="text-end mt-3">
+					<button class="btn btn-danger">Cancel</button>
+					<button class="btn btn-primary">Create Account</button>
+				</div>
+
+			</div>
+
+		</div>
+
+	</main>
+</div>
