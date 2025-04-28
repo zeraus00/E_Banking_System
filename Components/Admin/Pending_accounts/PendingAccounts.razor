@@ -1,0 +1,129 @@
+﻿@page "/PendingAccounts"
+
+@rendermode InteractiveServer
+@inject NavigationManager NavigationManager
+
+<div class="main">
+    <div class="d-flex align-items-center gap-3 m-3 flex-wrap">
+
+        <div class="d-flex align-items-center gap-3">
+            <input class="bi bi-search form-control form-control-sm" @bind="searchAccount" placeholder="Search specific account">
+        </div>
+
+        <div class="d-flex align-items-center gap-3">
+            <label class="text-light mb-0" style="white-space: nowrap;">Start Date</label>
+            <InputDate class="form-control form-control-sm" @bind-Value="startDate" />
+        </div>
+
+        <div class="d-flex align-items-center gap-3">
+            <label class="text-light mb-0" style="white-space: nowrap;">End Date</label>
+            <InputDate class="form-control form-control-sm" @bind-Value="endDate" />
+        </div>
+
+        <div class="d-flex align-items-center gap-3">
+            <label class="text-light mb-0" style="white-space: nowrap;">Account Type</label>
+            <select class="form-select form-select-sm" @bind="selectedType">
+                <option value="">All</option>
+                <option value="Deposit">Joint Account</option>
+                <option value="Withdraw">Personal Account</option>
+            </select>
+        </div>
+
+        <button class="btn btn-primary btn-sm shadow-sm" @onclick="Filter">Filter</button>
+        <button class="btn btn-danger btn-sm shadow-sm" @onclick="ClearFilter">Clear Filter</button>
+
+    </div>
+
+    <hr class="m-3" style="border: 1px solid white; opacity: 100%;" />
+
+    <div class="table-responsive m-4 rounded">
+        <table class="table table-bordered text-center">
+            <thead class="table-info">
+                <tr>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Name</th>
+                    <th>Account Type</th>
+                    <th>Operation</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var a in accounts)
+                {
+                    <tr class="bg-light">
+                        <td>@a.Date.ToString("MM/dd/yyyy")</td>
+                        <td>@a.Time.ToString(@"hh\:mm\:ss")</td>
+                        <td>@a.Name</td>
+                        <td>@a.AccountType</td>
+                        <td>
+                            <button class="btn btn-secondary btn-sm" @onclick="() => ViewDetails(a)">View</button>
+                        </td>
+                        <td>@a.Status</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    private DateTime? startDate;
+    private DateTime? endDate;
+    private string selectedType = "";
+    private string searchAccount = "";
+
+    private List<AccountRecord> allAccounts = new();
+    private List<AccountRecord> accounts = new();
+
+    // Mockup data
+    protected override void OnInitialized()
+    {
+        allAccounts = new List<AccountRecord>
+        {
+            new AccountRecord
+            {
+                Date = DateTime.Today,
+                Time = DateTime.Now.TimeOfDay,
+                Name = "Sample Name",
+                AccountType = "Deposit",
+                Status = "Pending"
+            }
+        };
+        accounts = allAccounts.ToList();
+    }
+
+    private void Filter()
+    {
+        accounts = allAccounts
+        .Where(t =>
+            (string.IsNullOrEmpty(searchAccount) || t.Name.Contains(searchAccount, StringComparison.OrdinalIgnoreCase)) &&
+            (!startDate.HasValue || t.Date >= startDate.Value.Date) &&
+            (!endDate.HasValue || t.Date <= endDate.Value.Date) &&
+            (string.IsNullOrEmpty(selectedType) || t.AccountType == selectedType)
+        ).ToList();
+    }
+
+    private void ClearFilter()
+    {
+        startDate = null;
+        endDate = null;
+        selectedType = "";
+        searchAccount = "";
+        accounts = allAccounts.ToList();
+    }
+
+    private void ViewDetails(AccountRecord account)
+    {
+        Console.WriteLine($"Viewing details for {account.Name}");
+    }
+
+    public class AccountRecord
+    {
+        public DateTime Date { get; set; }
+        public TimeSpan Time { get; set; }
+        public string Name { get; set; }
+        public string AccountType { get; set; }
+        public string Status { get; set; }
+    }
+}

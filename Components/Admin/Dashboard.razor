@@ -1,0 +1,100 @@
+﻿@page "/Dashboard"
+@rendermode InteractiveServer
+
+<div class="page">
+    <main>
+        <div class="dashboard-container">
+            
+            <!-- Top Bar -->
+            <div class="top-bar mx-3">
+                <h2>Dashboard</h2>
+            </div>
+
+            <hr class="divider" />
+
+            <div class="top-bar-right mb-4">
+                <!-- Start Date -->
+                <div class="d-flex align-items-center gap-3">
+                    <label class="text-light mb-0" style="white-space: nowrap;">Start Date</label>
+                    <InputDate class="form-control" @bind-Value="startDate" />
+                </div>
+
+                <!-- End Date -->
+                <div class="d-flex align-items-center gap-3">
+                    <label class="text-light mb-0" style="white-space: nowrap;">End Date</label>
+                    <InputDate class="form-control" @bind-Value="endDate" />
+                </div>
+
+                <!-- Filter Buttons -->
+                <button class="btn btn-primary shadow-sm" @onclick="Filter">Filter</button>
+                <button class="btn btn-danger shadow-sm" @onclick="ClearFilter">Clear Filter</button>
+            </div>
+
+            <!-- Card Section -->
+            <div class="card-section justify-content-center">
+                <!-- Withdraw Card -->
+                <div class="data-card">
+                    <h3>Withdrawals</h3>
+                    <p class="number">1234</p>
+                    <div class="card-footer">
+                        <div class="footer-item">
+                            <i class="icon-calendar"></i> <span class="text-danger">▼ 3%</span>
+                        </div>
+                        <div class="footer-item">
+                            <i class="icon-calendar"></i> <span class="text-success">▲ 4%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Deposits Card -->
+                <div class="data-card">
+                    <h3>Deposits</h3>
+                    <p class="number">1234</p>
+                    <div class="card-footer">
+                        <div class="footer-item">
+                            <i class="icon-calendar"></i> <span class="text-danger">▼ 3%</span>
+                        </div>
+                        <div class="footer-item">
+                            <i class="icon-calendar"></i> <span class="text-success">▲ 4%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Empty Cards -->
+                <div class="data-card"></div>
+                <div class="data-card"></div>
+
+            </div>
+
+            <!-- Line Chart Section -->
+            <div class="chart-section">
+                <h3>Template Line Chart</h3>
+
+                <!-- Insert chart component here -->
+                <div class="chart-placeholder">
+                    <!-- Placeholder for now -->
+                    <p>Chart placeholder</p>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+</div>
+
+@code {
+    private DateTime? startDate;
+    private DateTime? endDate;
+
+    private void Filter()
+    {
+        Console.WriteLine($"Filtering accounts from {startDate} to {endDate}");
+    }
+
+    private void ClearFilter()
+    {
+        startDate = null;
+        endDate = null;
+        Console.WriteLine("Filter cleared");
+    }
+}
