@@ -1,6 +1,10 @@
-﻿@page "/"
-@using Layout
+﻿@using Layout
+@page "/"
+@rendermode InteractiveServer
+
 @layout PlainLayout
+@inject IHttpContextAccessor accessor;
+@inject UserSessionService userSessionService
 
 <div class="page">
 	<main>
@@ -14,3 +18,19 @@
 		</div>
 	</main>
 </div>
+
+@code
+{
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			//	End user session if there is no authentication cookie found.
+			bool hasAuthCookie = accessor.HttpContext?.Request.Cookies.ContainsKey("auth-token") ?? false;
+			if (!hasAuthCookie)
+			{
+				await userSessionService.EndSession();
+			}
+		}
+	}
+}

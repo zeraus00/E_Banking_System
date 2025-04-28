@@ -1,12 +1,13 @@
 ﻿@page "/Withdraw_receipt"
 @attribute [Authorize(Roles = "User")]
-
 @rendermode InteractiveServer
+
 @inject NavigationManager NavigationManager
 @inject ClaimsHelperService _claimsHelper
-@inject PageRedirectService _redirectService
-@inject UserDataService _userDataService
-@inject SessionStorageService _storageService
+@inject PageRedirectService redirectService
+@inject SessionStorageService sessionStorageService
+@inject UserDataService userDataService
+@inject UserSessionService userSessionService
 @using Helpers;
 
 <div class="page">
@@ -50,57 +51,27 @@
 
 @code
 {
-    [CascadingParameter]
-    private Task<AuthenticationState> authenticationState { get; set; } = default!;
-
-    private ClaimsPrincipal? user;
-    private Account? Account;
-
-    private string accountNumber = string.Empty;
-    private string clientName = string.Empty;
+    private string accountNumber = "Loading...";
+    private string clientName = "Loading...";
     private decimal currentBalance = 0.00m;
     private decimal withdrawAmount = 0.00m;
-    private string confirmationNumber = string.Empty;
+    private string confirmationNumber = "Loading...";
     private DateTime? date;
-
-    protected override async Task OnInitializedAsync()
-    {
-        //  Get Authentication State
-        AuthenticationState authState = await authenticationState;
-        user = authState.User;
-
-        //  Retrieve userAuth id from claims.
-        var userAuthId = Convert.ToInt32(_claimsHelper.GetClaimValue(user, ClaimTypes.NameIdentifier) ?? "0");
-
-        // //  Retrieve account id list from userAuthObject
-        // List<int>? accountIds = await _userDataService.GetAccountIdListAsync(userAuthId);
-
-        // //  Retreive account id from list.
-        // var accountId = accountIds?[0] ?? 5;
-
-        var accountId = await _userDataService.GetFirstAccountAsync(userAuthId) ?? 0;
-
-        //  Retriev account from db.
-        Account = await _userDataService.GetAccountAsync(accountId);
-
-        if (Account is not null)
-        {
-            accountNumber = Account.AccountNumber;
-            clientName = Account.AccountName;
-        }
-    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender) 
     {
         if (firstRender) 
         {
             try 
-            {   
+            {
                 //  Fetch transaction session details from session storage.
                 //  Throws SessionNotFoundException if session is not found.
-                TransactionSession transactionSession = await _storageService.FetchSessionAsync<TransactionSession>(SessionSchemes.WITHDRAW_SESSION);
+                UserSession userSession = await userSessionService.GetUserSession();
+                TransactionSession transactionSession = await sessionStorageService.FetchSessionAsync<TransactionSession>(SessionSchemes.WITHDRAW_SESSION);
 
                 //  Set display data.
+                accountNumber = userSession.ActiveAccountNumber;
+                clientName = userSession.ActiveAccountName;
                 currentBalance = transactionSession.CurrentBalance;
                 withdrawAmount = transactionSession.Amount;
                 date = transactionSession.TransactionDate;
@@ -113,7 +84,7 @@
             catch (SessionNotFoundException) 
             {
                 //  Redirect to client home if users try to access the page without an ongoing transaction session.
-                _redirectService.redirectWithNavigationManager(PageRoutes.CLIENT_HOME);
+                redirectService.redirectWithNavigationManager(PageRoutes.CLIENT_HOME);
             }
         }
     }
@@ -121,9 +92,9 @@
     private async Task GoHome() 
     {
         //  Delete transaction session details from session storage.
-        await _storageService.DeleteSessionAsync(SessionSchemes.WITHDRAW_SESSION);
+        await sessionStorageService.DeleteSessionAsync(SessionSchemes.WITHDRAW_SESSION);
 
         //  Redirect user to client home.
-        _redirectService.redirectWithNavigationManager(PageRoutes.CLIENT_HOME);
+        redirectService.redirectWithNavigationManager(PageRoutes.CLIENT_HOME);
     }
 }

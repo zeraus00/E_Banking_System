@@ -71,7 +71,7 @@ namespace Services
         /// Checks if the user is authenticated.
         /// </summary>
         /// <param name="user">The ClaimsPrincipal.</param>
-        /// <returns>True if user is authenticated.</returns>
+        /// <returns>True if user is authenticated. False otherwise, or if user or Identity is null.</returns>
         public bool IsAuthenticated(ClaimsPrincipal? user)
         {
             return user?.Identity?.IsAuthenticated == true;

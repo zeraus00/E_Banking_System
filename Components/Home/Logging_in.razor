@@ -1,0 +1,57 @@
+﻿@page "/Logging_in"
+@attribute [Authorize(Roles="Administrator, User, Employee")]
+@rendermode InteractiveServer
+
+@inject ClaimsHelperService claimsHelperService
+@inject UserSessionService userSessionService
+@inject PageRedirectService redirectService
+
+<h3>Logging_in</h3>
+
+@code {
+	[CascadingParameter]
+	private Task<AuthenticationState> authenticationState { get; set; } = default!;
+
+	private ClaimsPrincipal? user;
+
+	protected override async Task OnInitializedAsync() 
+	{
+		AuthenticationState authState = await authenticationState;
+		user = authState.User;
+	}
+
+	protected override async Task OnAfterRenderAsync(bool firstRender) 
+	{
+		try 
+		{
+			if (firstRender) 
+			{
+				if (user is not null)
+				{
+					//	Start session.
+					await userSessionService.StartUserSession(user);
+
+					//	Redirect based on role.
+					redirectService.RedirectBasedOnRole(user);
+
+					StateHasChanged();
+					return;
+				}
+				else
+					//	if sign in failed.
+					throw new NullReferenceException("CLAIMS IS NULL");
+			}
+		} 
+		catch (UserNotFoundException)
+		{
+			//	Redirect to landing page if cookie is expired and claims principal is not found.
+			redirectService.redirectWithNavigationManager(PageRoutes.LANDING_PAGE);	
+		}
+		catch (NullReferenceException ex)
+		{
+			//	Redirect to log in page if claims principal is null.
+			Console.WriteLine("ERROR: " + ex.Message);
+			redirectService.redirectWithNavigationManager(PageRoutes.LOG_IN_PAGE);
+		}
+	}
+}
