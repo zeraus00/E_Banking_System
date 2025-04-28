@@ -9,6 +9,8 @@
         public const string LOG_OUT_PAGE = "/Logout_page";
 
         public const string DASHBOARD = "/Dashboard";
+        public const string PENDING_ACCOUNTS = "/PendingAccounts";
+        public const string VIEW_DETAILS = "/ViewDetails";
 
         public const string CLIENT_HOME = "/Client_home";
         public const string DEPOSIT_AMOUNT = "/Deposit_amount";
