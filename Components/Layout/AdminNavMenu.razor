@@ -1,5 +1,10 @@
 ﻿@rendermode InteractiveServer
 
+@inject PageRedirectService redirectService
+@inject UserSessionService userSessionService
+
+<AuthorizeView Roles="Administrator">
+    <Authorized>
         <!-- Side NavBar Layout -->
         <nav class="sidebar">
             <!-- Top Row -->
@@ -11,8 +16,8 @@
                 </div>
 
                 <div class="text-light mt-3">
-                    <p class="m-0 p-0">_fullName</p>
-                    <p style="font-size: small;">_email</p>
+                    <p class="m-0 p-0">@fullName</p>
+                    <p style="font-size: small;">@email</p>
                 </div>
 
             </div>
@@ -50,14 +55,52 @@
                             <NavLink class="nav-link" href="#" Match="NavLinkMatch.All">Settings</NavLink>
                         </div>
                         <div class="nav-item px-3">
-                            <button class="nav-link"> Logout</button>
+                            <button class="nav-link" @onclick="LogOutAsync"> Logout</button>
                         </div>
                     </nav>
                 </div>
             </div>
 
         </nav>
+    </Authorized>    
+</AuthorizeView>
+        
 
 @code {
+    private AdminSession adminSession { get; set; } = default!;
 
+    private string fullName { get; set; } = "Loading...";
+    private string email { get; set; } = "Loading...";
+
+    public async Task LogOutAsync()
+    {
+        await userSessionService.EndSession();
+
+        redirectService.redirectWithNavigationManager(PageRoutes.LOG_OUT_PAGE);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                //  Get admin session details from session storage.
+                //  Throws SessionNotFoundException if not session is found.
+                adminSession = await userSessionService.GetAdminSession();
+
+                //  Set display data.
+                fullName = adminSession.FullName;
+                email = adminSession.Email;
+
+                //  Reload component.
+                StateHasChanged();
+            }
+            catch (SessionNotFoundException)
+            {
+                //  Redirect user to LOGGING_IN_PAGE if no session is found.
+                redirectService.redirectWithNavigationManager(PageRoutes.LOGGING_IN_PAGE);
+            }
+        }
+    }
 }
