@@ -113,14 +113,13 @@
     private List<string> transactionTypes { get; set; } = new();
     private string selectedTransactionType = "";
 
-    private List<TransactionRecord> allTransactions = new();
-    private List<TransactionRecord> TransactionsList = new();
     private List<Transaction> transactionList = new();
 
     private int accountId { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
+        //  Load transaction types
         transactionTypes = TransactionTypeNames.TransactionTypeNameList;
         await base.OnInitializedAsync();
     }
@@ -152,6 +151,7 @@
 
     private async Task FilterTransactionsAsync()
     {
+        //  Load the filtered transaction list from the database.
         transactionList = await userDataService.GetRecentAccountTransactionsAsync(
             accountId,
             transactionCount: 50,
@@ -171,20 +171,7 @@
 
     private async Task LoadTransactionsAsync()
     {
+        //  Load the transaction list associated with the accound id and take 50 entries from the list.
         transactionList = await userDataService.GetRecentAccountTransactionsAsync(accountId, 50);
-    }
-
-    public class TransactionRecord
-    {
-        public DateTime Date { get; set; }
-        public TimeSpan Time { get; set; }
-        public int AccountNo { get; set; }
-        public string Type { get; set; }
-        public decimal Amount { get; set; }
-        public string ReceiverID { get; set; }
-        public string SenderID { get; set; }
-        public decimal previousBalance { get; set; }
-        public decimal newBalance { get; set; }
-        public decimal transactionFee { get; set; }
     }
 }
