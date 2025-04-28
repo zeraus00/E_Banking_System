@@ -16,14 +16,12 @@
             if (query is not  null)
             {
                 transactionsList = await query
-                     .Where(t => t.MainAccountId == mainAccountId ||
-                                 t.CounterAccountId == mainAccountId)
+                     .Where(t => t.MainAccountId == mainAccountId)
                      .ToListAsync();
             } else
             {
                 transactionsList = await _context.Transactions
-                    .Where(t => t.MainAccountId == mainAccountId ||
-                                t.CounterAccountId == mainAccountId)
+                    .Where(t => t.MainAccountId == mainAccountId)
                     .ToListAsync();
             }
 
@@ -48,6 +46,25 @@
                 query = query.Include(t => t.MainAccount);
             if (includeCounterAccount)
                 query = query.Include(t => t.CounterAccount);
+            return query;
+        }
+
+        public IQueryable<Transaction> FilterQuery(
+            IQueryable<Transaction>? query = null,
+            int transactionTypeId = 0,
+            DateTime? transactionStartDate = null,
+            DateTime? transactionEndDate = null
+            )
+        {
+            if (query is null)
+                query = _context.Transactions.AsQueryable();
+            if (transactionTypeId is not 0)
+                query = query.Where(t => t.TransactionTypeId == transactionTypeId);
+            if (transactionStartDate.HasValue)
+                query = query.Where(t => t.TransactionDate >= transactionStartDate);
+            if (transactionEndDate.HasValue)
+                query = query.Where(t => t.TransactionDate <= transactionEndDate);
+
             return query;
         }
     }
