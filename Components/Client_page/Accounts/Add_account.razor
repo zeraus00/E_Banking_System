@@ -2,9 +2,9 @@
 @attribute [Authorize(Roles = "User")]
 @rendermode InteractiveServer
 
-@inject NavigationManager NavigationManager
-@inject ClaimsHelperService claimsHelperService
+@inject PageRedirectService redirectService
 @inject UserDataService userDataService
+@inject UserSessionService userSessionService
 
 <div class="page">
 	<main>
@@ -37,21 +37,23 @@
 				<div class="row mt-2">
 					<label class="text-light">Account Type</label>
 					<select class="form-select" placeholder="Account Type" required>
-						<option>Personal Account</option>
-						<option>Joint Account</option>
+						@foreach(var type in accountTypeList)
+						{
+							<option value="@type">@type</option>
+						}
 					</select>
 				</div>
 
 				<!-- Account Number -->
 				<div class="row mt-2">
 					<label class="text-light">Account Number</label>
-					<input class="form-control" placeholder="Select Account Number">
+					<input class="form-control" @bind="@accountName" placeholder="Enter Account Number">
 				</div>
 
 				<!-- Account Name -->
 				<div class="row mt-2">
 					<label class="text-light">Account Name</label>
-					<input class="form-control" placeholder="Enter Account Name" required>
+					<input class="form-control" @bind="@accountName" placeholder="Enter Account Name" required>
 				</div>
 
 				<!-- Terms and Conditions -->
@@ -64,8 +66,10 @@
 
 				<!-- Submit -->
 				<div class="text-end mt-3">
-					<button class="btn btn-danger">Cancel</button>
-					<button class="btn btn-primary">Create Account</button>
+					<NavLink href="/Accounts">
+						<button class="btn btn-danger">Cancel</button>
+					</NavLink>
+					<button class="btn btn-primary" @onclick="TryAddAccountAsync">Add Account</button>
 				</div>
 
 			</div>
@@ -76,5 +80,40 @@
 
 @code
 {
+	private List<string> accountTypeList { get; set; } = new();
+	private string accountNumber { get; set; } = string.Empty;
+	private string accountName { get; set; } = string.Empty;
 
+	protected override async Task OnInitializedAsync()
+	{
+		accountTypeList = new AccountTypeNames().AccountTypeNameList;
+	}
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			try
+			{
+				UserSession userSession = await userSessionService.GetUserSession();
+			}
+			catch (SessionNotFoundException)
+			{
+				//	Redirect user to CLIENT_HOME if there is no active session.
+				redirectService.redirectWithNavigationManager(PageRoutes.CLIENT_HOME);
+			}
+		}
+	}
+
+	private async Task TryAddAccountAsync()
+	{
+		try
+		{
+
+		}
+		catch
+		{
+
+		}
+	}
 }

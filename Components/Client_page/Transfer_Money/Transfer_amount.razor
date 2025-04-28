@@ -85,7 +85,7 @@
     private string clientName = string.Empty;
     private decimal currentBalance = 0.0m;
 
-    private string erro = string.Empty;
+    private string error = string.Empty;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -117,7 +117,7 @@
             catch (AccountNotFoundException)
             {
                 currentBalance = 0.00m;
-                error = "Error resolving database. Please try again later."
+                error = "Error resolving database. Please try again later.";
             }
         }
     }

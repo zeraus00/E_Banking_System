@@ -84,7 +84,11 @@
         {
             try
             {
+                //  Get user session details from session storage.
                 UserSession userSession = await userSessionService.GetUserSession();
+
+                //  Get list of accounts from database.
+                //  Returns empty list of no accounts are found.
                 accounts = await userDataService.GetAccountListAsync(userSession.UserAccountIdList);
 
                 StateHasChanged();
