@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="Components\Client_page\Accounts\AddAccount.razor" />
+    <Content Remove="Components\Client_page\Accounts\ManageAccounts.razor" />
+    <Content Remove="Components\Client_page\Accounts\MyAccounts.razor" />
+    <Content Remove="Components\Home\Sign_up_page.razor" />
     <Content Remove="wwwroot\bootstrap\Utilities\profile.png" />
   </ItemGroup>
 

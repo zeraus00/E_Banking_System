@@ -1,0 +1,27 @@
+﻿@using Layout
+@page "/PendingApproval"
+@inject NavigationManager NavigationManager
+
+<div class="page">
+	<main>
+
+		<!-- Logout Box -->
+		<div class="card new_password p-4 shadow-lg">
+			<div class="m-4">
+				<h4 class="text-center fw-bold mb-4">Your registration has been submitted.</h4>
+				<h6>Your account is currently under review. We’ll notify you once the approval process is complete.</h6>
+
+			</div>
+			<!-- Sign In Button -->
+			<div class="mb-2 mx-auto px-4 w-100">
+				<NavLink class="btn btn-primary w-100" href="/">Back to Home Page.</NavLink>
+			</div>
+
+		</div>
+	</main>
+</div>
+
+@code
+{
+
+}

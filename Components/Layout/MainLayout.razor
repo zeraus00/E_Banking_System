@@ -27,5 +27,7 @@
 </div>
 
 @code {
-    private bool HideSidebar => NavManager.Uri.Contains("/Logout_page");
+    private bool HideSidebar => 
+    NavManager.Uri.Contains("/Logout") ||
+    NavManager.Uri.Contains("/PendingApproval");
 }
