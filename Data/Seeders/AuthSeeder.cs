@@ -42,8 +42,8 @@ namespace Data.Seeders
 
                 var users = new List<(int roleId, string userName, string email, string password)>
                 {
-                    (1, "admin", "admin@gmail.com", "admin123"),
-                    (2, "user", "user@gmail.com", "user123"),
+                    (1, "nexusAdmin", "nexusAdmin@gmail.com", "nexusAdmin123"),
+                    (2, "bogartDelaMon", "bogartDelaMonJr@gmail.com", "bogartDelaMonJr123"),
                     (3, "employee", "employee@gmail.com", "employee123")
                 };
 

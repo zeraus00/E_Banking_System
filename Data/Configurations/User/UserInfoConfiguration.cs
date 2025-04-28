@@ -38,7 +38,7 @@ namespace Data.Configurations.User
             UsersInfo
                 .Property(ui => ui.Sex)
                 .IsRequired()
-                .HasMaxLength(10);
+                .HasMaxLength(20);
 
             // FatherNameId (Required)
             UsersInfo
@@ -75,11 +75,11 @@ namespace Data.Configurations.User
                 .IsRequired()
                 .HasMaxLength(12);
 
-            //  CivilStatus (Required; MaxLength=20)
+            //  CivilStatus (Required; MaxLength=30)
             UsersInfo
                 .Property(ui => ui.CivilStatus)
                 .IsRequired()
-                .HasMaxLength(20);
+                .HasMaxLength(30);
 
             /*  
              *  Configure Relationships
