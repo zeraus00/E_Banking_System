@@ -49,8 +49,7 @@ namespace Services
 
             return new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, userAuth.UserAuthId.ToString()),
-                new Claim(ClaimTypes.Name, userAuth.Email),
+                new Claim(CustomClaimTypes.USERAUTH_ID, userAuth.UserAuthId.ToString()),
                 new Claim(ClaimTypes.Role, userAuth.Role.RoleName),
                 new Claim(CustomClaimTypes.ROLE_ID, roleId),
                 new Claim(CustomClaimTypes.USERINFO_ID, userInfoId)
@@ -72,7 +71,7 @@ namespace Services
         /// Checks if the user is authenticated.
         /// </summary>
         /// <param name="user">The ClaimsPrincipal.</param>
-        /// <returns>True if user is authenticated.</returns>
+        /// <returns>True if user is authenticated. False otherwise, or if user or Identity is null.</returns>
         public bool IsAuthenticated(ClaimsPrincipal? user)
         {
             return user?.Identity?.IsAuthenticated == true;

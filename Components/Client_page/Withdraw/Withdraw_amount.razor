@@ -1,12 +1,11 @@
 ﻿@page "/Withdraw_amount"
 @attribute [Authorize(Roles="User")]
-
 @rendermode InteractiveServer
-@inject ClaimsHelperService _claimsHelper
-@inject PageRedirectService _redirectService
-@inject UserDataService _userDataService
-@inject TransactionService _transactionService
-@inject PageRedirectService _redirectService
+
+@inject PageRedirectService redirectService
+@inject TransactionService transactionService
+@inject UserDataService userDataService
+@inject UserSessionService userSessionService
 @using Helpers;
 
 <div class="page">
@@ -56,47 +55,46 @@
 </div>
 
 @code {
-    [CascadingParameter]
-    private Task<AuthenticationState> authenticationState { get; set; } = default!;
-
-    private ClaimsPrincipal? user;
-    private Account? Account;
-
     private int accountId;
-    private string accountNumber = string.Empty;
-    private string clientName = string.Empty;
+    private string accountNumber = "Loading...";
+    private string clientName = "Loading...";
     private decimal currentBalance = 0.0m;
 
     private decimal withdrawAmount = 0.00m;
 
     private string error = string.Empty;
 
-
-    protected override async Task OnInitializedAsync() 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        //  Get Authentication State
-        AuthenticationState authState = await authenticationState;
-        user = authState.User;
-
-        //  Retrieve userAuth id from claims.
-        var userAuthId = Convert.ToInt32(_claimsHelper.GetClaimValue(user, ClaimTypes.NameIdentifier) ?? "0");
-
-        // //  Retrieve account id list from userAuthObject
-        // List<int>? accountIds = await _userDataService.GetAccountIdListAsync(userAuthId);
-
-        // //  Retreive account id from list.
-        // var accountId = accountIds?[0] ?? 5;
-
-        accountId = await _userDataService.GetFirstAccountAsync(userAuthId) ?? 0;
-
-        //  Retriev account from db.
-        Account = await _userDataService.GetAccountAsync(accountId);
-
-        if (Account is not null) 
+        if (firstRender)
         {
-            accountNumber = Account.AccountNumber;
-            clientName = Account.AccountName;
-            currentBalance = Account.Balance;
+            try
+            {
+                //  Get user session details from session storage.
+                //  Throws SessionNotFoundException is session is not found.
+                UserSession userSession = await userSessionService.GetUserSession();
+
+                //  Set display data.
+                accountId = userSession.ActiveAccountId;
+                accountNumber = userSession.ActiveAccountNumber;
+                clientName = userSession.ActiveAccountName;
+
+                //  Throws AccountNotFoundException if account is not found.
+                Account Account = await userDataService.GetAccountAsync(accountId);
+                currentBalance = Account.Balance;
+
+                StateHasChanged();
+            }
+            catch (SessionNotFoundException)
+            {
+                redirectService.redirectWithNavigationManager(PageRoutes.LOGGING_IN_PAGE);
+            }
+            catch (AccountNotFoundException)
+            {
+                //  do something.
+                currentBalance = 0.00m;
+                error = "Error resolving database. Please try again later";
+            }
         }
     }
 
@@ -105,10 +103,10 @@
         try
         {
             //  Save transaction session to session storage.
-            await _transactionService.InitiateTransaction(SessionSchemes.WITHDRAW_SESSION, accountId, (int)TransactionTypes.Withdrawal, withdrawAmount);
+            await transactionService.InitiateTransaction(SessionSchemes.WITHDRAW_SESSION, accountId, (int)TransactionTypes.Withdrawal, withdrawAmount);
 
             //  Redirect to withdraw confirmation page.
-            _redirectService.redirectWithNavigationManager(PageRoutes.WITHDRAW_CONFIRMATION);
+            redirectService.redirectWithNavigationManager(PageRoutes.WITHDRAW_CONFIRMATION);
         } 
         catch (AccountNotFoundException) 
         {

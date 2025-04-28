@@ -1,9 +1,10 @@
 ﻿@page  "/Add_account"
+@attribute [Authorize("User")]
+@rendermode InteractiveServer
 
 @inject NavigationManager NavigationManager
-@inject ClaimsHelperService _claimsHelper
-@inject UserDataService _userDataService
-@rendermode InteractiveServer
+@inject ClaimsHelperService claimsHelperService
+@inject UserDataService userDataService
 
 <div class="page">
     <main>

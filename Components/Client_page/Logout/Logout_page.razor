@@ -1,9 +1,9 @@
 ﻿@using Layout
-@inject IHttpContextAccessor accessor
+
 @page "/Logout_page"
-@inject NavigationManager NavigationManager
-@inject ClaimsHelperService claimsHelper
+@inject IHttpContextAccessor accessor
 @inject PageRedirectService redirectService
+@inject UserSessionService userSessionService
 
 <div class="page">
 	<main>
@@ -30,11 +30,14 @@
 
 	protected override async Task OnInitializedAsync() 
 	{
+		//	Get authentication state.
 		AuthenticationState authState = await authenticationState;
 		var user = authState.User;
 
+		//	Redirect user if not authenticated on page load.
 		redirectService.RedirectIfNotAuthenticated(user);
 
+		//	Signout user if still authenticated on page load.
 		await accessor.HttpContext!.SignOutAsync();
 	}
 }

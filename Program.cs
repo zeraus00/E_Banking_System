@@ -42,6 +42,7 @@ builder.Services.AddScoped<SessionStorageService>();
 builder.Services.AddScoped<SignInService>();
 builder.Services.AddScoped<TransactionService>();
 builder.Services.AddScoped<UserDataService>();
+builder.Services.AddScoped<UserSessionService>();
 
 
 builder.Services.AddAntiforgery(options =>
@@ -53,9 +54,9 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     .AddCookie(options =>
     {
         options.Cookie.Name = "auth-token";
-        options.LoginPath = "/Login_page";
+        options.LoginPath = PageRoutes.LANDING_PAGE;
         options.Cookie.MaxAge = TimeSpan.FromMinutes(30);
-        options.AccessDeniedPath = "/"; // add access denied page here.
+        options.AccessDeniedPath = PageRoutes.LANDING_PAGE; // add access denied page here.
         // Ensure the cookie is only sent over HTTPS
         options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 

@@ -66,7 +66,7 @@ namespace Data.Seeders.Finance
                 var accountStatusTypeBuilder = new AccountStatusTypeBuilder();
                 var statusTypeList = new List<string>
                 {
-                    AccountStatusTypeNames.Active,
+                    AccountStatusTypeNames.ACTIVE,
                     AccountStatusTypeNames.PENDING,
                     AccountStatusTypeNames.INACTIVE,
                     AccountStatusTypeNames.DORMANT,

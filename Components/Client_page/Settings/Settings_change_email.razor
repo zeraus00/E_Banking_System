@@ -2,10 +2,10 @@
 
 @page "/Settings_change_email"
 @attribute [Authorize(Roles = "User")]
+@rendermode InteractiveServer
 
-@inject NavigationManager NavigationManager
-@inject ClaimsHelperService claimsHelper
 @inject PageRedirectService redirectService
+@inject UserSessionService userSessionService
 
 <div class="page">
 	<main>
@@ -59,21 +59,30 @@
 
 @code 
 {
-	[CascadingParameter]
-	private Task<AuthenticationState> authenticationState { get; set; } = default!;
-
 	[SupplyParameterFromForm]
 	private EmailChangeViewModel emailChangeModel { get; set; } = new();
 
 	private string error = string.Empty;
 
-	private ClaimsPrincipal? user;
-
-	protected override async Task OnInitializedAsync()
+	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
-		//  Get Authentication state
-		AuthenticationState authState = await authenticationState;
-		user = authState.User;
+		if (firstRender)
+		{
+			try
+			{
+				//	Get user session details from session storage.
+				//	Throws SessionNotFoundException if session is not found.
+				UserSession userSession = await userSessionService.GetUserSession();
+
+				//	Reload component.
+				StateHasChanged();
+			}
+			catch (SessionNotFoundException)
+			{
+				//	Redirect to LOGGING_IN_PAGE if session is not found.
+				redirectService.redirectWithNavigationManager(PageRoutes.LOGGING_IN_PAGE);
+			}
+		}
 	}
 
 	private void ValidateEmail() 
@@ -82,7 +91,8 @@
 		{
 			//	Handle email verification logic here.
 
-			redirectService.redirectWithHttpContext("/Client_home");
+			//	Redirect to LOG_OUT_PAGE.
+			redirectService.redirectWithNavigationManager(PageRoutes.LOG_OUT_PAGE);
 			return;
 		} else 
 		{

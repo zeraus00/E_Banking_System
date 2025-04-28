@@ -1,6 +1,8 @@
-﻿@inject IWebHostEnvironment Env
-@inject UserDataService _userDataService;
-@inject ClaimsHelperService _claimsHelper
+﻿@rendermode InteractiveServer
+
+@inject IWebHostEnvironment Env
+@inject UserSessionService userSessionService
+@inject PageRedirectService redirectService
 
 <AuthorizeView Roles = "User, Administrator, Employee">
     <Authorized>
@@ -81,7 +83,7 @@
                             <NavLink class="nav-link" href="/Settings_page" Match="NavLinkMatch.All">Settings</NavLink>
                         </div>
                         <div class="nav-item px-3">
-                            <NavLink class="nav-link" href="/Logout_page"> Logout</NavLink>
+                            <button class="nav-link" @onclick="LogOutAsync"> Logout</button>
                         </div>
                     </nav>
                 </div>
@@ -94,26 +96,40 @@
 
 
 @code {
-    [CascadingParameter]
-    private Task<AuthenticationState> authenticationState { get; set; } = default!;
+    private string _fullName = "Loading...";
+    private string _email = "Loading...";
 
-    private ClaimsPrincipal? _user;
-    private UserInfo? UserInfo;
-    private string _fullName = string.Empty;
-    private string _email = string.Empty;
-
-    protected override async Task OnInitializedAsync() 
+    private async Task LogOutAsync()
     {
-        AuthenticationState authState = await authenticationState;
-        _user = authState.User;
+        //  End user session.
+        await userSessionService.EndSession();
 
+        //  Redirect to LOG_OUT_PAGE.
+        redirectService.redirectWithNavigationManager(PageRoutes.LOG_OUT_PAGE);
+    }
 
-        if (_claimsHelper.IsAuthenticated(_user)) 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
         {
-            int userInfoId = Convert.ToInt32(_user.FindFirst(c => c.Type == CustomClaimTypes.USERINFO_ID)?.Value ?? "0");
-            UserInfo = await _userDataService.GetUserInfoAsync(userInfoId);
-            _fullName = await _userDataService.GetUserFullName(UserInfo);
-            _email = _user.FindFirst(c => c.Type == ClaimTypes.Name)?.Value ?? "Email not found";
+            try
+            {
+                //  Get user session details from session storage.
+                //  Throws SessionNotFoundException if session is not found.
+                UserSession userSession = await userSessionService.GetUserSession();
+
+                //  Set display data
+                _fullName = userSession.CurrentUserName;
+                _email = userSession.CurrentUserEmail;
+
+                //  Reload component
+                StateHasChanged();
+            }
+            catch (SessionNotFoundException)
+            {
+                //  Redirect to LOGGING_IN_PAGE if there is no user session.
+                redirectService.redirectWithNavigationManager(PageRoutes.LOGGING_IN_PAGE);
+            }
         }
     }
 }

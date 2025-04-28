@@ -5,11 +5,11 @@ namespace Services
 {
     public class NexusAuthenticationStateProvider : AuthenticationStateProvider
     {
-        private readonly ClaimsHelperService _claimsHelperService;
+        private readonly ClaimsHelperService _claimsHelper;
         private AuthenticationState _authenticationState;
-        public NexusAuthenticationStateProvider (NexusAuthenticationService authenticationService )
+        public NexusAuthenticationStateProvider (ClaimsHelperService claimsHelper, NexusAuthenticationService authenticationService )
         {
-            _claimsHelperService = new();
+            _claimsHelper = claimsHelper;
 
             
 
@@ -26,7 +26,7 @@ namespace Services
 
         public void AuthenticateUser(UserAuth userAuth)
         {
-            ClaimsPrincipal principal = _claimsHelperService.CreateClaimsPrincipal(userAuth);
+            ClaimsPrincipal principal = _claimsHelper.CreateClaimsPrincipal(userAuth);
             NotifyAuthenticationStateChanged(
                 Task.FromResult(new AuthenticationState(principal)));
         }

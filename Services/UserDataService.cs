@@ -3,6 +3,7 @@ using Data.Repositories.Auth;
 using Data.Repositories.Finance;
 using Data.Repositories.User;
 using Exceptions;
+using Microsoft.Identity.Client;
 
 
 namespace Services
@@ -21,24 +22,60 @@ namespace Services
         public UserDataService(IDbContextFactory<EBankingContext> contextFactory) : base(contextFactory) { }
 
         /// <summary>
-        /// Get UserInfo through userInfoId asynchronously.
-        /// Includes the Name navigation property.
+        /// Attempts to retrieve a UserAuth from the database with specified includes.
+        /// Throws an error if no userauth is found.
+        /// </summary>
+        /// <param name="userAuthId">The primary key of the UserAuth.</param>
+        /// <param name="includeRole">Decide wheter to include the Role.</param>
+        /// <param name="includeAccounts">Decide wheter to include the Accounts.</param>
+        /// <param name="includeUserInfo">Decide wheter to include the UserInfo.</param>
+        /// <returns></returns>
+        /// <exception cref="UserNotFoundException"></exception>
+        public async Task<UserAuth> TryGetUserAuthAsync(
+            int userAuthId, 
+            bool includeRole = false,
+            bool includeAccounts = false, 
+            bool includeUserInfo = false)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                var userAuthRepo = new UserAuthRepository(dbContext);
+                var query = userAuthRepo.ComposeQuery(includeRole, includeAccounts, includeUserInfo);
+                return (await userAuthRepo.GetUserAuthByIdAsync(userAuthId, query)) ?? throw new UserNotFoundException();
+            }
+        }
+        /// <summary>
+        /// Get UserInfo through userInfoId asynchronously with specified includes.
         /// </summary>
         /// <param name="userInfoId">The primary key of the UserInfo.</param>
         /// <returns>The UserInfo if found. Null otherwise.</returns>
-        public async Task<UserInfo?> GetUserInfoAsync(int userInfoId)
+        public async Task<UserInfo> TryGetUserInfoAsync(
+            int userInfoId,
+            bool includeUserAuth = false,
+            bool includeUserName = false,
+            bool includeBirthInfo = false,
+            bool includeAddress = false,
+            bool includeFatherName = false,
+            bool includeMotherName = false,
+            bool includeReligion = false
+            )
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
                 UserInfoRepository userInfoRepo = new UserInfoRepository(dbContext);
 
-                IQueryable<UserInfo> query = userInfoRepo.ComposeQuery(includeName: true);
-                UserInfo? userInfo = await userInfoRepo.GetUserInfoByIdAsync(userInfoId, query);
-
-                return userInfo;
+                IQueryable<UserInfo> query = userInfoRepo.ComposeQuery(
+                        includeUserAuth,
+                        includeUserName,
+                        includeBirthInfo,
+                        includeAddress,
+                        includeFatherName,
+                        includeMotherName,
+                        includeReligion
+                    );
+                return (await userInfoRepo.GetUserInfoByIdAsync(userInfoId, query)) ?? throw new UserNotFoundException();
             }
         }
-
 
         /// <summary>
         /// Gets the user's full name from the UserInfo object.
@@ -46,13 +83,13 @@ namespace Services
         /// the NameId provided in the UserInfo.
         /// </summary>
         /// <param name="userInfo">The UserInfo instance.</param>
-        /// <returns>A string containing the user's full name. Null if the userInfo is null.</returns>
-        public async Task<string> GetUserFullName(UserInfo? userInfo)
+        /// <returns>A string containing the user's full name. Null if the userInfo or Name is null.</returns>
+        public async Task<string?> GetUserFullName(UserInfo? userInfo)
         {
-            //  If userInfo is null, throws a UserNotFoundException.
-            if(userInfo is null)
+            //  If userInfo is null, return null.
+            if (userInfo is null)
             {
-                throw new UserNotFoundException(); 
+                return null;
             }
 
             //  Initialize a list for the name parts.
@@ -62,14 +99,16 @@ namespace Services
             //  If null, query the database for the Name using the NameId.
             //  If not null, use the navigation property.
             //  Fill out the list with the name's parts.
-            if(userInfo.UserName is null)
+            if (userInfo.UserName is null)
             {
-                await using (var dbContext = await _contextFactory.CreateDbContextAsync()) 
+                await using (var dbContext = await _contextFactory.CreateDbContextAsync())
                 {
+                    //  Query the names table.
                     var nameRepo = new NameRepository(dbContext);
                     Name? name = await nameRepo.GetNameByIdAsync(userInfo.UserNameId);
+                    //  return null if name is null.
                     if (name is null)
-                        throw new NameNotFoundException(userInfo.UserNameId);
+                        return null;
                     else
                     {
                         names = new List<string?>
@@ -81,7 +120,8 @@ namespace Services
                         };
                     }
                 }
-            } else
+            }
+            else
             {
 
                 names = new List<string?>
@@ -127,6 +167,26 @@ namespace Services
 
                 return userAuth?.Accounts.ToList() ?? null;
             }
+        }
+        public async Task<List<Account>> GetAccountListAsync(List<int> accountIdList)
+        {
+            List<Account> accountList = new();
+            foreach (var id in accountIdList)
+            {
+                try
+                {
+                    //  Throws AccountNotFoundException if account is not found.
+                    Account account = await this.GetAccountAsync(id);
+                    accountList.Add(account);
+                } 
+                catch (AccountNotFoundException)
+                {
+                    //  Do not add accounts that are not found to the list.
+                    continue;
+                }
+            }
+
+            return accountList;
         }
         /// <summary>
         /// Retrieves a list of transactions associated with the specified account ID.
@@ -182,41 +242,65 @@ namespace Services
         }
 
         /// <summary>
-        /// Asynchronously retrieves an account by its account id.
+        /// Asynchronously retrieves an account by its account id with the specified includes.
         /// </summary>
         /// <param name="accountId">The account's id/primary key.</param>
         /// <returns>The account if found.</returns>
-        public async Task<Account?> GetAccountAsync(int accountId)
+        /// <exception cref="AccountNotFoundException">Thrown if no account is found.</exception>
+        public async Task<Account> GetAccountAsync(
+            int accountId,
+            bool includeAccountType = false,
+            bool includeLinkedBeneficiaryAccount = false,
+            bool includeLinkedSourceAccounts = false,
+            bool includeUsersAuth = false,
+            bool includeTransactions = false,
+            bool includeLoans = false,
+            bool includeLoanTransactions = false)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
                 AccountRepository accountRepo = new AccountRepository(dbContext);
-
-
-                IQueryable<Account> query = accountRepo.ComposeQuery(includeTransactions: true);
-                Account? account = await accountRepo.GetAccountByIdAsync(accountId, query);
-
-                return account;
+                IQueryable<Account> query = accountRepo.ComposeQuery(
+                    includeAccountType,
+                    includeLinkedBeneficiaryAccount,
+                    includeLinkedSourceAccounts,
+                    includeUsersAuth,
+                    includeTransactions,
+                    includeLoans,
+                    includeLoanTransactions);
+                return (await accountRepo.GetAccountByIdAsync(accountId, query)) ?? throw new AccountNotFoundException(accountId);
             }
         }
 
         /// <summary>
-        /// Asynchronously retrieves an account by its account number.
+        /// Asynchronously retrieves an account by its account number with the specified includes.
         /// </summary>
         /// <param name="accountNumber">The account number.</param>
         /// <returns>The account if found.</returns>
-        public async Task<Account?> GetAccountAsync(string accountNumber)
+        /// <exception cref="AccountNotFoundException">Thrown if no account is found.</exception>
+        public async Task<Account?> GetAccountAsync(
+            string accountNumber,
+            bool includeAccountType = false,
+            bool includeLinkedBeneficiaryAccount = false,
+            bool includeLinkedSourceAccounts = false,
+            bool includeUsersAuth = false,
+            bool includeTransactions = false,
+            bool includeLoans = false,
+            bool includeLoanTransactions = false)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
                 AccountRepository accountRepo = new AccountRepository(dbContext);
-
-                IQueryable<Account> query = accountRepo.ComposeQuery(includeTransactions: true);
-                Account? account = await accountRepo.GetAccountByAccountNumberAsync(accountNumber, query);
-
-                return account;
+                IQueryable<Account> query = accountRepo.ComposeQuery(
+                    includeAccountType,
+                    includeLinkedBeneficiaryAccount,
+                    includeLinkedSourceAccounts,
+                    includeUsersAuth,
+                    includeTransactions,
+                    includeLoans,
+                    includeLoanTransactions);
+                return (await accountRepo.GetAccountByAccountNumberAsync(accountNumber, query)) ?? throw new AccountNotFoundException(accountNumber);
             }
         }
-
     }
 }
