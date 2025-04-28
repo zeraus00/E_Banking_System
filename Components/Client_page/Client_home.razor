@@ -78,8 +78,8 @@
                     <section class="custom-card balance text-start p-3 h-100 border rounded shadow-sm bg-white w-100">
                         <h3 class="fw-bold my-1">Current Balance:</h3>
                         <h4 class="justify-content-center text-center align-items-center">
-                            <span class="@(_currentBalance is >= 0 ? "text-success" : "text-danger")">
-                                ₱@_currentBalance?.ToString()
+                            <span class="@(_currentBalance >= 0 ? "text-success" : "text-danger")">
+                                @FormatHelper.BalanceFormatter(_currentBalance)
                             </span>
                         </h4>
                         <div class="custom-card sm">
@@ -153,7 +153,7 @@
                         {
                             <div class="row fs-6 mb-2 border-bottom pb-2">
                                 <div class="col">@tx.TransactionType.TransactionTypeName</div>
-                                <div class="col text-end">₱@tx.Amount.ToString()</div>
+                                <div class="col text-end">@FormatHelper.BalanceFormatter(tx.Amount)</div>
                                 <div class="col text-end">@tx.TransactionDate.ToShortDateString()</div>
                             </div>
                         }
