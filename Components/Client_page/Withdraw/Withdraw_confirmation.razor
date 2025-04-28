@@ -20,7 +20,7 @@
             <section class="d-flex justify-content-end align-items-end mx-5 gap-2">
                 <p class="fs-6 fw-lighter align-text-bottom">Current Balance: </p>
                 <div class="custom-card-clientpage current-balance d-flex align-items-center justify-content-center">
-                    @currentBalance
+                    @FormatHelper.BalanceFormatter(currentBalance)
                 </div>
             </section>
         </header>
@@ -30,7 +30,7 @@
             <section class="card registration shadow-lg d-flex flex-column my-4 p-3">
                 <div class="mx-auto text-center p-4">
                     <h5>Withdraw Amount</h5>
-                    <h1 class="fw-bolder py-3 mb-2">@withdrawAmount</h1>
+                    <h1 class="fw-bolder py-3 mb-2">₱@FormatHelper.BalanceFormatter(withdrawAmount)</h1>
                 </div>
 
                 <div class="d-flex justify-content-between mx-5">

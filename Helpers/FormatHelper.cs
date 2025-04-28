@@ -21,5 +21,10 @@ namespace Helpers
             }
             return Regex.Replace(accountNumber, @"(\d{3})(\d{3})(\d{3})(\w+)", "$1-$2-$3-$4");
         }
+
+        public static string BalanceFormatter(decimal balance)
+        {
+            return balance.ToString("#,0.00");
+        }
     }
 }
