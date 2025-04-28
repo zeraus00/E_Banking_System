@@ -28,6 +28,14 @@
 
         <div class="container">
             <section class="card registration shadow-lg d-flex flex-column mt-4 p-3">
+
+                @if (error.Length > 0)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <strong>@error</strong>
+                    </div>
+                }
+
                 <h3 class="mx-3 my-3 ">Enter Deposit Amount</h3>
                 <div class="input-group px-4 mb-4">
                     <span class="input-group-text fs-2">$</span>
