@@ -21,23 +21,36 @@
             <section class="d-flex justify-content-end align-items-end mx-5 gap-2">
                 <p class="fs-6 fw-lighter align-text-bottom">Current Balance: </p>
                 <div class="custom-card-clientpage current-balance d-flex align-items-center justify-content-center">
-                    @currentBalance
+                    @FormatHelper.BalanceFormatter(currentBalance)
                 </div>
             </section>
         </header>
 
         <div class="container">
             <section class="card registration shadow-lg d-flex flex-column mt-4 p-3">
+
+                @if (error.Length > 0)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <strong>@error</strong>
+                    </div>
+                }
+
                 <h3 class="mx-3 my-3 ">Enter Deposit Amount</h3>
                 <div class="input-group px-4 mb-4">
-                    <span class="input-group-text fs-2">$</span>
-                    <input type="number" class="form-control form-control-custom form-control-lg fs-2" @bind="@depositAmount" placeholder="000-000" />
+                    <span class="input-group-text fs-2">₱</span>
+                    <input 
+                        type="number" 
+                        class="form-control form-control-custom form-control-lg fs-2" 
+                        @bind="@depositAmount" placeholder="0.00" 
+                        @onfocus="ClearDefaultValue"
+                        @onblur="SetDefaultValue" />
                 </div>
 
                 <div class="d-flex justify-content-between mx-5">
                     <div class="d-flex flex-column text-start mb-0">
                         <h5 class="mb-1">@clientName</h5>
-                        <p class="mb-0">@FormatHelper.AccountNumberFormatter(accountNumber)</p>
+                        <p class="mb-0"><strong>Account No.:</strong> @FormatHelper.AccountNumberFormatter(accountNumber)</p>
                     </div>             
 
                     <div class="text-end mt-3 w-25">
@@ -63,7 +76,7 @@
     private string accountNumber = "Loading...";
     private string clientName = "Loading...";
     private decimal currentBalance = 0.00m;
-    private decimal depositAmount = 0.00m;
+    private decimal? depositAmount = null;
 
     private string error = string.Empty;
 
@@ -100,6 +113,22 @@
         }
     }
 
+    private void ClearDefaultValue()
+    {
+        if (!depositAmount.HasValue)
+        {
+            depositAmount = null;
+        }
+    }
+
+    private void SetDefaultValue()
+    {
+        if (!depositAmount.HasValue || depositAmount == 0.00m)
+        {
+            depositAmount = null;
+        }
+    }
+
     private async Task InitiateDepositProcess() 
     {
         try 
@@ -107,7 +136,7 @@
             if (depositAmount > 0)
             {
                 //  Save transaction session to session storage.
-                await transactionService.InitiateTransaction(SessionSchemes.DEPOSIT_SESSION, accountId, (int)TransactionTypes.Deposit, depositAmount);
+                await transactionService.InitiateTransaction(SessionSchemes.DEPOSIT_SESSION, accountId, (int)TransactionTypes.Deposit, depositAmount.Value);
 
                 //  Redirect to DEPOSIT_CONFIRMATION page.
                 redirectService.redirectWithNavigationManager(PageRoutes.DEPOSIT_CONFIRMATION);

@@ -4,66 +4,76 @@
 @inject NavigationManager NavigationManager
 
 <div class="main">
-    <div class="d-flex align-items-center gap-3 m-3 flex-wrap">
+    <div class="dashboard-container">
 
-        <div class="d-flex align-items-center gap-3">
-            <input class="bi bi-search form-control form-control-sm" @bind="searchAccount" placeholder="Search specific account">
+        <div class="top-bar mx-3">
+            <h2>Pending Accounts</h2>
         </div>
 
-        <div class="d-flex align-items-center gap-3">
-            <label class="text-light mb-0" style="white-space: nowrap;">Start Date</label>
-            <InputDate class="form-control form-control-sm" @bind-Value="startDate" />
+        <hr class="divider" />
+
+        <div class="d-flex align-items-center gap-3 m-3 flex-wrap">
+
+            <div class="d-flex align-items-center gap-3">
+                <input class="form-control form-control-sm" @bind="searchAccount" placeholder="Search specific account">
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+                <label class="text-light mb-0" style="white-space: nowrap;">Start Date</label>
+                <InputDate class="form-control form-control-sm" @bind-Value="startDate" />
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+                <label class="text-light mb-0" style="white-space: nowrap;">End Date</label>
+                <InputDate class="form-control form-control-sm" @bind-Value="endDate" />
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+                <label class="text-light mb-0" style="white-space: nowrap;">Account Type</label>
+                <select class="form-select form-select-sm" @bind="selectedType">
+                    <option value="">All</option>
+                    <option value="Personal Account">Personal Account</option>
+                    <option value="Joint Account">Joint Account</option>
+                </select>
+
+            </div>
+
+            <button class="btn btn-primary btn-sm shadow-sm" @onclick="Filter">Filter</button>
+            <button class="btn btn-danger btn-sm shadow-sm" @onclick="ClearFilter">Clear Filter</button>
+
         </div>
 
-        <div class="d-flex align-items-center gap-3">
-            <label class="text-light mb-0" style="white-space: nowrap;">End Date</label>
-            <InputDate class="form-control form-control-sm" @bind-Value="endDate" />
-        </div>
+        <hr class="divider" />
 
-        <div class="d-flex align-items-center gap-3">
-            <label class="text-light mb-0" style="white-space: nowrap;">Account Type</label>
-            <select class="form-select form-select-sm" @bind="selectedType">
-                <option value="">All</option>
-                <option value="Deposit">Joint Account</option>
-                <option value="Withdraw">Personal Account</option>
-            </select>
-        </div>
-
-        <button class="btn btn-primary btn-sm shadow-sm" @onclick="Filter">Filter</button>
-        <button class="btn btn-danger btn-sm shadow-sm" @onclick="ClearFilter">Clear Filter</button>
-
-    </div>
-
-    <hr class="m-3" style="border: 1px solid white; opacity: 100%;" />
-
-    <div class="table-responsive m-4 rounded">
-        <table class="table table-bordered text-center">
-            <thead class="table-info">
-                <tr>
-                    <th>Date</th>
-                    <th>Time</th>
-                    <th>Name</th>
-                    <th>Account Type</th>
-                    <th>Operation</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var a in accounts)
-                {
-                    <tr class="bg-light">
-                        <td>@a.Date.ToString("MM/dd/yyyy")</td>
-                        <td>@a.Time.ToString(@"hh\:mm\:ss")</td>
-                        <td>@a.Name</td>
-                        <td>@a.AccountType</td>
-                        <td>
-                            <button class="btn btn-secondary btn-sm" @onclick="() => ViewDetails(a)">View</button>
-                        </td>
-                        <td>@a.Status</td>
+        <div class="table-responsive m-4 rounded">
+            <table class="table table-bordered text-center">
+                <thead class="table-info">
+                    <tr>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Name</th>
+                        <th>Account Type</th>
+                        <th>Operation</th>
+                        <th>Status</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var a in accounts)
+                    {
+                        <tr class="bg-light">
+                            <td>@a.Date.ToString("MM/dd/yyyy")</td>
+                            <td>@a.Time.ToString(@"hh\:mm\:ss")</td>
+                            <td>@a.Name</td>
+                            <td>@a.AccountType</td>
+                            <td>
+                                <button class="btn btn-secondary btn-sm" @onclick="() => ViewDetails(a)">View</button>
+                            </td>
+                            <td class="text-secondary">@a.Status</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
@@ -83,10 +93,19 @@
         {
             new AccountRecord
             {
+                Date = DateTime.Today.AddDays(-1),
+                Time = DateTime.Now.TimeOfDay,
+                Name = "Sample Name 1",
+                AccountType = "Personal Account",
+                Status = "Pending"
+            },
+
+            new AccountRecord
+            {
                 Date = DateTime.Today,
                 Time = DateTime.Now.TimeOfDay,
-                Name = "Sample Name",
-                AccountType = "Deposit",
+                Name = "Sample Name 2",
+                AccountType = "Joint Account",
                 Status = "Pending"
             }
         };
@@ -96,12 +115,12 @@
     private void Filter()
     {
         accounts = allAccounts
-        .Where(t =>
-            (string.IsNullOrEmpty(searchAccount) || t.Name.Contains(searchAccount, StringComparison.OrdinalIgnoreCase)) &&
-            (!startDate.HasValue || t.Date >= startDate.Value.Date) &&
-            (!endDate.HasValue || t.Date <= endDate.Value.Date) &&
-            (string.IsNullOrEmpty(selectedType) || t.AccountType == selectedType)
-        ).ToList();
+            .Where(t =>
+                (string.IsNullOrEmpty(searchAccount) || t.Name.Contains(searchAccount, StringComparison.OrdinalIgnoreCase)) &&
+                (!startDate.HasValue || t.Date >= startDate.Value.Date) &&
+                (!endDate.HasValue || t.Date <= endDate.Value.Date) &&
+                (string.IsNullOrEmpty(selectedType) || t.AccountType == selectedType)
+            ).ToList();
     }
 
     private void ClearFilter()

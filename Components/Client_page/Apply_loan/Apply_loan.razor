@@ -69,7 +69,7 @@
 						<label class="text-light">Age</label>
 						<input class="form-control" type="number" placeholder="Age" required>
 					</div>
-					<div class="col-12 col-md-3">
+					<div class="col-12 col-md-2">
 						<label class="text-light">Birth Date</label>
 						<input class="form-control" type="date" placeholder="mm/dd/yyyy" required>
 					</div>
@@ -84,11 +84,11 @@
 						<label class="text-light">Contact No.</label>
 						<input class="form-control" @bind="ContactNo" placeholder="Contact No." required>
 					</div>
-					<div class="col-12 col-md-4">
+					<div class="col-12 col-md-3">
 						<label class="text-light">Email</label>
 						<input class="form-control" @bind="Email" placeholder="Sample@gmail.com" required>
 					</div>
-					<div class="col-12 col-md-2">
+					<div class="col-12 col-md-3">
 						<label class="text-light">Civil Status</label>
 						<select class="form-select" required>
 							<option>Single</option>
@@ -105,11 +105,31 @@
 						<label class="text-light">Gross Annual Income</label>
 						<input class="form-control" @bind="MinAnnualGross" placeholder="Minimum 250,000" required>
 					</div>
-					<div class="col-12 col-md-4">
+					<div class="col-12 col-md-3">
 						<label class="text-light">Type of Loan</label>
 						<select class="form-select" required>
 							<option>Personal Loan</option>
 							<option>Etc.</option>
+						</select>
+					</div>
+					<div class="col-12 col-md-3">
+						<label class="text-light">Loan Amount</label>
+						<input type="number" class="form-control" placeholder="Loan Amount" required>
+					</div>
+					<div class="col-12 col-md-3">
+						<label class="text-light">Loan Purpose</label>
+						<input class="form-control" placeholder="Home Purchase, Education, Debt Consolidation, etc" required>
+					</div>
+					<div class="col-12 col-md-3">
+						<label class="text-light">Loan Term</label>
+						<input type="number" class="form-control" placeholder="Months to Pay" required>
+					</div>
+					<div class="col-12 col-md-3">
+						<label class="text-light">Preferred Payment Frequency</label>
+						<select class="form-select" required>
+							<option>Monthly</option>
+							<option>Bi-Monthly</option>
+							<option>Quarterly</option>
 						</select>
 					</div>
 				</div>
