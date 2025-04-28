@@ -86,6 +86,8 @@
             {
                 UserSession userSession = await userSessionService.GetUserSession();
                 accounts = await userDataService.GetAccountListAsync(userSession.UserAccountIdList);
+
+                StateHasChanged();
             }
             catch (SessionNotFoundException)
             {
