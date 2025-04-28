@@ -132,6 +132,7 @@ namespace Services
 
                 userSession.ActiveAccountId = newActiveAccount.AccountId;
                 userSession.ActiveAccountNumber = newActiveAccount.AccountNumber;
+                userSession.ActiveAccountName = newActiveAccount.AccountName;
 
                 /*  STORE THE SESSION BACK TO SESSION STORAGE   */
                 await _sessionStorage.StoreSessionAsync(SessionSchemes.USER_SESSION, userSession);

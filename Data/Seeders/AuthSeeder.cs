@@ -64,10 +64,13 @@ namespace Data.Seeders
 
                 await _context.SaveChangesAsync();
                 var account = await accountRepository.GetAccountByIdAsync(1);
+                var account2 = await accountRepository.GetAccountByIdAsync(2);
                 var userAuth2 = await userAuthRepository.GetUserAuthByIdAsync(2);
 
                 account!.UsersAuth.Add(userAuth2!);
+                account2!.UsersAuth.Add(userAuth2!);
                 userAuth2!.Accounts.Add(account!);
+                userAuth2!.Accounts.Add(account2!);
 
                 await _context.SaveChangesAsync();
             }

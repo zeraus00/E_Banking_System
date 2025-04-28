@@ -21,22 +21,23 @@
                     </h5>
 
                     <div class="w-auto">
-                        <select class="form-select form-select-sm" required>
-                            <option>Account 1</option>
-                            <option>Account 2</option>
-                            <option>Account 3</option>
-                            <option>Account 4</option>
+                        <select class="form-select form-select-sm" value="@selectedAccountId" @onchange="async _ => await GetSelectedAccount(_)" required>
+                            <option value= "" diasbled hidden>@_clientName</option>
+                            @foreach(var account in accountList)
+                            {
+                                <option value="@account.AccountId">@account.AccountName</option>
+                            }
                         </select>
                     </div>
 
                 </div>
             </div>
 
-                <!-- Notifications -->
-                <div class="d-flex align-items-center justify-content-center me-5 pt-3 position-relative notification" tabindex="0" @onblur="() => showNotifications = false">
-                    <i class="@bellIcon" role="button" tabindex="0" @onclick="ToggleNotification" />
+            <!-- Notifications -->
+            <div class="d-flex align-items-center justify-content-center me-5 pt-3 position-relative notification" tabindex="0" @onblur="() => showNotifications = false">
+                <i class="@bellIcon" role="button" tabindex="0" @onclick="ToggleNotification" />
 
-                    @if (showNotifications)
+                @if (showNotifications)
                 {
                     <div class="notification-popup">
                         <div class="d-flex justify-content-between align-items-baseline border-bottom">
@@ -166,11 +167,12 @@
 
 
 @code {
-    [CascadingParameter]
-    private Task<AuthenticationState> authenticationState { get; set; } = default!;
+    UserSession userSession;
 
     // Mock data for demonstration — replace with real data from your backend
-    private Account? Account;
+    private List<Account> accountList = new();
+    private Account? activeAccount;
+    private int selectedAccountId;
     private string _clientName = "Loading...";
     private string _accountNumber = "Loading...";
     private decimal? _currentBalance = 0.00m;
@@ -204,6 +206,19 @@
 
     private List<Transaction> recentTransactions = new();
 
+    public async Task GetSelectedAccount(ChangeEventArgs? e = null)
+    {
+        //  Get the value of the selection
+        selectedAccountId = Convert.ToInt32(e?.Value?.ToString());
+
+        //  Update the current account details in the session.
+        await userSessionService.UpdateCurrentAccountInSession(selectedAccountId);
+
+
+        //  Reload page.
+        redirectService.redirectWithNavigationManager(PageRoutes.CLIENT_HOME);
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender) 
     {
         if (firstRender)
@@ -212,19 +227,23 @@
             {
                 //  Get user session details from session storage.
                 //  Throws SessionNotFoundException if session is not found.
-                UserSession userSession = await userSessionService.GetUserSession();
+                userSession = await userSessionService.GetUserSession();
 
                 //  Set display data.
                 _clientName = userSession.ActiveAccountName;
                 _accountNumber = userSession.ActiveAccountNumber;
                 _clientPhone = userSession.CurrentUserContact;
 
+                //  Get account list.
+                await this.LoadAccountList();
+
+                //  Get active account.
                 //  Throws AccountNotFoundException is account is not found.
-                Account = await userDataService.GetAccountAsync(userSession.ActiveAccountId, includeTransactions: true);
-                _currentBalance = Account.Balance;
+                activeAccount = await userDataService.GetAccountAsync(userSession.ActiveAccountId, includeTransactions: true);
+                _currentBalance = activeAccount.Balance;
                 recentTransactions = await userDataService.GetRecentAccountTransactionsAsync(userSession.ActiveAccountId, 3);
 
-                //  Reload page.
+                //  Reload component.
                 StateHasChanged();
             }
             catch (SessionNotFoundException)
@@ -237,6 +256,16 @@
                 _currentBalance = 0.00m;
                 error = "Error resolving database. Please try again later.";
             }
+        }
+    }
+
+    private async Task LoadAccountList()
+    {
+        List<int> accountIdList = userSession.UserAccountIdList;
+        foreach (var id in accountIdList)
+        {
+            var account = await userDataService.GetAccountAsync(id);
+            accountList.Add(account);
         }
     }
 }
