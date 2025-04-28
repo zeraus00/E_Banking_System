@@ -81,7 +81,7 @@ namespace Services
         {
             return roleId switch
             {
-                (int)RoleTypes.Administrator => "/",
+                (int)RoleTypes.Administrator => PageRoutes.DASHBOARD,
                 (int)RoleTypes.User => PageRoutes.CLIENT_HOME,       //  Client Home
                 (int)RoleTypes.Employee => "/",
                 _ => PageRoutes.LANDING_PAGE                         //  Landing Page

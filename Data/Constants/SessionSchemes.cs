@@ -2,6 +2,7 @@
 {
     public class SessionSchemes
     {
+        public const string ADMIN_SESSION = "nexusbanking:admin_session";
         public const string USER_SESSION = "nexusbanking:user_session";
         public const string WITHDRAW_SESSION = "nexusbanking:withdraw_session";
         public const string DEPOSIT_SESSION = "nexusbanking:deposit_session";

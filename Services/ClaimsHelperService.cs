@@ -55,6 +55,45 @@ namespace Services
                 new Claim(CustomClaimTypes.USERINFO_ID, userInfoId)
             };
         }
+        /// <summary>
+        /// Get user id from the claims.
+        /// </summary>
+        /// <param name="user">The claims principal.</param>
+        /// <returns></returns>
+        /// <exception cref="NullReferenceException">Thrown if claim is null.</exception>
+        public int GetUserAuthId(ClaimsPrincipal user)
+        {
+            string? claimValue = this.GetClaimValue(user, CustomClaimTypes.USERAUTH_ID);
+            return claimValue is not null 
+                ? Convert.ToInt32(claimValue) 
+                : throw new NullReferenceException($"Claim: {CustomClaimTypes.USERAUTH_ID} is null.");
+        }
+        /// <summary>
+        /// Get role id from the claims.
+        /// </summary>
+        /// <param name="user">The claims principal.</param>
+        /// <returns></returns>
+        /// <exception cref="NullReferenceException">Thrown if claim is null.</exception>
+        public int GetRoleId(ClaimsPrincipal user)
+        {
+            string? claimValue = this.GetClaimValue(user, CustomClaimTypes.ROLE_ID);
+            return claimValue is not null
+                ? Convert.ToInt32(claimValue)
+                : throw new NullReferenceException($"Claim: {CustomClaimTypes.ROLE_ID} is null.");
+        }
+        /// <summary>
+        /// Get userinfo id from the claims.
+        /// </summary>
+        /// <param name="user">The claims principal.</param>
+        /// <returns></returns>
+        /// <exception cref="NullReferenceException">Thrown if claim is null.</exception>
+        public int GetUserInfoId(ClaimsPrincipal user)
+        {
+            string? claimValue = this.GetClaimValue(user, CustomClaimTypes.USERINFO_ID);
+            return claimValue is not null
+                ? Convert.ToInt32(claimValue)
+                : throw new NullReferenceException($"Claim: {CustomClaimTypes.USERINFO_ID} is null.");
+        }
 
         /// <summary>
         /// Retrieves the claim value of the specified type from the claim principal.

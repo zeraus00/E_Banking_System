@@ -3,14 +3,17 @@
     public class PageRoutes
     {
         public const string ACCOUNT_OPENING = "/Account_opening";
-        public const string CLIENT_HOME = "/Client_home";
-        public const string DEPOSIT_AMOUNT = "/Deposit_amount";
-        public const string DEPOSIT_CONFIRMATION = "/Deposit_confirmation";
-        public const string DEPOSIT_RECEIPT = "/Deposit_receipt";
         public const string LANDING_PAGE = "/";
         public const string LOG_IN_PAGE = "/Login_page";
         public const string LOGGING_IN_PAGE = "/Logging_in";
         public const string LOG_OUT_PAGE = "/Logout_page";
+
+        public const string DASHBOARD = "/Dashboard";
+
+        public const string CLIENT_HOME = "/Client_home";
+        public const string DEPOSIT_AMOUNT = "/Deposit_amount";
+        public const string DEPOSIT_CONFIRMATION = "/Deposit_confirmation";
+        public const string DEPOSIT_RECEIPT = "/Deposit_receipt";
         public const string MY_ACCOUNTS = "/My_accounts";
         public const string MANAGE_ACCOUNTS = "/Manage_accounts";
         public const string SETTINGS_EMAIL_PASSOWRD = "/Settings_email_password";
