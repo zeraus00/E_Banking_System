@@ -54,6 +54,7 @@
                     <th>Date</th>
                     <th>Time</th>
                     <th>Transaction Type</th>
+                    <th>Status</th>
                     <th>Amount</th>
                     <th>Receiver ID</th>
                     <th>Sender ID</th>
@@ -69,6 +70,7 @@
                         <td>@transaction.TransactionDate.ToString("MM/dd/yyyy")</td>
                         <td>@transaction.TransactionTime.ToString(@"hh\:mm\:ss")</td>
                         <td>@transaction.TransactionType.TransactionTypeName</td>
+                        <td>@transaction.Status</td>
                         <td>@transaction.Amount.ToString("C0")</td>
                         @* Set Receiver and Sender *@ 
                         @if (@transaction.TransactionType.TransactionTypeId == (int)@TransactionTypes.Outgoing_Transfer)
