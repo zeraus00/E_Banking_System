@@ -17,7 +17,7 @@
         public const string SETTINGS_CHANGE_CONTACT = "/Settings_change_contact";
         public const string SETTINGS_CHANGE_EMAIL = "/Settings_change_email";
         public const string SETTINGS_PAGE = "/Settings_page";
-        public const string TRANSACTIONS = "/Transaction";
+        public const string TRANSACTIONS = "/Transactions";
         public const string TRANSFER_AMOUNT = "/Transfer_amount";
         public const string TRANSFER_CONFIRMATION = "/Transfer_confirmation";
         public const string TRANSFER_RECEIPT = "/Transfer_receipt";

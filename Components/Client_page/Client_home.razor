@@ -172,6 +172,7 @@
     // Mock data for demonstration — replace with real data from your backend
     private List<Account> accountList = new();
     private Account? activeAccount;
+    private List<Transaction> recentTransactions = new();
     private int selectedAccountId;
     private string _clientName = "Loading...";
     private string _accountNumber = "Loading...";
@@ -204,7 +205,6 @@
         public DateTime Date { get; set; }
     }
 
-    private List<Transaction> recentTransactions = new();
 
     public async Task GetSelectedAccount(ChangeEventArgs? e = null)
     {
