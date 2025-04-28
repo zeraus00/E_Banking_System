@@ -5,6 +5,9 @@ using Data.Repositories.User;
 using Data.Repositories.Auth;
 using Data.Models.User;
 using Data.Repositories.Finance;
+using Data.Models.Finance;
+using Data.Models.Place;
+using System.IO;
 
 
 namespace Services
@@ -13,12 +16,6 @@ namespace Services
     {
         public RegistrationService(IDbContextFactory<EBankingContext> contextFactory) : base(contextFactory) { }
 
-
-        public async Task RegisterUserInfoAsync(UserAuth userAuthId) 
-        {
-
-        }
-
         public async Task RegisterAsync(int accountTypeId, int accountProductTypeId, string userFirstName, string? userMiddleName, string userLastName, string? userSuffix,
                 string fatherFirstName, string? fatherMiddleName, string fatherLastName, string? fatherSuffix,
                 string motherFirstName, string? motherMiddleName, string motherLastName, string? motherSuffix,
@@ -26,7 +23,7 @@ namespace Services
                 DateTime birthDate, int birthCityId, int birthProvinceId, int birthRegionId,
                 string houseNo, string street, int barangayId, int cityId, int provinceId, int regionId, int postalCode,
                 int age, string sex, string contactNumber, string Occupation, string taxIdentificationNumber, string civilStatus, string userReligion,
-                string username, string email, string password
+                string username, string email, string password, byte[] profilePicture, byte[] governmentId
             )
         {
             Account userAccount = await RegisterAccount(accountTypeId, accountProductTypeId);
@@ -56,8 +53,10 @@ namespace Services
                 sex,
                 contactNumber,
                 Occupation,
-                taxIdentificationNumber, 
-                civilStatus
+                taxIdentificationNumber,
+                civilStatus,
+                profilePicture,
+                governmentId
                 );
         }
 
@@ -277,7 +276,9 @@ namespace Services
             string contactNumber,
             string Occupation,
             string taxIdentificationNumber,
-            string civilStatus
+            string civilStatus,
+            byte[] profilePicture,
+            byte[] governmentId
             ) 
         {
             if (string.IsNullOrWhiteSpace(contactNumber)) 
@@ -314,13 +315,11 @@ namespace Services
                 .WithContactNumber(contactNumber)
                 .WithOccupation(Occupation)
                 .WithTaxIdentificationNumber(taxIdentificationNumber)
-                .WithCivilStatus(civilStatus);
+                .WithCivilStatus(civilStatus)
+                .WithProfilePicture(profilePicture)
+                .WithGovernmentId(governmentId);
 
             UserInfo UserInfo = UserInfoBuilder.Build();
-
-
-            
-
 
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
@@ -328,7 +327,6 @@ namespace Services
 
                 await userInfoRepo.AddAsync(UserInfo);
                 await userInfoRepo.SaveChangesAsync();
-
                 return UserInfo;
             }
         }
@@ -362,9 +360,5 @@ namespace Services
                 return userAccount;
             }
         }
-
-        
-
-
     }
 }
