@@ -103,11 +103,17 @@
     {
         try
         {
-            //  Save transaction session to session storage.
-            await transactionService.InitiateTransaction(SessionSchemes.WITHDRAW_SESSION, accountId, (int)TransactionTypes.Withdrawal, withdrawAmount);
+            if (withdrawAmount is > 0)
+            {
+                //  Save transaction session to session storage.
+                await transactionService.InitiateTransaction(SessionSchemes.WITHDRAW_SESSION, accountId, (int)TransactionTypes.Withdrawal, withdrawAmount);
 
-            //  Redirect to WITHDRAW_CONFIRMATION page.
-            redirectService.redirectWithNavigationManager(PageRoutes.WITHDRAW_CONFIRMATION);
+                //  Redirect to WITHDRAW_CONFIRMATION page.
+                redirectService.redirectWithNavigationManager(PageRoutes.WITHDRAW_CONFIRMATION);
+            } else
+            {
+                error = "Withdraw amount must be greater than 0.";
+            }
         } 
         catch (AccountNotFoundException) 
         {

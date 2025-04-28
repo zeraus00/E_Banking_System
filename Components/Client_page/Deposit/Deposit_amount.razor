@@ -104,11 +104,17 @@
     {
         try 
         {
-            //  Save transaction session to session storage.
-            await transactionService.InitiateTransaction(SessionSchemes.DEPOSIT_SESSION, accountId, (int)TransactionTypes.Deposit, depositAmount);
+            if (depositAmount > 0)
+            {
+                //  Save transaction session to session storage.
+                await transactionService.InitiateTransaction(SessionSchemes.DEPOSIT_SESSION, accountId, (int)TransactionTypes.Deposit, depositAmount);
 
-            //  Redirect to DEPOSIT_CONFIRMATION page.
-            redirectService.redirectWithNavigationManager(PageRoutes.DEPOSIT_CONFIRMATION);
+                //  Redirect to DEPOSIT_CONFIRMATION page.
+                redirectService.redirectWithNavigationManager(PageRoutes.DEPOSIT_CONFIRMATION);
+            } else 
+            {
+                error = "Deposit amount must be greater than 0.";
+            }
         }
         catch (AccountNotFoundException)
         {
