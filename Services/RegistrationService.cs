@@ -436,8 +436,16 @@ namespace Services
             }
         }
 
-        
-
+        private string GenerateAccountNumber(DateTime creationDate, int accountProductTypeId)
+        {
+            return $"{accountProductTypeId}{creationDate:yyMMdd}{Random.Shared.Next(100000, 100000)}";
+        }
+        private string GenerateAccountName(int accountTypeId, int accountProductTypeId)
+        {
+            var firstPart = new AccountTypeNames().AccountTypeNameList[accountTypeId][..3];
+            var secondPart = new AccountProductTypeNames().AccountProductTypeNameList[accountProductTypeId][..3];
+            return $"{firstPart}-{secondPart}-{Guid.NewGuid().ToString().Substring(0, 6).ToUpper()}";
+        }
 
     }
 }
