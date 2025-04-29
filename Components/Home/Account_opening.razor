@@ -2,7 +2,7 @@
 @using Exceptions
 @using System.Text.Json;
 @using Data.Constants
-
+@using Microsoft.AspNetCore.Components.Forms
 
 @page "/Account_opening"
 @rendermode InteractiveServer
@@ -26,9 +26,10 @@
 				</NavLink>
 			</div>
 
+			<!--to show the error in the UI-->
 			@if (!string.IsNullOrEmpty(error))
 			{
-				<div class="alert alert-danger">@error</div>
+				<div class="alert alert-danger" role="alert">@error</div>
 			}
 
 			<!-- Account Holder Details Border -->
@@ -139,13 +140,19 @@
 					<div class="col">
 						<label class="text-light">Religion</label>
 						<select class="form-select form-select-sm" @bind="selectedReligion">
-							@foreach (var option in religionOptions)
+							@foreach (var religion in religionOptions)
 							{
-								<option value="@option">@option</option>
+								<option value="@religion">@religion</option>
 							}
 						</select>
 					</div>
-
+					@if (selectedReligion == "Others")
+					{
+						<div class="mt-2">
+							<label for="customReligion">Please specify your religon:</label>
+							<input type="text" @bind="customReligion" class="form-control" placeholder="Enter your religion"/>
+						</div>
+					}
 					<!-- Contact No -->
 					<div class="col">
 						<label class="text-light">Contact No.</label>
@@ -195,7 +202,7 @@
 						<label class="text-light">Postal Code</label>
 						<select class="form-select form-select-sm" value="#" required>
 							<option value="" disabled hidden> # </option>
-							
+
 						</select>
 					</div>
 
@@ -278,17 +285,6 @@
 							}
 						</select>
 					</div>
-
-					@*<!-- Barangay -->
-					<div class="col-3">
-						<label class="text-light">Barangay</label>
-						<select class="form-select form-select-sm" @bind="selectedBarangay" required>
-							@foreach (var b in barangays)
-							{
-								<option value="@b.BarangayId">@b.BarangayName</option>
-							}
-						</select>
-					</div>*@
 
 					<!-- Birth Date -->
 					<div class="col">
@@ -376,7 +372,7 @@
 
 						<!-- View Button -->
 						<div class="d-flex gap-2">
-							<input type="file" class="btn btn-light btn-sm w-75" required />
+							<input type="file" @bind="governmentId" class="btn btn-light btn-sm w-75" required />
 							<button class="btn btn-outline-light">View</button>
 						</div>
 					</div>
@@ -387,7 +383,7 @@
 
 						<!-- View BUtton -->
 						<div class="d-flex gap-2">
-							<input type="file" class="btn btn-light btn-sm w-75" required />
+							<input type="file" @bind="profilePicture" class="btn btn-light btn-sm w-75" required />
 							<button class="btn btn-outline-light">View</button>
 						</div>
 					</div>
@@ -434,7 +430,7 @@
 
 				<!-- Register Button -->
 				<div class="text-end mt-3">
-					<button class="btn btn-primary btn-secondary" @onclick="LoginAsync">Submit Application</button>
+					<button class="btn btn-primary btn-secondary">Submit Application</button>
 				</div>
 
 			</div>
@@ -448,38 +444,47 @@
 
 	private string error = string.Empty;
 
+
+	// user basic info
+	public string userFirstName = string.Empty;
+	public string userMiddleName = string.Empty;
+	public string userLastName = string.Empty;
+	public string userSuffix = string.Empty;
+	public string userName = string.Empty;
+	public string password = string.Empty;
+	public string email = string.Empty;
+	public string contactNumber = string.Empty;
+	public string Occupation = string.Empty;
+	public string taxIdentificationNumber = string.Empty;
+	public string selectedSex = string.Empty;
+	public string selectedCivilStatus = string.Empty;
+	public string selectedReligion = string.Empty;
+	public string customReligion = string.Empty;
+
+	// user profile picture and government id
+	private byte[] profilePicture;
+	private byte[] governmentId;
+
+	// Account
 	private AccountTypeNames accountTypeNames = new();
 	private AccountProductTypeNames accountProductTypeNames = new();
-
 	private string selectedAccountTypeName = string.Empty;
 	private string selectedAccountProductTypeName = string.Empty;
 	public int accountTypeId;
 	public int accountProductTypeId;
 
-	public int regionId;
-	public int provinceId;
-	public int cityId;
-	public int barangayId;
-	public string userFirstName = string.Empty;
-	public string userMiddleName = string.Empty;
-	public string userLastName = string.Empty;
-	public string userSuffix = string.Empty;
 
+
+	// user Birth Info
 	public int age;
 	public DateTime birthDate;
-	public int birthCityId;
-	public int birthProvinceId;
-	public int birthRegionId;
 	public string selectedBirthCity = string.Empty;
 	public string selectedBirthProvince = string.Empty;
 	public string selectedBirthRegion = string.Empty;
+	public int birthCityId;
+	public int birthProvinceId;
+	public int birthRegionId;
 
-	public string email = string.Empty;
-	public string selectedSex = string.Empty;
-	public string selectedCivilStatus = string.Empty;
-	public string selectedReligion = string.Empty;
-	public string contactNumber = string.Empty;
-	public string Occupation = string.Empty;
 
 	//address info
 	public string houseNo = string.Empty;
@@ -490,6 +495,10 @@
 	public string selectedBarangay = string.Empty;
 	public string userPostalCode = string.Empty;
 	public int postalCode;
+	public int regionId;
+	public int provinceId;
+	public int cityId;
+	public int barangayId;
 
 	//drop down selection place holders
 	public const string regionPlaceHolder = "--Select Region--";
@@ -497,7 +506,7 @@
 	public const string cityPlaceHolder = "--Select City--";
 	public const string barangayPlaceHolder = "--Select Barangay--";
 
-	//Parents Name
+	//Parents Name And Beneficiary
 	public string fatherFirstName = string.Empty;
 	public string fatherMiddleName = string.Empty;
 	public string fatherLastName = string.Empty;
@@ -512,9 +521,6 @@
 	public string beneficiaryMiddleName = string.Empty;
 	public string beneficiaryLastName = string.Empty;
 	public string beneficiarySuffix = string.Empty;
-	public string userName = string.Empty;
-	public string password = string.Empty;
-	public string taxIdentificationNumber = string.Empty;
 
 	<!--user birth info address--> 
 	private List<RegionViewModel>? birthRegions = new();
@@ -529,139 +535,194 @@
 	private List<BarangayViewModel>? barangays = new List<BarangayViewModel>();
 	private List<BarangayViewModel>? barangaysFromCities = new();
 
+
+	// method for getting user address
 	protected override async Task OnInitializedAsync()
 	{
-		await LoadRegionAsync();
+		try
+		{
+			await LoadRegionAsync();
+		}
+		catch (FieldMissingException ex)
+		{
+			error = "Error Loading Regions" + ex.Message;
+		}
+
 	}
 
 	// For Full address of user
 	private async Task LoadRegionAsync()
 	{
-		var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/regions/");
-		regions = JsonSerializer.Deserialize<List<RegionViewModel>>(json);
-		if (regions is null) return;
+		try
+		{
+			var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/regions/");
+			if (string.IsNullOrWhiteSpace(json))
+			{
+				error = "No regions data found.";
+				return;
+			}
+			regions = JsonSerializer.Deserialize<List<RegionViewModel>>(json);
+			if (regions is null) return;
+		}
+		catch (FieldMissingException ex)
+		{
+			error = "Error loading Regions" + ex.Message;
+		}	
 	}
 
 	//	Pass the ChangeEventArgs instance ONLY FOR drop down selections that need updating.
 	private async Task LoadProvinceAsync(ChangeEventArgs? e = null)
 	{
-
-		//	Get the value of the selection
-		selectedRegion = e?.Value?.ToString() ?? "";
-
-		//	Get the provinces from the api.
-		var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/provinces/");
-		provinces = JsonSerializer.Deserialize<List<ProvinceViewModel>>(json);
-		if (provinces is null) return;
-
-		//	Get the list of provinces with the selected region's region code
-		provincesFromRegion = provinces.Where(p => p.regionCode.ToString() == selectedRegion).ToList();
-
-		//	Default the selection to the first option each time provinces are updated.
-		if (provincesFromRegion.Any())
+		try
 		{
-			selectedProvince = provincesFromRegion[0].code.ToString();
-		} else
-		{
-			selectedProvince = string.Empty;
+			error = string.Empty; // reset previous error
+			//	Get the value of the selection
+			selectedRegion = e?.Value?.ToString() ?? "";
+			if (string.IsNullOrWhiteSpace(selectedRegion))
+			{
+				error = "Please select a valid region.";
+				return;
+			}
+			var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/provinces/");
+			provinces = JsonSerializer.Deserialize<List<ProvinceViewModel>>(json);
+			if (provinces is null) return;
+
+			//	Get the list of provinces with the selected region's region code
+			provincesFromRegion = provinces.Where(p => p.regionCode.ToString() == selectedRegion).ToList();
+			if (provincesFromRegion.Any())
+			{
+				selectedProvince = provincesFromRegion[0].code.ToString();
+			}
+			//	Rerender component
+			StateHasChanged();
 		}
-
-		//	Rerender component
-		StateHasChanged();
+		catch (FieldMissingException ex)
+		{
+			error = "Error loading Provinces" + ex.Message;
+		}
 	}
 
 	private async Task LoadCitiesAsync(ChangeEventArgs? e = null)
 	{
-
-		//	Get the value of the selection
-		selectedProvince = e?.Value?.ToString() ?? "";
-
-		//	Get the municipalities from the api.
-		var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/municipalities/");
-		cities = JsonSerializer.Deserialize<List<CityViewModel>>(json);
-		if (cities is null) return;
-
-		//	Get the list of provinces with the selected region's region code
-		citiesFromProvince = cities.Where(c => c.provinceCode.ToString() == selectedProvince).ToList();
-		//	Default the selection to the first option each time provinces are updated.
-		if (citiesFromProvince.Any())
+		try
 		{
-			selectedCity = citiesFromProvince[0].code.ToString();
-		}
-		else
-		{
-			selectedCity = string.Empty;
-		}
+			error = string.Empty; // reset previous error
+			//	Get the value of the selection
+			selectedProvince = e?.Value?.ToString() ?? "";
+			if (string.IsNullOrWhiteSpace(selectedProvince))
+			{
+				error = "Please select a valid Province.";
+				return;
+			}
+			//	Get the municipalities from the api.
+			var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/municipalities/");
+			cities = JsonSerializer.Deserialize<List<CityViewModel>>(json);
+			if (cities is null) return;
+			//	Get the list of provinces with the selected region's region code
+			citiesFromProvince = cities.Where(c => c.provinceCode.ToString() == selectedProvince).ToList();
 
-		//	Rerender component
-		StateHasChanged();
+			//	Default the selection to the first option each time provinces are updated.
+			if (citiesFromProvince.Any())
+			{
+				selectedCity = citiesFromProvince[0].code.ToString();
+			}
+			//	Rerender component
+			StateHasChanged();
+		}
+		catch (FieldMissingException ex)
+		{
+			error = "Error loading cities" + ex.Message;
+		}
 	}
 
 	private async Task LoadBarangaysAsync(ChangeEventArgs? e = null)
 	{
-		selectedCity = e?.Value?.ToString() ?? "";
-		var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/barangays/");
-		barangays = JsonSerializer.Deserialize<List<BarangayViewModel>>(json);
-		if (barangays is null) return;
-
-		barangaysFromCities = barangays.Where(b => b.municipalityCode.ToString() == selectedCity).ToList();
-		if (barangaysFromCities.Any())
+		try
 		{
-			selectedBarangay = barangaysFromCities[0].code.ToString();
-		}
-		else
-		{
-			selectedBarangay = string.Empty;
-		}
+			error = string.Empty; // reset previous error
+			selectedCity = e?.Value?.ToString() ?? "";
+			if (string.IsNullOrWhiteSpace(selectedCity))
+			{
+				error = "Select a valid city.";
+				return;
+			}
+			var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/barangays/");
+			barangays = JsonSerializer.Deserialize<List<BarangayViewModel>>(json);
+			if (barangays is null) return;
 
-		//	Rerender component
-		StateHasChanged();
+			barangaysFromCities = barangays.Where(b => b.municipalityCode.ToString() == selectedCity).ToList();
+			if (barangaysFromCities.Any())
+			{
+				selectedBarangay = barangaysFromCities[0].code.ToString();
+			}
+			//	Rerender component
+			StateHasChanged();
+		}
+		catch (FieldMissingException ex)
+		{
+			error = "Error loading barangays" + ex.Message;
+		}
 	}
 
 	// method to get user birth place
 	private async Task LoadBirthProvincesAsync(ChangeEventArgs? e = null)
 	{
-		selectedBirthRegion = e?.Value?.ToString() ?? "";
-
-		var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/provinces/");
-		provinces = JsonSerializer.Deserialize<List<ProvinceViewModel>>(json);
-		if (provinces is null) return;
-		provincesFromRegion = provinces.Where(p => p.regionCode.ToString() == selectedBirthRegion).ToList();
-		if (provincesFromRegion.Any())
+		try
 		{
-			selectedBirthProvince = provincesFromRegion[0].code.ToString();
+			error = string.Empty; // reset previous error
+			selectedBirthRegion = e?.Value?.ToString() ?? "";
+			if (string.IsNullOrWhiteSpace(selectedBirthRegion))
+			{
+				error = "Please select a valid Region.";
+				return;
+			}
+			var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/provinces/");
+			provinces = JsonSerializer.Deserialize<List<ProvinceViewModel>>(json);
+			if (provinces is null) return;
+			provincesFromRegion = provinces.Where(p => p.regionCode.ToString() == selectedBirthRegion).ToList();
+			if (provincesFromRegion.Any())
+			{
+				selectedBirthProvince = provincesFromRegion[0].code.ToString();
+			}
+			StateHasChanged();
 		}
-		else
+		catch (FieldMissingException ex)
 		{
-			selectedBirthProvince = string.Empty;
+			error = "Error loading Provinces" + ex.Message;
 		}
 	}
 
 	private async Task LoadBirthCitiesAsync(ChangeEventArgs? e = null)
 	{
-
-		//	Get the value of the selection
-		selectedBirthProvince = e?.Value?.ToString() ?? "";
-
-		//	Get the municipalities from the api.
-		var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/municipalities/");
-		cities = JsonSerializer.Deserialize<List<CityViewModel>>(json);
-		if (cities is null) return;
-
-		//	Get the list of provinces with the selected region's region code
-		citiesFromProvince = cities.Where(c => c.provinceCode.ToString() == selectedBirthProvince).ToList();
-		//	Default the selection to the first option each time provinces are updated.
-		if (citiesFromProvince.Any())
+		try
 		{
-			selectedBirthCity = citiesFromProvince[0].code.ToString();
-		}
-		else
-		{
-			selectedBirthCity = string.Empty;
-		}
+			error = string.Empty; // reset previous error
+			selectedBirthProvince = e?.Value?.ToString() ?? "";
+			if (string.IsNullOrWhiteSpace(selectedBirthProvince))
+			{
+				error = "Please select a valid Province.";
+				return;
+			}
 
-		//	Rerender component
-		StateHasChanged();
+			//	Get the municipalities from the api.
+			var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/municipalities/");
+			cities = JsonSerializer.Deserialize<List<CityViewModel>>(json);
+			if (cities is null) return;
+
+			//	Get the list of provinces with the selected region's region code
+			citiesFromProvince = cities.Where(c => c.provinceCode.ToString() == selectedBirthProvince).ToList();
+			//	Default the selection to the first option each time provinces are updated.
+			if (citiesFromProvince.Any())
+			{
+				selectedBirthCity = citiesFromProvince[0].code.ToString();
+			}
+			//	Rerender component
+			StateHasChanged();
+		}
+		catch (FieldMissingException ex)
+		{
+			error = "Error Loading cities" + ex.Message;
+		}
 	}
 
 	private int GetIdFromSelected(string selectedCode, List<dynamic> options)
@@ -677,18 +738,182 @@
 		return 0;
 	}
 
-	private List<string> religionOptions = new List<string>
-	{
-		"Religion 1",
-		"Religion 2",
-		"Religion 3",
-		"Religion 4"
-	};
-
-	private async Task LoginAsync()
+	// handling the uploaded picture
+	private async Task UploadGovernmentId(InputFileChangeEventArgs e)
 	{
 		try
 		{
+			var file = e.File;
+			if (file != null)
+			{
+				using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); // allow up to 10 MB
+				using var ms = new MemoryStream();
+				await stream.CopyToAsync(ms);
+				governmentId = ms.ToArray();
+			}
+		}
+		catch (FieldMissingException ex)
+		{
+			error = "Error uploading Government ID:" + ex.Message;
+		}
+	}
+
+	private async Task UploadProfilePicture(InputFileChangeEventArgs e)
+	{
+		try
+		{
+			var file = e.File;
+			if (file != null)
+			{
+				using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); // allow u to 10 MB
+				using var ms = new MemoryStream();
+				await stream.CopyToAsync(ms);
+				profilePicture = ms.ToArray();
+			}
+		}
+		catch (FieldMissingException ex)
+		{
+			error = "Error uploading profile Picture: " + ex.Message;
+		}
+	}
+
+	private List<string> religionOptions = new List<string>
+	{
+		"Roman Catholic",
+		"Islam",
+		"Iglesia ni Cristo",
+		"Evangelical",
+		"Seventh-day Adventist",
+		"Born Again",
+		"Buddhism",
+		"Hinduism",
+		"Judaism",
+		"Orthodox",
+		"Others"
+	};
+
+	private async Task RegisterUserAsync()
+	{
+		try
+		{
+			error = string.Empty;
+
+			if (string.IsNullOrWhiteSpace(userFirstName))
+			{
+				error = "First name is required.";
+				return;
+			}
+			if (string.IsNullOrWhiteSpace(userFirstName))
+			{
+				error = "Last name is required.";
+				return;
+			}
+
+			if (string.IsNullOrWhiteSpace(userName))
+			{
+				error = "Username is required.";
+				return;
+			}
+			if (age < 18)
+			{
+				error = "Invalid age, at least 18 years old is required.";
+				return;
+			}
+
+			if (string.IsNullOrWhiteSpace(password) || password.Length < 6)
+			{
+				error = "Invalid password, at least 6 character length is required.";
+				return;
+			}
+			if (string.IsNullOrWhiteSpace(email))
+			{
+				error = "Email is required.";
+				return;
+			}
+			if (string.IsNullOrWhiteSpace(contactNumber))
+			{
+				error = "Contact number is required.";
+				return;
+			}
+			if (string.IsNullOrWhiteSpace(Occupation))
+			{
+				error = "Occupation is required.";
+				return;
+			}
+			if (string.IsNullOrWhiteSpace(taxIdentificationNumber))
+			{
+				error = "Tax Identification Number is required.";
+				return;
+			}
+			if (string.IsNullOrWhiteSpace(selectedSex))
+			{
+				error = "Sex is required.";
+				return;
+			}
+			if (string.IsNullOrWhiteSpace(selectedCivilStatus))
+			{
+				error = "Civil status is required.";
+				return;
+			}
+			if (string.IsNullOrWhiteSpace(selectedReligion))
+			{
+				error = "Religion is required.";
+				return;
+			}
+
+			// Validation for names
+			if (string.IsNullOrWhiteSpace(fatherFirstName) || string.IsNullOrWhiteSpace(fatherLastName))
+			{
+				error = "Father's full name is required.";
+				return;
+			}
+			if (string.IsNullOrWhiteSpace(motherFirstName) || string.IsNullOrWhiteSpace(motherLastName))
+			{
+				error = "Mother's full name is required.";
+				return;
+			}
+			if (string.IsNullOrWhiteSpace(beneficiaryFirstName) || string.IsNullOrWhiteSpace(beneficiaryLastName))
+			{
+				error = "Beneficiary's full name is required.";
+				return;
+			}
+
+			// Validation for address
+			if (string.IsNullOrWhiteSpace(houseNo))
+			{
+				error = "House number is required.";
+				return;
+			}
+			if (string.IsNullOrWhiteSpace(street))
+			{
+				error = "Street name is required.";
+				return;
+			}
+			if (regionId == 0 || provinceId == 0 || cityId == 0 || barangayId == 0)
+			{
+				error = "Complete address (region, province, city, barangay) is required.";
+				return;
+			}
+			if (postalCode == 0)
+			{
+				error = "Postal code is required.";
+				return;
+			}
+
+			if (birthDate == DateTime.MinValue)
+			{
+				error = "Valid birth date is required.";
+				return;
+			}
+
+			if (string.IsNullOrEmpty(customReligion))
+			{
+				error = "Religon is required.";
+				return;
+			}
+
+			
+
 			accountTypeId = accountTypeNames.AccountTypeNameList.IndexOf(selectedAccountTypeName) + 1;
 			accountProductTypeId = accountProductTypeNames.AccountProductTypeNameList.IndexOf(selectedAccountProductTypeName) + 1;
 
@@ -710,7 +935,9 @@
 			UserAuth userAuth = await RegistrationService.RegisterUserAuth(userName, email, password);
 			BirthInfo UserBirthInfo = await RegistrationService.RegisterBirthInfo(birthDate, birthCityId, birthProvinceId, birthRegionId);
 			Address UserAddress = await RegistrationService.RegisterAddress(houseNo, street, barangayId, cityId, provinceId, regionId, postalCode);
-			Religion UserReligion = await RegistrationService.RegisterReligion(selectedReligion);
+
+			string religionToSave = selectedRegion == "others" ? customReligion : selectedReligion;
+			Religion UserReligion = await RegistrationService.RegisterReligion(religionToSave);
 
 
 
@@ -729,19 +956,19 @@
 				contactNumber,
 				Occupation,
 				taxIdentificationNumber,
-				selectedCivilStatus
+				selectedCivilStatus,
+				profilePicture,
+				governmentId
 				);
-			NavigationManager.NavigateTo("/");
-
+			NavigationManager.NavigateTo("/PendingApproval");
 		}
-
 		catch (MissingFieldException ex)
 		{
 			error = ex.Message;
 		}
 		catch (Exception ex)
 		{
-			error = "Error occurred: " + ex.Message;
+			error = "Registration failed: " + ex.Message;
 		}
 	}
 

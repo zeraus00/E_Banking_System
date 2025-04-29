@@ -5,6 +5,9 @@ using Data.Repositories.User;
 using Data.Repositories.Auth;
 using Data.Models.User;
 using Data.Repositories.Finance;
+using Data.Models.Finance;
+using Data.Models.Place;
+using System.IO;
 
 
 namespace Services
@@ -13,12 +16,6 @@ namespace Services
     {
         public RegistrationService(IDbContextFactory<EBankingContext> contextFactory) : base(contextFactory) { }
 
-
-        public async Task RegisterUserInfoAsync(UserAuth userAuthId) 
-        {
-
-        }
-
         public async Task RegisterAsync(int accountTypeId, int accountProductTypeId, string userFirstName, string? userMiddleName, string userLastName, string? userSuffix,
                 string fatherFirstName, string? fatherMiddleName, string fatherLastName, string? fatherSuffix,
                 string motherFirstName, string? motherMiddleName, string motherLastName, string? motherSuffix,
@@ -26,39 +23,9 @@ namespace Services
                 DateTime birthDate, int birthCityId, int birthProvinceId, int birthRegionId,
                 string houseNo, string street, int barangayId, int cityId, int provinceId, int regionId, int postalCode,
                 int age, string sex, string contactNumber, string Occupation, string taxIdentificationNumber, string civilStatus, string userReligion,
-                string username, string email, string password
+                string username, string email, string password, byte[] profilePicture, byte[] governmentId
             )
         {
-            Account userAccount = await RegisterAccount(accountTypeId, accountProductTypeId);
-            Name UserName = await RegisterName(userFirstName, userMiddleName, userLastName, userSuffix);
-            Name FatherName = await RegisterName(fatherFirstName, fatherMiddleName, fatherLastName, fatherSuffix);
-            Name MotherName = await RegisterName(motherFirstName, motherMiddleName, motherLastName, motherSuffix);
-            Name BeneficiaryName = await RegisterName(beneficiaryFirstName, beneficiaryMiddleName, beneficiaryLastName, beneficiarySuffix);
-
-            UserAuth userAuth = await RegisterUserAuth(username, email, password);
-            BirthInfo UserBirthInfo = await RegisterBirthInfo(birthDate, birthCityId, birthProvinceId, birthRegionId);
-            Address UserAddress = await RegisterAddress(houseNo, street, barangayId, cityId, provinceId, regionId, postalCode);
-            Religion UserReligion = await RegisterReligion(userReligion);
-
-
-
-            UserInfo UserInfo = await RegisterUserInfo(
-                userAuth.UserAuthId,
-                userAccount.AccountTypeId,
-                userAccount.AccountProductTypeId,
-                UserName.NameId,
-                MotherName.NameId,
-                FatherName.NameId,
-                UserBirthInfo.BirthInfoId,
-                UserAddress.AddressId,
-                UserReligion.ReligionId,
-                age,
-                sex,
-                contactNumber,
-                Occupation,
-                taxIdentificationNumber, 
-                civilStatus
-                );
         }
 
 
@@ -277,7 +244,9 @@ namespace Services
             string contactNumber,
             string Occupation,
             string taxIdentificationNumber,
-            string civilStatus
+            string civilStatus,
+            byte[] profilePicture,
+            byte[] governmentId
             ) 
         {
             if (string.IsNullOrWhiteSpace(contactNumber)) 
@@ -314,13 +283,11 @@ namespace Services
                 .WithContactNumber(contactNumber)
                 .WithOccupation(Occupation)
                 .WithTaxIdentificationNumber(taxIdentificationNumber)
-                .WithCivilStatus(civilStatus);
+                .WithCivilStatus(civilStatus)
+                .WithProfilePicture(profilePicture)
+                .WithGovernmentId(governmentId);
 
             UserInfo UserInfo = UserInfoBuilder.Build();
-
-
-            
-
 
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
@@ -328,7 +295,6 @@ namespace Services
 
                 await userInfoRepo.AddAsync(UserInfo);
                 await userInfoRepo.SaveChangesAsync();
-
                 return UserInfo;
             }
         }
@@ -362,9 +328,5 @@ namespace Services
                 return userAccount;
             }
         }
-
-        
-
-
     }
 }
