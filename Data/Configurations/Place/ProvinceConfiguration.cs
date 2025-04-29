@@ -16,6 +16,12 @@ namespace Data.Configurations.Place
             Provinces
                 .Property(p => p.ProvinceId)
                 .ValueGeneratedOnAdd();
+
+            //  ProvinceCode (Required)
+            Provinces
+                .Property(p => p.ProvinceCode)
+                .IsRequired();
+
             //  ProvinceName (Required; Max Length: 50)
             Provinces
                 .Property(p => p.ProvinceName)

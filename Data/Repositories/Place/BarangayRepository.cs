@@ -11,6 +11,9 @@
     public class BarangayRepository : Repository
     {
         public BarangayRepository(EBankingContext context) : base(context) { }
+
+        public async Task<Barangay?> GetBarangayByIdAsync(int barangayId) => await GetById<Barangay>(barangayId);
+        public async Task<Barangay?> GetBarangayByBarangayCodeAsync(string barangayCode) => await Get<Barangay>(b => b.BarangayCode == barangayCode);
     }
 
     /// <summary>
@@ -18,9 +21,15 @@
     /// </summary>
     public class BarangayBuilder
     {
+        private string _districtCode = string.Empty;
         private string _barangayName = string.Empty;
         private int? _cityId;
 
+        public BarangayBuilder WithDistrictCode(string districtCode)
+        {
+            _districtCode = districtCode.Trim();
+            return this;
+        }
         public BarangayBuilder WithBarangayName(string barangayName)
         {
             _barangayName = barangayName.Trim();

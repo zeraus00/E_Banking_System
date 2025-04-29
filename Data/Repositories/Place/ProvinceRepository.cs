@@ -11,6 +11,9 @@
     public class ProvinceRepository : Repository
     {
         public ProvinceRepository(EBankingContext context) : base(context) { }
+
+        public async Task<Province?> GetProvinceByIdAsync(int provinceId) => await GetById<Province>(provinceId);
+        public async Task<Province?> GetProvinceByCodeAsync(string provinceCode) => await Get<Province>(p => p.ProvinceCode == provinceCode);
     }
 
     /// <summary>
@@ -18,9 +21,15 @@
     /// </summary>
     public class ProvinceBuilder
     {
+        private string _provinceCode = string.Empty;
         private string _provinceName = string.Empty;
         private int? _regionId;
 
+        public ProvinceBuilder WithProvinceCode(string provinceCode)
+        {
+            _provinceCode = provinceCode.Trim();
+            return this;
+        }
         public ProvinceBuilder WithProvinceName(string provinceName)
         {
             _provinceName = provinceName.Trim();
@@ -40,6 +49,7 @@
         {
             return new Province
             {
+                ProvinceCode = _provinceCode,
                 ProvinceName = _provinceName,
                 RegionId = _regionId
             };

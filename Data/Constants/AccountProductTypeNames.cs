@@ -2,9 +2,9 @@
 {
     public class AccountProductTypeNames
     {
-        public const string SAVINGS = "Savings";
-        public const string CHECKING = "Checking";
-        public const string LOAN = "Loan";
+        public const string SAVINGS = "SAVINGS";
+        public const string CHECKING = "CHECKING";
+        public const string LOAN = "LOAN";
 
         public readonly List<string> AccountProductTypeNameList = new()
         {

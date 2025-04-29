@@ -11,6 +11,10 @@
     public class RegionRepository : Repository
     {
         public RegionRepository(EBankingContext context) : base(context) { }
+
+        public async Task<Region?> GetRegionByIdAsync(int regionId) => await GetById<Region>(regionId);
+
+        public async Task<Region?> GetRegionByCodeAsync(string regionCode) => await Get<Region>(r => r.RegionCode == regionCode);
     }
     
     /// <summary>
@@ -18,8 +22,14 @@
     /// </summary>
     public class RegionBuilder
     {
+        private string _regionCode = string.Empty;
         private string _regionName = string.Empty;
         
+        public RegionBuilder WithRegionCode (string regionCode)
+        {
+            _regionCode = regionCode.Trim();
+            return this;
+        }
         public RegionBuilder WithRegionName (string regionName)
         {
             _regionName = regionName.Trim();
@@ -34,6 +44,7 @@
         {
             return new Region
             {
+                RegionCode = _regionCode,
                 RegionName = _regionName
             };
         }

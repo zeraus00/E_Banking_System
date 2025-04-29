@@ -4,8 +4,9 @@
     public class Province
     {
         public int ProvinceId { get; set; }                         // Primary Key
+        public string ProvinceCode { get; set; } = string.Empty;      // Required
         public string ProvinceName { get; set; } = string.Empty;    // Required
-        public int? RegionId { get; set; }                           // Foreign Key to Region
+        public int? RegionId { get; set; }                          // Foreign Key to Region
 
 
         /*  Navigation Properties   */

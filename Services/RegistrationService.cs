@@ -1,10 +1,13 @@
 ﻿using Exceptions;
 using Data;
+using Data.Constants;
 using Data.Enums;
 using Data.Repositories.User;
 using Data.Repositories.Auth;
+using Data.Repositories.Place;
 using Data.Models.User;
 using Data.Repositories.Finance;
+using ViewModels;
 
 
 namespace Services
@@ -12,12 +15,6 @@ namespace Services
     public class RegistrationService : Service
     {
         public RegistrationService(IDbContextFactory<EBankingContext> contextFactory) : base(contextFactory) { }
-
-
-        public async Task RegisterUserInfoAsync(UserAuth userAuthId) 
-        {
-
-        }
 
         public async Task RegisterAsync(int accountTypeId, int accountProductTypeId, string userFirstName, string? userMiddleName, string userLastName, string? userSuffix,
                 string fatherFirstName, string? fatherMiddleName, string fatherLastName, string? fatherSuffix,
@@ -196,6 +193,104 @@ namespace Services
                 return UserAddress;
             }
         }
+        public async Task<int> RegisterRegion(string selectedCode, List<RegionViewModel> regionList)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                var regionRepo = new RegionRepository(dbContext);
+
+                RegionViewModel selectedRegion = regionList
+                    .FirstOrDefault(r => r.code.GetString() == selectedCode)!;
+
+                Region? region = await regionRepo.GetRegionByCodeAsync(selectedCode);
+
+                if (region is null)
+                {
+                    region = new();
+                    region.RegionCode = selectedCode.Trim();
+                    region.RegionName = selectedRegion.name.GetString()?.Trim() ?? FieldPlaceHolders.REGION_NAME_NOT_FOUND;
+
+                    await regionRepo.AddAsync(region);
+                    await regionRepo.SaveChangesAsync();
+                }
+
+                return region.RegionId;
+            }
+        }
+        public async Task<int> RegisterProvince(string selectedCode, List<ProvinceViewModel> provinceList)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                var provinceRepo = new ProvinceRepository(dbContext);
+
+                ProvinceViewModel selectedProvince = provinceList
+                    .FirstOrDefault(r => r.code.GetString() == selectedCode)!;
+
+                Province? province = await provinceRepo.GetProvinceByCodeAsync(selectedCode);
+
+                if (province is null)
+                {
+                    province = new();
+                    province.ProvinceCode = selectedCode.Trim();
+                    province.ProvinceName = selectedProvince.name.GetString()?.Trim() ?? FieldPlaceHolders.PROVINCE_NAME_NOT_FOUND;
+
+                    await provinceRepo.AddAsync(province);
+                    await provinceRepo.SaveChangesAsync();
+                }
+
+                return province.ProvinceId;
+            }
+        }
+
+        public async Task<int> RegisterCity(string selectedCode, List<CityViewModel> cityList)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                var cityRepo = new CityRepository(dbContext);
+
+                CityViewModel selectedCity = cityList
+                    .FirstOrDefault(r => r.code.GetString() == selectedCode)!;
+
+                City? city = await cityRepo.GetCityByCityCodeAsync(selectedCode);
+
+                if (city is null)
+                {
+                    city = new();
+                    city.CityCode = selectedCode.Trim();
+                    city.CityName = selectedCity.name.GetString()?.Trim() ?? FieldPlaceHolders.CITY_NAME_NOT_FOUND;
+
+                    await cityRepo.AddAsync(city);
+                    await cityRepo.SaveChangesAsync();
+                }
+
+                return city.CityId;
+            }
+        }
+
+        public async Task<int> RegisterBarangay(string selectedCode, List<BarangayViewModel> barangayList)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                var barangayRepo = new BarangayRepository(dbContext);
+
+                BarangayViewModel selectedBarangay = barangayList
+                    .FirstOrDefault(r => r.code.GetString() == selectedCode)!;
+
+                Barangay? barangay = await barangayRepo.GetBarangayByBarangayCodeAsync(selectedCode);
+
+                if (barangay is null)
+                {
+                    barangay = new();
+                    barangay.BarangayCode = selectedCode.Trim();
+                    barangay.BarangayName = selectedBarangay.name.GetString()?.Trim() ?? FieldPlaceHolders.CITY_NAME_NOT_FOUND;
+
+                    await barangayRepo.AddAsync(barangay);
+                    await barangayRepo.SaveChangesAsync();
+                }
+
+                return barangay.BarangayId;
+            }
+        }
 
         public async Task<Religion> RegisterReligion(string religionName) 
         {
@@ -345,12 +440,18 @@ namespace Services
                 throw new FieldAccessException("Account product type is required.");
             }
 
-
+            DateTime creationDate = DateTime.UtcNow.Date;
+            string accountNumber = GenerateAccountNumber(creationDate, accountProductTypeId);
+            string accountName = GenerateAccountName(accountTypeId, accountProductTypeId);
 
             var accountBuilder = new AccountBuilder();
             accountBuilder
                 .WithAccountType(accountTypeId)
-                .WithAccountProductTypeId(accountProductTypeId);
+                .WithAccountProductTypeId(accountProductTypeId)
+                .WithAccountNumber(accountNumber)
+                .WithAccountName(accountName)
+                .WithAccountStatus((int)AccountStatusTypes.Pending)
+                .WithBalance(0);
 
             Account userAccount = accountBuilder.Build();
 
@@ -363,8 +464,36 @@ namespace Services
             }
         }
 
-        
+        public async Task SyncAccountAndUserAuthAsync(int userAuthId, int accountId)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                var userAuthRepo = new UserAuthRepository(dbContext);
+                var accountRepo = new AccountRepository(dbContext);
 
+                var userAuthQuery = userAuthRepo.ComposeQuery(includeAccounts: true);
+                var accountQuery = accountRepo.Query.IncludeUsersAuth().GetQuery();
 
+                UserAuth userAuth = await userAuthRepo.GetUserAuthByIdAsync(userAuthId, userAuthQuery) ?? throw new UserNotFoundException();
+                Account account = await accountRepo.GetAccountByIdAsync(accountId, accountQuery) ?? throw new AccountNotFoundException(accountId);
+
+                userAuth.Accounts.Add(account);
+                account.UsersAuth.Add(userAuth);
+
+                await dbContext.SaveChangesAsync();
+            }
+        }
+
+        private string GenerateAccountNumber(DateTime creationDate, int accountProductTypeId)
+        {
+            return $"{creationDate:yyMMdd}{accountProductTypeId}{Random.Shared.Next(10000, 100000)}";
+        }
+
+        private string GenerateAccountName(int accountTypeId, int accountProductTypeId)
+        {
+            var firstPart = new AccountTypeNames().AccountTypeNameList[accountTypeId][..3];
+            var secondPart = new AccountProductTypeNames().AccountProductTypeNameList[accountProductTypeId][..3];
+            return $"{firstPart}-{secondPart}-{Guid.NewGuid().ToString().Substring(0, 6).ToUpper()}";
+        }
     }
 }

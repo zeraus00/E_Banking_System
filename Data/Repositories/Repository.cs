@@ -53,6 +53,30 @@ namespace Data.Repositories
             await _context.Set<T>().AddAsync(entity);
         }
 
+        /// <summary>
+        /// Retrieves an entity of class T from database.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        protected async Task<T?> GetById<T>(int id, IQueryable<T>? query = null) where T : class
+        {
+            return await _context.Set<T>().FindAsync(id);
+        }
+
+        /// <summary>
+        /// Retrieves an entity of class T from database.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="condition"></param>
+        /// <param name="query"></param>
+        /// <returns></returns>
+        protected async Task<T?> Get<T>(Expression<Func<T, bool>> condition, IQueryable<T>? query = null) where T : class
+        {
+            IQueryable<T> finalQuery = query ?? _context.Set<T>().AsQueryable();
+            return await finalQuery.FirstOrDefaultAsync(condition);
+        }
+
         public abstract class CustomQuery<TEntity, TSelf> where TEntity : class where TSelf : CustomQuery<TEntity, TSelf>
         {
             protected IQueryable<TEntity> _query;

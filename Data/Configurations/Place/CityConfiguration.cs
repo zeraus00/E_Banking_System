@@ -16,6 +16,12 @@ namespace Data.Configurations.Place
             Cities
                 .Property(c => c.CityId)
                 .ValueGeneratedOnAdd();
+
+            //  CityCode (Required)
+            Cities
+                .Property(c => c.CityCode)
+                .IsRequired();
+
             // CityName (Required; MaxLength=50)
             Cities
                 .Property(c => c.CityName)

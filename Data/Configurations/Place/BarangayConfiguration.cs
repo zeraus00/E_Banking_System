@@ -16,6 +16,12 @@ namespace Data.Configurations.Place
             Barangays
                 .Property(b => b.BarangayId)
                 .ValueGeneratedOnAdd();
+
+            // DistrictCode (Required)
+            Barangays
+                .Property(b => b.BarangayCode)
+                .IsRequired();
+
             // BarangayName (Required, MaxLength=50) 
             Barangays
                 .Property(b => b.BarangayName)

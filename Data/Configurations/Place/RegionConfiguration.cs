@@ -16,6 +16,12 @@ namespace Data.Configurations.Place
             Regions
                 .Property(Region => Region.RegionId)
                 .ValueGeneratedOnAdd();
+
+            //  RegionCode (Required)
+            Regions
+                .Property(Region => Region.RegionCode)
+                .IsRequired();
+
             // RegionName (Required; MaxLength=50)
             Regions
                 .Property(r => r.RegionName)

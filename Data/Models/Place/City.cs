@@ -5,6 +5,7 @@
     {
         /*  Properties    */
         public int CityId { get; set; }                         // Primary Key
+        public string CityCode { get; set; } = string.Empty;    // Required
         public string CityName { get; set; } = string.Empty;    // Required; Max Length: 50
         public int? ProvinceId { get; set; }                    // Foreign Key to Province
 
