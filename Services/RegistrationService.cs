@@ -436,36 +436,8 @@ namespace Services
             }
         }
 
-        public async Task SyncAccountAndUserAuthAsync(int userAuthId, int accountId)
-        {
-            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
-            {
-                var userAuthRepo = new UserAuthRepository(dbContext);
-                var accountRepo = new AccountRepository(dbContext);
+        
 
-                var userAuthQuery = userAuthRepo.ComposeQuery(includeAccounts: true);
-                var accountQuery = accountRepo.Query.IncludeUsersAuth().GetQuery();
 
-                UserAuth userAuth = await userAuthRepo.GetUserAuthByIdAsync(userAuthId, userAuthQuery) ?? throw new UserNotFoundException();
-                Account account = await accountRepo.GetAccountByIdAsync(accountId, accountQuery) ?? throw new AccountNotFoundException(accountId);
-
-                userAuth.Accounts.Add(account);
-                account.UsersAuth.Add(userAuth);
-
-                await dbContext.SaveChangesAsync();
-            }
-        }
-
-        private string GenerateAccountNumber(DateTime creationDate, int accountProductTypeId)
-        {
-            return $"{creationDate:yyMMdd}{accountProductTypeId}{Random.Shared.Next(10000, 100000)}";
-        }
-
-        private string GenerateAccountName(int accountTypeId, int accountProductTypeId)
-        {
-            var firstPart = new AccountTypeNames().AccountTypeNameList[accountTypeId][..3];
-            var secondPart = new AccountProductTypeNames().AccountProductTypeNameList[accountProductTypeId][..3];
-            return $"{firstPart}-{secondPart}-{Guid.NewGuid().ToString().Substring(0, 6).ToUpper()}";
-        }
     }
 }
