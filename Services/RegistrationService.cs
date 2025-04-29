@@ -26,38 +26,6 @@ namespace Services
                 string username, string email, string password, byte[] profilePicture, byte[] governmentId
             )
         {
-            Account userAccount = await RegisterAccount(accountTypeId, accountProductTypeId);
-            Name UserName = await RegisterName(userFirstName, userMiddleName, userLastName, userSuffix);
-            Name FatherName = await RegisterName(fatherFirstName, fatherMiddleName, fatherLastName, fatherSuffix);
-            Name MotherName = await RegisterName(motherFirstName, motherMiddleName, motherLastName, motherSuffix);
-            Name BeneficiaryName = await RegisterName(beneficiaryFirstName, beneficiaryMiddleName, beneficiaryLastName, beneficiarySuffix);
-
-            UserAuth userAuth = await RegisterUserAuth(username, email, password);
-            BirthInfo UserBirthInfo = await RegisterBirthInfo(birthDate, birthCityId, birthProvinceId, birthRegionId);
-            Address UserAddress = await RegisterAddress(houseNo, street, barangayId, cityId, provinceId, regionId, postalCode);
-            Religion UserReligion = await RegisterReligion(userReligion);
-
-
-
-            UserInfo UserInfo = await RegisterUserInfo(
-                userAuth.UserAuthId,
-                userAccount.AccountTypeId,
-                userAccount.AccountProductTypeId,
-                UserName.NameId,
-                MotherName.NameId,
-                FatherName.NameId,
-                UserBirthInfo.BirthInfoId,
-                UserAddress.AddressId,
-                UserReligion.ReligionId,
-                age,
-                sex,
-                contactNumber,
-                Occupation,
-                taxIdentificationNumber,
-                civilStatus,
-                profilePicture,
-                governmentId
-                );
         }
 
 
