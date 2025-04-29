@@ -140,13 +140,19 @@
 					<div class="col">
 						<label class="text-light">Religion</label>
 						<select class="form-select form-select-sm" @bind="selectedReligion">
-							@foreach (var option in religionOptions)
+							@foreach (var religion in religionOptions)
 							{
-								<option value="@option">@option</option>
+								<option value="@religion">@religion</option>
 							}
 						</select>
 					</div>
-
+					@if (selectedReligion == "Others")
+					{
+						<div class="mt-2">
+							<label for="customReligion">Please specify your religon:</label>
+							<input type="text" @bind="customReligion" class="form-control" placeholder="Enter your religion"/>
+						</div>
+					}
 					<!-- Contact No -->
 					<div class="col">
 						<label class="text-light">Contact No.</label>
@@ -453,6 +459,7 @@
 	public string selectedSex = string.Empty;
 	public string selectedCivilStatus = string.Empty;
 	public string selectedReligion = string.Empty;
+	public string customReligion = string.Empty;
 
 	// user profile picture and government id
 	private byte[] profilePicture;
@@ -772,10 +779,17 @@
 
 	private List<string> religionOptions = new List<string>
 	{
-		"Religion 1",
-		"Religion 2",
-		"Religion 3",
-		"Religion 4"
+		"Roman Catholic",
+		"Islam",
+		"Iglesia ni Cristo",
+		"Evangelical",
+		"Seventh-day Adventist",
+		"Born Again",
+		"Buddhism",
+		"Hinduism",
+		"Judaism",
+		"Orthodox",
+		"Others"
 	};
 
 	private async Task RegisterUserAsync()
@@ -892,6 +906,14 @@
 				return;
 			}
 
+			if (string.IsNullOrEmpty(customReligion))
+			{
+				error = "Religon is required.";
+				return;
+			}
+
+			
+
 			accountTypeId = accountTypeNames.AccountTypeNameList.IndexOf(selectedAccountTypeName) + 1;
 			accountProductTypeId = accountProductTypeNames.AccountProductTypeNameList.IndexOf(selectedAccountProductTypeName) + 1;
 
@@ -913,7 +935,9 @@
 			UserAuth userAuth = await RegistrationService.RegisterUserAuth(userName, email, password);
 			BirthInfo UserBirthInfo = await RegistrationService.RegisterBirthInfo(birthDate, birthCityId, birthProvinceId, birthRegionId);
 			Address UserAddress = await RegistrationService.RegisterAddress(houseNo, street, barangayId, cityId, provinceId, regionId, postalCode);
-			Religion UserReligion = await RegistrationService.RegisterReligion(selectedReligion);
+
+			string religionToSave = selectedRegion == "others" ? customReligion : selectedReligion;
+			Religion UserReligion = await RegistrationService.RegisterReligion(religionToSave);
 
 
 
@@ -936,7 +960,7 @@
 				profilePicture,
 				governmentId
 				);
-			NavigationManager.NavigateTo("/");
+			NavigationManager.NavigateTo("/PendingApproval");
 		}
 		catch (MissingFieldException ex)
 		{
