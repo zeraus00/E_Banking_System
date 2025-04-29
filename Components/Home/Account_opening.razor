@@ -50,7 +50,7 @@
 					<div class="col-2">
 						<label class="text-light">Account Sub-Type</label>
 						<select class="form-select form-select-sm" @bind="selectedAccountTypeName" required>
-							<option value="" disabled hidden>--select Account type--</option>
+							<option value="" disabled hidden>--select account type--</option>
 							@foreach (var accountType in accountTypeNames.AccountTypeNameList)
 							{
 								<option value="@accountType">@accountType</option>
@@ -173,7 +173,7 @@
 							<option value="" disabled hidden>@regionPlaceHolder</option>
 							@foreach (var r in regions)
 							{
-								<option value="@r.code.GetString()">@r.regionName</option>
+								<option value="@r.code">@r.regionName</option>
 							}
 						</select>
 					</div>
@@ -185,7 +185,7 @@
 							<option value="" disabled hidden>@provincePlaceHolder</option>
 							@foreach (var p in provincesFromRegion)
 							{
-								<option value="@p.code.GetString()">@p.name</option>
+								<option value="@p.code">@p.name</option>
 							}
 						</select>
 					</div>
@@ -195,7 +195,7 @@
 						<label class="text-light">Postal Code</label>
 						<select class="form-select form-select-sm" value="#" required>
 							<option value="" disabled hidden> # </option>
-
+							
 						</select>
 					</div>
 
@@ -206,7 +206,7 @@
 							<option value="" disabled hidden>@cityPlaceHolder</option>
 							@foreach (var c in citiesFromProvince)
 							{
-								<option value="@c.code.GetString()">@c.name</option>
+								<option value="@c.code">@c.name</option>
 							}
 						</select>
 					</div>
@@ -216,9 +216,9 @@
 						<label class="text-light">Barangay</label>
 						<select class="form-select form-select-sm" value="@selectedBarangay" required>
 							<option value="" disabled hidden>@barangayPlaceHolder</option>
-							@foreach (var b in barangaysFromCity)
+							@foreach (var b in barangaysFromCities)
 							{
-								<option value="@b.code.GetString()">@b.name</option>
+								<option value="@b.code">@b.name</option>
 							}
 						</select>
 					</div>
@@ -246,9 +246,9 @@
 					<!-- Region -->
 					<div class="col">
 						<label class="text-light">Region</label>
-						<select class="form-select form-select-sm" value="@selectedBirthRegion" @onchange="async _ => await LoadBirthProvincesAsync(_)" required>
+						<select class="form-select form-select-sm" value="@selectedBirthRegion" @onchange="async _ => LoadBirthProvincesAsync(_)" required>
 							<option value="" disabled hidden>@regionPlaceHolder</option>
-							@foreach (var r in birthRegions)
+							@foreach (var r in regions)
 							{
 								<option value="@r.code">@r.regionName</option>
 							}
@@ -258,9 +258,9 @@
 					<!-- Province -->
 					<div class="col">
 						<label class="text-light">Province</label>
-						<select class="form-select form-select-sm" value="@selectedBirthProvince" @onchange="async _ => await LoadBirthCitiesAsync(_)" required>
+						<select class="form-select form-select-sm" value="@selectedBirthProvince" @onchange="async _ => LoadCitiesAsync(_)" required>
 							<option value="" disabled hidden>@provincePlaceHolder</option>
-							@foreach (var p in birthProvinces)
+							@foreach (var p in provincesFromRegion)
 							{
 								<option value="@p.code">@p.name</option>
 							}
@@ -272,7 +272,7 @@
 						<label class="text-light" >City</label>
 						<select class="form-select form-select-sm" value="@selectedBirthCity" required>
 							<option value="" disabled hidden>@cityPlaceHolder</option>
-							@foreach (var c in birthCities)
+							@foreach (var c in citiesFromProvince)
 							{
 								<option value="@c.code">@c.name.ToString()</option>
 							}
@@ -420,7 +420,7 @@
 					<!-- Password -->
 					<div class="col-3">
 						<label class="text-light">Password</label>
-						<input type="password" class="form-control form-control-sm" @bind="password" placeholder="Password" required>
+						<input type="password" class="form-control form-control-sm" placeholder="Password" required>
 					</div>
 				</div>
 
@@ -517,26 +517,29 @@
 	public string taxIdentificationNumber = string.Empty;
 
 	<!--user birth info address--> 
-	private List<RegionViewModel> birthRegions = new();
-	private List<ProvinceViewModel> birthProvinces = new();
-	private List<CityViewModel> birthCities = new();
+	private List<RegionViewModel>? birthRegions = new();
+	private List<ProvinceViewModel>? birthProvinces = new();
+	private List<CityViewModel>? birthCities = new();
 	<!--user full address-->
-	private List<RegionViewModel> regions = new List<RegionViewModel>();
-	private List<ProvinceViewModel> provincesFromRegion = new();	//	use this for the drop down selection
-	private List<CityViewModel> citiesFromProvince = new();
-	private List<BarangayViewModel> barangaysFromCity = new();
+	private List<RegionViewModel>? regions = new List<RegionViewModel>();
+	private List<ProvinceViewModel>? provinces = new List<ProvinceViewModel>();
+	private List<ProvinceViewModel>? provincesFromRegion = new();	//	use this for the drop down selection
+	private List<CityViewModel>? cities = new List<CityViewModel>();
+	private List<CityViewModel>? citiesFromProvince = new();
+	private List<BarangayViewModel>? barangays = new List<BarangayViewModel>();
+	private List<BarangayViewModel>? barangaysFromCities = new();
 
 	protected override async Task OnInitializedAsync()
 	{
 		await LoadRegionAsync();
-		await LoadBirthRegionsAsync();
 	}
 
 	// For Full address of user
 	private async Task LoadRegionAsync()
 	{
 		var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/regions/");
-		regions = JsonSerializer.Deserialize<List<RegionViewModel>>(json) ?? new();
+		regions = JsonSerializer.Deserialize<List<RegionViewModel>>(json);
+		if (regions is null) return;
 	}
 
 	//	Pass the ChangeEventArgs instance ONLY FOR drop down selections that need updating.
@@ -548,11 +551,12 @@
 
 		//	Get the provinces from the api.
 		var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/provinces/");
-		provincesFromRegion = JsonSerializer
-			.Deserialize<List<ProvinceViewModel>>(json)? 
-			.Where(p => p.regionCode.GetString() == selectedRegion)
-			.ToList()
-			?? new();
+		provinces = JsonSerializer.Deserialize<List<ProvinceViewModel>>(json);
+		if (provinces is null) return;
+
+		//	Get the list of provinces with the selected region's region code
+		provincesFromRegion = provinces.Where(p => p.regionCode.ToString() == selectedRegion).ToList();
+
 		//	Default the selection to the first option each time provinces are updated.
 		if (provincesFromRegion.Any())
 		{
@@ -574,11 +578,11 @@
 
 		//	Get the municipalities from the api.
 		var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/municipalities/");
-		citiesFromProvince = JsonSerializer
-			.Deserialize<List<CityViewModel>>(json)? 
-			.Where(c => c.provinceCode.GetString() == selectedProvince)
-			.ToList()
-			?? new();
+		cities = JsonSerializer.Deserialize<List<CityViewModel>>(json);
+		if (cities is null) return;
+
+		//	Get the list of provinces with the selected region's region code
+		citiesFromProvince = cities.Where(c => c.provinceCode.ToString() == selectedProvince).ToList();
 		//	Default the selection to the first option each time provinces are updated.
 		if (citiesFromProvince.Any())
 		{
@@ -597,14 +601,13 @@
 	{
 		selectedCity = e?.Value?.ToString() ?? "";
 		var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/barangays/");
-		barangaysFromCity = JsonSerializer
-			.Deserialize<List<BarangayViewModel>>(json)?
-			.Where(b => b.municipalityCode.GetString() == selectedCity)
-			.ToList()
-			?? new();
-		if (barangaysFromCity.Any())
+		barangays = JsonSerializer.Deserialize<List<BarangayViewModel>>(json);
+		if (barangays is null) return;
+
+		barangaysFromCities = barangays.Where(b => b.municipalityCode.ToString() == selectedCity).ToList();
+		if (barangaysFromCities.Any())
 		{
-			selectedBarangay = barangaysFromCity[0].code.ToString();
+			selectedBarangay = barangaysFromCities[0].code.ToString();
 		}
 		else
 		{
@@ -616,23 +619,14 @@
 	}
 
 	// method to get user birth place
-
-	private async Task LoadBirthRegionsAsync()
-	{
-		var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/regions/");
-		birthRegions = JsonSerializer.Deserialize<List<RegionViewModel>>(json) ?? new();
-	}
 	private async Task LoadBirthProvincesAsync(ChangeEventArgs? e = null)
 	{
 		selectedBirthRegion = e?.Value?.ToString() ?? "";
 
 		var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/provinces/");
-		birthProvinces = JsonSerializer
-			.Deserialize<List<ProvinceViewModel>>(json)?
-			.Where(p => p.regionCode.GetString() == selectedBirthRegion)
-			.ToList() 
-			?? new();
-
+		provinces = JsonSerializer.Deserialize<List<ProvinceViewModel>>(json);
+		if (provinces is null) return;
+		provincesFromRegion = provinces.Where(p => p.regionCode.ToString() == selectedBirthRegion).ToList();
 		if (provincesFromRegion.Any())
 		{
 			selectedBirthProvince = provincesFromRegion[0].code.ToString();
@@ -651,11 +645,11 @@
 
 		//	Get the municipalities from the api.
 		var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/municipalities/");
-		birthCities = JsonSerializer
-			.Deserialize<List<CityViewModel>>(json)? 
-			.Where(c => c.provinceCode.GetString() == selectedBirthProvince)
-			.ToList()
-			?? new();
+		cities = JsonSerializer.Deserialize<List<CityViewModel>>(json);
+		if (cities is null) return;
+
+		//	Get the list of provinces with the selected region's region code
+		citiesFromProvince = cities.Where(c => c.provinceCode.ToString() == selectedBirthProvince).ToList();
 		//	Default the selection to the first option each time provinces are updated.
 		if (citiesFromProvince.Any())
 		{
@@ -668,6 +662,19 @@
 
 		//	Rerender component
 		StateHasChanged();
+	}
+
+	private int GetIdFromSelected(string selectedCode, List<dynamic> options)
+	{
+		foreach (var item in options)
+		{
+			if (item?.Code == selectedCode)
+			{
+				return item?.Id ?? 0;
+			}
+		}
+
+		return 0;
 	}
 
 	private List<string> religionOptions = new List<string>
@@ -685,42 +692,27 @@
 			accountTypeId = accountTypeNames.AccountTypeNameList.IndexOf(selectedAccountTypeName) + 1;
 			accountProductTypeId = accountProductTypeNames.AccountProductTypeNameList.IndexOf(selectedAccountProductTypeName) + 1;
 
-			// regionId = GetIdFromSelected(selectedRegion, regions.Cast<dynamic>().ToList());
-			// provinceId = GetIdFromSelected(selectedProvince, provinces.Cast<dynamic>().ToList());
-			// cityId = GetIdFromSelected(selectedCity, cities.Cast<dynamic>().ToList());
-			// barangayId = GetIdFromSelected(selectedBarangay, barangays.Cast<dynamic>().ToList()); 
+			regionId = GetIdFromSelected(selectedRegion, regions.Cast<dynamic>().ToList());
+			provinceId = GetIdFromSelected(selectedProvince, provinces.Cast<dynamic>().ToList());
+			cityId = GetIdFromSelected(selectedCity, cities.Cast<dynamic>().ToList());
+			barangayId = GetIdFromSelected(selectedBarangay, barangays.Cast<dynamic>().ToList()); 
 
-			// birthRegionId = GetIdFromSelected(selectedBirthRegion, regions.Cast<dynamic>().ToList());
-			// birthProvinceId = GetIdFromSelected(selectedBirthProvince, provinces.Cast<dynamic>().ToList());
-			// birthCityId = GetIdFromSelected(selectedBirthCity, cities.Cast<dynamic>().ToList());
+			birthRegionId = GetIdFromSelected(selectedBirthRegion, regions.Cast<dynamic>().ToList());
+			birthProvinceId = GetIdFromSelected(selectedBirthProvince, provinces.Cast<dynamic>().ToList());
+			birthCityId = GetIdFromSelected(selectedBirthCity, cities.Cast<dynamic>().ToList());
 
-
-
-			regionId = await RegistrationService.RegisterRegion(selectedRegion, regions);
-			provinceId = await RegistrationService.RegisterProvince(selectedProvince, provincesFromRegion);
-			cityId = await RegistrationService.RegisterCity(selectedCity, citiesFromProvince);
-			barangayId = await RegistrationService.RegisterBarangay(selectedBarangay, barangaysFromCity);
-
-			birthRegionId = await RegistrationService.RegisterRegion(selectedBirthRegion, birthRegions);
-			birthProvinceId = await RegistrationService.RegisterProvince(selectedBirthProvince, birthProvinces);
-			birthCityId = await RegistrationService.RegisterCity(selectedBirthCity, birthCities);
-
-
-
-
-
+			Account userAccount = await RegistrationService.RegisterAccount(accountTypeId, accountProductTypeId);
 			Name UserName = await RegistrationService.RegisterName(userFirstName, userMiddleName, userLastName, userSuffix);
 			Name FatherName = await RegistrationService.RegisterName(fatherFirstName, fatherMiddleName, fatherLastName, fatherSuffix);
 			Name MotherName = await RegistrationService.RegisterName(motherFirstName, motherMiddleName, motherLastName, motherSuffix);
-			// Name BeneficiaryName = await RegistrationService.RegisterName(beneficiaryFirstName, beneficiaryMiddleName, beneficiaryLastName, beneficiarySuffix);
+			Name BeneficiaryName = await RegistrationService.RegisterName(beneficiaryFirstName, beneficiaryMiddleName, beneficiaryLastName, beneficiarySuffix);
 
-			Account userAccount = await RegistrationService.RegisterAccount(accountTypeId, accountProductTypeId);
 			UserAuth userAuth = await RegistrationService.RegisterUserAuth(userName, email, password);
-			Address UserAddress = await RegistrationService.RegisterAddress(houseNo, street, barangayId, cityId, provinceId, regionId, postalCode);
 			BirthInfo UserBirthInfo = await RegistrationService.RegisterBirthInfo(birthDate, birthCityId, birthProvinceId, birthRegionId);
+			Address UserAddress = await RegistrationService.RegisterAddress(houseNo, street, barangayId, cityId, provinceId, regionId, postalCode);
 			Religion UserReligion = await RegistrationService.RegisterReligion(selectedReligion);
 
-			await RegistrationService.SyncAccountAndUserAuthAsync(userAuth.UserAuthId, userAccount.AccountId);
+
 
 			UserInfo UserInfo = await RegistrationService.RegisterUserInfo(
 				userAuth.UserAuthId,

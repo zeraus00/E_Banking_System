@@ -4,6 +4,7 @@
 
 @inject PageRedirectService redirectService
 @inject UserSessionService userSessionService
+@using Helpers;
 
 <div class="page">
 	<main>
@@ -45,7 +46,7 @@
 				<div class="mb-3 border-bottom pb-2 d-flex justify-content-between align-items-center">
 					<div>
 						<label class="form-label text-muted">Contact No.</label>
-						<div>@contactNo</div>
+						<div>@FormatHelper.PhoneNumberFormatter(contactNo)</div>
 					</div>
 					<NavLink class="custom-nav-link" href="/Settings_contact_password">
 						<button class="btn btn-link text-decoration-none text-light">Change</button>
