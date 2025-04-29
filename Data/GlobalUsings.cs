@@ -12,6 +12,10 @@ global using Data.Models.Place;
 global using Data.Models.Authentication;
 global using Data.Models.Finance;
 
+global using System;
+global using System.Linq;
+global using System.Linq.Expressions;
+
 namespace Data
 {
     
