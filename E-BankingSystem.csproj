@@ -16,7 +16,12 @@
     <Content Remove="Components\Client_page\Accounts\MyAccounts.razor" />
     <Content Remove="Components\Client_page\Accounts\My_accounts.razor" />
     <Content Remove="Components\Home\Sign_up_page.razor" />
+    <Content Remove="Components\Layout\Header.razor" />
     <Content Remove="wwwroot\bootstrap\Utilities\profile.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Components\Layout\Header.razor.css" />
   </ItemGroup>
 
   <ItemGroup>
@@ -30,10 +35,6 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.3.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.4" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Components\Admin\Manage_accounts\" />
   </ItemGroup>
 
 </Project>
