@@ -1,7 +1,7 @@
 ﻿@page "/PendingAccounts"
 
 @rendermode InteractiveServer
-@inject NavigationManager NavigationManager
+@inject NavigationManager Navigation
 @using Layout
 @layout AdminMainLayout
 
@@ -68,7 +68,7 @@
                             <td>@a.Name</td>
                             <td>@a.AccountType</td>
                             <td>
-                                <button class="btn btn-secondary btn-sm" @onclick="() => ViewDetails(a)">View</button>
+                                <button class="btn btn-info btn-secondary btn-sm rounded text-dark shadow-sm" style="border: 2px solid cyan" @onclick="() => ViewDetails(a)">View</button>
                             </td>
                             <td class="text-secondary">@a.Status</td>
                         </tr>
@@ -136,7 +136,7 @@
 
     private void ViewDetails(AccountRecord account)
     {
-        Console.WriteLine($"Viewing details for {account.Name}");
+        Navigation.NavigateTo($"/ViewDetails");
     }
 
     public class AccountRecord
