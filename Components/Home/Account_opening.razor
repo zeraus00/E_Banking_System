@@ -176,7 +176,7 @@
 					<!-- Region -->
 					<div class="col">
 						<label class="text-light">Region</label>
-						<select class="form-select form-select-sm" value="@selectedRegion" @onchange="async _ => await LoadProvinceAsync(_)" required>
+						<select class="form-select form-select-sm" value="selectedRegion" @onchange="async _ => await LoadProvinceAsync(_)" required>
 							<option value="" disabled hidden>@regionPlaceHolder</option>
 							@foreach (var r in regions)
 							{
@@ -188,7 +188,7 @@
 					<!-- Province -->
 					<div class="col">
 						<label class="text-light">Province</label>
-						<select class="form-select form-select-sm" value="@selectedProvince" @onchange="async _ => await LoadCitiesAsync(_)" required>
+						<select class="form-select form-select-sm" value="selectedProvince" @onchange="async _ => await LoadCitiesAsync(_)" required>
 							<option value="" disabled hidden>@provincePlaceHolder</option>
 							@foreach (var p in provincesFromRegion)
 							{
@@ -209,7 +209,7 @@
 					<!-- Municipality/City -->
 					<div class="col">
 						<label class="text-light">Municipality/City</label>
-						<select class="form-select form-select-sm" value="@selectedCity" @onchange="async _ => await LoadBarangaysAsync(_)" required>
+						<select class="form-select form-select-sm" value="selectedCity" @onchange="async _ => await LoadBarangaysAsync(_)" required>
 							<option value="" disabled hidden>@cityPlaceHolder</option>
 							@foreach (var c in citiesFromProvince)
 							{
@@ -221,9 +221,9 @@
 					<!-- Barangay -->
 					<div class="col">
 						<label class="text-light">Barangay</label>
-						<select class="form-select form-select-sm" value="@selectedBarangay" required>
+						<select class="form-select form-select-sm" value="selectedBarangay" required>
 							<option value="" disabled hidden>@barangayPlaceHolder</option>
-							@foreach (var b in barangaysFromCities)
+							@foreach (var b in barangaysFromCity)
 							{
 								<option value="@b.code">@b.name</option>
 							}
@@ -253,9 +253,9 @@
 					<!-- Region -->
 					<div class="col">
 						<label class="text-light">Region</label>
-						<select class="form-select form-select-sm" value="@selectedBirthRegion" @onchange="async _ => LoadBirthProvincesAsync(_)" required>
+						<select class="form-select form-select-sm" value="selectedBirthRegion" @onchange="async _ => await LoadBirthProvincesAsync(_)" required>
 							<option value="" disabled hidden>@regionPlaceHolder</option>
-							@foreach (var r in regions)
+							@foreach (var r in birthRegions)
 							{
 								<option value="@r.code">@r.regionName</option>
 							}
@@ -265,9 +265,9 @@
 					<!-- Province -->
 					<div class="col">
 						<label class="text-light">Province</label>
-						<select class="form-select form-select-sm" value="@selectedBirthProvince" @onchange="async _ => LoadCitiesAsync(_)" required>
+						<select class="form-select form-select-sm" value="selectedBirthProvince" @onchange="async _ => await LoadBirthCitiesAsync(_)" required>
 							<option value="" disabled hidden>@provincePlaceHolder</option>
-							@foreach (var p in provincesFromRegion)
+							@foreach (var p in birthProvinces)
 							{
 								<option value="@p.code">@p.name</option>
 							}
@@ -277,9 +277,9 @@
 					<!-- City -->
 					<div class="col">
 						<label class="text-light" >City</label>
-						<select class="form-select form-select-sm" value="@selectedBirthCity" required>
+						<select class="form-select form-select-sm" value="selectedBirthCity" required>
 							<option value="" disabled hidden>@cityPlaceHolder</option>
-							@foreach (var c in citiesFromProvince)
+							@foreach (var c in birthCities)
 							{
 								<option value="@c.code">@c.name</option>
 							}
@@ -372,7 +372,7 @@
 
 						<!-- View Button -->
 						<div class="d-flex gap-2">
-							<input type="file" @bind="governmentId" class="btn btn-light btn-sm w-75" required />
+							<input type="file" @* @bind="governmentId" *@ class="btn btn-light btn-sm w-75" required />
 							<button class="btn btn-outline-light">View</button>
 						</div>
 					</div>
@@ -383,7 +383,7 @@
 
 						<!-- View BUtton -->
 						<div class="d-flex gap-2">
-							<input type="file" @bind="profilePicture" class="btn btn-light btn-sm w-75" required />
+							<input type="file" @* @bind="profilePicture" *@ class="btn btn-light btn-sm w-75" required />
 							<button class="btn btn-outline-light">View</button>
 						</div>
 					</div>
@@ -430,7 +430,7 @@
 
 				<!-- Register Button -->
 				<div class="text-end mt-3">
-					<button class="btn btn-primary btn-secondary">Submit Application</button>
+					<button class="btn btn-primary btn-secondary" @onclick="RegisterUserAsync">Submit Application</button>
 				</div>
 
 			</div>
@@ -523,17 +523,14 @@
 	public string beneficiarySuffix = string.Empty;
 
 	<!--user birth info address--> 
-	private List<RegionViewModel>? birthRegions = new();
-	private List<ProvinceViewModel>? birthProvinces = new();
-	private List<CityViewModel>? birthCities = new();
+	private List<RegionViewModel> birthRegions = new();
+	private List<ProvinceViewModel> birthProvinces = new();
+	private List<CityViewModel> birthCities = new();
 	<!--user full address-->
-	private List<RegionViewModel>? regions = new List<RegionViewModel>();
-	private List<ProvinceViewModel>? provinces = new List<ProvinceViewModel>();
-	private List<ProvinceViewModel>? provincesFromRegion = new();	//	use this for the drop down selection
-	private List<CityViewModel>? cities = new List<CityViewModel>();
-	private List<CityViewModel>? citiesFromProvince = new();
-	private List<BarangayViewModel>? barangays = new List<BarangayViewModel>();
-	private List<BarangayViewModel>? barangaysFromCities = new();
+	private List<RegionViewModel> regions = new List<RegionViewModel>();
+	private List<ProvinceViewModel> provincesFromRegion = new();	//	use this for the drop down selection
+	private List<CityViewModel> citiesFromProvince = new();
+	private List<BarangayViewModel> barangaysFromCity = new();
 
 
 	// method for getting user address
@@ -542,12 +539,92 @@
 		try
 		{
 			await LoadRegionAsync();
+			await LoadBirthRegionsAsync();
+			dataSeeding();
 		}
 		catch (FieldMissingException ex)
 		{
 			error = "Error Loading Regions" + ex.Message;
 		}
 
+	}
+
+	private void dataSeeding()
+	{
+		// // user basic info
+		userFirstName = "BOGART";
+		userMiddleName = "RELAPSE";
+		userLastName = "GODS";
+		userSuffix = "X";
+		userName = "bogartrelapse";
+		password = "bogartrelapse";
+		email = "bogartrelapse@gmail.com";
+		contactNumber = "09669072782";
+		Occupation = "MACHO DANCER";
+		taxIdentificationNumber = "012345678910";
+		selectedSex = "MALE";
+		selectedCivilStatus = "OPPRESSED";
+		selectedReligion = "Roman Catholic";
+
+
+		// // user profile picture and government id
+		// private byte[] profilePicture;
+		// private byte[] governmentId;
+
+		// // Account
+		// private AccountTypeNames accountTypeNames = new();
+		// private AccountProductTypeNames accountProductTypeNames = new();
+		selectedAccountTypeName = AccountTypeNames.PERSONAL_ACCOUNT;
+		selectedAccountProductTypeName = AccountProductTypeNames.SAVINGS;
+
+
+
+		// // user Birth Info
+		age = 69;
+		// public DateTime birthDate;
+		// selectedBirthCity = string.Empty;
+		// public string selectedBirthProvince = string.Empty;
+		// public string selectedBirthRegion = string.Empty;
+		// public int birthCityId;
+		// public int birthProvinceId;
+		// public int birthRegionId;
+
+
+		// //address info
+		houseNo = "10";
+		street = "25";
+		// public string selectedRegion = string.Empty;
+		// public string selectedProvince = string.Empty;
+		// public string selectedCity = string.Empty;
+		// public string selectedBarangay = string.Empty;
+		// public string userPostalCode = string.Empty;
+		postalCode = 4028;
+		// public int regionId;
+		// public int provinceId;
+		// public int cityId;
+		// public int barangayId;
+
+		// //drop down selection place holders
+		// public const string regionPlaceHolder = "--Select Region--";
+		// public const string provincePlaceHolder = "--Select Province--";
+		// public const string cityPlaceHolder = "--Select City--";
+		// public const string barangayPlaceHolder = "--Select Barangay--";
+
+		// //Parents Name And Beneficiary
+		fatherFirstName = "BOGART";
+		fatherMiddleName = "RELAPSE";
+		fatherLastName = "GODS";
+		fatherSuffix = "IX";
+
+		motherFirstName = "MARIE";
+		motherMiddleName = "RIE";
+		motherLastName = "RELAPSE";
+		// public string motherSuffix = string.Empty;
+
+		// public string beneficiaryFirstName = string.Empty;
+		// public string beneficiaryMiddleName = string.Empty;
+		// public string beneficiaryLastName = string.Empty;
+		// public string beneficiarySuffix = string.Empty;
 	}
 
 	// For Full address of user
@@ -561,8 +638,9 @@
 				error = "No regions data found.";
 				return;
 			}
-			regions = JsonSerializer.Deserialize<List<RegionViewModel>>(json);
-			if (regions is null) return;
+			regions = JsonSerializer.Deserialize<List<RegionViewModel>>(json) ?? new();
+			if (regions is not null)
+				selectedRegion = regions[0].code.GetString()!;
 		}
 		catch (FieldMissingException ex)
 		{
@@ -576,22 +654,21 @@
 		try
 		{
 			error = string.Empty; // reset previous error
-			//	Get the value of the selection
+										//	Get the value of the selection
 			selectedRegion = e?.Value?.ToString() ?? "";
-			if (string.IsNullOrWhiteSpace(selectedRegion))
-			{
-				error = "Please select a valid region.";
-				return;
-			}
+			// if (string.IsNullOrWhiteSpace(selectedRegion))
+			// {
+			// 	error = "Please select a valid region.";
+			// 	return;
+			// }
 			var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/provinces/");
-			provinces = JsonSerializer.Deserialize<List<ProvinceViewModel>>(json);
-			if (provinces is null) return;
-
-			//	Get the list of provinces with the selected region's region code
-			provincesFromRegion = provinces.Where(p => p.regionCode.ToString() == selectedRegion).ToList();
+			provincesFromRegion = JsonSerializer.Deserialize<List<ProvinceViewModel>>(json)?
+			.Where(p => p.regionCode.ToString() == selectedRegion)
+			.ToList()
+			?? new();
 			if (provincesFromRegion.Any())
 			{
-				selectedProvince = provincesFromRegion[0].code.ToString();
+				selectedProvince = provincesFromRegion[0].code.GetString()!;
 			}
 			//	Rerender component
 			StateHasChanged();
@@ -607,24 +684,24 @@
 		try
 		{
 			error = string.Empty; // reset previous error
-			//	Get the value of the selection
+										//	Get the value of the selection
 			selectedProvince = e?.Value?.ToString() ?? "";
-			if (string.IsNullOrWhiteSpace(selectedProvince))
-			{
-				error = "Please select a valid Province.";
-				return;
-			}
+			// if (string.IsNullOrWhiteSpace(selectedProvince))
+			// {
+			// 	error = "Please select a valid Province.";
+			// 	return;
+			// }
 			//	Get the municipalities from the api.
 			var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/municipalities/");
-			cities = JsonSerializer.Deserialize<List<CityViewModel>>(json);
-			if (cities is null) return;
-			//	Get the list of provinces with the selected region's region code
-			citiesFromProvince = cities.Where(c => c.provinceCode.ToString() == selectedProvince).ToList();
+			citiesFromProvince = JsonSerializer.Deserialize<List<CityViewModel>>(json)?
+			.Where(c => c.provinceCode.ToString() == selectedProvince)
+			.ToList()
+			?? new();
 
 			//	Default the selection to the first option each time provinces are updated.
 			if (citiesFromProvince.Any())
 			{
-				selectedCity = citiesFromProvince[0].code.ToString();
+				selectedCity = citiesFromProvince[0].code.GetString()!;
 			}
 			//	Rerender component
 			StateHasChanged();
@@ -641,19 +718,19 @@
 		{
 			error = string.Empty; // reset previous error
 			selectedCity = e?.Value?.ToString() ?? "";
-			if (string.IsNullOrWhiteSpace(selectedCity))
-			{
-				error = "Select a valid city.";
-				return;
-			}
+			// if (string.IsNullOrWhiteSpace(selectedCity))
+			// {
+			// 	error = "Select a valid city.";
+			// 	return;
+			// }
 			var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/barangays/");
-			barangays = JsonSerializer.Deserialize<List<BarangayViewModel>>(json);
-			if (barangays is null) return;
-
-			barangaysFromCities = barangays.Where(b => b.municipalityCode.ToString() == selectedCity).ToList();
-			if (barangaysFromCities.Any())
+			barangaysFromCity = JsonSerializer.Deserialize<List<BarangayViewModel>>(json)?
+			.Where(b => b.municipalityCode.ToString() == selectedCity)
+			.ToList()
+			?? new();
+			if (barangaysFromCity.Any())
 			{
-				selectedBarangay = barangaysFromCities[0].code.ToString();
+				selectedBarangay = barangaysFromCity[0].code.GetString()!;
 			}
 			//	Rerender component
 			StateHasChanged();
@@ -664,6 +741,28 @@
 		}
 	}
 
+	private async Task LoadBirthRegionsAsync()
+	{
+		try
+		{
+			var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/regions/");
+			if (string.IsNullOrWhiteSpace(json))
+			{
+				error = "No regions data found.";
+				return;
+			}
+			birthRegions = JsonSerializer.Deserialize<List<RegionViewModel>>(json) ?? new();
+			if (selectedRegion.Any())
+			{
+				selectedRegion = birthRegions[0].code.GetString()!;
+			}
+		}
+		catch (FieldMissingException ex)
+		{
+			error = "Error loading Regions" + ex.Message;
+		}
+	}
+
 	// method to get user birth place
 	private async Task LoadBirthProvincesAsync(ChangeEventArgs? e = null)
 	{
@@ -671,18 +770,19 @@
 		{
 			error = string.Empty; // reset previous error
 			selectedBirthRegion = e?.Value?.ToString() ?? "";
-			if (string.IsNullOrWhiteSpace(selectedBirthRegion))
-			{
-				error = "Please select a valid Region.";
-				return;
-			}
+			// if (string.IsNullOrWhiteSpace(selectedBirthRegion))
+			// {
+			// 	error = "Please select a valid Region.";
+			// 	return;
+			// }
 			var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/provinces/");
-			provinces = JsonSerializer.Deserialize<List<ProvinceViewModel>>(json);
-			if (provinces is null) return;
-			provincesFromRegion = provinces.Where(p => p.regionCode.ToString() == selectedBirthRegion).ToList();
-			if (provincesFromRegion.Any())
+			birthProvinces = JsonSerializer.Deserialize<List<ProvinceViewModel>>(json)?
+			.Where(p => p.regionCode.ToString() == selectedBirthRegion)
+			.ToList()
+			?? new();
+			if (birthProvinces.Any())
 			{
-				selectedBirthProvince = provincesFromRegion[0].code.ToString();
+				selectedBirthProvince = birthProvinces[0].code.GetString()!;
 			}
 			StateHasChanged();
 		}
@@ -698,23 +798,23 @@
 		{
 			error = string.Empty; // reset previous error
 			selectedBirthProvince = e?.Value?.ToString() ?? "";
-			if (string.IsNullOrWhiteSpace(selectedBirthProvince))
-			{
-				error = "Please select a valid Province.";
-				return;
-			}
+			// if (string.IsNullOrWhiteSpace(selectedBirthProvince))
+			// {
+			// 	error = "Please select a valid Province.";
+			// 	return;
+			// }
 
 			//	Get the municipalities from the api.
 			var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/municipalities/");
-			cities = JsonSerializer.Deserialize<List<CityViewModel>>(json);
-			if (cities is null) return;
+			birthCities = JsonSerializer.Deserialize<List<CityViewModel>>(json)?
+			.Where(c => c.provinceCode.ToString() == selectedBirthProvince)
+			.ToList()
+			?? new();
 
-			//	Get the list of provinces with the selected region's region code
-			citiesFromProvince = cities.Where(c => c.provinceCode.ToString() == selectedBirthProvince).ToList();
 			//	Default the selection to the first option each time provinces are updated.
 			if (citiesFromProvince.Any())
 			{
-				selectedBirthCity = citiesFromProvince[0].code.ToString();
+				selectedBirthCity = birthCities[0].code.GetString()!;
 			}
 			//	Rerender component
 			StateHasChanged();
@@ -796,150 +896,192 @@
 	{
 		try
 		{
+			Console.WriteLine("CLICKED");
 			error = string.Empty;
 
 			if (string.IsNullOrWhiteSpace(userFirstName))
 			{
 				error = "First name is required.";
+				Console.WriteLine(error);
 				return;
 			}
 			if (string.IsNullOrWhiteSpace(userFirstName))
 			{
 				error = "Last name is required.";
+				Console.WriteLine(error);
 				return;
 			}
 
 			if (string.IsNullOrWhiteSpace(userName))
 			{
 				error = "Username is required.";
+				Console.WriteLine(error);
 				return;
 			}
 			if (age < 18)
 			{
 				error = "Invalid age, at least 18 years old is required.";
+				Console.WriteLine(error);
 				return;
 			}
 
 			if (string.IsNullOrWhiteSpace(password) || password.Length < 6)
 			{
 				error = "Invalid password, at least 6 character length is required.";
+				Console.WriteLine(error);
 				return;
 			}
 			if (string.IsNullOrWhiteSpace(email))
 			{
 				error = "Email is required.";
+				Console.WriteLine(error);
 				return;
 			}
 			if (string.IsNullOrWhiteSpace(contactNumber))
 			{
 				error = "Contact number is required.";
+				Console.WriteLine(error);
 				return;
 			}
 			if (string.IsNullOrWhiteSpace(Occupation))
 			{
 				error = "Occupation is required.";
+				Console.WriteLine(error);
 				return;
 			}
 			if (string.IsNullOrWhiteSpace(taxIdentificationNumber))
 			{
 				error = "Tax Identification Number is required.";
+				Console.WriteLine(error);
 				return;
 			}
 			if (string.IsNullOrWhiteSpace(selectedSex))
 			{
 				error = "Sex is required.";
+				Console.WriteLine(error);
 				return;
 			}
 			if (string.IsNullOrWhiteSpace(selectedCivilStatus))
 			{
 				error = "Civil status is required.";
+				Console.WriteLine(error);
 				return;
 			}
 			if (string.IsNullOrWhiteSpace(selectedReligion))
 			{
 				error = "Religion is required.";
+				Console.WriteLine(error);
 				return;
 			}
 
-			// Validation for names
-			if (string.IsNullOrWhiteSpace(fatherFirstName) || string.IsNullOrWhiteSpace(fatherLastName))
-			{
-				error = "Father's full name is required.";
-				return;
-			}
-			if (string.IsNullOrWhiteSpace(motherFirstName) || string.IsNullOrWhiteSpace(motherLastName))
-			{
-				error = "Mother's full name is required.";
-				return;
-			}
-			if (string.IsNullOrWhiteSpace(beneficiaryFirstName) || string.IsNullOrWhiteSpace(beneficiaryLastName))
-			{
-				error = "Beneficiary's full name is required.";
-				return;
-			}
+			// // Validation for names
+			// if (string.IsNullOrWhiteSpace(fatherFirstName) || string.IsNullOrWhiteSpace(fatherLastName))
+			// {
+			// 	error = "Father's full name is required.";
+			// 	return;
+			// }
+			// if (string.IsNullOrWhiteSpace(motherFirstName) || string.IsNullOrWhiteSpace(motherLastName))
+			// {
+			// 	error = "Mother's full name is required.";
+			// 	return;
+			// }
+			// if (string.IsNullOrWhiteSpace(beneficiaryFirstName) || string.IsNullOrWhiteSpace(beneficiaryLastName))
+			// {
+			// 	error = "Beneficiary's full name is required.";
+			// 	return;
+			// }
 
 			// Validation for address
 			if (string.IsNullOrWhiteSpace(houseNo))
 			{
 				error = "House number is required.";
+				Console.WriteLine(error);
 				return;
 			}
 			if (string.IsNullOrWhiteSpace(street))
 			{
 				error = "Street name is required.";
+				Console.WriteLine(error);
 				return;
 			}
-			if (regionId == 0 || provinceId == 0 || cityId == 0 || barangayId == 0)
-			{
-				error = "Complete address (region, province, city, barangay) is required.";
-				return;
-			}
+			// if (regionId == 0 || provinceId == 0 || cityId == 0 || barangayId == 0)
+			// {
+			// 	error = "Complete address (region, province, city, barangay) is required.";
+			// 	Console.WriteLine(error);
+			// 	return;
+			// }
 			if (postalCode == 0)
 			{
 				error = "Postal code is required.";
+				Console.WriteLine(error);
 				return;
 			}
 
 			if (birthDate == DateTime.MinValue)
 			{
 				error = "Valid birth date is required.";
+				Console.WriteLine(error);
 				return;
 			}
 
-			if (string.IsNullOrEmpty(customReligion))
-			{
-				error = "Religon is required.";
-				return;
-			}
+			// if (string.IsNullOrEmpty(customReligion))
+			// {
+			// 	error = "Religon is required.";
+			// 	Console.WriteLine(error);
+			// 	return;
+			// }
 
-			
+			Console.WriteLine("ERRRO CHECKS PASSED.");
 
 			accountTypeId = accountTypeNames.AccountTypeNameList.IndexOf(selectedAccountTypeName) + 1;
 			accountProductTypeId = accountProductTypeNames.AccountProductTypeNameList.IndexOf(selectedAccountProductTypeName) + 1;
+			Console.WriteLine(accountTypeId + " " + accountProductTypeId);
 
-			regionId = GetIdFromSelected(selectedRegion, regions.Cast<dynamic>().ToList());
-			provinceId = GetIdFromSelected(selectedProvince, provinces.Cast<dynamic>().ToList());
-			cityId = GetIdFromSelected(selectedCity, cities.Cast<dynamic>().ToList());
-			barangayId = GetIdFromSelected(selectedBarangay, barangays.Cast<dynamic>().ToList()); 
+			// regionId = GetIdFromSelected(selectedRegion, regions.Cast<dynamic>().ToList());
+			// provinceId = GetIdFromSelected(selectedProvince, provinces.Cast<dynamic>().ToList());
+			// cityId = GetIdFromSelected(selectedCity, cities.Cast<dynamic>().ToList());
+			// barangayId = GetIdFromSelected(selectedBarangay, barangays.Cast<dynamic>().ToList()); 
 
-			birthRegionId = GetIdFromSelected(selectedBirthRegion, regions.Cast<dynamic>().ToList());
-			birthProvinceId = GetIdFromSelected(selectedBirthProvince, provinces.Cast<dynamic>().ToList());
-			birthCityId = GetIdFromSelected(selectedBirthCity, cities.Cast<dynamic>().ToList());
+			// birthRegionId = GetIdFromSelected(selectedBirthRegion, regions.Cast<dynamic>().ToList());
+			// birthProvinceId = GetIdFromSelected(selectedBirthProvince, provinces.Cast<dynamic>().ToList());
+			// birthCityId = GetIdFromSelected(selectedBirthCity, cities.Cast<dynamic>().ToList());
 
-			Account userAccount = await RegistrationService.RegisterAccount(accountTypeId, accountProductTypeId);
+			regionId = await RegistrationService.RegisterRegion(selectedRegion, regions);
+			provinceId = await RegistrationService.RegisterProvince(selectedProvince, provincesFromRegion);
+			cityId = await RegistrationService.RegisterCity(selectedCity, citiesFromProvince);
+			barangayId = await RegistrationService.RegisterBarangay(selectedBarangay, barangaysFromCity);
+
+			Console.WriteLine($"PLACE IDS {regionId} {provinceId} {cityId} {barangayId} ");
+
+			birthRegionId = await RegistrationService.RegisterRegion(selectedBirthRegion, birthRegions);
+			birthProvinceId = await RegistrationService.RegisterProvince(selectedBirthProvince, birthProvinces);
+			birthCityId = await RegistrationService.RegisterCity(selectedBirthCity, birthCities);
+
+			Console.WriteLine($"BIRTH PLACE IDS {birthRegionId} {birthProvinceId} {birthCityId}");
+
 			Name UserName = await RegistrationService.RegisterName(userFirstName, userMiddleName, userLastName, userSuffix);
 			Name FatherName = await RegistrationService.RegisterName(fatherFirstName, fatherMiddleName, fatherLastName, fatherSuffix);
 			Name MotherName = await RegistrationService.RegisterName(motherFirstName, motherMiddleName, motherLastName, motherSuffix);
-			Name BeneficiaryName = await RegistrationService.RegisterName(beneficiaryFirstName, beneficiaryMiddleName, beneficiaryLastName, beneficiarySuffix);
+			// Name BeneficiaryName = await RegistrationService.RegisterName(beneficiaryFirstName, beneficiaryMiddleName, beneficiaryLastName, beneficiarySuffix);
 
-			UserAuth userAuth = await RegistrationService.RegisterUserAuth(userName, email, password);
+			Console.WriteLine($"NAMES: {UserName.NameId} {FatherName.NameId} {MotherName.NameId}");
+
 			BirthInfo UserBirthInfo = await RegistrationService.RegisterBirthInfo(birthDate, birthCityId, birthProvinceId, birthRegionId);
 			Address UserAddress = await RegistrationService.RegisterAddress(houseNo, street, barangayId, cityId, provinceId, regionId, postalCode);
+
+			Console.WriteLine($"BIRTH INFO AND ADDRESS : {UserBirthInfo.BirthInfoId} {UserAddress.AddressId}");
 
 			string religionToSave = selectedRegion == "others" ? customReligion : selectedReligion;
 			Religion UserReligion = await RegistrationService.RegisterReligion(religionToSave);
 
+			Console.WriteLine($"RELIGION {UserReligion.ReligionId}");
 
+
+			Account userAccount = await RegistrationService.RegisterAccount(accountTypeId, accountProductTypeId);
+			UserAuth userAuth = await RegistrationService.RegisterUserAuth(userName, email, password);
+			await RegistrationService.SyncUserAuthAndAccount(userAuth.UserAuthId, userAccount.AccountId);
+
+			Console.WriteLine($"ACCOUNT AND AUTH: {userAccount.AccountId} {userAuth.UserAuthId}");
 
 			UserInfo UserInfo = await RegistrationService.RegisterUserInfo(
 				userAuth.UserAuthId,
@@ -956,10 +1098,13 @@
 				contactNumber,
 				Occupation,
 				taxIdentificationNumber,
-				selectedCivilStatus,
-				profilePicture,
-				governmentId
+				selectedCivilStatus
+				// profilePicture,
+				// governmentId
 				);
+
+			Console.WriteLine($"UserInfo: {UserInfo.UserInfoId}");
+
 			NavigationManager.NavigateTo("/PendingApproval");
 		}
 		catch (MissingFieldException ex)

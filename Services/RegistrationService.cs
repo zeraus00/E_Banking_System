@@ -345,9 +345,9 @@ namespace Services
             string contactNumber,
             string Occupation,
             string taxIdentificationNumber,
-            string civilStatus,
-            byte[] profilePicture,
-            byte[] governmentId
+            string civilStatus
+            //byte[] profilePicture,
+            //byte[] governmentId
             ) 
         {
             if (string.IsNullOrWhiteSpace(contactNumber)) 
@@ -384,9 +384,9 @@ namespace Services
                 .WithContactNumber(contactNumber)
                 .WithOccupation(Occupation)
                 .WithTaxIdentificationNumber(taxIdentificationNumber)
-                .WithCivilStatus(civilStatus)
-                .WithProfilePicture(profilePicture)
-                .WithGovernmentId(governmentId);
+                .WithCivilStatus(civilStatus);
+                //.WithProfilePicture(profilePicture)
+                //.WithGovernmentId(governmentId);
 
             UserInfo UserInfo = UserInfoBuilder.Build();
 
@@ -413,7 +413,7 @@ namespace Services
             }
 
             DateTime creationDate = DateTime.UtcNow.Date;
-            string accountNumber = GenerateAccountNumber(creationDate, accountProductTypeId);
+            string accountNumber = GenerateAccountNumber(creationDate, accountTypeId, accountProductTypeId);
             string accountName = GenerateAccountName(accountTypeId, accountProductTypeId);
 
             var accountBuilder = new AccountBuilder();
@@ -436,9 +436,29 @@ namespace Services
             }
         }
 
-        private string GenerateAccountNumber(DateTime creationDate, int accountProductTypeId)
+        public async Task SyncUserAuthAndAccount(int userAuthId, int accountId)
         {
-            return $"{accountProductTypeId}{creationDate:yyMMdd}{Random.Shared.Next(100000, 100000)}";
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                var userAuthRepo = new UserAuthRepository(dbContext);
+                var accountRepo = new AccountRepository(dbContext);
+
+                var userAuthQuery = userAuthRepo.ComposeQuery(includeAccounts: true);
+                var accountQuery = accountRepo.Query.IncludeUsersAuth().GetQuery();
+
+                UserAuth userAuth = (await userAuthRepo.GetUserAuthByIdAsync(userAuthId, userAuthQuery))!;
+                Account account = (await accountRepo.GetAccountByIdAsync(accountId, accountQuery))!;
+
+                userAuth.Accounts.Add(account);
+                account.UsersAuth.Add(userAuth);
+
+                await dbContext.SaveChangesAsync();
+            }
+        }
+
+        private string GenerateAccountNumber(DateTime creationDate, int accountTypeId, int accountProductTypeId)
+        {
+            return $"{accountProductTypeId}{accountTypeId}{creationDate:yMMdd}{Random.Shared.Next(1000, 10000)}";
         }
         private string GenerateAccountName(int accountTypeId, int accountProductTypeId)
         {
