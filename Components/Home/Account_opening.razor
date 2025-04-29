@@ -279,7 +279,7 @@
 						<label class="text-light" >City</label>
 						<select class="form-select form-select-sm" value="@selectedBirthCity" required>
 							<option value="" disabled hidden>@cityPlaceHolder</option>
-							@foreach (var c in citiesFromProvince)
+							@foreach (var c in birthCities)
 							{
 								<option value="@c.code">@c.name</option>
 							}
@@ -710,7 +710,7 @@
 			if (cities is null) return;
 
 			//	Get the list of provinces with the selected region's region code
-			citiesFromProvince = cities.Where(c => c.provinceCode.ToString() == selectedBirthProvince).ToList();
+			birthCities = cities.Where(c => c.provinceCode.ToString() == selectedBirthProvince).ToList();
 			//	Default the selection to the first option each time provinces are updated.
 			if (citiesFromProvince.Any())
 			{
