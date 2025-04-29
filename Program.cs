@@ -31,6 +31,7 @@ builder.Services.AddRazorComponents()
 // Authentication Services
 builder.Services.AddHttpClient();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<AdminDataService>();
 builder.Services.AddScoped<AuthenticationStateProvider, NexusAuthenticationStateProvider>();
 builder.Services.AddScoped<ClaimsHelperService>();
 builder.Services.AddScoped<CredentialValidationService>();
@@ -42,6 +43,7 @@ builder.Services.AddScoped<SessionStorageService>();
 builder.Services.AddScoped<SignInService>();
 builder.Services.AddScoped<TransactionService>();
 builder.Services.AddScoped<UserDataService>();
+builder.Services.AddScoped<UserSessionService>();
 
 
 builder.Services.AddAntiforgery(options =>
@@ -53,9 +55,9 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     .AddCookie(options =>
     {
         options.Cookie.Name = "auth-token";
-        options.LoginPath = "/Login_page";
+        options.LoginPath = PageRoutes.LANDING_PAGE;
         options.Cookie.MaxAge = TimeSpan.FromMinutes(30);
-        options.AccessDeniedPath = "/"; // add access denied page here.
+        options.AccessDeniedPath = PageRoutes.LANDING_PAGE; // add access denied page here.
         // Ensure the cookie is only sent over HTTPS
         options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 
@@ -137,6 +139,7 @@ static async Task SeedData(IDbContextFactory<EBankingContext> contextFactory)
         AccountSeeder accountSeeders = new AccountSeeder(dbContext);
         AccountTypeSeeder accountTypeSeeders = new AccountTypeSeeder(dbContext);
         TransactionTypesSeeder transactionTypesSeeder = new TransactionTypesSeeder(dbContext);
+        LoanTypeSeeder loanTypeSeeder = new LoanTypeSeeder(dbContext);
         NameSeeder nameSeeders = new NameSeeder(dbContext);
         UserInfoSeeder userInfoSeeders = new UserInfoSeeder(dbContext);
 
@@ -149,6 +152,8 @@ static async Task SeedData(IDbContextFactory<EBankingContext> contextFactory)
         await accountSeeders.SeedAccounts();
         // Seed TransactionTypes
         await transactionTypesSeeder.SeedTransactionTypes();
+        // Seed LoanTypes
+        await loanTypeSeeder.SeedLoanTypes();
         // Seed roles
         await authSeeders.SeedRoles();
         // Seed users

@@ -27,6 +27,15 @@
                     </NavLink>
                 </Authorized>
             </AuthorizeView>
+            <AuthorizeView Roles = "@RoleNames.ADMINISTRATOR">
+                <Authorized>
+                    <NavLink class="nav-link" href="/Dashboard">
+                        <button type="button" class="nav-link button">
+                            Dashboard
+                        </button>
+                    </NavLink>
+                </Authorized>
+            </AuthorizeView>
             <AuthorizeView>
                 <NotAuthorized>
                     <NavLink class="nav-link" href="/Login_page">

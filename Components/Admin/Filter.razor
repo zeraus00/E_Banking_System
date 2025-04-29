@@ -1,0 +1,77 @@
+﻿@using E_BankingSystem.Components.Admin;
+
+<div class="d-flex align-items-center gap-3 flex-wrap">
+    <!-- Start Date -->
+    <div class="d-flex align-items-center gap-2">
+        <label class="text-light mb-0" style="white-space: nowrap;">Start Date</label>
+        <InputDate class="form-control form-control-sm" @bind-Value="StartDate" />
+    </div>
+
+    <!-- End Date -->
+    <div class="d-flex align-items-center gap-2">
+        <label class="text-light mb-0" style="white-space: nowrap;">End Date</label>
+        <InputDate class="form-control form-control-sm" @bind-Value="EndDate" />
+    </div>
+
+    <!-- Dynamic Type Form-Select (Dropdown) -->
+    <div class="d-flex align-items-center gap-3">
+        <label class="text-light mb-0" style="white-space: nowrap;">Type</label>
+        <select class="form-select form-select-sm" @bind="SelectedType">
+            @foreach (var option in SelectOptions)
+            {
+                <option value="@option">@option</option>
+            }
+        </select>
+    </div>
+
+    @if (ChildContent != null)
+    {
+        @ChildContent
+    }
+
+    <!-- Buttons -->
+    <button class="btn btn-primary btn-sm shadow-sm" @onclick="OnFilterClicked">Filter</button>
+    <button class="btn btn-danger btn-sm shadow-sm" @onclick="OnClearClicked">Clear Filter</button>
+</div>
+
+@code {
+    [Parameter]
+    public DateTime? StartDate { get; set; }
+
+    [Parameter]
+    public EventCallback<DateTime?> StartDateChanged { get; set; }
+
+    [Parameter]
+    public DateTime? EndDate { get; set; }
+
+    [Parameter]
+    public EventCallback<DateTime?> EndDateChanged { get; set; }
+
+    [Parameter]
+    public string SelectedType { get; set; }
+
+    [Parameter]
+    public EventCallback SelectedTypeChange { get; set; }
+
+    [Parameter]
+    public List<string> SelectOptions { get; set; } = new List<string>();
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public EventCallback OnFilter { get; set; }
+
+    [Parameter]
+    public EventCallback OnClear { get; set; }
+
+    private async Task OnFilterClicked()
+    {
+        await OnFilter.InvokeAsync();
+    }
+
+    private async Task OnClearClicked()
+    {
+        await OnClear.InvokeAsync();
+    }
+}

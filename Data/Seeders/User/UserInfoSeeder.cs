@@ -16,16 +16,15 @@ namespace Data.Seeders.User
         
         public async Task SeedUserInfos()
         {
-            UserInfo userInfo;
             Name name;
             Name fatherName;
             Name motherName;
             name = new NameBuilder()
-                    .WithFirstName("Bogart")
-                    .WithMiddleName("Mon")
-                    .WithLastName("Dela Mon")
-                    .WithSuffix("Jr.")
-                    .Build();
+                .WithFirstName("Bogart")
+                .WithMiddleName("Mon")
+                .WithLastName("Dela Mon")
+                .WithSuffix("Jr.")
+                .Build();
 
             fatherName = new NameBuilder()
                 .WithFirstName("Bogart")
@@ -40,6 +39,25 @@ namespace Data.Seeders.User
                 .WithLastName("Mon")
                 .Build();
 
+            Name adminName = new NameBuilder()
+                .WithFirstName("Hee Hee")
+                .WithMiddleName("Mon")
+                .WithLastName("Dela Mon")
+                .WithSuffix("VII")
+                .Build();
+
+            Name adminFatherName = new NameBuilder()
+                .WithFirstName("Hee Hee")
+                .WithMiddleName("Mon")
+                .WithLastName("Dela Mon")
+                .WithSuffix("VII")
+                .Build();
+
+            Name adminMotherName = new NameBuilder()
+                .WithFirstName("Po")
+                .WithMiddleName("Key")
+                .WithLastName("Mon")
+                .Build();
 
             if (!await _context.Names.AnyAsync())
             {
@@ -48,13 +66,16 @@ namespace Data.Seeders.User
                 await _nameRepository.AddAsync(name);
                 await _nameRepository.AddAsync(fatherName);
                 await _nameRepository.AddAsync(motherName);
+                await _nameRepository.AddAsync(adminName);
+                await _nameRepository.AddAsync(adminFatherName);
+                await _nameRepository.AddAsync(adminMotherName);
 
                 await _nameRepository.SaveChangesAsync();
             }
 
             if (!await _context.UsersInfo.AnyAsync())
             {
-                userInfo = new UserInfoBuilder()
+                UserInfo userInfo = new UserInfoBuilder()
                     .WithUserAuthId(2)
                     .WithUserNameId(name.NameId)
                     .WithAge(25)
@@ -67,7 +88,21 @@ namespace Data.Seeders.User
                     .WithCivilStatus("Oppressed")
                     .Build();
 
+                UserInfo adminInfo = new UserInfoBuilder()
+                    .WithUserAuthId(1)
+                    .WithUserNameId(adminName.NameId)
+                    .WithAge(56)
+                    .WithSex("Frying Pansexual")
+                    .WithFatherNameId(adminFatherName.NameId)
+                    .WithMotherNameId(adminMotherName.NameId)
+                    .WithContactNumber("09GAYGAYGAY")
+                    .WithOccupation("Bank Administrator")
+                    .WithTaxIdentificationNumber("123456789012")
+                    .WithCivilStatus("Committed to Relapsing")
+                    .Build();
+
                 await _userInfoRepository.AddAsync(userInfo);
+                await _userInfoRepository.AddAsync(adminInfo);
 
                 await _userInfoRepository.SaveChangesAsync();
             }

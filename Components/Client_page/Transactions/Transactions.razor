@@ -1,0 +1,180 @@
+﻿@page "/Transactions"
+@attribute [Authorize(Roles="User")]
+@rendermode InteractiveServer
+
+@inject NavigationManager NavigationManager
+@inject PageRedirectService redirectService
+@inject UserDataService userDataService
+@inject UserSessionService userSessionService
+
+<div class="main">
+    <header class="custom-card-clientpage clientheader py-4 align-items-start">
+        <div class="px-5">
+            <div class="d-flex align-items-center my-4">
+                <h2>Transactions</h2>
+            </div>
+        </div>
+    </header>
+
+    <div class="d-flex align-items-center gap-3 m-3 flex-wrap">
+
+        <div class="d-flex align-items-center gap-3">
+            <label class="text-light mb-0" style="white-space: nowrap;">Start Date</label>
+            <InputDate class="form-control" @bind-Value="startDate" />
+        </div>
+
+        <div class="d-flex align-items-center gap-3">
+            <label class="text-light mb-0" style="white-space: nowrap;">End Date</label>
+            <InputDate class="form-control" @bind-Value="endDate" />
+        </div>
+
+        <div class="d-flex align-items-center gap-3">
+            <label class="text-light mb-0" style="white-space: nowrap;">Transaction Type</label>
+            <select class="form-select" @bind="selectedTransactionType">
+                <option value="" disabled hidden>All</option>
+                <option value="0">All</option>
+                @foreach (var typeName in transactionTypes)
+                {
+                    <option value="@(transactionTypes.IndexOf(typeName) + 1)">@typeName</option>
+                }
+            </select>
+        </div>
+
+        <button class="btn btn-primary shadow-sm" @onclick="FilterTransactionsAsync">Filter</button>
+        <button class="btn btn-danger shadow-sm" @onclick="ClearFilterAsync">Clear Filter</button>
+
+    </div>
+
+    <hr class="m-3" style="border: 1px solid white; opacity: 100%;" />
+
+    <div class="table-responsive m-4 rounded">
+        <table class="table table-bordered text-center">
+            <thead class="table-info">
+                <tr>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Transaction Type</th>
+                    <th>Status</th>
+                    <th>Amount</th>
+                    <th>Receiver ID</th>
+                    <th>Sender ID</th>
+                    <th>Previous Balance</th>
+                    <th>New Balance</th>
+                    <th>Transaction Fee</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var transaction in transactionList)
+                {
+                    <tr class="bg-light">
+                        <td>@transaction.TransactionDate.ToString("MM/dd/yyyy")</td>
+                        <td>@transaction.TransactionTime.ToString(@"hh\:mm\:ss")</td>
+                        <td>@transaction.TransactionType.TransactionTypeName</td>
+                        <td>@transaction.Status</td>
+                        <td>@transaction.Amount.ToString("C0")</td>
+                        @* Set Receiver and Sender *@ 
+                        @if (@transaction.TransactionType.TransactionTypeId == (int)@TransactionTypes.Outgoing_Transfer)
+                        {
+                            <td>@transaction.CounterAccount.AccountName</td>
+                            <td>@transaction.MainAccount.AccountName</td>
+                        } else if (@transaction.TransactionType.TransactionTypeId == (int)@TransactionTypes.Incoming_Transfer)
+                        {
+                            <td>@transaction.MainAccount.AccountName</td>
+                            <td>@transaction.CounterAccount.AccountName</td>
+                        } else
+                        {
+                            <td>--</td>
+                            <td>--</td>
+                        }
+                        <td>@transaction.PreviousBalance</td>
+                        <td>@transaction.NewBalance</td>
+                        <td>@transaction.TransactionFee</td>
+                        @* <td>@transaction.Date.ToString("MM/dd/yyyy")</td>
+                        <td>@transaction.Time.ToString(@"hh\:mm\:ss")</td>
+                        <td>@transaction.AccountNo.ToString()</td>
+                        <td>@transaction.Type</td>
+                        <td>@transaction.Amount.ToString("C0")</td>
+                        <td>@(transaction.Type == "Transfer" ? transaction.ReceiverID : "--")</td>
+                        <td>@(transaction.Type == "Transfer" ? transaction.SenderID : "--")</td>
+                        <td>@transaction.previousBalance.ToString("C0")</td>
+                        <td>@transaction.newBalance.ToString("C0")</td>
+                        <td>@transaction.transactionFee.ToString("C0")</td> *@
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    private DateTime? startDate;
+    private DateTime? endDate;
+
+    private List<string> transactionTypes { get; set; } = new();
+    private string selectedTransactionType = "";
+
+    private List<Transaction> transactionList = new();
+
+    private int accountId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        //  Load transaction types
+        transactionTypes = TransactionTypeNames.TransactionTypeNameList;
+        await base.OnInitializedAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                //  Get user session details from session storage
+                //  Throws SessionNotFoundException if session is not found.
+                UserSession userSession = await userSessionService.GetUserSession();
+
+                accountId = userSession.ActiveAccountId;
+
+                //  Get transaction list from database.
+                await LoadTransactionsAsync();
+
+                StateHasChanged();
+            }
+            catch (SessionNotFoundException)
+            {
+                //  Redirect user to CLIENT_HOME if there is no ongoing user session.
+                redirectService.redirectWithNavigationManager(PageRoutes.CLIENT_HOME);
+            }
+        }
+    }
+
+    private async Task FilterTransactionsAsync()
+    {
+        //  Load the filtered transaction list from the database.
+        int transactionType = !string.IsNullOrWhiteSpace(selectedTransactionType) 
+            ? Convert.ToInt32(selectedTransactionType)
+            : 0;
+        transactionList = await userDataService.GetRecentAccountTransactionsAsync(
+            accountId,
+            transactionCount: 50,
+            transactionTypeId: transactionType,
+            transactionStartDate: startDate,
+            transactionEndDate: endDate
+        );
+    }
+
+    private async Task ClearFilterAsync()
+    {
+        startDate = null;
+        endDate = null;
+        selectedTransactionType = "";
+        await LoadTransactionsAsync();
+    }
+
+    private async Task LoadTransactionsAsync()
+    {
+        //  Load the transaction list associated with the accound id and take 50 entries from the list.
+        transactionList = await userDataService.GetRecentAccountTransactionsAsync(accountId, 50);
+    }
+}

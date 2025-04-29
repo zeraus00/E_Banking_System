@@ -1,10 +1,9 @@
 ﻿@page "/Settings_page"
 @attribute [Authorize(Roles="User")]
+@rendermode InteractiveServer
 
-@inject NavigationManager NavigationManager
-@inject ClaimsHelperService _claimsHelper
-@inject PageRedirectService _redirectService
-@inject UserDataService _userDataService
+@inject PageRedirectService redirectService
+@inject UserSessionService userSessionService
 
 <div class="page">
 	<main>
@@ -77,58 +76,35 @@
 
 @code 
 {
-	[CascadingParameter]
-	private Task<AuthenticationState> _authenticationState { get; set; } = default!;
+	private string email = "Loading...";
+	private string accountNumber = "Loading...";
+	private string clientName = "Loading...";
+	private string contactNo = "Loading...";
 
-	private ClaimsPrincipal? user;
-	private Account? Account;
-	private UserInfo? UserInfo;
-
-	private string email = string.Empty;
-	private int userInfoId;
-
-	private string accountNumber = string.Empty;
-	private string clientName = string.Empty;
-	private decimal currentBalance = 0.0m;
-	private string contactNo = string.Empty;
-
-
-	protected override async Task OnInitializedAsync()
+	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
-		//  Get Authentication State
-		AuthenticationState authState = await _authenticationState;
-		user = authState.User;
-
-		//	Retrieve email from claims
-		email = _claimsHelper.GetClaimValue(user, ClaimTypes.Name) ?? string.Empty;
-		//  Retrieve userAuth id from claims.
-		var userAuthId = Convert.ToInt32(_claimsHelper.GetClaimValue(user, ClaimTypes.NameIdentifier) ?? "0");
-
-		// //  Retrieve account id list from userAuthObject
-		// List<int>? accountIds = await _userDataService.GetAccountIdListAsync(userAuthId);
-
-		// //  Retreive account id from list.
-		// var accountId = accountIds?[0] ?? 5;
-
-		var accountId = await _userDataService.GetFirstAccountAsync(userAuthId) ?? 0;
-		
-		//	Retrieve userinfo id from claims
-		userInfoId = Convert.ToInt32(_claimsHelper.GetClaimValue(user, CustomClaimTypes.USERINFO_ID) ?? "0");
-
-		//  Retrieve account from db.
-		Account = await _userDataService.GetAccountAsync(accountId);
-		if (Account is not null)
+		if (firstRender)
 		{
-			accountNumber = Account.AccountNumber;
-			currentBalance = Account.Balance;
-		}
+			try
+			{
+				//	Get user session details from session storage.
+				//	Throws SessionNotFoundException if session is not found.
+				UserSession userSession = await userSessionService.GetUserSession();
 
-		//	Retrieve userinfo from db.
-		UserInfo = await _userDataService.GetUserInfoAsync(userInfoId);
-		if (UserInfo is not null) 
-		{
-			clientName = await _userDataService.GetUserFullName(UserInfo);
-			contactNo = UserInfo.ContactNumber;
+				//	Set display data.
+				email = userSession.CurrentUserEmail;
+				accountNumber = userSession.ActiveAccountNumber;
+				clientName = userSession.CurrentUserName;
+				contactNo = userSession.CurrentUserContact;
+
+				//	Reload component.
+				StateHasChanged();
+			}
+			catch (SessionNotFoundException)
+			{
+				//	Redirect to LOGGING_IN_PAGE if session is not found.
+				redirectService.redirectWithNavigationManager(PageRoutes.LOGGING_IN_PAGE);
+			}
 		}
 	}
 }

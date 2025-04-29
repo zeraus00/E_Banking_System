@@ -5,7 +5,7 @@
     <div class="carousel-wrapper px-5 py-2">
 
         <!-- Left Arrow -->
-        <button class="carousel-arrow left" @onclick="scrollLeft">
+        <button class="carousel-arrow left" @onclick="ScrollLeft">
             <i class="bi bi-chevron-left text-light"></i>
         </button>
 
@@ -16,13 +16,12 @@
                 foreach (var account in Accounts)
                 {
                     <AccountCard Account="account" ContactNumber="@(UserInfo?.ContactNumber ?? "09123456789")" IsEditable="IsEditable" />
-                    <AccountCard Account="account" ContactNumber="@(UserInfo?.ContactNumber ?? "09123456789")" IsEditable="IsEditable" />
                 }
             }
         </div>
 
         <!-- Right Arrow -->
-        <button class="carousel-arrow right" @onclick="scrollRight">
+        <button class="carousel-arrow right" @onclick="ScrollRight">
             <i class="bi bi-chevron-right text-light"></i>
         </button>
 
@@ -30,7 +29,7 @@
         <div class="carousel-pagination d-flex justify-content-center mt-3">
             @for (int i = 0; i < Accounts.Count; i++)
             {
-                <button class="dot mx-1" onclick="scrollToCard(@i)"></button>
+                <button class="dot mx-1 @(activeIndex == i ? "active" : "")" @onclick="@(() => ScrollToCard(i))"></button>
             }
         </div>
     </div>
@@ -72,6 +71,8 @@
 </script>
 
 @code {
+    private int activeIndex = 0;
+
     [Parameter]
     public List<Account> Accounts { get; set; } = new List<Account>();
 
@@ -81,15 +82,28 @@
     [Parameter]
     public bool IsEditable { get; set; } = false;
 
-    private void scrollLeft()
+    private async Task ScrollLeft()
     {
-        _ = JS.InvokeVoidAsync("scrollCarousel", "left");
+        if (Accounts.Count == 0) return;
+
+        activeIndex = (activeIndex - 1 + Accounts.Count) % Accounts.Count; 
+        await JS.InvokeVoidAsync("scrollToCard", activeIndex);
     }
 
-    private void scrollRight()
+    private async Task ScrollRight()
     {
-        _ = JS.InvokeVoidAsync("scrollCarousel", "right");
+        if (Accounts.Count == 0) return;
+
+        activeIndex = (activeIndex + 1) % Accounts.Count;
+        await JS.InvokeVoidAsync("scrollToCard", activeIndex);
     }
+
+    private async Task ScrollToCard(int index)
+    {
+        activeIndex = index; 
+        await JS.InvokeVoidAsync("scrollToCard", index); 
+    }
+
 
     [Inject]
     private IJSRuntime JS { get; set; } = default;

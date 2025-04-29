@@ -68,7 +68,7 @@
         user = authState.User;
 
         //  Retrieve userAuth id from claims.
-        var userAuthId = Convert.ToInt32(_claimsHelper.GetClaimValue(user, ClaimTypes.NameIdentifier) ?? "0");
+        var userAuthId = Convert.ToInt32(_claimsHelper.GetClaimValue(user, CustomClaimTypes.USERAUTH_ID) ?? "0");
 
         // //  Retrieve account id list from userAuthObject
         // List<int>? accountIds = await _userDataService.GetAccountIdListAsync(userAuthId);

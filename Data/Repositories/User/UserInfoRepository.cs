@@ -49,6 +49,7 @@ namespace Data.Repositories.User
                 includeUserAuth: true,
                 includeName: true,
                 includeBirthInfo: true,
+                includeAddress: true,
                 includeFatherName: true,
                 includeMotherName: true,
                 includeReligion: true
@@ -68,6 +69,7 @@ namespace Data.Repositories.User
             bool includeUserAuth = false,
             bool includeName = false,
             bool includeBirthInfo = false,
+            bool includeAddress = false,
             bool includeFatherName = false,
             bool includeMotherName = false,
             bool includeReligion = false
@@ -80,6 +82,7 @@ namespace Data.Repositories.User
             if (includeUserAuth) { query = query.Include(ui => ui.UserAuth); }
             if (includeName) { query = query.Include(ui => ui.UserName); }
             if (includeBirthInfo) { query = query.Include(ui => ui.BirthInfo); }
+            if (includeAddress) { query = query.Include(ui => ui.Address); }
             if (includeFatherName) { query = query.Include(ui => ui.FatherName); }
             if (includeMotherName) { query = query.Include(ui => ui.MotherName); }
             if (includeReligion) { query = query.Include(ui => ui.Religion); }

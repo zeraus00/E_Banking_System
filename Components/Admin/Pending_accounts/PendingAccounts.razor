@@ -1,0 +1,180 @@
+﻿@using Layout
+@page "/PendingAccounts"
+@layout AdminMainLayout
+@attribute [Authorize(Roles="Administrator")]
+@rendermode InteractiveServer
+
+@inject AdminDataService adminDataService
+@inject NavigationManager Navigation
+@inject PageRedirectService redirectService
+
+<div class="main">
+    <div class="dashboard-container">
+
+        <div class="top-bar mx-3">
+            <h2>Pending Accounts</h2>
+        </div>
+
+        <hr class="divider" />
+
+        <div class="d-flex align-items-center gap-3 m-3 flex-wrap">
+
+            <div class="d-flex align-items-center gap-3">
+                <input class="form-control form-control-sm" @bind="searchAccount" placeholder="Search specific account">
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+                <label class="text-light mb-0" style="white-space: nowrap;">Start Date</label>
+                <InputDate class="form-control form-control-sm" @bind-Value="startDate" />
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+                <label class="text-light mb-0" style="white-space: nowrap;">End Date</label>
+                <InputDate class="form-control form-control-sm" @bind-Value="endDate" />
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+                <label class="text-light mb-0" style="white-space: nowrap;">Account Type</label>
+                <select class="form-select form-select-sm" @bind="selectedType">
+                    <option value="">All</option>
+                    @foreach(var type in accountTypeList)
+                    {
+                        <option value="@accountTypeList.IndexOf(type)">type</option>
+                    }
+                </select>
+            </div>
+
+            <button class="btn btn-primary btn-sm shadow-sm" @onclick="FilterAsync">Filter</button>
+            <button class="btn btn-danger btn-sm shadow-sm" @onclick="ClearFilterAsync">Clear Filter</button>
+
+        </div>
+
+        <hr class="divider" />
+
+        <div class="table-responsive m-4 rounded">
+            <table class="table table-bordered text-center">
+                <thead class="table-info">
+                    <tr>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Name</th>
+                        <th>Account Type</th>
+                        <th>Operation</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var a in accountList)
+                    {
+                        <tr class="bg-light">
+                            <td>@a.DateOpened.ToString("MM/dd/yyyy")</td>
+                            <td>@a.AccountNumber</td>
+                            <td>@a.AccountName</td>
+                            <td>@a.AccountType.AccountTypeName</td>
+                            <td>
+                                <button class="btn btn-info btn-secondary btn-sm rounded text-dark shadow-sm" style="border: 2px solid cyan" @onclick="() => ViewDetails(a)">View</button>
+                            </td>
+                            <td class="text-secondary">@a.AccountStatusType.AccountStatusTypeName</td>
+                        </tr>
+                    }
+                    @* @foreach (var a in accounts)
+                    {
+                        <tr class="bg-light">
+                            <td>@a.Date.ToString("MM/dd/yyyy")</td>
+                            <td>@a.Time.ToString(@"hh\:mm\:ss")</td>
+                            <td>@a.Name</td>
+                            <td>@a.AccountType</td>
+                            <td>
+                                <button class="btn btn-info btn-secondary btn-sm rounded text-dark shadow-sm" style="border: 2px solid cyan" @onclick="() => ViewDetails(a)">View</button>
+                            </td>
+                            <td class="text-secondary">@a.Status</td>
+                        </tr>
+                    } *@
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<string> accountTypeList = new AccountTypeNames().AccountTypeNameList;
+
+    private DateTime? startDate;
+    private DateTime? endDate;
+    private string selectedType = "";
+    private string searchAccount = "";
+
+    private List<Account> accountList = new();
+
+    // private List<AccountRecord> allAccounts = new();
+    // private List<AccountRecord> accounts = new();
+
+    // Mockup data
+    protected override async Task OnInitializedAsync()
+    {
+        // allAccounts = new List<AccountRecord>
+        // {
+        //     new AccountRecord
+        //     {
+        //         Date = DateTime.Today.AddDays(-1),
+        //         Time = DateTime.Now.TimeOfDay,
+        //         Name = "Sample Name 1",
+        //         AccountType = "Personal Account",
+        //         Status = "Pending"
+        //     },
+
+        //     new AccountRecord
+        //     {
+        //         Date = DateTime.Today,
+        //         Time = DateTime.Now.TimeOfDay,
+        //         Name = "Sample Name 2",
+        //         AccountType = "Joint Account",
+        //         Status = "Pending"
+        //     }
+        // };
+        // accounts = allAccounts.ToList();
+        accountList = await adminDataService.FilterPendingAccountsAsync();
+    }
+
+    private async Task FilterAsync()
+    {
+        // accounts = allAccounts
+        //     .Where(t =>
+        //         (string.IsNullOrEmpty(searchAccount) || t.Name.Contains(searchAccount, StringComparison.OrdinalIgnoreCase)) &&
+        //         (!startDate.HasValue || t.Date >= startDate.Value.Date) &&
+        //         (!endDate.HasValue || t.Date <= endDate.Value.Date) &&
+        //         (string.IsNullOrEmpty(selectedType) || t.AccountType == selectedType)
+        //     ).ToList();
+        accountList = await adminDataService
+        .FilterPendingAccountsAsync(
+        searchAccount,
+        startDate,
+        endDate,
+        (int)AccountTypes.PersonalAccount
+    );
+    }
+
+    private async Task ClearFilterAsync()
+    {
+        startDate = null;
+        endDate = null;
+        selectedType = "";
+        searchAccount = "";
+        // accounts = allAccounts.ToList();
+        accountList = await adminDataService.FilterPendingAccountsAsync();
+    }
+
+    private void ViewDetails(Account account)
+    {
+        redirectService.redirectWithNavigationManager(PageRoutes.VIEW_DETAILS);
+    }
+
+    // public class AccountRecord
+    // {
+    //     public DateTime Date { get; set; }
+    //     public TimeSpan Time { get; set; }
+    //     public string Name { get; set; }
+    //     public string AccountType { get; set; }
+    //     public string Status { get; set; }
+    // }
+}

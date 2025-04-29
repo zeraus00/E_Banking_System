@@ -42,8 +42,8 @@ namespace Data.Seeders
 
                 var users = new List<(int roleId, string userName, string email, string password)>
                 {
-                    (1, "admin", "admin@gmail.com", "admin123"),
-                    (2, "user", "user@gmail.com", "user123"),
+                    (1, "nexusAdmin", "nexusAdmin@gmail.com", "nexusAdmin123"),
+                    (2, "bogartDelaMon", "bogartDelaMonJr@gmail.com", "bogartDelaMonJr123"),
                     (3, "employee", "employee@gmail.com", "employee123")
                 };
 
@@ -64,10 +64,13 @@ namespace Data.Seeders
 
                 await _context.SaveChangesAsync();
                 var account = await accountRepository.GetAccountByIdAsync(1);
+                var account2 = await accountRepository.GetAccountByIdAsync(2);
                 var userAuth2 = await userAuthRepository.GetUserAuthByIdAsync(2);
 
                 account!.UsersAuth.Add(userAuth2!);
+                account2!.UsersAuth.Add(userAuth2!);
                 userAuth2!.Accounts.Add(account!);
+                userAuth2!.Accounts.Add(account2!);
 
                 await _context.SaveChangesAsync();
             }

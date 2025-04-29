@@ -1,0 +1,82 @@
+﻿@page "/View_account"
+@using E_BankingSystem.Components.Client_page.Accounts
+@rendermode InteractiveServer
+@using Layout
+@layout AdminMainLayout
+
+<div class="page">
+    <main>
+        <div class="dashboard-container">
+
+            <!-- Top Bar -->
+            <div class="top-bar mx-3">
+                <h2>View Account</h2>
+            </div>
+
+            <hr class="divider" />
+
+            <!-- Card Section -->
+            <div class="card-section justify-content-start mx-4">
+                <!-- Account Card -->
+                <AccountCard Account="@mockupData" ContactNumber="09171234567" IsEditable="true" />
+
+                <!-- Data Card -->
+                <div class="data-card">
+                    <p class="label">Savings</p>
+                    <div class="amount">1,000,000</div>
+                </div>
+            </div>
+
+            <hr class="divider" />
+
+            <!-- Filter Bar -->
+            <div class="top-bar-right mb-4">
+                <div class="d-flex align-items-center gap-3 flex-wrap">
+                    <!-- Start Date -->
+                    <div class="d-flex align-items-center gap-3">
+                        <label class="text-light mb-0" style="white-space: nowrap;">Start Date</label>
+                        <input class="form-control form-control-sm"/>
+                    </div>
+
+                    <!-- End Date -->
+                    <div class="d-flex align-items-center gap-3">
+                        <label class="text-light mb-0" style="white-space: nowrap;">End Date</label>
+                        <input class="form-control form-control-sm"/>
+                    </div>
+
+                    <!-- Filter Buttons -->
+                    <button class="btn btn-primary btn-sm shadow-sm">Filter</button>
+                    <button class="btn btn-danger btn-sm shadow-sm">Clear Filter</button>
+                </div>
+            </div>
+
+            <div class="table-responsive m-4 rounded">
+                <table class="table table-bordered text-center">
+                    <thead class="table-info">
+                        <tr>
+                            <th>Account No.</th>
+                            <th>Name</th>
+                            <th>Account Type</th>
+                            <th>Operation</th>
+                            <th>Status</th>
+                            <th>Date of<br />Registration</th>
+                            <th>Time of<br />Registration</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+@code {
+    //mockup data (kinuha ko lang component sa AccountCard di ko alam pano kumuhang data shjdshj)
+    private Account mockupData = new Account
+    {
+        AccountName = "Savings Account",
+        AccountNumber = "123456789",
+        Balance = 10000.00m
+    };
+
+}

@@ -1,14 +1,15 @@
-﻿@page "/Deposit_confirmation"
-@attribute [Authorize(Roles = "User")]
+﻿@using Helpers;
 
+@page "/Deposit_confirmation"
+@attribute [Authorize(Roles = "User")]
 @rendermode InteractiveServer
+
 @inject NavigationManager NavigationManager
-@inject ClaimsHelperService _claimsHelper
-@inject PageRedirectService _redirectService
-@inject SessionStorageService _storageService
-@inject TransactionService _transactionService
-@inject UserDataService _userDataService
-@using Helpers;
+@inject PageRedirectService redirectService
+@inject SessionStorageService sessionStorageService
+@inject TransactionService transactionService
+@inject UserDataService userDataService
+@inject UserSessionService userSessionService
 
 <div class="page">
     <main>
@@ -21,7 +22,7 @@
             <section class="d-flex justify-content-end align-items-end mx-5 gap-2">
                 <p class="fs-6 fw-lighter align-text-bottom">Current Balance: </p>
                 <div class="custom-card-clientpage current-balance d-flex align-items-center justify-content-center">
-                    @currentBalance
+                    @FormatHelper.BalanceFormatter(currentBalance)
                 </div>
             </section>
         </header>
@@ -30,15 +31,15 @@
             <section class="card registration shadow-lg d-flex flex-column my-4 p-3">
                 <div class="mx-auto text-center p-4">
                     <h5>Deposit Amount</h5>
-                    <h1 class="fw-bolder py-3 mb-2">@depositAmount</h1>
+                    <h1 class="fw-bolder py-3 mb-2">@FormatHelper.BalanceFormatter(depositAmount)</h1>
                 </div>
 
                 <div class="d-flex justify-content-between mx-5">
                     <div class="d-flex flex-column text-start text-light mb-0">
                         <h5 class="mb-1 fw-bold">@clientName</h5>
-                        <p class="m-0">@FormatHelper.AccountNumberFormatter(accountNumber)</p>
-                        <p class="m-0">@date</p>
-                        <p class="m-0">@transactionNumber</p>
+                        <p class="m-0"><strong>Account No.:</strong> @FormatHelper.AccountNumberFormatter(accountNumber)</p>
+                        <p class="m-0"><strong>Date:</strong> @date</p>
+                        <p class="m-0"><strong>Transaction No.:</strong> @transactionNumber</p>
                     </div>
 
                     <section class="d-flex flex-column justify-content-end mt-3 w-25">
@@ -69,48 +70,14 @@
 
 @code
 {
-    [CascadingParameter]
-    private Task<AuthenticationState> authenticationState { get; set; } = default!;
-
-    private ClaimsPrincipal? user;
-    private Account? Account;
-
-    private int accountId;
-    private string accountNumber = string.Empty;
-    private string clientName = string.Empty;
+    private string accountNumber = "Loading...";
+    private string clientName = "Loading...";
     private decimal currentBalance = 0.00m;
     private decimal depositAmount = 0.00m;
-    private string transactionNumber = string.Empty;
+    private string transactionNumber = "Loading...";
     private DateTime? date;
 
     private string error = string.Empty;
-
-    protected override async Task OnInitializedAsync()
-    {
-        //  Get Authentication State
-        AuthenticationState authState = await authenticationState;
-        user = authState.User;
-
-        //  Retrieve userAuth id from claims.
-        var userAuthId = Convert.ToInt32(_claimsHelper.GetClaimValue(user, ClaimTypes.NameIdentifier) ?? "0");
-
-        // //  Retrieve account id list from userAuthObject
-        // List<int>? accountIds = await _userDataService.GetAccountIdListAsync(userAuthId);
-
-        // //  Retreive account id from list.
-        // var accountId = accountIds?[0] ?? 5;
-
-        accountId = await _userDataService.GetFirstAccountAsync(userAuthId) ?? 0;
-
-        //  Retriev account from db.
-        Account = await _userDataService.GetAccountAsync(accountId);
-
-        if (Account is not null)
-        {
-            accountNumber = Account.AccountNumber;
-            clientName = Account.AccountName;
-        }
-    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender) 
     {
@@ -118,11 +85,14 @@
         {
             try 
             {
-                //  Fetch transaction session details from session storage.
-                //  Throws SessionNotFoundException if sesion is not found.
-                TransactionSession transactionSession = await _storageService.FetchSessionAsync<TransactionSession>(SessionSchemes.DEPOSIT_SESSION);
+                //  Fetch user and transaction session details from session storage.
+                //  Throws SessionNotFoundException if session is not found.
+                UserSession userSession = await userSessionService.GetUserSession();
+                TransactionSession transactionSession = await sessionStorageService.FetchSessionAsync<TransactionSession>(SessionSchemes.DEPOSIT_SESSION);
 
                 //  Set display data.
+                accountNumber = userSession.ActiveAccountNumber;
+                clientName = userSession.ActiveAccountName;
                 currentBalance = transactionSession.CurrentBalance;
                 depositAmount = transactionSession.Amount;
                 date = transactionSession.TransactionDate;
@@ -133,8 +103,8 @@
             }
             catch (SessionNotFoundException)
             {
-                //  Redirect user to client home if there is no ongoing transaction session.
-                _redirectService.redirectWithNavigationManager(PageRoutes.CLIENT_HOME);
+                //  Redirect user to CLIENT_HOME if they try to access the page without an ongoing transaction session.
+                redirectService.redirectWithNavigationManager(PageRoutes.CLIENT_HOME);
             }
         }
     }
@@ -144,10 +114,10 @@
         try
         {
             //  Process deposit transaction.
-            await _transactionService.ProcessTransactionAsync(SessionSchemes.DEPOSIT_SESSION);
+            await transactionService.ProcessTransactionAsync(SessionSchemes.DEPOSIT_SESSION);
 
-            //  Redirect to deposit receipt page.
-            _redirectService.redirectWithNavigationManager(PageRoutes.DEPOSIT_RECEIPT);
+            //  Redirect to DEPOSIT_RECEIPT page.
+            redirectService.redirectWithNavigationManager(PageRoutes.DEPOSIT_RECEIPT);
         } catch (AccountNotFoundException)
         {
             error = "Error resolving database. Please try again later.";
@@ -157,8 +127,9 @@
     private async Task CancelDeposit()
     {
         //  Persist cancelled transaction to database and delete transaction details from session.
-        await _storageService.DeleteSessionAsync(SessionSchemes.DEPOSIT_SESSION);
+        await sessionStorageService.DeleteSessionAsync(SessionSchemes.DEPOSIT_SESSION);
 
-        _redirectService.redirectWithNavigationManager(PageRoutes.CLIENT_HOME);
+        //  Redirect to CLIENT_HOME.
+        redirectService.redirectWithNavigationManager(PageRoutes.CLIENT_HOME);
     }
 }

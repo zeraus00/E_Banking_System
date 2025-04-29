@@ -1,0 +1,32 @@
+﻿@inherits LayoutComponentBase
+@inject NavigationManager NavManager
+@inject IWebHostEnvironment Env
+
+<!-- Top NavBar -->
+<div class="nav-horizontal">
+    <NavLink href="/" class="nav-link">
+        <img class="logo mx-5" src="/nexus_banking.png" alt="Logo" />
+    </NavLink>
+</div>
+
+<!-- Side NavBar + Main Content Wrapper-->
+<div class="body-wrapper">
+    @if (!HideSidebar)
+    {
+        <AdminNavMenu />
+    }
+    <div class="main-content">
+        @Body
+    </div>
+</div>
+
+<div id="blazor-error-ui">
+    An unhandled error has occurred.
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>
+
+@code {
+    private bool HideSidebar => 
+    NavManager.Uri.Contains("/Logout");
+}

@@ -3,13 +3,12 @@
 
 @page "/Login_page"
 @* @rendermode InteractiveServer *@
+
 @inject NavigationManager NavigationManager
-@inject IJSRuntime JS
-@inject HttpClient http
-@inject ClaimsHelperService _claimsHelper
-@inject CredentialValidationService _validationService
-@inject PageRedirectService _redirectService
-@inject SignInService _signInService
+@inject ClaimsHelperService claimsHelperService
+@inject CredentialValidationService credentialValidationService
+@inject PageRedirectService redirectService
+@inject SignInService signInService
 @layout PlainLayout
 
 <EditForm Model="_loginModel" OnValidSubmit="LogInAsync" FormName="LogInForm">
@@ -108,6 +107,8 @@
 	[CascadingParameter]
 	private Task<AuthenticationState> authenticationState { get; set; } = default!;
 
+	private ClaimsPrincipal? user;
+
 	[SupplyParameterFromForm]
 	public LogInViewModel _loginModel { get; set; } = new();
 
@@ -133,10 +134,13 @@
 
 	protected override async Task OnInitializedAsync() 
 	{
+		//	Get user authentication state.
 		AuthenticationState authState = await authenticationState;
-		ClaimsPrincipal? user = authState.User;
-		if (_claimsHelper.IsAuthenticated(user)) {
-			_redirectService.RedirectBasedOnRole(user);
+		user = authState.User;
+
+		//	If already authenticated, redirect user based on role.
+		if (claimsHelperService.IsAuthenticated(user)) {
+			redirectService.RedirectBasedOnRole(user);
 		}
 	}
 
@@ -148,23 +152,22 @@
 			//  Validate the credentials.
 			var email = (_loginModel.Email ?? string.Empty).Trim();
 			var password = (_loginModel.Password ?? string.Empty).Trim();
-			var userAuth = await _validationService.TryValidateUserAsync(email, password);
+			var userAuth = await credentialValidationService.TryValidateUserAsync(email, password);
 			if (userAuth == null)
 			{
 				//  Handle failed validation
 				//  Redirect to log in page.
 				error = "Invalid Username or Password";
-				redirectUrl = _redirectService.GetRedirectToLogInPage();
-				_redirectService.redirectWithHttpContext(redirectUrl);
+				redirectUrl = redirectService.GetRedirectToLogInPage();
+				redirectService.redirectWithHttpContext(redirectUrl);
 				return;
 			}
 
 			//  Handle Sign In logic.
-			await _signInService.TrySignInAsync(userAuth);
+			await signInService.TrySignInAsync(userAuth);
 
-			//	Redirect based on role.
-			redirectUrl = _redirectService.GetRedirectBasedOnRole(userAuth.RoleId);
-			_redirectService.redirectWithHttpContext(redirectUrl);
+			//	Redirect to logging in page.
+			redirectService.redirectWithHttpContext(PageRoutes.LOGGING_IN_PAGE);
 
 			return;
 		}
@@ -172,8 +175,9 @@
 		{
 			Console.WriteLine("ERRORRRR: " + ex.Message);
 
-			var redirectUrl = _redirectService.GetRedirectToLogInPage();
-			_redirectService.redirectWithHttpContext(redirectUrl);
+			//	Redirect to log in page.
+			var redirectUrl = redirectService.GetRedirectToLogInPage();
+			redirectService.redirectWithHttpContext(redirectUrl);
 			return;
 		}
 

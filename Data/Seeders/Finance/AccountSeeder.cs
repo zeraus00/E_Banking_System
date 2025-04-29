@@ -23,7 +23,17 @@ namespace Data.Seeders.Finance
                     .WithAccountStatus((int)AccountStatusTypes.Active)
                     .WithBalance(696969)
                     .Build();
+                var account2 = new AccountBuilder()
+                        .WithAccountType((int)AccountTypes.JointAccount)
+                        .WithAccountProductTypeId((int)AccountProductTypes.Savings)
+                        .WithAccountNumber("222333444ABC")
+                        .WithAccountName("Bogart Dela Mon Jr.")
+                        .WithAccountStatus((int)AccountStatusTypes.Active)
+                        .WithBalance(100000)
+                        .Build();
+
                 await _accountRepository.AddAsync(account);
+                await _accountRepository.AddAsync(account2);
                 await _accountRepository.SaveChangesAsync();
             }
         }

@@ -18,9 +18,21 @@ namespace Data.Configurations.Finance
                 .ValueGeneratedOnAdd();
 
             //  LoanTypeName (Required; MaxLength=20)
-            LoanTypes.Property(lt => lt.LoanTypeName)
+            LoanTypes
+                .Property(lt => lt.LoanTypeName)
                 .IsRequired()
                 .HasMaxLength(20);
+
+            //  InterestRatePerAnnum (Required; Decimal(5, 2))
+            LoanTypes
+                .Property(lt => lt.InterestRatePerAnnum)
+                .HasColumnType("DECIMAL (5, 2)")
+                .IsRequired();
+
+            //  LoanTermInMonths (Required)
+            LoanTypes
+                .Property(lt => lt.LoanTermInMonths)
+                .IsRequired();
 
             /*
              *  Relationships

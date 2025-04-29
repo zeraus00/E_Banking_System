@@ -1,0 +1,106 @@
+﻿@rendermode InteractiveServer
+
+@inject PageRedirectService redirectService
+@inject UserSessionService userSessionService
+
+<AuthorizeView Roles="Administrator">
+    <Authorized>
+        <!-- Side NavBar Layout -->
+        <nav class="sidebar">
+            <!-- Top Row -->
+            <div class="top-row border-bottom">
+
+                <!-- Profile Picture Container (Draft) -->
+                <div class="profile-picture_container">
+                    <div class="profile-placeholder"></div>
+                </div>
+
+                <div class="text-light mt-3">
+                    <p class="m-0 p-0">@fullName</p>
+                    <p style="font-size: small;">@email</p>
+                </div>
+
+            </div>
+
+            <!-- Sidebar Navigation Links (Middle Row)-->
+            <div class="position-relative" onclick="document.querySelector('.toggler').click()">
+                <p class="position-absolute text-light top-0 start-0 mx-4 my-3 fw-lighter" style="font-size: 0.75rem;">ADMIN</p>
+                <div class="middle-row border-bottom">
+                    <nav class="flex-column">
+                        <div class="nav-item px-3 pt-5">
+                            <NavLink class="nav-link" href="/Dashboard" Match="NavLinkMatch.All">Dashboard</NavLink>
+                        </div>
+                        <div class="nav-item px-3">
+                            <NavLink class="nav-link lh-sm" href="/PendingAccounts">Pending Accounts</NavLink>
+                        </div>
+                        <div class="nav-item px-3">
+                            <NavLink class="nav-link" href="Manage_accounts">Manage Accounts</NavLink>
+                        </div>
+                        <div class="nav-item px-3">
+                            <NavLink class="nav-link" href="#">Transactions</NavLink>
+                        </div>
+                        <div class="nav-item px-3">
+                            <NavLink class="nav-link lh-sm" href="#">Loans</NavLink>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Sidebar Navigation Links (Bottom Row) -->
+            <div class="position-relative" onclick="document.querySelector('.toggler').click()">
+                <p class="position-absolute text-light top-0 start-0 mx-4 my-3 fw-lighter" style="font-size: 0.75rem;">OTHERS</p>
+                <div class="bottom-row">
+                    <nav class="flex-column">
+                        <div class="nav-item px-3 pt-5">
+                            <NavLink class="nav-link" href="#" Match="NavLinkMatch.All">Settings</NavLink>
+                        </div>
+                        <div class="nav-item px-3">
+                            <button class="nav-link" @onclick="LogOutAsync"> Logout</button>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+
+        </nav>
+    </Authorized>    
+</AuthorizeView>
+        
+
+@code {
+    private AdminSession adminSession { get; set; } = default!;
+
+    private string fullName { get; set; } = "Loading...";
+    private string email { get; set; } = "Loading...";
+
+    public async Task LogOutAsync()
+    {
+        await userSessionService.EndSession();
+
+        redirectService.redirectWithNavigationManager(PageRoutes.LOG_OUT_PAGE);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                //  Get admin session details from session storage.
+                //  Throws SessionNotFoundException if not session is found.
+                adminSession = await userSessionService.GetAdminSession();
+
+                //  Set display data.
+                fullName = adminSession.FullName;
+                email = adminSession.Email;
+
+                //  Reload component.
+                StateHasChanged();
+            }
+            catch (SessionNotFoundException)
+            {
+                //  Redirect user to LOGGING_IN_PAGE if no session is found.
+                redirectService.redirectWithNavigationManager(PageRoutes.LOGGING_IN_PAGE);
+            }
+        }
+    }
+}

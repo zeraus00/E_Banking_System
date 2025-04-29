@@ -1,0 +1,158 @@
+﻿@page "/Dashboard"
+@rendermode InteractiveServer
+@attribute [Authorize(Roles="Administrator")]
+
+@inject AdminDataService adminDataService
+@inject PageRedirectService redirectService
+@inject UserSessionService userSessionService
+@using Layout
+@layout AdminMainLayout
+
+<div class="page">
+    <main>
+        <div class="dashboard-container">
+
+            <!-- Top Bar -->
+            <div class="top-bar mx-3">
+                <h2>Admin Dashboard</h2>
+            </div>
+
+            <hr class="divider" />
+
+            <div class="top-bar-right mb-4">
+                <div class="d-flex align-items-center gap-3 flex-wrap">
+                    <!-- Start Date -->
+                    <div class="d-flex align-items-center gap-3">
+                        <label class="text-light mb-0" style="white-space: nowrap;">Start Date</label>
+                        <InputDate class="form-control form-control-sm" @bind-Value="startDate" />
+                    </div>
+
+                    <!-- End Date -->
+                    <div class="d-flex align-items-center gap-3">
+                        <label class="text-light mb-0" style="white-space: nowrap;">End Date</label>
+                        <InputDate class="form-control form-control-sm" @bind-Value="endDate" />
+                    </div>
+
+                    <!-- Filter Buttons -->
+                    <button class="btn btn-primary btn-sm shadow-sm" @onclick="FilterAsync">Filter</button>
+                    <button class="btn btn-danger btn-sm shadow-sm" @onclick="ClearFilterAsync">Clear Filter</button>
+                </div>
+            </div>
+
+            <hr class="divider" />
+
+            <!-- Card Section -->
+            <div class="card-section justify-content-center mx-4">
+                <!-- Withdraw Card -->
+                <div class="data-card">
+                    <h3>Withdrawals</h3>
+                    <p class="number">@withdrawalCount</p>
+                    <div class="card-footer">
+                        <div class="footer-item">
+                            <i class="icon-calendar"></i> <span class="text-danger">▼ 3%</span>
+                        </div>
+                        <div class="footer-item">
+                            <i class="icon-calendar"></i> <span class="text-success">▲ 4%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Deposits Card -->
+                <div class="data-card">
+                    <h3>Deposits</h3>
+                    <p class="number">@depositCount</p>
+                    <div class="card-footer">
+                        <div class="footer-item">
+                            <i class="icon-calendar"></i> <span class="text-danger">▼ 3%</span>
+                        </div>
+                        <div class="footer-item">
+                            <i class="icon-calendar"></i> <span class="text-success">▲ 4%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Empty Cards -->
+                <div class="data-card"></div>
+                <div class="data-card"></div>
+
+            </div>
+
+            <!-- Line Chart Section -->
+            <div class="chart-section">
+                <h3>Template Line Chart</h3>
+
+                <!-- Insert chart component here -->
+                <div class="chart-placeholder">
+                    <!-- Placeholder for now -->
+                    <p>Chart placeholder</p>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+</div>
+
+@code {
+    private AdminSession adminSession { get; set; } = default!;
+
+    private DateTime? startDate = null;
+    private DateTime? endDate = null;
+
+    private List<Transaction> transactionList { get; set; } = new();
+    private Dictionary<int, int> transactionCounts { get; set; } = new();
+
+    private int withdrawalCount;
+    private int depositCount;
+
+    protected override async Task OnInitializedAsync()
+    {
+        //  Get transaction list.
+        transactionList = await adminDataService.GetTransactionListAsync();
+        this.GetTransactionCounts();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                //  Get admin session details from session storage.
+                //  Throws SessionNotFoundException if no session is found.
+                adminSession = await userSessionService.GetAdminSession();
+
+                //  Reload component.
+                StateHasChanged();
+            }
+            catch (SessionNotFoundException)
+            {
+                redirectService.redirectWithNavigationManager(PageRoutes.LOGGING_IN_PAGE);
+            }
+        }
+    }
+
+    private async Task FilterAsync()
+    {
+        Console.WriteLine($"Filtering accounts from {startDate} to {endDate}");
+        transactionList = await adminDataService.GetTransactionListAsync(startDate, endDate);
+        this.GetTransactionCounts();
+    }
+
+    private async Task ClearFilterAsync()
+    {
+        startDate = null;
+        endDate = null;
+        transactionList = await adminDataService.GetTransactionListAsync();
+        this.GetTransactionCounts();
+        Console.WriteLine("Filter cleared");
+    }
+
+    private void GetTransactionCounts()
+    {
+        //  Get transaction counts.
+        transactionCounts = adminDataService.GetTransactionCounts(transactionList);
+        withdrawalCount = transactionCounts[(int)TransactionTypes.Withdrawal];
+        depositCount = transactionCounts[(int)TransactionTypes.Deposit];
+    }
+}

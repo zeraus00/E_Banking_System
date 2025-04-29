@@ -1,10 +1,12 @@
 ﻿@page "/Accounts"
 @attribute [Authorize(Roles = "User")]
+@rendermode InteractiveServer
 
 @inject NavigationManager NavigationManager
-@inject ClaimsHelperService _claimsHelper
-@inject UserDataService _userDataService
-@rendermode InteractiveServer
+@inject ClaimsHelperService claimsHelperService
+@inject PageRedirectService redirectService
+@inject UserDataService userDataService
+@inject UserSessionService userSessionService
 
 <div class="page">
     <main>
@@ -59,7 +61,7 @@
     private Task<AuthenticationState> authenticationState { get; set; } = default!;
 
     private ClaimsPrincipal? user;
-    private List<Account>? accounts = new();
+    private List<Account> accounts = new();
     private UserInfo? userInfo;
     private bool IsEditable { get; set; } = false; // Default to view mode
 
@@ -70,12 +72,32 @@
         user = authState.User;
 
         // Retrieve ids from claims
-        var userAuthId = Convert.ToInt32(_claimsHelper.GetClaimValue(user, ClaimTypes.NameIdentifier) ?? "0");
-        var userInfoId = Convert.ToInt32(_claimsHelper.GetClaimValue(user, CustomClaimTypes.UserInfoId) ?? "0");
+        var userInfoId = Convert.ToInt32(claimsHelperService.GetClaimValue(user, CustomClaimTypes.USERINFO_ID) ?? "0");
 
-        // Retrieve account list
-        accounts = await _userDataService.GetAccountListAsync(userAuthId);
-        userInfo = await _userDataService.GetUserInfoAsync(userInfoId);
+        //  Retrieve user info from db.
+        userInfo = await userDataService.TryGetUserInfoAsync(userInfoId);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                //  Get user session details from session storage.
+                UserSession userSession = await userSessionService.GetUserSession();
+
+                //  Get list of accounts from database.
+                //  Returns empty list of no accounts are found.
+                accounts = await userDataService.GetAccountListAsync(userSession.UserAccountIdList);
+
+                StateHasChanged();
+            }
+            catch (SessionNotFoundException)
+            {
+                redirectService.redirectWithNavigationManager(PageRoutes.LOGGING_IN_PAGE);
+            }
+        }
     }
 
     private void ToggleEdit()

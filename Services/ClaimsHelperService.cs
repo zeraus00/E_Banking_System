@@ -49,12 +49,50 @@ namespace Services
 
             return new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, userAuth.UserAuthId.ToString()),
-                new Claim(ClaimTypes.Name, userAuth.Email),
+                new Claim(CustomClaimTypes.USERAUTH_ID, userAuth.UserAuthId.ToString()),
                 new Claim(ClaimTypes.Role, userAuth.Role.RoleName),
                 new Claim(CustomClaimTypes.ROLE_ID, roleId),
                 new Claim(CustomClaimTypes.USERINFO_ID, userInfoId)
             };
+        }
+        /// <summary>
+        /// Get user id from the claims.
+        /// </summary>
+        /// <param name="user">The claims principal.</param>
+        /// <returns></returns>
+        /// <exception cref="NullReferenceException">Thrown if claim is null.</exception>
+        public int GetUserAuthId(ClaimsPrincipal user)
+        {
+            string? claimValue = this.GetClaimValue(user, CustomClaimTypes.USERAUTH_ID);
+            return claimValue is not null 
+                ? Convert.ToInt32(claimValue) 
+                : throw new NullReferenceException($"Claim: {CustomClaimTypes.USERAUTH_ID} is null.");
+        }
+        /// <summary>
+        /// Get role id from the claims.
+        /// </summary>
+        /// <param name="user">The claims principal.</param>
+        /// <returns></returns>
+        /// <exception cref="NullReferenceException">Thrown if claim is null.</exception>
+        public int GetRoleId(ClaimsPrincipal user)
+        {
+            string? claimValue = this.GetClaimValue(user, CustomClaimTypes.ROLE_ID);
+            return claimValue is not null
+                ? Convert.ToInt32(claimValue)
+                : throw new NullReferenceException($"Claim: {CustomClaimTypes.ROLE_ID} is null.");
+        }
+        /// <summary>
+        /// Get userinfo id from the claims.
+        /// </summary>
+        /// <param name="user">The claims principal.</param>
+        /// <returns></returns>
+        /// <exception cref="NullReferenceException">Thrown if claim is null.</exception>
+        public int GetUserInfoId(ClaimsPrincipal user)
+        {
+            string? claimValue = this.GetClaimValue(user, CustomClaimTypes.USERINFO_ID);
+            return claimValue is not null
+                ? Convert.ToInt32(claimValue)
+                : throw new NullReferenceException($"Claim: {CustomClaimTypes.USERINFO_ID} is null.");
         }
 
         /// <summary>
@@ -72,7 +110,7 @@ namespace Services
         /// Checks if the user is authenticated.
         /// </summary>
         /// <param name="user">The ClaimsPrincipal.</param>
-        /// <returns>True if user is authenticated.</returns>
+        /// <returns>True if user is authenticated. False otherwise, or if user or Identity is null.</returns>
         public bool IsAuthenticated(ClaimsPrincipal? user)
         {
             return user?.Identity?.IsAuthenticated == true;

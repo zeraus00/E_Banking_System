@@ -1,12 +1,11 @@
 ﻿@page "/Withdraw_amount"
 @attribute [Authorize(Roles="User")]
-
 @rendermode InteractiveServer
-@inject ClaimsHelperService _claimsHelper
-@inject PageRedirectService _redirectService
-@inject UserDataService _userDataService
-@inject TransactionService _transactionService
-@inject PageRedirectService _redirectService
+
+@inject PageRedirectService redirectService
+@inject TransactionService transactionService
+@inject UserDataService userDataService
+@inject UserSessionService userSessionService
 @using Helpers;
 
 <div class="page">
@@ -20,23 +19,37 @@
             <section class="d-flex justify-content-end align-items-end mx-5 gap-2">
                 <p class="fs-6 fw-lighter align-text-bottom">Current Balance: </p>
                 <div class="custom-card-clientpage current-balance d-flex align-items-center justify-content-center">
-                    @currentBalance
+                    @FormatHelper.BalanceFormatter(currentBalance)
                 </div>
             </section>
         </header>
 
         <div class="container">
             <section class="card registration shadow-lg d-flex flex-column mt-4 p-3">
+
+                @if (error.Length > 0)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <strong>@error</strong>
+                    </div>
+                }
+
                 <h3 class="mx-3 my-3 ">Enter Withdrawal Amount</h3>
                 <div class="input-group px-4 mb-4">
-                    <span class="input-group-text fs-2">$</span>
-                    <input type="number" class="form-control form-control-custom form-control-lg fs-2" placeholder="000-000" @bind="withdrawAmount"/>
+                    <span class="input-group-text fs-2">₱</span>
+                    <input 
+                    type="number" 
+                    class="form-control form-control-custom form-control-lg fs-2" 
+                    placeholder="0.00" 
+                    @bind="withdrawAmount" 
+                    @onfocus="ClearDefaultValue" 
+                    @onblur="SetDefaultValue"/>
                 </div>
 
                 <div class="d-flex justify-content-between mx-5">
                     <div class="d-flex flex-column text-start mb-0">
                         <h5 class="mb-1">@clientName</h5>
-                        <p class="mb-0">@FormatHelper.AccountNumberFormatter(accountNumber)</p>
+                        <p class="mb-0"><strong>Account No.:</strong>@FormatHelper.AccountNumberFormatter(accountNumber)</p>
                     </div>
 
                     <div class="text-end mt-3 w-25">
@@ -56,47 +69,63 @@
 </div>
 
 @code {
-    [CascadingParameter]
-    private Task<AuthenticationState> authenticationState { get; set; } = default!;
-
-    private ClaimsPrincipal? user;
-    private Account? Account;
-
     private int accountId;
-    private string accountNumber = string.Empty;
-    private string clientName = string.Empty;
+    private string accountNumber = "Loading...";
+    private string clientName = "Loading...";
     private decimal currentBalance = 0.0m;
 
-    private decimal withdrawAmount = 0.00m;
+    private decimal? withdrawAmount = null;
 
     private string error = string.Empty;
 
-
-    protected override async Task OnInitializedAsync() 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        //  Get Authentication State
-        AuthenticationState authState = await authenticationState;
-        user = authState.User;
-
-        //  Retrieve userAuth id from claims.
-        var userAuthId = Convert.ToInt32(_claimsHelper.GetClaimValue(user, ClaimTypes.NameIdentifier) ?? "0");
-
-        // //  Retrieve account id list from userAuthObject
-        // List<int>? accountIds = await _userDataService.GetAccountIdListAsync(userAuthId);
-
-        // //  Retreive account id from list.
-        // var accountId = accountIds?[0] ?? 5;
-
-        accountId = await _userDataService.GetFirstAccountAsync(userAuthId) ?? 0;
-
-        //  Retriev account from db.
-        Account = await _userDataService.GetAccountAsync(accountId);
-
-        if (Account is not null) 
+        if (firstRender)
         {
-            accountNumber = Account.AccountNumber;
-            clientName = Account.AccountName;
-            currentBalance = Account.Balance;
+            try
+            {
+                //  Get user session details from session storage.
+                //  Throws SessionNotFoundException is session is not found.
+                UserSession userSession = await userSessionService.GetUserSession();
+
+                //  Set display data.
+                accountId = userSession.ActiveAccountId;
+                accountNumber = userSession.ActiveAccountNumber;
+                clientName = userSession.ActiveAccountName;
+
+                //  Get Account from database.
+                //  Throws AccountNotFoundException if account is not found.
+                Account Account = await userDataService.GetAccountAsync(accountId);
+                currentBalance = Account.Balance;
+
+                StateHasChanged();
+            }
+            catch (SessionNotFoundException)
+            {
+                //  Redirect to LOGGING_IN_PAGE
+                redirectService.redirectWithNavigationManager(PageRoutes.LOGGING_IN_PAGE);
+            }
+            catch (AccountNotFoundException)
+            {
+                currentBalance = 0.00m;
+                error = "Error resolving database. Please try again later";
+            }
+        }
+    }
+
+    private void ClearDefaultValue()
+    {
+        if (!withdrawAmount.HasValue)
+        {
+            withdrawAmount = null;
+        }
+    }
+
+    private void SetDefaultValue()
+    {
+        if (!withdrawAmount.HasValue || withdrawAmount == 0.00m)
+        {
+            withdrawAmount = null;
         }
     }
 
@@ -104,11 +133,17 @@
     {
         try
         {
-            //  Save transaction session to session storage.
-            await _transactionService.InitiateTransaction(SessionSchemes.WITHDRAW_SESSION, accountId, (int)TransactionTypes.Withdrawal, withdrawAmount);
+            if (withdrawAmount is > 0)
+            {
+                //  Save transaction session to session storage.
+                await transactionService.InitiateTransaction(SessionSchemes.WITHDRAW_SESSION, accountId, (int)TransactionTypes.Withdrawal, withdrawAmount.Value);
 
-            //  Redirect to withdraw confirmation page.
-            _redirectService.redirectWithNavigationManager(PageRoutes.WITHDRAW_CONFIRMATION);
+                //  Redirect to WITHDRAW_CONFIRMATION page.
+                redirectService.redirectWithNavigationManager(PageRoutes.WITHDRAW_CONFIRMATION);
+            } else
+            {
+                error = "Withdraw amount must be greater than 0.";
+            }
         } 
         catch (AccountNotFoundException) 
         {
