@@ -13,7 +13,7 @@
 <div class="body-wrapper">
     @if (!HideSidebar)
     {
-            <NavMenu />
+        <AdminNavMenu />
     }
     <div class="main-content">
         @Body
@@ -28,6 +28,5 @@
 
 @code {
     private bool HideSidebar => 
-    NavManager.Uri.Contains("/Logout") ||
-    NavManager.Uri.Contains("/PendingApproval");
+    NavManager.Uri.Contains("/Logout");
 }
