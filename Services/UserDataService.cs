@@ -270,24 +270,34 @@ namespace Services
         public async Task<Account> GetAccountAsync(
             int accountId,
             bool includeAccountType = false,
-            bool includeLinkedBeneficiaryAccount = false,
-            bool includeLinkedSourceAccounts = false,
             bool includeUsersAuth = false,
             bool includeTransactions = false,
-            bool includeLoans = false,
-            bool includeLoanTransactions = false)
+            bool includeLoans = false
+            )
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
+                //  Declare repository dependencies.
                 AccountRepository accountRepo = new AccountRepository(dbContext);
-                IQueryable<Account> query = accountRepo.ComposeQuery(
-                    includeAccountType,
-                    includeLinkedBeneficiaryAccount,
-                    includeLinkedSourceAccounts,
-                    includeUsersAuth,
-                    includeTransactions,
-                    includeLoans,
-                    includeLoanTransactions);
+
+                //  Get query.
+                IQueryable<Account>? query = null;
+
+
+                //  Check if there are no includes.
+                bool noIncludes = !(includeAccountType && includeUsersAuth && includeTransactions && includeLoans);
+                if (!noIncludes)
+                {
+                    query = accountRepo.Query
+                        .IncludeAccountType(includeAccountType)
+                        .IncludeUsersAuth(includeUsersAuth)
+                        .IncludeMainTransactions(includeTransactions)
+                        .IncludeLoans(includeLoans)
+                        .GetQuery();
+                }
+
+                //  Return the result of the query.
+                //  Throws AccountNotFoundException if no account is found.
                 return (await accountRepo.GetAccountByIdAsync(accountId, query)) ?? throw new AccountNotFoundException(accountId);
             }
         }
@@ -295,30 +305,47 @@ namespace Services
         /// <summary>
         /// Asynchronously retrieves an account by its account number with the specified includes.
         /// </summary>
-        /// <param name="accountNumber">The account number.</param>
-        /// <returns>The account if found.</returns>
-        /// <exception cref="AccountNotFoundException">Thrown if no account is found.</exception>
+        /// <param name="accountNumber">The account number to search for.</param>
+        /// <param name="includeAccountType">Specifies whether to include the associated AccountType. Default is false.</param>
+        /// <param name="includeUsersAuth">Specifies whether to include the associated UsersAuth. Default is false.</param>
+        /// <param name="includeTransactions">Specifies whether to include the associated transactions. Default is false.</param>
+        /// <param name="includeLoans">Specifies whether to include the associated loans. Default is false.</param>
+        /// <returns>
+        /// The account if found, otherwise throws an <see cref="AccountNotFoundException"/>.
+        /// </returns>
+        /// <exception cref="AccountNotFoundException">
+        /// Thrown if no account with the specified account number is found.
+        /// </exception>
         public async Task<Account?> GetAccountAsync(
             string accountNumber,
             bool includeAccountType = false,
-            bool includeLinkedBeneficiaryAccount = false,
-            bool includeLinkedSourceAccounts = false,
             bool includeUsersAuth = false,
             bool includeTransactions = false,
-            bool includeLoans = false,
-            bool includeLoanTransactions = false)
+            bool includeLoans = false
+            )
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
+                //  Declare repository dependencies.
                 AccountRepository accountRepo = new AccountRepository(dbContext);
-                IQueryable<Account> query = accountRepo.ComposeQuery(
-                    includeAccountType,
-                    includeLinkedBeneficiaryAccount,
-                    includeLinkedSourceAccounts,
-                    includeUsersAuth,
-                    includeTransactions,
-                    includeLoans,
-                    includeLoanTransactions);
+
+                //  Get query.
+                IQueryable<Account>? query = null;
+
+                //  Check if there are no includes.
+                bool hasIncludes = (includeAccountType || includeUsersAuth || includeTransactions || includeLoans);
+                if (hasIncludes)
+                {
+                    query = accountRepo.Query
+                        .IncludeAccountType(includeAccountType)
+                        .IncludeUsersAuth(includeUsersAuth)
+                        .IncludeMainTransactions(includeTransactions)
+                        .IncludeLoans(includeLoans)
+                        .GetQuery();
+                }
+
+                //  Return the result of the query.
+                //  Throws AccountNotFoundException if no account is found.
                 return (await accountRepo.GetAccountByAccountNumberAsync(accountNumber, query)) ?? throw new AccountNotFoundException(accountNumber);
             }
         }

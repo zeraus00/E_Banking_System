@@ -1,4 +1,8 @@
-﻿namespace Data.Repositories
+﻿using Microsoft.EntityFrameworkCore;
+using static Data.Repositories.Finance.AccountRepository;
+using System.Linq;
+
+namespace Data.Repositories
 {
     /// <summary>
     /// Abstract class for Repository classes
@@ -48,5 +52,42 @@
         {
             await _context.Set<T>().AddAsync(entity);
         }
+
+        public abstract class CustomQuery<TEntity, TSelf> where TEntity : class where TSelf : CustomQuery<TEntity, TSelf>
+        {
+            protected IQueryable<TEntity> _query;
+
+            public CustomQuery(IQueryable<TEntity> query)
+            {
+                _query = query;
+            }
+
+            protected TSelf Include(Expression<Func<TEntity, object?>> navigationProperty) 
+            {
+                _query = _query.Include(navigationProperty);
+                return (TSelf)this;
+            }
+            protected TSelf OrderBy(Expression<Func<TEntity, object?>> field)
+            {
+                _query = _query.OrderBy(field);
+                return (TSelf)this;
+            }
+            protected TSelf OrderByDescending(Expression<Func<TEntity, object?>> field)
+            {
+                _query = _query.OrderByDescending(field);
+                return (TSelf)this;
+            }
+            protected TSelf WhereCondition(Expression<Func<TEntity, bool>> condition)
+            {
+                _query = _query.Where(condition);
+                return (TSelf)this;
+            }
+            public IQueryable<TEntity> GetQuery()
+            {
+                return _query;
+            }
+        }
     }
 }
+
+

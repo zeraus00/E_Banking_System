@@ -1,4 +1,5 @@
-﻿using Data.Models.Finance;
+﻿using System.Linq;
+using Data.Models.Finance;
 using Exceptions;
 using Microsoft.Identity.Client;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
@@ -12,7 +13,11 @@ namespace Data.Repositories.Finance
     /// <param name="context"></param>
     public class AccountRepository : Repository
     {
-        public AccountRepository(EBankingContext context) : base(context) { }
+        public AccountQuery Query { get; private set; }
+        public AccountRepository(EBankingContext context) : base(context) 
+        {
+            Query = new AccountQuery(context.Accounts.AsQueryable());
+        }
 
         #region Read Methods
         /// <summary>
@@ -68,58 +73,42 @@ namespace Data.Repositories.Finance
         }
 
         /// <summary>
-        /// Builds an IQueryable for querying the Accounts table that includes all related entities.
+        /// Provides a strongly-typed query builder for the <see cref="Account"/> entity,
+        /// enabling fluent filtering and inclusion of related navigation properties.
         /// </summary>
-        /// <returns>An IQueryable of Account with all includes.</returns>
-        public IQueryable<Account> QueryIncludeAll()
+        /// <remarks>
+        /// Use this class within the repository layer to compose complex database queries 
+        /// by chaining methods that filter by account properties or include related entities.
+        /// </remarks>
+        public class AccountQuery : CustomQuery<Account, AccountQuery>
         {
-            return this.ComposeQuery(
-                includeAccountType: true,
-                includeLinkedBeneficiaryAccount: true,
-                includeLinkedSourceAccounts: true,
-                includeUsersAuth: true,
-                includeTransactions: true,
-                includeLoans: true,
-                includeLoanTransactions: true
-                );
-        }
-        
-        /// <summary>
-        /// Composes an <see cref="IQueryable{Account}"/> for retrieving account entities with optional related data.
-        /// </summary>
-        /// <param name="includeAccountType">Whether to include the associated <c>AccountType</c> entity.</param>
-        /// <param name="includeLinkedBeneficiaryAccount">Whether to include the linked beneficiary account.</param>
-        /// <param name="includeLinkedSourceAccounts">Whether to include linked source accounts.</param>
-        /// <param name="includeUsersAuth">Whether to include user authentication information associated with the account.</param>
-        /// <param name="includeTransactions">Whether to include related transactions.</param>
-        /// <param name="includeLoans">Whether to include loans associated with the account.</param>
-        /// <param name="includeLoanTransactions">Whether to include loan transactions associated with the account.</param>
-        /// <returns>
-        /// A queryable sequence of <see cref="Account"/> entities, with specified navigation properties included as needed.
-        /// </returns>
-        public IQueryable<Account> ComposeQuery(
-            bool includeAccountType = false,
-            bool includeLinkedBeneficiaryAccount = false,
-            bool includeLinkedSourceAccounts = false,
-            bool includeUsersAuth = false,
-            bool includeTransactions = false,
-            bool includeLoans = false,
-            bool includeLoanTransactions = false
-            )
-        {
-            var query = _context
-                .Accounts
-                .AsQueryable();
-
-            if (includeAccountType) { query = query.Include(a => a.AccountType); }
-            if (includeLinkedBeneficiaryAccount) { query = query.Include(a => a.LinkedBeneficiaryAccount); }
-            if (includeLinkedSourceAccounts) { query = query.Include(a => a.LinkedSourceAccounts); }
-            if (includeUsersAuth) { query = query.Include(a => a.UsersAuth); }
-            if (includeTransactions) { query = query.Include(a => a.MainTransactions); }
-            if (includeLoans) { query = query.Include(a => a.Loans); }
-            if (includeLoanTransactions) { query = query.Include(a => a.LoanTransactions); }
-
-            return query;
+            public AccountQuery(IQueryable<Account> account) : base(account) { }
+            public AccountQuery HasAccountId(int? accountId) => WhereCondition(a => a.AccountId == accountId);
+            public AccountQuery HasAccountTypeId(int? accountTypeId) => WhereCondition(a => a.AccountTypeId == accountTypeId);
+            public AccountQuery HasAccountProductTypeId(int? accountProductTypeId) => WhereCondition(a => a.AccountProductTypeId == accountProductTypeId);
+            public AccountQuery HasAccountNumber(string? accountNumber) => WhereCondition(a => a.AccountNumber == accountNumber);
+            public AccountQuery ContainsAccountName(string? accountName) => WhereCondition(a => a.AccountName.ToUpper().Contains(accountName.ToUpper()));
+            public AccountQuery HasAccountStatusTypeId(int? accountStatusTypeId) => WhereCondition(a => a.AccountStatusTypeId == accountStatusTypeId);
+            public AccountQuery HasBalanceLessThanOrEqualTo(decimal? balance) => WhereCondition(a => a.Balance <= balance);
+            public AccountQuery HasBalanceGreaterThanOrEqualTo(decimal? balance) => WhereCondition(a => a.Balance >= balance);
+            public AccountQuery HasBeneficiaryAccountId(int? beneficiaryAccountId) => WhereCondition(a => a.LinkedBeneficiaryId == beneficiaryAccountId);
+            public AccountQuery HasOpenedOn(DateTime? dateOpened) => WhereCondition(a => a.DateOpened == dateOpened);
+            public AccountQuery HasOpenedOnOrBefore(DateTime? dateOpened) => WhereCondition(a => a.DateOpened <= dateOpened);
+            public AccountQuery HasOpenedOnOrAfter(DateTime? dateOpened) => WhereCondition(a => a.DateOpened >= dateOpened);
+            public AccountQuery HasClosedOn(DateTime? dateClosed) => WhereCondition(a => a.DateClosed == dateClosed);
+            public AccountQuery HasClosedOnOrBefore(DateTime? dateClosed) => WhereCondition(a => a.DateClosed <= dateClosed);
+            public AccountQuery HasClosedOnOrAfter(DateTime? dateClosed) => WhereCondition(a => a.DateClosed >= dateClosed);
+            public AccountQuery IncludeAccountType(bool include = true) => include ? Include(a => a.AccountType) : this;
+            public AccountQuery IncludeAccountProductType(bool include = true) => include ? Include(a => a.AccountProductType) : this;
+            public AccountQuery IncludeAccountStatusType(bool include = true) => include ? Include(a => a.AccountStatusType) : this;
+            public AccountQuery IncludeLinkedBeneficiaryAccount(bool include = true) => include ? Include(a => a.LinkedBeneficiaryAccount) : this;
+            public AccountQuery IncludeLinkedSourceAccounts(bool include = true) => include ? Include(a => a.LinkedSourceAccounts) : this;
+            public AccountQuery IncludeUsersAuth(bool include = true) => include ? Include(a => a.UsersAuth) : this;
+            public AccountQuery IncludeMainTransactions(bool include = true) => include ? Include(a => a.MainTransactions) : this;
+            public AccountQuery IncludeCounterTransactions(bool include = true) => include ? Include(a => a.CounterTransactions) : this;
+            public AccountQuery IncludeLoans(bool include = true) => include ? Include(a => a.Loans) : this;
+            public AccountQuery OrderByDateOpened() => OrderBy(a => a.DateOpened);
+            public AccountQuery OrderByDateOpenedDescending() => OrderByDescending(a => a.DateOpened);
         }
 
         #endregion Read Methods

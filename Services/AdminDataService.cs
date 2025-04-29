@@ -10,6 +10,64 @@ namespace Services
         public AdminDataService(IDbContextFactory<EBankingContext> contextFactory) : base(contextFactory) { }
 
         /// <summary>
+        /// Asynchronously filters and retrieves a list of pending accounts based on optional criteria.
+        /// </summary>
+        /// <param name="accountNumber">Optional account number to filter by. If empty or null, this filter is ignored.</param>
+        /// <param name="startDate">Optional start date to filter accounts opened on or after this date. If null, this filter is ignored.</param>
+        /// <param name="endDate">Optional end date to filter accounts opened on or before this date. If null, this filter is ignored.</param>
+        /// <param name="accountTypeId">Optional account type ID to filter by. Only applies if greater than zero.</param>
+        /// <returns>A list of accounts matching the specified filters.</returns>
+        public async Task<List<Account>> FilterPendingAccountsAsync(
+            string accountNumber = "",
+            DateTime? startDate = null,
+            DateTime? endDate = null,
+            int accountTypeId = 0
+            )
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                //  Declare repository dependencies.
+                var accountRepo = new AccountRepository(dbContext);
+
+                //  Filter the accounts.
+                var queryBuilder = accountRepo.Query;
+                //  Get only the pending accounts.
+                queryBuilder.HasAccountStatusTypeId((int)AccountStatusTypes.Pending);
+                queryBuilder.IncludeAccountType();
+                queryBuilder.IncludeAccountStatusType();
+                queryBuilder.OrderByDateOpenedDescending();
+
+                if (!string.IsNullOrWhiteSpace(accountNumber))
+                    queryBuilder.HasAccountNumber(accountNumber);
+                if (startDate is not null)
+                    queryBuilder.HasOpenedOnOrAfter(startDate);
+                if (endDate is not null)
+                    queryBuilder.HasOpenedOnOrBefore(endDate);
+                if (accountTypeId > 0)
+                {
+                    queryBuilder.HasAccountTypeId(accountTypeId);
+                }
+
+                //  Pagination
+                int pageNumber = 1;
+                int pageSize = 10;
+                List<Account> accountList = await queryBuilder
+                    .GetQuery()
+                    .Skip((pageNumber -1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                //  Mask the user's account number.
+                foreach (var account in accountList)
+                {
+                    account.AccountNumber = MaskAccountNumber(account.AccountNumber);
+                }
+
+                //  Get the query as list
+                return accountList;
+            }
+        }
+        /// <summary>
         /// Counts the number of transactions for each transaction type.
         /// </summary>
         /// <param name="transactionList">The list of <see cref="Transaction"/> objects to analyze.</param>
@@ -65,6 +123,11 @@ namespace Services
             }
         }
 
-        
+        private string MaskAccountNumber(string accountNumber)
+        {
+            string maskedPart = new string('*', accountNumber.Length - 4);
+            string visiblePart = accountNumber[^4..];
+            return maskedPart + visiblePart;
+        }
     }
 }
