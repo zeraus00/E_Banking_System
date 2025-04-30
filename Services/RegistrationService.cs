@@ -345,9 +345,9 @@ namespace Services
             string contactNumber,
             string Occupation,
             string taxIdentificationNumber,
-            string civilStatus
-            //byte[] profilePicture,
-            //byte[] governmentId
+            string civilStatus,
+            byte[] profilePicture,
+            byte[] governmentId
             ) 
         {
             if (string.IsNullOrWhiteSpace(contactNumber)) 
@@ -384,9 +384,9 @@ namespace Services
                 .WithContactNumber(contactNumber)
                 .WithOccupation(Occupation)
                 .WithTaxIdentificationNumber(taxIdentificationNumber)
-                .WithCivilStatus(civilStatus);
-                //.WithProfilePicture(profilePicture)
-                //.WithGovernmentId(governmentId);
+                .WithCivilStatus(civilStatus)
+                .WithProfilePicture(profilePicture)
+                .WithGovernmentId(governmentId);
 
             UserInfo UserInfo = UserInfoBuilder.Build();
 
