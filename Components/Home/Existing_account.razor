@@ -1,0 +1,129 @@
+﻿@page "/Existing_account"
+@rendermode InteractiveServer
+@inject NavigationManager NavigationManager
+@using Layout
+@layout PlainLayout
+
+<div class="page">
+	<main>
+
+		<!-- Registration Box -->
+		<div class="card forget_password mt-3 p-4 shadow-lg">
+			<div class="d-flex justify-content-between align-items-center">
+				<h3 class="fw-bold text-light">Create Online Account for an Existing Account</h3>
+
+				<!-- Close Button -->
+				<NavLink href="/">
+					<button class="btn-close" aria-label="Close"></button>
+				</NavLink>
+			</div>
+
+@* 			<!--to show the error in the UI-->
+			@if (!string.IsNullOrEmpty(error))
+			{
+				<div class="alert alert-danger" role="alert">@error</div>
+			} *@
+
+			<!-- Account Holder Details Border -->
+			<div class="d-flex align-items-center my-3">
+				<span class="text-light me-2">Enter Account Details</span>
+				<div class="flex-grow-1">
+					<hr class="m-0" style="border: 1px solid white; opacity: 100%;">
+				</div>
+			</div>
+
+
+			<div class="information_box">
+
+				<!-- Row 2 -->
+				<div class="row g-2 mt-2">
+
+					<!-- Account Number or Debit Card Number -->
+					<div class="col-10">
+						<label class="text-light">Account Number or Debit Card Number</label>
+						<input type="number" class="form-control form-control-sm" placeholder="12 or 16 digits">
+					</div>
+
+				</div>
+
+
+
+				<!-- Row 3 -->
+				<div class="row g-2 mt-2">
+
+					<!-- Age -->
+					<div class="col-2">
+						<label class="text-light">Age</label>
+						<input class="form-control form-control-sm" type="number" placeholder="Age" required>
+					</div>
+
+					<!-- Birth Date -->
+					<div class="col-4">
+						<label class="text-light">Birth Date</label>
+						<input class="form-control form-control-sm" type="date" required>
+					</div>
+
+				</div>
+
+@* 
+				<div class="row g-3 mt-3">
+					<!-- Upload Government ID -->
+					<div class="col-md-4">
+						<label class="text-light">Upload Government Valid ID (Front & Back)</label>
+
+						<!-- View Button -->
+						<div class="d-flex gap-2">
+							<input type="file" class="btn btn-light btn-sm w-75" required />
+							<button class="btn btn-outline-light">View</button>
+						</div>
+					</div>
+
+				</div> *@
+
+				<!-- Credentials Inputs -->
+				<div class="row g-2 mt-2">
+
+					<!-- Email -->
+					<div class="col-4">
+						<label class="text-light">Email</label>
+						<input type="email" class="form-control form-control-sm" placeholder="Email" required>
+					</div>
+
+					<!-- Contact No -->
+					<div class="col-4">
+						<label class="text-light">Contact No</label>
+						<input class="form-control form-control-sm" placeholder="Contact No" required>
+					</div>
+				</div>
+
+				<!-- Terms and Conditions Checkbox -->
+				<div class="form-check d-flex justify-content-end mt-3">
+					<input class="form-check-input mx-2" type="checkbox" id="termsAndConditions" required>
+					<label class="form-check-label text-light" for="termsAndConditions">
+						I accept the terms and conditions
+					</label>
+				</div>
+
+				<!-- Data Privacy Consent Checkbox -->
+				<div class="form-check d-flex justify-content-end mt-3">
+					<input class="form-check-input mx-2" type="checkbox" id="dataPrivacyConset" required>
+					<label class="form-check-label text-light" for="dataPrivacyConset">
+						I agree to the Data Privacy Consent
+					</label>
+				</div>
+
+				<!-- Register Button -->
+				<div class="text-end mt-3">
+					<button class="btn btn-primary btn-secondary">Submit Application</button>
+				</div>
+
+			</div>
+		</div>
+	</main>
+</div>
+
+
+
+@code {
+
+}
