@@ -19,19 +19,6 @@ namespace Services
     {
         public RegistrationService(IDbContextFactory<EBankingContext> contextFactory) : base(contextFactory) { }
 
-        public async Task RegisterAsync(int accountTypeId, int accountProductTypeId, string userFirstName, string? userMiddleName, string userLastName, string? userSuffix,
-                string fatherFirstName, string? fatherMiddleName, string fatherLastName, string? fatherSuffix,
-                string motherFirstName, string? motherMiddleName, string motherLastName, string? motherSuffix,
-                string beneficiaryFirstName, string? beneficiaryMiddleName, string beneficiaryLastName, string? beneficiarySuffix,
-                DateTime birthDate, int birthCityId, int birthProvinceId, int birthRegionId,
-                string houseNo, string street, int barangayId, int cityId, int provinceId, int regionId, int postalCode,
-                int age, string sex, string contactNumber, string Occupation, string taxIdentificationNumber, string civilStatus, string userReligion,
-                string username, string email, string password, byte[] profilePicture, byte[] governmentId
-            )
-        {
-        }
-
-
         public async Task<Name> RegisterName(string userFirstName, string? userMiddleName, string userLastName, string? userSuffix)
         {
 
@@ -305,6 +292,7 @@ namespace Services
             var UserAuthBuilder = new UserAuthBuilder()
                .WithRoleId((int)RoleTypes.User)
                .WithUserName(username)
+               .WithEmail(email)
                .WithPassword(password);
 
             UserAuth userAuth = UserAuthBuilder.Build();

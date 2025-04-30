@@ -10,7 +10,21 @@
     /// <param name="_context"></param>
     public class AddressRepository : Repository
     {
-        public AddressRepository(EBankingContext context) : base (context) { }
+        public AddressQuery Query { get; private set; }
+        public AddressRepository(EBankingContext context) : base (context) 
+        {
+            Query = new AddressQuery(context.Addresses.AsQueryable());
+        }
+
+        public class AddressQuery : CustomQuery<Address, AddressQuery>
+        {
+            public AddressQuery(IQueryable<Address> query) : base(query) { }
+            public AddressQuery HasAddressId(int? addressId) => WhereCondition(a => a.AddressId == addressId);
+            public AddressQuery IncludeRegion(bool include = true) => include ? Include(a => a.Region) : this;
+            public AddressQuery IncludeProvince(bool include = true) => include ? Include(a => a.Province) : this;
+            public AddressQuery IncludeCity(bool include = true) => include ? Include(a => a.City) : this;
+            public AddressQuery IncludeBarangay(bool include = true) => include ? Include(a => a.Barangay) : this;
+        } 
     }
 
     /// <summary>

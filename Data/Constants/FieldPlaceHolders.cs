@@ -6,5 +6,7 @@
         public const string PROVINCE_NAME_NOT_FOUND = "PROVINCE_NAME_NOT_FOUND";
         public const string CITY_NAME_NOT_FOUND = "CITY_NAME_NOT_FOUND";
         public const string BARANGAY_NAME_NOT_FOUND = "BARANGAY_NAME_NOT_FOUND";
+
+        public const string NAME_NOT_FOUND = "NAME_NOT_FOUND";
     }
 }

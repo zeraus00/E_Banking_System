@@ -10,9 +10,16 @@ namespace Data.Repositories.Auth
         public UserAuthRepository(EBankingContext context) : base(context) { }
 
         #region Read Methods
+
         /// <summary>
         /// Retrieves a UserAuth entry asynchronously by its primary key.
-        /// Optionally accepts a pre-composed IQueryable with desired includes (e.g., Role, Account).
+        /// </summary>
+        /// <param name="userAuthId">The primary key of the UserAuth entity.</param>
+        /// <returns>The UserAuth entity if found or null if not.</returns>
+        public async Task<UserAuth?> GetUserAuthByIdAsync(int userAuthId) => await GetById<UserAuth>(userAuthId);
+        /// <summary>
+        /// Retrieves a UserAuth entry asynchronously by its primary key.
+        /// Accepts a pre-composed IQueryable with desired includes (e.g., Role, Account).
         /// </summary>
         /// <param name="userAuthId">The primary key of the UserAuth entity.</param>
         /// <param name="query">
@@ -20,22 +27,7 @@ namespace Data.Repositories.Auth
         /// If null, a basic lookup using DbContext.Find is performed.
         /// </param>
         /// <returns>The UserAuth entity if found or null if not.</returns>
-        public async Task<UserAuth?> GetUserAuthByIdAsync(int userAuthId, IQueryable<UserAuth>? query = null)
-        {
-            UserAuth? userAuth;
-
-            if (query != null)
-            {
-                userAuth = await query.FirstOrDefaultAsync(ua => ua.UserAuthId == userAuthId);
-            }
-            else
-            {
-                userAuth = await _context
-                    .Set<UserAuth>()
-                    .FindAsync(userAuthId);
-            }
-            return userAuth;
-        }
+        public async Task<UserAuth?> GetUserAuthByIdAsync(int userAuthId, IQueryable<UserAuth> query) => await Get<UserAuth>(ua => ua.UserAuthId == userAuthId, query);
 
         /// <summary>
         /// Retrieves a UserAuth entry by UserName or Email asynchronously.

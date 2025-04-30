@@ -110,6 +110,7 @@
 </div>
 
 @code {
+
     private List<string> accountTypeList = new AccountTypeNames().AccountTypeNameList;
 
     private DateTime? startDate;
@@ -177,9 +178,16 @@
         accountList = await adminDataService.FilterPendingAccountsAsync();
     }
 
-    private void ViewDetails(Account account)
+    private async Task ViewDetails(Account account)
     {
-        redirectService.redirectWithNavigationManager(PageRoutes.VIEW_DETAILS);
+        try
+        {
+            await adminDataService.StorePendingAccountSession(account);
+            redirectService.redirectWithNavigationManager(PageRoutes.VIEW_DETAILS);
+        } catch (SessionNotFoundException)
+        {
+            redirectService.redirectWithNavigationManager(PageRoutes.DASHBOARD);
+        }
     }
 
     // public class AccountRecord

@@ -64,19 +64,69 @@ namespace Services
             {
                 UserInfoRepository userInfoRepo = new UserInfoRepository(dbContext);
 
-                IQueryable<UserInfo> query = userInfoRepo.ComposeQuery(
-                        includeUserAuth,
-                        includeUserName,
-                        includeBirthInfo,
-                        includeAddress,
-                        includeFatherName,
-                        includeMotherName,
-                        includeReligion
-                    );
+                var queryBuilder = userInfoRepo.Query;
+
+                if (includeUserAuth)
+                    queryBuilder.IncludeUserAuth();
+                if (includeUserName)
+                    queryBuilder.IncludeUserName();
+                if (includeBirthInfo)
+                    queryBuilder.IncludeBirthInfo();
+                if (includeAddress)
+                    queryBuilder.IncludeAddress();
+                if (includeFatherName)
+                    queryBuilder.IncludeFatherName();
+                if (includeMotherName)
+                    queryBuilder.IncludeMotherName();
+                if (includeReligion)
+                    queryBuilder.IncludeReligion();
+
+                var query = queryBuilder.GetQuery();
+                    
                 return (await userInfoRepo.GetUserInfoByIdAsync(userInfoId, query)) ?? throw new UserNotFoundException();
             }
         }
+        public async Task<Address> TryGetAddressAsync(int addressId)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                var addressRepo = new AddressRepository(dbContext);
 
+                var query = addressRepo.Query
+                    .HasAddressId(addressId)
+                    .IncludeRegion()
+                    .IncludeProvince()
+                    .IncludeCity()
+                    .IncludeBarangay()
+                    .GetQuery();
+
+                return await query.FirstOrDefaultAsync() ?? throw new NullReferenceException("NO SUCH ADDRESS");
+            }
+        }
+        public async Task<BirthInfo> TryGetBirthInfoAsync(int birthInfoId)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                var birthInfoRepo = new BirthInfoRepository(dbContext);
+                var query = birthInfoRepo
+                    .Query
+                    .HasBirthInfoId(birthInfoId)
+                    .IncludeRegion()
+                    .IncludeProvince()
+                    .IncludeCity()
+                    .GetQuery();
+
+                return await query.FirstOrDefaultAsync() ?? throw new NullReferenceException();
+            }
+        }
+        public async Task<Religion> TryGetReligionAsync(int religionId)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                var religionRepo = new ReligionRepository(dbContext);
+                return await religionRepo.GetReligionById(religionId) ?? throw new ArgumentNullException();
+            }
+        }
         /// <summary>
         /// Gets the user's full name from the UserInfo object.
         /// If the UserInfo does not include the Name navigation property, queries the database using
@@ -294,11 +344,13 @@ namespace Services
                         .IncludeMainTransactions(includeTransactions)
                         .IncludeLoans(includeLoans)
                         .GetQuery();
+
+                    return (await accountRepo.GetAccountByIdAsync(accountId, query)) ?? throw new AccountNotFoundException(accountId);
                 }
 
                 //  Return the result of the query.
                 //  Throws AccountNotFoundException if no account is found.
-                return (await accountRepo.GetAccountByIdAsync(accountId, query)) ?? throw new AccountNotFoundException(accountId);
+                return (await accountRepo.GetAccountByIdAsync(accountId)) ?? throw new AccountNotFoundException(accountId);
             }
         }
 

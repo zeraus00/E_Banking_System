@@ -9,6 +9,7 @@
         Closed = 5,
         Suspended = 6,
         Frozen = 7,
-        Restricted = 8
+        Restricted = 8,
+        Denied = 9
     }
 }

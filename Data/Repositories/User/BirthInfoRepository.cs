@@ -10,8 +10,22 @@
     /// <param name="_context"></param>
     public class BirthInfoRepository : Repository
     {
-        public BirthInfoRepository(EBankingContext context) : base(context) { }
+        public BirthInfoQuery Query { get; private set; }
 
+        public BirthInfoRepository(EBankingContext context) : base(context)
+        {
+            Query = new BirthInfoQuery(context.BirthInfos.AsQueryable());
+        }
+
+        public class BirthInfoQuery : CustomQuery<BirthInfo, BirthInfoQuery>
+        {
+            public BirthInfoQuery(IQueryable<BirthInfo> query) : base (query) { }
+
+            public BirthInfoQuery HasBirthInfoId(int? birthInfoId) => WhereCondition(bi => bi.BirthInfoId == birthInfoId);
+            public BirthInfoQuery IncludeRegion(bool include = true) => include ? Include(bi => bi.Region) : this;
+            public BirthInfoQuery IncludeProvince(bool include = true) => include ? Include(bi => bi.Province) : this;
+            public BirthInfoQuery IncludeCity(bool include = true) => include ? Include(bi => bi.City) : this;
+        }
     }
 
     /// <summary>

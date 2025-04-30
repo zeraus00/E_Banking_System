@@ -277,7 +277,45 @@ namespace Services
             }
 
         }
+        public async Task<object> GetAdminControlledSession(string sessionScheme, AdminSession? adminSession = null) 
+        {
+            try
+            {
+                if (adminSession is null)
+                    adminSession = await GetAdminSession();
 
+                var sessions = adminSession.Sessions;
+                return sessions.GetValueOrDefault(sessionScheme) ?? throw new AdminControlledSessionNotFound(sessionScheme);
+            }
+            catch (SessionNotFoundException)
+            {
+                throw;
+            }
+            catch (AdminControlledSessionNotFound)
+            {
+                throw;
+            }
+        }
+        public async Task EndAdminControlledSession(string sessionScheme) => await UpdateAdminControlledSession(sessionScheme, null);
+        public async Task UpdateAdminControlledSession(string sessionScheme, object? value)
+        {
+            try
+            {
+                AdminSession adminSession = await GetAdminSession();
+
+                adminSession.Sessions[sessionScheme] = value;
+
+                await _sessionStorage.StoreSessionAsync(SessionSchemes.ADMIN_SESSION, adminSession);
+            }
+            catch (SessionNotFoundException)
+            {
+                throw;
+            }
+            catch (AccountNotFoundException)
+            {
+                throw;
+            }
+        }
         /// <summary>
         /// End user session.
         /// </summary>

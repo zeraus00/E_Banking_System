@@ -64,17 +64,7 @@ namespace Data.Seeders.Finance
             if (!await _context.AccountStatusTypes.AnyAsync())
             {
                 var accountStatusTypeBuilder = new AccountStatusTypeBuilder();
-                var statusTypeList = new List<string>
-                {
-                    AccountStatusTypeNames.ACTIVE,
-                    AccountStatusTypeNames.PENDING,
-                    AccountStatusTypeNames.INACTIVE,
-                    AccountStatusTypeNames.DORMANT,
-                    AccountStatusTypeNames.CLOSED,
-                    AccountStatusTypeNames.SUSPENDED,
-                    AccountStatusTypeNames.FROZEN,
-                    AccountStatusTypeNames.RESTRICTED
-                };
+                var statusTypeList = AccountStatusTypeNames.AccountStatusTypeList;
 
                 foreach(var typeName in statusTypeList)
                 {

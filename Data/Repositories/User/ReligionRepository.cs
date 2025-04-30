@@ -3,6 +3,9 @@
     public class ReligionRepository : Repository
     {
         public ReligionRepository(EBankingContext context) : base(context) { }
+
+        public async Task<Religion?> GetReligionById(int religionId) => await GetById<Religion>(religionId);
+        public async Task<Religion?> GetReligionByName(string religionName) => await Get<Religion>(r => r.ReligionName == religionName);
     }
 
     /// <summary>

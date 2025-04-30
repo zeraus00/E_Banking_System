@@ -10,6 +10,7 @@
         public const string SUSPENDED = "SUSPENDED";
         public const string FROZEN = "FROZEN";
         public const string RESTRICTED = "RESTRICTED";
+        public const string DENIED = "DENIED";
 
         public static readonly List<string> AccountStatusTypeList = new()
         {
@@ -20,7 +21,8 @@
             CLOSED,
             SUSPENDED,
             FROZEN,
-            RESTRICTED
+            RESTRICTED,
+            DENIED
         };
     }
 }

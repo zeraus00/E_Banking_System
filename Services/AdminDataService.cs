@@ -1,14 +1,28 @@
 ﻿using Data;
+using Data.Constants;
 using Data.Enums;
+using Data.Repositories.Auth;
 using Data.Repositories.Finance;
+using Data.Repositories.User;
+using Exceptions;
+using ViewModels;
+using System.Text.Json;
 
 namespace Services
 {
     public class AdminDataService : Service
     {
+        private readonly UserDataService _userDataService;
+        private readonly UserSessionService _userSessionService;
+        public AdminDataService(IDbContextFactory<EBankingContext> contextFactory, UserDataService userDataService, UserSessionService userSessionService) : base(contextFactory) 
+        {
+            _userDataService = userDataService;
+            _userSessionService = userSessionService;
+        }
 
-        public AdminDataService(IDbContextFactory<EBankingContext> contextFactory) : base(contextFactory) { }
-
+        public async Task StorePendingAccountSession(Account account) => await _userSessionService.UpdateAdminControlledSession(SessionSchemes.PENDING_ACCOUNT_SESSION, account.AccountId);
+        public async Task<int> GetPendingAccountSession() => ((JsonElement)await _userSessionService.GetAdminControlledSession(SessionSchemes.PENDING_ACCOUNT_SESSION)).GetInt32();
+        public async Task DeletePendingAccountSession() => await _userSessionService.EndAdminControlledSession(SessionSchemes.PENDING_ACCOUNT_SESSION);
         /// <summary>
         /// Asynchronously filters and retrieves a list of pending accounts based on optional criteria.
         /// </summary>
@@ -67,6 +81,67 @@ namespace Services
                 return accountList;
             }
         }
+        public async Task<UserInfo> GetAccountPrimaryOwner(int accountId)
+        {
+            try
+            {
+                await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+                {
+                    var userAuthRepo = new UserAuthRepository(dbContext);
+                    var accountRepo = new AccountRepository(dbContext);
+                    var userInfoRepo = new UserInfoRepository(dbContext);
+                    var accountQuery = accountRepo
+                        .Query
+                        .IncludeUsersAuth()
+                        .GetQuery();
+                    Account account = (await accountRepo.GetAccountByIdAsync(accountId, accountQuery)) ?? throw new AccountNotFoundException(accountId);
+                    int userAuthId = account.UsersAuth.FirstOrDefault()?.UserAuthId ?? throw new UserNotFoundException();
+                    var userAuthQuery = userAuthRepo.ComposeQuery(includeUserInfo: true);
+                    UserInfo userInfo = (await userAuthRepo.GetUserAuthByIdAsync(userAuthId, userAuthQuery))?.UserInfo ?? throw new UserNotFoundException();
+
+                    var userInfoQuery = userInfoRepo
+                        .Query
+                        .IncludeUserName()
+                        .IncludeFatherName()
+                        .IncludeMotherName()
+                        .IncludeReligion()
+                        .GetQuery();
+
+                    return await userInfoRepo.GetUserInfoByIdAsync(userInfo.UserInfoId, userInfoQuery) ?? throw new UserNotFoundException();
+                }
+            }
+            catch (AccountNotFoundException ex)
+            {
+                Console.WriteLine("COULD NOT FETCH PRIMARY OWNER. " + ex.Message);
+                throw;
+            }
+            catch (UserNotFoundException ex)
+            {
+                Console.WriteLine("COULD NOT FETCH PRIMARY OWNER. " + ex.Message);
+                throw;
+            }
+            
+        }
+        public async Task UpdatePendingAccountStatus(int accountId, int newStatus)
+        {
+            try
+            {
+                await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+                {
+                    var accountRepo = new AccountRepository(dbContext);
+                    bool isAccountUpdated = await accountRepo.AccountStatusUpdateAsync(accountId, newStatus);
+                    if (!isAccountUpdated) throw new AccountNotFoundException(accountId);
+
+                    await accountRepo.SaveChangesAsync();
+                }
+            } 
+            catch (AccountNotFoundException ex)
+            {
+                Console.WriteLine($"ACCOUNT_STATUS_UPDATE_FAILED: {ex.Message}");
+                throw;
+            }
+        }
+
         /// <summary>
         /// Counts the number of transactions for each transaction type.
         /// </summary>
@@ -122,12 +197,13 @@ namespace Services
                 return transactionList;
             }
         }
-
         private string MaskAccountNumber(string accountNumber)
         {
             string maskedPart = new string('*', accountNumber.Length - 4);
             string visiblePart = accountNumber[^4..];
             return maskedPart + visiblePart;
         }
+
+
     }
 }

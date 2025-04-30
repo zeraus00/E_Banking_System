@@ -20,32 +20,8 @@ namespace Data.Repositories.Finance
         }
 
         #region Read Methods
-        /// <summary>
-        /// Retrieves an Account entry by its primary key asynchronously.
-        /// Optionally accepts a pre-composed IQueryable with desired includes.
-        /// </summary>
-        /// <param name="accountId">The primary key of the Account entity.</param>
-        /// <param name="query">
-        /// An optional IQueryable with includes already applied.
-        /// If null, a basic lookup using DbContext.Find is performed.
-        /// </param>
-        /// <returns>The Account entity if found or null if not.</returns>
-        public async Task<Account?> GetAccountByIdAsync(int accountId, IQueryable<Account>? query = null)
-        {
-            Account? account;
-            if (query != null)
-            {
-                account = await query.FirstOrDefaultAsync(a => a.AccountId == accountId);
-            }
-            else
-            {
-                account = await _context
-                    .Accounts
-                    .FindAsync(accountId);
-            }
-            return account;
-        }
-
+        public async Task<Account?> GetAccountByIdAsync(int accountId) => await GetById<Account>(accountId);
+        public async Task<Account?> GetAccountByIdAsync(int accountId, IQueryable<Account> query) => await Get<Account>(a => a.AccountId == accountId, query);
         /// <summary>
         /// Retrieves an Account entry asynchronously by its account number.
         /// Optionally accepts a pre-composed IQueryable with desired includes.
@@ -55,22 +31,7 @@ namespace Data.Repositories.Finance
         /// An optional IQueryable with includes already applied.
         /// </param>
         /// <returns>The Account entity if found or null if not.</returns>
-        public async Task<Account?> GetAccountByAccountNumberAsync(string accountNumber, IQueryable<Account>? query = null)
-        {
-            var trimmedAccountNumber = accountNumber.Trim();
-            Account? account;
-            if (query != null)
-            {
-                account = await query.FirstOrDefaultAsync(a => a.AccountNumber == accountNumber);
-            }
-            else
-            {
-                account = await _context
-                    .Accounts
-                    .FirstOrDefaultAsync(a => a.AccountNumber == accountNumber);
-            }
-            return account;
-        }
+        public async Task<Account?> GetAccountByAccountNumberAsync(string accountNumber, IQueryable<Account>? query = null) => await Get<Account>(a => a.AccountNumber == accountNumber, query);
 
         /// <summary>
         /// Provides a strongly-typed query builder for the <see cref="Account"/> entity,
@@ -87,7 +48,7 @@ namespace Data.Repositories.Finance
             public AccountQuery HasAccountTypeId(int? accountTypeId) => WhereCondition(a => a.AccountTypeId == accountTypeId);
             public AccountQuery HasAccountProductTypeId(int? accountProductTypeId) => WhereCondition(a => a.AccountProductTypeId == accountProductTypeId);
             public AccountQuery HasAccountNumber(string? accountNumber) => WhereCondition(a => a.AccountNumber == accountNumber);
-            public AccountQuery ContainsAccountName(string? accountName) => WhereCondition(a => a.AccountName.ToUpper().Contains(accountName.ToUpper()));
+            public AccountQuery ContainsAccountName(string? accountName) => WhereCondition(a => a.AccountName.ToUpper().Contains(accountName!.ToUpper()));
             public AccountQuery HasAccountStatusTypeId(int? accountStatusTypeId) => WhereCondition(a => a.AccountStatusTypeId == accountStatusTypeId);
             public AccountQuery HasBalanceLessThanOrEqualTo(decimal? balance) => WhereCondition(a => a.Balance <= balance);
             public AccountQuery HasBalanceGreaterThanOrEqualTo(decimal? balance) => WhereCondition(a => a.Balance >= balance);
@@ -121,10 +82,15 @@ namespace Data.Repositories.Finance
         /// </summary>
         /// <param name="accountId">The unique identifier of the account to update.</param>
         /// <param name="accountStatusTypeId">The new account status to set for the account.</param>
-        public async Task AccountStatusUpdateAsync(int accountId, int accountStatusTypeId)
+        public async Task<bool> AccountStatusUpdateAsync(int accountId, int accountStatusTypeId)
         {
             var account = await this.GetAccountByIdAsync(accountId);
-            if (account is not null) account.AccountStatusTypeId = accountStatusTypeId;
+            if (account is not null)
+            {
+                account.AccountStatusTypeId = accountStatusTypeId;
+                return true;
+            }
+            else return false;
         }
 
         /// <summary>
@@ -132,10 +98,15 @@ namespace Data.Repositories.Finance
         /// </summary>
         /// <param name="accountNumber">The account number of the account to update.</param>
         /// <param name="accountStatusTypeId">The new account status to set for the account.</param>
-        public async Task AccountStatusUpdateAsync(string accountNumber, int accountStatusTypeId)
+        public async Task<bool> AccountStatusUpdateAsync(string accountNumber, int accountStatusTypeId)
         {
             var account = await this.GetAccountByAccountNumberAsync(accountNumber);
-            if (account is not null) account.AccountStatusTypeId = accountStatusTypeId;
+            if (account is not null)
+            {
+                account.AccountStatusTypeId = accountStatusTypeId;
+                return true;
+            }
+            else return false;
         }
         #endregion Account Status Update
 

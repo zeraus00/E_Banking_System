@@ -9,10 +9,15 @@ namespace Data.Repositories.User
     /// </summary>
     public class UserInfoRepository : Repository
     {
-        public UserInfoRepository(EBankingContext context) : base(context) { }
+        public UserInfoQuery Query { get; private set; }
+        public UserInfoRepository(EBankingContext context) : base(context) 
+        {
+            Query = new UserInfoQuery(context.UsersInfo.AsQueryable());
+        }
 
         #region Read Methods
 
+        public async Task<UserInfo?> GetUserInfoByIdAsync(int userInfoId) => await GetById<UserInfo>(userInfoId);
         /// <summary>
         /// Retrieves a UserInfo entry by its primary key asynchronously.
         /// Optionally accepts a pre-composed IQueryable with desired includes.
@@ -23,71 +28,19 @@ namespace Data.Repositories.User
         /// If null, a basic lookup using DbContext.Find is performed.
         /// </param>
         /// <returns>The UserInfo entity if found or null if not.</returns>
-        public async Task<UserInfo?> GetUserInfoByIdAsync(int userInfoId, IQueryable<UserInfo>? query = null)
+        public async Task<UserInfo?> GetUserInfoByIdAsync(int userInfoId, IQueryable<UserInfo> query) => await Get<UserInfo>(u => u.UserInfoId == userInfoId, query);
+
+        public class UserInfoQuery : CustomQuery<UserInfo, UserInfoQuery>
         {
-            UserInfo? userInfo;
-            if (query != null)
-            {
-                userInfo = await query.FirstOrDefaultAsync(ui => ui.UserInfoId == userInfoId);
-            }
-            else
-            {
-                userInfo = await _context
-                    .UsersInfo
-                    .FindAsync(userInfoId);
-            }
-            return userInfo;
-        }
-
-        /// <summary>
-        /// Builds an IQueryable for querying the UsersInfo table that includes all related entities.
-        /// </summary>
-        /// <returns>An IQueryable of UserInfo with all includes.</returns>
-        public IQueryable<UserInfo> QueryIncludeAll()
-        {
-            return this.ComposeQuery(
-                includeUserAuth: true,
-                includeName: true,
-                includeBirthInfo: true,
-                includeAddress: true,
-                includeFatherName: true,
-                includeMotherName: true,
-                includeReligion: true
-                );
-        }
-
-        /// <summary>
-        /// Builds an IQueryable for querying the UsersAuth table with optional related entities.
-        /// </summary>
-        /// <param name="includeName">Whether to include the related Name entity.</param>
-        /// <param name="includeBirthInfo">Whether to include the related BirthInfo entity.</param>
-        /// <param name="includeFatherName">Whether to include the related FatherName entity.</param>
-        /// <param name="includeMotherName">Whether to include the related MotherName entity.</param>
-        /// <param name="includeReligion">Whether to include the related Religion entity.</param>
-        /// <returns>An IQueryable of UserInfo with optional includes.</returns>
-        public IQueryable<UserInfo> ComposeQuery(
-            bool includeUserAuth = false,
-            bool includeName = false,
-            bool includeBirthInfo = false,
-            bool includeAddress = false,
-            bool includeFatherName = false,
-            bool includeMotherName = false,
-            bool includeReligion = false
-            )
-        {
-            var query = _context
-                .UsersInfo
-                .AsQueryable();
-
-            if (includeUserAuth) { query = query.Include(ui => ui.UserAuth); }
-            if (includeName) { query = query.Include(ui => ui.UserName); }
-            if (includeBirthInfo) { query = query.Include(ui => ui.BirthInfo); }
-            if (includeAddress) { query = query.Include(ui => ui.Address); }
-            if (includeFatherName) { query = query.Include(ui => ui.FatherName); }
-            if (includeMotherName) { query = query.Include(ui => ui.MotherName); }
-            if (includeReligion) { query = query.Include(ui => ui.Religion); }
-
-            return query;
+            public UserInfoQuery(IQueryable<UserInfo> userInfo) : base (userInfo) { }
+            public UserInfoQuery HasUserAuth(int? userAuthId) => WhereCondition(ui => ui.UserAuthId == userAuthId);
+            public UserInfoQuery IncludeUserAuth(bool include = true) => include ? Include(ui => ui.UserAuth) : this;
+            public UserInfoQuery IncludeUserName(bool include = true) => include ? Include(ui => ui.UserName) : this;
+            public UserInfoQuery IncludeBirthInfo(bool include = true) => include ? Include(ui => ui.BirthInfo) : this;
+            public UserInfoQuery IncludeAddress(bool include = true) => include ? Include(ui => ui.Address) : this;
+            public UserInfoQuery IncludeFatherName(bool include = true) => include ? Include(ui => ui.FatherName) : this;
+            public UserInfoQuery IncludeMotherName(bool include = true) => include ? Include(ui => ui.MotherName) : this;
+            public UserInfoQuery IncludeReligion(bool include = true) => include ? Include(ui => ui.Religion) : this;
         }
 
         #endregion Read Methods
