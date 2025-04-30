@@ -197,14 +197,7 @@
 						</select>
 					</div>
 
-					<!-- Postal Code -->
-					<div class="col">
-						<label class="text-light">Postal Code</label>
-						<select class="form-select form-select-sm" value="#" required>
-							<option value="" disabled hidden> # </option>
-
-						</select>
-					</div>
+					
 
 					<!-- Municipality/City -->
 					<div class="col">
@@ -228,6 +221,14 @@
 								<option value="@b.code">@b.name</option>
 							}
 						</select>
+					</div>
+
+					<!-- Postal Code -->
+					<div class="col">
+						<label class="text-light">Postal Code</label>
+						<input class="form-control form-control-sm" @bind="postalCode" required>
+
+						</input>
 					</div>
 
 					<!-- Street No. -->
@@ -372,7 +373,7 @@
 
 						<!-- View Button -->
 						<div class="d-flex gap-2">
-							<input type="file" @* @bind="governmentId" *@ class="btn btn-light btn-sm w-75" required />
+							<InputFile OnChange="UploadGovernmentId" class="btn btn-light btn-sm w-75" required />
 							<button class="btn btn-outline-light">View</button>
 						</div>
 					</div>
@@ -383,7 +384,7 @@
 
 						<!-- View BUtton -->
 						<div class="d-flex gap-2">
-							<input type="file" @* @bind="profilePicture" *@ class="btn btn-light btn-sm w-75" required />
+							<InputFile OnChange="UploadProfilePicture" class="btn btn-light btn-sm w-75" required />
 							<button class="btn btn-outline-light">View</button>
 						</div>
 					</div>
@@ -593,22 +594,8 @@
 		// //address info
 		houseNo = "10";
 		street = "25";
-		// public string selectedRegion = string.Empty;
-		// public string selectedProvince = string.Empty;
-		// public string selectedCity = string.Empty;
-		// public string selectedBarangay = string.Empty;
-		// public string userPostalCode = string.Empty;
-		postalCode = 4028;
-		// public int regionId;
-		// public int provinceId;
-		// public int cityId;
-		// public int barangayId;
 
-		// //drop down selection place holders
-		// public const string regionPlaceHolder = "--Select Region--";
-		// public const string provincePlaceHolder = "--Select Province--";
-		// public const string cityPlaceHolder = "--Select City--";
-		// public const string barangayPlaceHolder = "--Select Barangay--";
+		postalCode = 4028;
 
 		// //Parents Name And Beneficiary
 		fatherFirstName = "BOGART";
@@ -975,16 +962,16 @@
 			}
 
 			// // Validation for names
-			// if (string.IsNullOrWhiteSpace(fatherFirstName) || string.IsNullOrWhiteSpace(fatherLastName))
-			// {
-			// 	error = "Father's full name is required.";
-			// 	return;
-			// }
-			// if (string.IsNullOrWhiteSpace(motherFirstName) || string.IsNullOrWhiteSpace(motherLastName))
-			// {
-			// 	error = "Mother's full name is required.";
-			// 	return;
-			// }
+			if (string.IsNullOrWhiteSpace(fatherFirstName) || string.IsNullOrWhiteSpace(fatherLastName))
+			{
+			 	error = "Father's full name is required.";
+			 	return;
+			}
+			if (string.IsNullOrWhiteSpace(motherFirstName) || string.IsNullOrWhiteSpace(motherLastName))
+			{
+				error = "Mother's full name is required.";
+				return;
+			}
 			// if (string.IsNullOrWhiteSpace(beneficiaryFirstName) || string.IsNullOrWhiteSpace(beneficiaryLastName))
 			// {
 			// 	error = "Beneficiary's full name is required.";
@@ -1036,15 +1023,6 @@
 			accountTypeId = accountTypeNames.AccountTypeNameList.IndexOf(selectedAccountTypeName) + 1;
 			accountProductTypeId = accountProductTypeNames.AccountProductTypeNameList.IndexOf(selectedAccountProductTypeName) + 1;
 			Console.WriteLine(accountTypeId + " " + accountProductTypeId);
-
-			// regionId = GetIdFromSelected(selectedRegion, regions.Cast<dynamic>().ToList());
-			// provinceId = GetIdFromSelected(selectedProvince, provinces.Cast<dynamic>().ToList());
-			// cityId = GetIdFromSelected(selectedCity, cities.Cast<dynamic>().ToList());
-			// barangayId = GetIdFromSelected(selectedBarangay, barangays.Cast<dynamic>().ToList()); 
-
-			// birthRegionId = GetIdFromSelected(selectedBirthRegion, regions.Cast<dynamic>().ToList());
-			// birthProvinceId = GetIdFromSelected(selectedBirthProvince, provinces.Cast<dynamic>().ToList());
-			// birthCityId = GetIdFromSelected(selectedBirthCity, cities.Cast<dynamic>().ToList());
 
 			regionId = await RegistrationService.RegisterRegion(selectedRegion, regions);
 			provinceId = await RegistrationService.RegisterProvince(selectedProvince, provincesFromRegion);
@@ -1098,9 +1076,9 @@
 				contactNumber,
 				Occupation,
 				taxIdentificationNumber,
-				selectedCivilStatus
-				// profilePicture,
-				// governmentId
+				selectedCivilStatus,
+				profilePicture,
+				governmentId
 				);
 
 			Console.WriteLine($"UserInfo: {UserInfo.UserInfoId}");
