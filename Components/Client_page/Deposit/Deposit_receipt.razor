@@ -32,9 +32,13 @@
                 <div class="d-flex gap-2 text-start border-bottom w-100 align-items-center p-4">
                     <h4>Total Amount Deposited: </h4>
                     <h2 class="fw-bolder mx-5">@FormatHelper.BalanceFormatter(depositAmount)</h2>
-                </div>
+                </div>            
+                
+                <h6 class="mx-5 my-3">
+                    <strong>Current Balance: </strong>@FormatHelper.BalanceFormatter(currentBalance)
+                </h6>
 
-                <div class="d-flex justify-content-between align-items-end my-5 mx-5">
+                <div class="d-flex justify-content-between align-items-end my-2 mx-5">
                     <div class="d-flex flex-column text-start mb-0">
                         <h5 class="mb-1">@clientName</h5>
                         <p class="m-0"><strong>Account No.:</strong> @FormatHelper.AccountNumberFormatter(accountNumber)</p>

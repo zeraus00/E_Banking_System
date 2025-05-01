@@ -46,6 +46,9 @@
                         @onfocus="ClearDefaultValue"
                         @onblur="SetDefaultValue" />
                 </div>
+                <h6 class="mx-3 mb-4">
+                    <strong>Current Balance: </strong>@FormatHelper.BalanceFormatter(currentBalance)
+                </h6>
 
                 <div class="mb-4 mt-2">
                     <h5 class="text-light fs-5 mx-5">Payment Method:</h5>
