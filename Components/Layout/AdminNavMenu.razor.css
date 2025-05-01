@@ -3,24 +3,24 @@
     height: 100%;
     overflow-y: auto;
     background: #212B5E;
-    position: sticky; 
-    top: 0; 
+    position: sticky;
+    top: 0;
 }
 
-.sidebar::-webkit-scrollbar{
-    width: 6px;
-}
+    .sidebar::-webkit-scrollbar {
+        width: 6px;
+    }
 
-.sidebar::-webkit-scrollbar-track{
-    background: transparent;
-}
+    .sidebar::-webkit-scrollbar-track {
+        background: transparent;
+    }
 
-.sidebar::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.3); 
-    border-radius: 10px;
-    border: 2px solid transparent; 
-    background-clip: content-box;
-}
+    .sidebar::-webkit-scrollbar-thumb {
+        background-color: rgba(255, 255, 255, 0.3);
+        border-radius: 10px;
+        border: 2px solid transparent;
+        background-clip: content-box;
+    }
 
 .profile-picture-container {
     position: relative;
@@ -31,9 +31,9 @@
     cursor: pointer;
 }
 
-.profile-picture-container:hover .edit-overlay {
-    opacity: 1;
-}
+    .profile-picture-container:hover .edit-overlay {
+        opacity: 1;
+    }
 
 .profile-picture {
     width: 100%;
@@ -81,7 +81,7 @@
 }
 
 .middle-row {
-    height: 350px;
+    height: 500px;
     margin-right: 10%;
     margin-left: 10%;
     padding: 0;
@@ -107,9 +107,9 @@
     background: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.55%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") no-repeat center/1.75rem rgba(255, 255, 255, 0.1);
 }
 
-.toggler:checked {
-    background-color: rgba(255, 255, 255, 0.5);
-}
+    .toggler:checked {
+        background-color: rgba(255, 255, 255, 0.5);
+    }
 
 .nav-item {
     font-size: 0.9rem;
@@ -136,15 +136,15 @@
         width: 100%;
     }
 
-.nav-item ::deep a.active {
-    background-color: rgba(255,255,255,0.37);
-    color: white;
-}
+    .nav-item ::deep a.active {
+        background-color: rgba(255,255,255,0.37);
+        color: white;
+    }
 
-.nav-item ::deep .nav-link:hover {
-    background-color: rgba(255,255,255,0.1);
-    color: white;
-}
+    .nav-item ::deep .nav-link:hover {
+        background-color: rgba(255,255,255,0.1);
+        color: white;
+    }
 
 @media (min-width: 641px) {
     .toggler {
@@ -153,7 +153,6 @@
 
     .nav-scrollable {
         display: block;
-
         height: calc(100vh - 3.5rem);
         overflow-y: auto;
     }

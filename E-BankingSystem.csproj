@@ -26,6 +26,7 @@
     <Content Remove="Components\Client_page\Method\TransactionMethod%28car%29.razor" />
     <Content Remove="Components\Client_page\Method\TransactionMethodCarousel.razor" />
     <Content Remove="Components\Home\Sign_up_page.razor" />
+    <Content Remove="Components\Layout\AdminMainLayout.razor" />
     <Content Remove="Components\Layout\Header.razor" />
     <Content Remove="wwwroot\bootstrap\Utilities\profile.png" />
   </ItemGroup>
@@ -34,6 +35,7 @@
     <None Remove="Components\Client_page\Method\CardDestinationCarousel.razor.css" />
     <None Remove="Components\Client_page\Method\TransactionMethod%28car%29.razor.css" />
     <None Remove="Components\Client_page\Method\TransactionMethodCarousel.razor.css" />
+    <None Remove="Components\Layout\AdminMainLayout.razor.css" />
     <None Remove="Components\Layout\Header.razor.css" />
   </ItemGroup>
 

@@ -13,7 +13,18 @@
 <div class="body-wrapper">
     @if (!HideSidebar)
     {
-            <NavMenu />
+        <AuthorizeView Roles="User">
+            <Authorized>
+                <NavMenu />
+            </Authorized>
+        </AuthorizeView>
+
+        <AuthorizeView Roles="Administrator">
+            <Authorized>
+                <AdminNavMenu />
+            </Authorized>
+        </AuthorizeView>
+
     }
     <div class="main-content">
         @Body
