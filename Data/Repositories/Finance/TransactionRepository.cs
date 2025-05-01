@@ -36,7 +36,7 @@
         public IQueryable<Transaction> ComposeQuery(
             bool includeTransactionType = false,
             bool includeMainAccount = false,
-            bool includeCounterAccount = false
+            bool includeCounterAccount = false,
             bool includeExternalVendor = false
             )
         {
