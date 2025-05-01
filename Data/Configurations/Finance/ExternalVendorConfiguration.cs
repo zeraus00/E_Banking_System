@@ -25,9 +25,9 @@
              */
             ExternalVendors
                 .HasData(
-                    new ExternalVendor { VendorName = "GCash" },
-                    new ExternalVendor { VendorName = "Paymaya" },
-                    new ExternalVendor { VendorName = "GoTyme" }
+                    new ExternalVendor { VendorId = 1, VendorName = "GCash" },
+                    new ExternalVendor { VendorId = 2, VendorName = "Paymaya" },
+                    new ExternalVendor { VendorId = 3, VendorName = "GoTyme" }
                 );
 
 
