@@ -171,7 +171,9 @@ namespace Data.Repositories.Finance
         private int _accountTypeId;
         private int _accountProductTypeId;
         private string _accountNumber = string.Empty;
+        private string _atmNumber = string.Empty;
         private string _accountName = string.Empty;
+        private string _accountContactNo = string.Empty;
         private int _accountStatusTypeId;
         private decimal _balance = 0.0m;
         private int? _linkedBeneficiaryId;
@@ -192,9 +194,21 @@ namespace Data.Repositories.Finance
             return this;
         }
 
+        public AccountBuilder WithATMNumber(string atmNumber)
+        {
+            _atmNumber = atmNumber;
+            return this;
+        }
+
         public AccountBuilder WithAccountNumber(string accountNumber)
         {
             _accountNumber = accountNumber.Trim();
+            return this;
+        }
+
+        public AccountBuilder WithAccountContactNo(string accountContactNo)
+        {
+            _accountContactNo = accountContactNo;
             return this;
         }
 

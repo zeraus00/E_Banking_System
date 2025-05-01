@@ -9,7 +9,9 @@
         public int AccountTypeId { get; set; }                      // FK to AccountTypes
         public int AccountProductTypeId { get; set; }               // FK to AccountProductTypes
         public string AccountNumber { get; set; } = string.Empty;   // Required
+        public string ATMNumber { get; set; } = string.Empty;       // Required
         public string AccountName { get; set; } = string.Empty;     // Required; MaxLength=30
+        public string AccountContactNo { get; set; } = string.Empty;// Required
         public int AccountStatusTypeId { get; set; }                // FK to AccountStatusTypes
         public decimal Balance { get; set; } = 0.0m;                // Required; Default 0.0
         public int? LinkedBeneficiaryId { get; set; }               // Self reference fk
