@@ -1,4 +1,5 @@
 ﻿@using E_BankingSystem.Components.Client_page.Accounts
+@inject NavigationManager Navigation
 
 <!-- Card Component -->
 <section class="carousel-card text-start p-3 border shadow-sm h-100">
@@ -14,10 +15,22 @@
 
             <!-- Edit Button -->
             @if (IsEditable)
-            {
-                <div class="d-flex align-items-end px-3">
-                    <button class="btn btn-primary btn-sm" @onclick="EnterEditMode">Edit</button>
-                </div>
+            {   
+                <AuthorizeView Roles="User">
+                    <Authorized>
+                    <div class="d-flex align-items-end px-3">
+                        <button class="btn btn-primary btn-sm" @onclick="EnterEditMode">Edit</button>
+                    </div>
+                    </Authorized>
+                </AuthorizeView>
+
+                    <AuthorizeView Roles="Administrator">
+                        <Authorized>
+                            <div class="d-flex align-items-end px-3">
+                                <button class="btn btn-primary btn-sm" @onclick="EnterUpdateMode">Edit</button>
+                            </div>
+                        </Authorized>
+                    </AuthorizeView>
             }
         </div>
         <hr />
@@ -75,6 +88,12 @@
     {
         isEditing = true;
         editedAccountName = Account.AccountName;
+    }
+
+    private void EnterUpdateMode()
+    {
+        isEditing = true;
+        Navigation.NavigateTo($"/Update_account");
     }
 
     private void SaveChanges()
