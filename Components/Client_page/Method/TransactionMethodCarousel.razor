@@ -1,0 +1,99 @@
+﻿@using E_BankingSystem.Components.Client_page.Method
+@using ViewModels
+
+<div class="flex-grow-1 d-flex justify-content-center container">
+    <div class="carousel-wrapper px-5">
+
+        <!-- Left Arrow -->
+        <button class="carousel-arrow left" @onclick="ScrollLeft">
+            <i class="bi bi-chevron-left text-light"></i>
+        </button>
+
+        <!-- Cards Carousel -->
+        <div id="accountCarousel" class="carousel-card d-flex flex-nowrap overflow-auto">
+            @foreach (var card in Cards)
+            {
+                <TransactionMethod 
+                    Card="card" 
+                    TransactionProcess="transactionProcess" 
+                    SelectedCardId="@selectedCardId" 
+                    SelectedCardIdChanged="@((id) => selectedCardId = id)" />
+
+            }
+        </div>
+
+        <!-- Right Arrow -->
+        <button class="carousel-arrow right" @onclick="ScrollRight">
+            <i class="bi bi-chevron-right text-light"></i>
+        </button>
+
+        <!-- Pagination Dots -->
+        <div class="carousel-pagination d-flex justify-content-center mt-3">
+            @for (int i = 0; i < Cards.Count; i++)
+            {
+                <button class="dot mx-1 @(activeIndex == i ? "active" : "")" @onclick="@(() => ScrollToCard(i))"></button>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    function scrollToCard(index) {
+        const carousel = document.getElementById('accountCarousel');
+        const cards = carousel.children;
+
+        if (cards.length === 0 || !cards[index]) return;
+
+        const card = cards[index];
+        const offsetLeft = card.offsetLeft;
+
+        carousel.scrollTo({
+            left: offsetLeft,
+            behavior: 'smooth'
+        });
+    }
+</script>
+
+@code {
+    private int activeIndex = 0;
+    private bool transactionProcess = false;
+    private string? selectedCardId;
+
+    [Inject] private NavigationManager NavigationManager { get; set; } = default!;
+    [Inject] private IJSRuntime JS { get; set; } = default!;
+
+    private List<CardModel> Cards = new()
+    {
+        new CardModel { Id = "gcash", Name = "GCash", LogoUrl = "/gcash.png" },
+        new CardModel { Id = "paymaya", Name = "PayMaya", LogoUrl = "/paymaya.jpg" },
+        new CardModel { Id = "gotyme", Name = "GoTyme", LogoUrl = "/gotyme.png" }
+    };
+
+    protected override void OnInitialized()
+    {
+        if (NavigationManager.Uri.Contains("/Withdraw_amount") || NavigationManager.Uri.Contains("/Deposit_amount"))
+        {
+            transactionProcess = true;
+        }
+    }
+
+    private async Task ScrollLeft()
+    {
+        if (Cards.Count == 0) return;
+        activeIndex = (activeIndex - 1 + Cards.Count) % Cards.Count;
+        await JS.InvokeVoidAsync("scrollToCard", activeIndex);
+    }
+
+    private async Task ScrollRight()
+    {
+        if (Cards.Count == 0) return;
+        activeIndex = (activeIndex + 1) % Cards.Count;
+        await JS.InvokeVoidAsync("scrollToCard", activeIndex);
+    }
+
+    private async Task ScrollToCard(int index)
+    {
+        activeIndex = index;
+        await JS.InvokeVoidAsync("scrollToCard", index);
+    }
+}

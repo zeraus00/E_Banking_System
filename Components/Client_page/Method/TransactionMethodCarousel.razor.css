@@ -1,0 +1,101 @@
+﻿.container {
+    width: 100%;
+    max-width: 90%;
+    height: auto;
+}
+
+.carousel-wrapper {
+    width: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.carousel-card {
+    display: flex;
+    gap: 1.5rem;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    padding: 1rem 0;
+    justify-content: flex-start;
+    max-width: 100%;
+    margin: 3rem 0;
+    background-color: transparent;
+}
+
+    .carousel-card::-webkit-scrollbar {
+        display: none;
+    }
+
+    .carousel-card > * {
+        flex: 0 0 auto;
+        width: 40%;
+        max-width: 90%;
+        background-color: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        scroll-snap-align: start;
+        color: black;
+    }
+
+@media (max-width: 768px) {
+    .carousel-card > * {
+        width: 90%;
+        padding: 1rem;
+    }
+}
+
+.carousel-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.3);
+    border: none;
+    border-radius: 50%;
+    padding: 0.5rem;
+    cursor: pointer;
+    z-index: 10;
+    color: white;
+}
+
+    .carousel-arrow.left {
+        left: 10px;
+    }
+
+    .carousel-arrow.right {
+        right: 10px;
+    }
+
+@media (max-width: 768px) {
+    .carousel-arrow.left {
+        left: 5px;
+    }
+
+    .carousel-arrow.right {
+        right: 5px;
+    }
+}
+
+.carousel-pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+    .carousel-pagination .dot {
+        width: 10px;
+        height: 10px;
+        margin: 0 5px;
+        border-radius: 50%;
+        background-color: #ccc;
+        border: none;
+        cursor: pointer;
+    }
+
+        .carousel-pagination .dot.active {
+            background-color: #007bff;
+        }

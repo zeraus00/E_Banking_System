@@ -9,20 +9,27 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Components\Client_page\Payment\**" />
+    <Content Remove="Components\Client_page\Payment\**" />
+    <EmbeddedResource Remove="Components\Client_page\Payment\**" />
+    <None Remove="Components\Client_page\Payment\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Remove="Components\Admin\Filter.razor" />
     <Content Remove="Components\Client_page\Accounts\AddAccount.razor" />
     <Content Remove="Components\Client_page\Accounts\ManageAccounts.razor" />
     <Content Remove="Components\Client_page\Accounts\Manage_accounts.razor" />
     <Content Remove="Components\Client_page\Accounts\MyAccounts.razor" />
     <Content Remove="Components\Client_page\Accounts\My_accounts.razor" />
-    <Content Remove="Components\Client_page\Destination\CardDestinationCarousel.razor" />
+    <Content Remove="Components\Client_page\Method\CardDestinationCarousel.razor" />
     <Content Remove="Components\Home\Sign_up_page.razor" />
     <Content Remove="Components\Layout\Header.razor" />
     <Content Remove="wwwroot\bootstrap\Utilities\profile.png" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Components\Client_page\Destination\CardDestinationCarousel.razor.css" />
+    <None Remove="Components\Client_page\Method\CardDestinationCarousel.razor.css" />
     <None Remove="Components\Layout\Header.razor.css" />
   </ItemGroup>
 
