@@ -37,6 +37,7 @@
             bool includeTransactionType = false,
             bool includeMainAccount = false,
             bool includeCounterAccount = false
+            bool includeExternalVendor = false
             )
         {
             IQueryable<Transaction> query = _context.Transactions.AsQueryable();
@@ -46,6 +47,8 @@
                 query = query.Include(t => t.MainAccount);
             if (includeCounterAccount)
                 query = query.Include(t => t.CounterAccount);
+            if (includeExternalVendor)
+                query = query.Include(t => t.ExternalVendor);
             return query;
         }
 
@@ -80,6 +83,7 @@
         private string? _confirmationNumber = null;
         private int _mainAccountId;
         private int? _counterAccountId = null;
+        private int? _externalVendorId = null;
         private decimal _amount;
         private decimal _previousBalance;
         private decimal _newBalance;
@@ -116,6 +120,11 @@
         public TransactionBuilder WithCounterAccountId(int counterAccountId)
         {
             _counterAccountId = counterAccountId;
+            return this;
+        }
+        public TransactionBuilder WithExternalVendorId(int externalVendorId)
+        {
+            _externalVendorId = externalVendorId;
             return this;
         }
         public TransactionBuilder WithAmount(decimal amount)
@@ -164,6 +173,7 @@
                 ConfirmationNumber = _confirmationNumber,
                 MainAccountId = _mainAccountId,
                 CounterAccountId = _counterAccountId,
+                ExternalVendorId = _externalVendorId,
                 Amount = _amount,
                 PreviousBalance = _previousBalance,
                 NewBalance = _newBalance

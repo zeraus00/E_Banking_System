@@ -46,7 +46,8 @@ namespace Services
             int mainAccountId, 
             int transactionTypeId, 
             decimal amount, 
-            int? counterAccountId = null)
+            int? counterAccountId = null,
+            int? externalVendorId = null)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
@@ -101,7 +102,8 @@ namespace Services
                     MainAccountId = mainAccountId,
                     Amount = amount,
                     CurrentBalance = mainAccount.Balance,
-                    CounterAccountId = counterAccountId
+                    CounterAccountId = counterAccountId,
+                    ExternalVendorId = externalVendorId
                 };
 
                 
@@ -201,19 +203,21 @@ namespace Services
                     .WithTransactionDate(transactionDate)
                     .WithTransactionTime(transactionTime);
 
-                /*  For Incoming Transfer or Outgoing Transfer Transaction Types    */
+                /*  For Deposit or Withdraw Transaction Types   */
+                int? externalVendorId = transactionSession.ExternalVendorId;
+
+                if (externalVendorId is int vendorId)
+                    mainTransactionBuilder.WithExternalVendorId(vendorId);
+
+                /*  For Outgoing Transfer Transaction Types    */
                 //  Retrieve counterAccount as needed.
                 int? counterAccountId = transactionSession.CounterAccountId;
-
-                if (counterAccountId is int id)
-                    mainTransactionBuilder.WithCounterAccountId(id);
-
-                Transaction mainTransaction = mainTransactionBuilder.Build();
-
-                //  Handle Outgoing Transfers
                 bool isOutgoingTransfer = transactionTypeId is (int) TransactionTypes.Outgoing_Transfer;
+
                 if (counterAccountId is int counterId && isOutgoingTransfer)
                 {
+                    //  Add counter id to main transaction
+                    mainTransactionBuilder.WithCounterAccountId(counterId);
                     /*  Retrieve counter account from the database  */
                     //  Throws AccountNotFoundException if account not found.
                     Account counterAccount = await this.GetAccountAsync(dbContext, counterId);
@@ -222,6 +226,7 @@ namespace Services
                     decimal newCounterBalance = counterAccount.Balance + amount;
                     this.UpdateAccountBalance(counterAccount, newCounterBalance);
 
+                    /*  Build the incoming transfer counter transaction */
                     Transaction counterTransaction = new TransactionBuilder()
                         .WithTransactionTypeId((int)TransactionTypes.Incoming_Transfer)
                         .WithTransactionNumber(transactionNumber)
@@ -241,6 +246,7 @@ namespace Services
                 }
 
                 /*  Add main transaction to database  */
+                Transaction mainTransaction = mainTransactionBuilder.Build();
                 await transactionRepository.AddAsync(mainTransaction);
                 
                 /*  Save changes to account and transaction.    */

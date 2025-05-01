@@ -40,10 +40,21 @@
                 .HasMaxLength(28)
                 .IsFixedLength()
                 .IsRequired(false);
+            //  MainAccountId (Required)
+            Transactions
+                .Property(t => t.MainAccountId)
+                .HasMaxLength(28)
+                .IsFixedLength()
+                .IsRequired();
 
             //  CounterAccountId (Optional)
             Transactions
                 .Property(t => t.CounterAccountId)
+                .IsRequired(false);
+
+            //  ExternalVendorId (Optional)
+            Transactions
+                .Property(t => t.ExternalVendorId)
                 .IsRequired(false);
 
             //  Amount (Required, DECIMAL(18,2))
@@ -83,6 +94,7 @@
              *  Accounts: MainAccount (many-to-one) 
              *  Accounts: CounterAccount (many-to-one)
              *  TransactionTypes (many-to-one)
+             *  ExternalVendors: (many-to-one)
              */
             Transactions
                 .HasOne(t => t.MainAccount)
@@ -98,6 +110,11 @@
                 .HasOne(t => t.TransactionType)
                 .WithMany(tt => tt.Transactions)
                 .HasForeignKey(t => t.TransactionTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
+            Transactions
+                .HasOne(t => t.ExternalVendor)
+                .WithMany(ev => ev.Transactions)
+                .HasForeignKey(t => t.ExternalVendorId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

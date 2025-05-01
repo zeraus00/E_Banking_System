@@ -21,6 +21,7 @@ namespace Data
             /*  Configure Finance Schema
              *  Configure Accounts Table
              *  Configure AccountTypes Table
+             *  Configure ExternalVendors Table
              *  Configure Loans Table
              *  Configure LoanTransactions Table
              *  Configure LoanTypes Table
@@ -31,6 +32,7 @@ namespace Data
             modelBuilder.ApplyConfiguration(new AccountTypeConfiguration());
             modelBuilder.ApplyConfiguration(new AccountProductTypeConfiguration());
             modelBuilder.ApplyConfiguration(new AccountStatusTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ExternalVendorConfiguration());
             modelBuilder.ApplyConfiguration(new LoanConfiguration());
             modelBuilder.ApplyConfiguration(new LoanTransactionConfiguration());
             modelBuilder.ApplyConfiguration(new LoanTypeConfiguration());
@@ -76,6 +78,7 @@ namespace Data
         public DbSet<AccountType> AccountTypes { get; set; }
         public DbSet<AccountProductType> AccountProductTypes { get; set; }
         public DbSet<AccountStatusType> AccountStatusTypes { get; set; }
+        public DbSet<ExternalVendor> ExternalVendors { get; set; }
         public DbSet<Loan> Loans { get; set; }
         public DbSet<LoanTransaction> LoanTransactions { get; set; }
         public DbSet<LoanType> LoanTypes { get; set; }

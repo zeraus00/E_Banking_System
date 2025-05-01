@@ -11,6 +11,7 @@
         public decimal CurrentBalance { get; set; }
         public string? ConfirmationNumber { get; set; } = null;
         public int? CounterAccountId { get; set; } = null;
+        public int? ExternalVendorId { get; set; } = null;
 
     }
 }
