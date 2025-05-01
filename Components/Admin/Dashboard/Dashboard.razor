@@ -5,11 +5,9 @@
 @inject AdminDataService adminDataService
 @inject PageRedirectService redirectService
 @inject UserSessionService userSessionService
-@using Layout
-@layout AdminMainLayout
 
-<div class="page">
-    <main>
+<div class="dashboard-page">
+    <div class="dashboard-container">
         <div class="dashboard-container">
 
             <!-- Top Bar -->
@@ -90,7 +88,7 @@
             </div>
 
         </div>
-    </main>
+    </div>
 </div>
 
 @code {
