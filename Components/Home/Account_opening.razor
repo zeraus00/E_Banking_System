@@ -189,7 +189,7 @@
 					<div class="col">
 						<label class="text-light">Province</label>
 						<select class="form-select form-select-sm" value="selectedProvince" @onchange="async _ => await LoadCitiesAsync(_)" required>
-							<option value="" disabled hidden>@provincePlaceHolder</option>
+							<option value="@provincePlaceHolder" hidden>@provincePlaceHolder</option>
 							@foreach (var p in provincesFromRegion)
 							{
 								<option value="@p.code">@p.name</option>
@@ -197,7 +197,7 @@
 						</select>
 					</div>
 
-					
+
 
 					<!-- Municipality/City -->
 					<div class="col">
@@ -533,7 +533,6 @@
 	private List<CityViewModel> citiesFromProvince = new();
 	private List<BarangayViewModel> barangaysFromCity = new();
 
-
 	// method for getting user address
 	protected override async Task OnInitializedAsync()
 	{
@@ -643,11 +642,16 @@
 			error = string.Empty; // reset previous error
 										//	Get the value of the selection
 			selectedRegion = e?.Value?.ToString() ?? "";
-			// if (string.IsNullOrWhiteSpace(selectedRegion))
-			// {
-			// 	error = "Please select a valid region.";
-			// 	return;
-			// }
+
+			// this will reset if the user select new region
+			selectedProvince = string.Empty;
+			selectedCity = string.Empty;
+			selectedBarangay = string.Empty;
+
+			provincesFromRegion = new();
+			citiesFromProvince = new();
+			barangaysFromCity = new();
+
 			var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/provinces/");
 			provincesFromRegion = JsonSerializer.Deserialize<List<ProvinceViewModel>>(json)?
 			.Where(p => p.regionCode.ToString() == selectedRegion)
@@ -655,7 +659,7 @@
 			?? new();
 			if (provincesFromRegion.Any())
 			{
-				selectedProvince = provincesFromRegion[0].code.GetString()!;
+				selectedProvince = provincePlaceHolder;
 			}
 			//	Rerender component
 			StateHasChanged();
@@ -671,13 +675,15 @@
 		try
 		{
 			error = string.Empty; // reset previous error
-										//	Get the value of the selection
+			//	Get the value of the selection
 			selectedProvince = e?.Value?.ToString() ?? "";
-			// if (string.IsNullOrWhiteSpace(selectedProvince))
-			// {
-			// 	error = "Please select a valid Province.";
-			// 	return;
-			// }
+
+			selectedCity = string.Empty;
+			selectedBarangay = string.Empty;
+
+			citiesFromProvince = new();
+			barangaysFromCity = new();
+
 			//	Get the municipalities from the api.
 			var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/municipalities/");
 			citiesFromProvince = JsonSerializer.Deserialize<List<CityViewModel>>(json)?
@@ -704,12 +710,10 @@
 		try
 		{
 			error = string.Empty; // reset previous error
-			selectedCity = e?.Value?.ToString() ?? "";
-			// if (string.IsNullOrWhiteSpace(selectedCity))
-			// {
-			// 	error = "Select a valid city.";
-			// 	return;
-			// }
+
+			selectedBarangay = string.Empty;
+			barangaysFromCity = new();
+
 			var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/barangays/");
 			barangaysFromCity = JsonSerializer.Deserialize<List<BarangayViewModel>>(json)?
 			.Where(b => b.municipalityCode.ToString() == selectedCity)
@@ -757,11 +761,13 @@
 		{
 			error = string.Empty; // reset previous error
 			selectedBirthRegion = e?.Value?.ToString() ?? "";
-			// if (string.IsNullOrWhiteSpace(selectedBirthRegion))
-			// {
-			// 	error = "Please select a valid Region.";
-			// 	return;
-			// }
+
+			birthProvinces = new();
+			selectedBirthProvince = string.Empty;
+
+			birthCities = new();
+			selectedBirthCity = string.Empty;
+
 			var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/provinces/");
 			birthProvinces = JsonSerializer.Deserialize<List<ProvinceViewModel>>(json)?
 			.Where(p => p.regionCode.ToString() == selectedBirthRegion)
@@ -785,11 +791,9 @@
 		{
 			error = string.Empty; // reset previous error
 			selectedBirthProvince = e?.Value?.ToString() ?? "";
-			// if (string.IsNullOrWhiteSpace(selectedBirthProvince))
-			// {
-			// 	error = "Please select a valid Province.";
-			// 	return;
-			// }
+
+			birthCities = new();
+			selectedBirthCity = string.Empty;
 
 			//	Get the municipalities from the api.
 			var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/municipalities/");

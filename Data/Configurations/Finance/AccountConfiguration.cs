@@ -28,11 +28,25 @@
                 .HasMaxLength(12)
                 .IsFixedLength();
 
+            //  ATMNumber (Required; MaxLength=16; FixedLength)
+            Accounts
+                .Property(a => a.ATMNumber)
+                .IsRequired()
+                .HasMaxLength(16)
+                .IsFixedLength();
+
             //  AccountName (Required; MaxLength=30)
             Accounts
                 .Property(a => a.AccountName)
                 .IsRequired()
                 .HasMaxLength(30);
+
+            //  AccountContactNo (Required; MaxLength=11; FixedLength)
+            Accounts
+                .Property(a => a.AccountContactNo)
+                .IsRequired()
+                .HasMaxLength(11)
+                .IsFixedLength();
 
             //  AccountStatus (Required)
             Accounts
