@@ -15,12 +15,14 @@
     <Content Remove="Components\Client_page\Accounts\Manage_accounts.razor" />
     <Content Remove="Components\Client_page\Accounts\MyAccounts.razor" />
     <Content Remove="Components\Client_page\Accounts\My_accounts.razor" />
+    <Content Remove="Components\Client_page\Destination\CardDestinationCarousel.razor" />
     <Content Remove="Components\Home\Sign_up_page.razor" />
     <Content Remove="Components\Layout\Header.razor" />
     <Content Remove="wwwroot\bootstrap\Utilities\profile.png" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Components\Client_page\Destination\CardDestinationCarousel.razor.css" />
     <None Remove="Components\Layout\Header.razor.css" />
   </ItemGroup>
 
