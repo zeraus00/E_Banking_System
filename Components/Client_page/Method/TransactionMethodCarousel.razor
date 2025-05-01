@@ -1,99 +1,61 @@
-﻿@using E_BankingSystem.Components.Client_page.Method
-@using ViewModels
+﻿@using E_BankingSystem.Components.Client_page.Method;
+@inject NavigationManager NavigationManager
 
-<div class="flex-grow-1 d-flex justify-content-center container">
-    <div class="carousel-wrapper px-5">
+<div class="d-flex text-light justify-content-start gap-3 mx-5">
+    @foreach (var card in Cards){
+        <div class="shipping-container d-flex justify-content-between align-items-center p-3 border rounded bg-light gap-3">
 
-        <!-- Left Arrow -->
-        <button class="carousel-arrow left" @onclick="ScrollLeft">
-            <i class="bi bi-chevron-left text-light"></i>
-        </button>
+            <div>
+                <div class="d-flex align-items-center">
+                    <img class="logo mx-3" src="@card.LogoUrl" alt="@card.Name Logo" />
+                    <div>
+                        <h6 class="mb-0">@card.Name</h6>
+                    </div>
+                </div>
+            </div>
 
-        <!-- Cards Carousel -->
-        <div id="accountCarousel" class="carousel-card d-flex flex-nowrap overflow-auto">
-            @foreach (var card in Cards)
-            {
-                <TransactionMethod 
-                    Card="card" 
-                    TransactionProcess="transactionProcess" 
-                    SelectedCardId="@selectedCardId" 
-                    SelectedCardIdChanged="@((id) => selectedCardId = id)" />
-
+            <!-- radio button -->
+            @if(transactionProcess){
+                <div class="form-check">
+                    <input class="form-check-input"
+                           type="radio"
+                           name="selectedCard"
+                           id="@card.Id"
+                           value="@card.Id"
+                           checked="@((selectedCardId == card.Id))"
+                           @onchange="@(() => selectedCardId = card.Id)" />
+                    <label class="form-check-label" for="@card.Id"></label>
+                </div>
             }
-        </div>
 
-        <!-- Right Arrow -->
-        <button class="carousel-arrow right" @onclick="ScrollRight">
-            <i class="bi bi-chevron-right text-light"></i>
-        </button>
-
-        <!-- Pagination Dots -->
-        <div class="carousel-pagination d-flex justify-content-center mt-3">
-            @for (int i = 0; i < Cards.Count; i++)
-            {
-                <button class="dot mx-1 @(activeIndex == i ? "active" : "")" @onclick="@(() => ScrollToCard(i))"></button>
-            }
         </div>
-    </div>
+    }
 </div>
 
-<script>
-    function scrollToCard(index) {
-        const carousel = document.getElementById('accountCarousel');
-        const cards = carousel.children;
-
-        if (cards.length === 0 || !cards[index]) return;
-
-        const card = cards[index];
-        const offsetLeft = card.offsetLeft;
-
-        carousel.scrollTo({
-            left: offsetLeft,
-            behavior: 'smooth'
-        });
-    }
-</script>
-
 @code {
-    private int activeIndex = 0;
     private bool transactionProcess = false;
     private string? selectedCardId;
 
-    [Inject] private NavigationManager NavigationManager { get; set; } = default!;
-    [Inject] private IJSRuntime JS { get; set; } = default!;
-
     private List<CardModel> Cards = new()
     {
-        new CardModel { Id = "gcash", Name = "GCash", LogoUrl = "/gcash.png" },
+        new CardModel { Id = "gcash", Name = "GCash", LogoUrl = "/gcash" },
         new CardModel { Id = "paymaya", Name = "PayMaya", LogoUrl = "/paymaya.jpg" },
         new CardModel { Id = "gotyme", Name = "GoTyme", LogoUrl = "/gotyme.png" }
     };
-
+    
     protected override void OnInitialized()
     {
-        if (NavigationManager.Uri.Contains("/Withdraw_amount") || NavigationManager.Uri.Contains("/Deposit_amount"))
+        if (NavigationManager.Uri.Contains("/Withdraw_amount") ||
+        NavigationManager.Uri.Contains("/Deposit_amount"))
         {
             transactionProcess = true;
         }
     }
 
-    private async Task ScrollLeft()
+    public class CardModel
     {
-        if (Cards.Count == 0) return;
-        activeIndex = (activeIndex - 1 + Cards.Count) % Cards.Count;
-        await JS.InvokeVoidAsync("scrollToCard", activeIndex);
-    }
-
-    private async Task ScrollRight()
-    {
-        if (Cards.Count == 0) return;
-        activeIndex = (activeIndex + 1) % Cards.Count;
-        await JS.InvokeVoidAsync("scrollToCard", activeIndex);
-    }
-
-    private async Task ScrollToCard(int index)
-    {
-        activeIndex = index;
-        await JS.InvokeVoidAsync("scrollToCard", index);
+        public string Id { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string LogoUrl { get; set; } = string.Empty;
     }
 }

@@ -1,33 +1,63 @@
-﻿@using E_BankingSystem.Components.Client_page.Method
+﻿@using E_BankingSystem.Components.Client_page.Method;
+@inject NavigationManager NavigationManager
 
-@if (Card is not null)
-{
-    <div class="shipping-container d-flex justify-content-between align-items-center p-3 border rounded bg-light gap-3 mx-2">
-        <div class="d-flex align-items-center">
-            <img class="logo mx-3" src="@Card.LogoUrl" alt="@Card.Name Logo" />
-            <h6 class="mb-0">@Card.Name</h6>
-        </div>
+<div class="d-flex text-light justify-content-start gap-3 mx-5">
+    @foreach (var card in Cards)
+    {
+            <div class="shipping-container d-flex justify-content-between align-items-center p-3 border rounded bg-light gap-3">
 
-        @if (TransactionProcess)
-        {
-            <div class="form-check">
-                <input class="form-check-input"
-                       type="radio"
-                       name="selectedCard"
-                       id="@Card.Id"
-                       value="@Card.Id"
-                       checked="@((SelectedCardId == Card.Id))"
-                       @onchange="@(() => SelectedCardIdChanged.InvokeAsync(Card.Id))" />
-                <label class="form-check-label" for="@Card.Id"></label>
+                <div>
+                    <div class="d-flex align-items-center">
+                        <img class="logo mx-3" src="@card.LogoUrl" alt="@card.Name Logo" />
+                        <div>
+                            <h6 class="mb-0">@card.Name</h6>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- radio button -->
+            @if (transactionProcess)
+            {
+                        <div class="form-check">
+                            <input class="form-check-input"
+                                   type="radio"
+                                   name="selectedCard"
+                                   id="@card.Id"
+                                   value="@card.Id"
+                                   checked="@((selectedCardId == card.Id))"
+                                   @onchange="@(() => selectedCardId = card.Id)" />
+                            <label class="form-check-label" for="@card.Id"></label>
+                        </div>
+            }
+
             </div>
-        }
-    </div>
-}
-
+    }
+</div>
 
 @code {
-    [Parameter] public CardModel Card { get; set; } = default!;
-    [Parameter] public bool TransactionProcess { get; set; }
-    [Parameter] public string SelectedCardId { get; set; } = string.Empty;
-    [Parameter] public EventCallback<string> SelectedCardIdChanged { get; set; }
+    private bool transactionProcess = false;
+    private string? selectedCardId;
+
+    private List<CardModel> Cards = new()
+    {
+        new CardModel { Id = "gcash", Name = "GCash", LogoUrl = "/gcash.png" },
+        new CardModel { Id = "paymaya", Name = "PayMaya", LogoUrl = "/paymaya.jpg" },
+        new CardModel { Id = "gotyme", Name = "GoTyme", LogoUrl = "/gotyme.png" }
+    };
+
+    protected override void OnInitialized()
+    {
+        if (NavigationManager.Uri.Contains("/Withdraw_amount") ||
+        NavigationManager.Uri.Contains("/Deposit_amount"))
+        {
+            transactionProcess = true;
+        }
+    }
+
+    public class CardModel
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string LogoUrl { get; set; } = string.Empty;
+    }
 }
