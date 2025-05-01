@@ -1,3 +1,315 @@
 ﻿@page "/Update_account"
+@inject NavigationManager Navigation
 
-<h1>Hello World</h1>
+@rendermode InteractiveServer
+
+<div class="card registration mt-3 p-4 shadow-lg">
+    <main>
+        <div class="d-flex justify-content-between">
+            <h3 class="fw-bold text-light">Account Details</h3>
+            <!-- Close Button -->
+            <NavLink href="/">
+                <button class="btn-close" aria-label="Close" @onclick="OnClose"></button>
+            </NavLink>
+        </div>
+
+        <!-- Replace one of your rows like this: -->
+        <div class="row g-2 mt-2">
+            <div class="col-3">
+                <label class="text-light">First Name:</label>
+                <InputText class="form-control form-control-sm" @bind-Value="formData.FirstName" disabled="@(isEditing ? null : true)" placeholder="placeholder" />
+            </div>
+            <div class="col-3">
+                <label class="text-light">Middle Name:</label>
+                <InputText class="form-control form-control-sm" @bind-Value="formData.MiddleName" disabled="@(isEditing ? null : true)" placeholder="placeholder"/>
+            </div>
+            <div class="col-3">
+                <label class="text-light">Last Name:</label>
+                <InputText class="form-control form-control-sm" @bind-Value="formData.LastName" disabled="@(isEditing ? null : true)" placeholder="placeholder"/>
+            </div>
+            <div class="col-1">
+                <label class="text-light">Suffix:</label>
+                <InputText class="form-control form-control-sm" @bind-Value="formData.Suffix" disabled="@(isEditing ? null : true)" placeholder="placeholder" />
+            </div>
+        </div>
+
+
+        <!-- Row 3 -->
+        <div class="row g-2 mt-2">
+            <div class="col-1">
+                <label class="text-light">Age</label>
+                <InputText class="form-control form-control-sm" @bind-Value="formData.Age" disabled="@(isEditing ? null : true)" placeholder="placeholder" />
+            </div>
+
+            <div class="col-1">
+                <label class="text-light">Sex</label>
+                <InputText class="form-control form-control-sm" @bind-Value="formData.Sex" disabled="@(isEditing ? null : true)" placeholder="placeholder"/>
+            </div>
+
+            <div class="col-2">
+                <label class="text-light">Civil Status</label>
+                <InputText class="form-control form-control-sm" @bind-Value="formData.CivilStatus" disabled="@(isEditing ? null : true)" placeholder="placeholder" />
+            </div>
+
+            <div class="col">
+                <label class="text-light">Religion</label>
+                <InputText class="form-control form-control-sm" @bind-Value="formData.Religion" disabled="@(isEditing ? null : true)" placeholder="placeholder" />
+            </div>
+
+            <div class="col">
+                <label class="text-light">Contact No.</label>
+                <InputText class="form-control form-control-sm" @bind-Value="formData.ContactNumber" disabled="@(isEditing ? null : true)" placeholder="placeholder"/>
+            </div>
+
+            <div class="col">
+                <label class="text-light">Email Address</label>
+                <InputText class="form-control form-control-sm" @bind-Value="formData.Email" disabled="@(isEditing ? null : true)" placeholder="placeholder" />
+            </div>
+        </div>
+
+        <!-- Row 4 -->
+        <div class="row g-2 mt-3">
+            <label class="text-light">Full Address</label>
+
+            <div class="col">
+                <label class="text-light">Region</label>
+                <InputText class="form-control form-control-sm" @bind-Value="formData.Region" disabled="@(isEditing ? null : true)" placeholder="placeholder" />
+            </div>
+
+            <div class="col">
+                <label class="text-light">Province</label>
+                <InputText class="form-control form-control-sm" @bind-Value="formData.Province" disabled="@(isEditing ? null : true)" placeholder="placeholder"/>
+            </div>
+
+            <div class="col">
+                <label class="text-light">Postal Code</label>
+                <InputText class="form-control form-control-sm" @bind-Value="formData.PostalCode" disabled="@(isEditing ? null : true)" placeholder="placeholder"/>
+            </div>
+
+            <div class="col">
+                <label class="text-light">Municipality/City</label>
+                <InputText class="form-control form-control-sm" @bind-Value="formData.City" disabled="@(isEditing ? null : true)" placeholder="placeholder" />
+            </div>
+
+            <div class="col">
+                <label class="text-light">Barangay</label>
+                <InputText class="form-control form-control-sm" @bind-Value="formData.Barangay" disabled="@(isEditing ? null : true)" placeholder="placeholder" />
+            </div>
+
+            <div class="col">
+                <label class="text-light">Street No.</label>
+                <InputText class="form-control form-control-sm" @bind-Value="formData.StreetNumber" disabled="@(isEditing ? null : true)" placeholder="placeholder" />
+            </div>
+
+            <div class="col">
+                <label class="text-light">House No.</label>
+                <InputText class="form-control form-control-sm" @bind-Value="formData.HouseNumber" disabled="@(isEditing ? null : true)" placeholder="placeholder" />
+            </div>
+        </div>
+
+        <!-- Row 5 -->
+        <div class="row g-2 mt-3">
+            <label class="text-light">Birth Place</label>
+
+            <div class="col">
+                <label class="text-light">Region</label>
+                <InputText class="form-control form-control-sm" @bind-Value="formData.BirthRegion" disabled="@(isEditing ? null : true)" placeholder="placeholder" />
+            </div>
+
+            <div class="col">
+                <label class="text-light">Province</label>
+                <InputText class="form-control form-control-sm" @bind-Value="formData.BirthProvince" disabled="@(isEditing ? null : true)" placeholder="placeholder" />
+            </div>
+
+            <div class="col">
+                <label class="text-light">Municipality/City</label>
+                <InputText class="form-control form-control-sm" @bind-Value="formData.BirthCity" disabled="@(isEditing ? null : true)" placeholder="placeholder" />
+            </div>
+
+            <div class="col">
+                <label class="text-light">Birth Date</label>
+                <InputText class="form-control form-control-sm" @bind-Value="formData.BirthDate" disabled="@(isEditing ? null : true)" placeholder="placeholder"/>
+            </div>
+
+            <div class="col">
+                <label class="text-light">Occupation</label>
+                <InputText class="form-control form-control-sm" @bind-Value="formData.Occupation" disabled="@(isEditing ? null : true)" placeholder="placeholder" />
+            </div>
+        </div>
+
+        <div class="row g-2 mt-2">
+            <!-- Row 6 (Father's Name)-->
+            <div class="col-12">
+                <label class="text-light">Father's Name</label>
+                <div class="row g-2">
+                    <div class="col-3">
+                        <InputText class="form-control form-control-sm" @bind-Value="formData.FatherFirstName" disabled="@(isEditing ? null : true)" placeholder="placeholder"/>
+                    </div>
+                    <div class="col-3">
+                        <InputText class="form-control form-control-sm" @bind-Value="formData.FatherMiddleName" disabled="@(isEditing ? null : true)" placeholder="placeholder"/>
+                    </div>
+                    <div class="col-3">
+                        <InputText class="form-control form-control-sm" @bind-Value="formData.FatherLastName" disabled="@(isEditing ? null : true)" placeholder="placeholder"/>
+                    </div>
+                    <div class="col-1">
+                        <InputText class="form-control form-control-sm" @bind-Value="formData.FatherSuffix" disabled="@(isEditing ? null : true)" placeholder="placeholder" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 7 (Mother's Name)-->
+            <div class="col-12">
+                <label class="text-light">Mother's Maiden Name</label>
+                <div class="row g-2">
+                    <div class="col-3">
+                        <InputText class="form-control form-control-sm" @bind-Value="formData.MotherFirstName" disabled="@(isEditing ? null : true)" placeholder="placeholder" />
+                    </div>
+                    <div class="col-3">
+                        <InputText class="form-control form-control-sm" @bind-Value="formData.MotherMiddleName" disabled="@(isEditing ? null : true)" placeholder="placeholder"/>
+                    </div>
+                    <div class="col-3">
+                        <InputText class="form-control form-control-sm" @bind-Value="formData.MotherLastName" disabled="@(isEditing ? null : true)" placeholder="placeholder" />
+                    </div>
+                    <div class="col-1">
+                        <InputText class="form-control form-control-sm" @bind-Value="formData.MotherSuffix" disabled="@(isEditing ? null : true)" placeholder="placeholder" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 8 (Beneficiary's Name) -->
+            <div class="col-12">
+                <label class="text-light">Beneficiary's Name</label>
+                <div class="row g-2">
+                    <div class="col-3">
+                        <InputText class="form-control form-control-sm" @bind-Value="formData.BeneficiaryFirstName"disabled="@(isEditing ? null : true)" placeholder="placeholder"/>
+                    </div>
+                    <div class="col-3">
+                        <InputText class="form-control form-control-sm" @bind-Value="formData.BeneficiaryMiddleName" disabled="@(isEditing ? null : true)" placeholder="placeholder"/>
+                    </div>
+                    <div class="col-3">
+                        <InputText class="form-control form-control-sm" @bind-Value="formData.BeneficiaryLastName" disabled="@(isEditing ? null : true)" placeholder="placeholder" />
+                    </div>
+                    <div class="col-1">
+                        <InputText class="form-control form-control-sm" @bind-Value="formData.BeneficiarySuffix" disabled="@(isEditing ? null : true)" placeholder="placeholder" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 mt-3">
+            <!-- Upload Government ID -->
+            <div class="col-md-4">
+                <label class="text-light">Upload Government Valid ID (Front & Back)</label>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-light w-75">View</button>
+                </div>
+            </div>
+
+            <!-- Upload 1x1 Picture -->
+            <div class="col-md-4">
+                <label class="text-light">Upload 1x1 Picture</label>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-light w-75">View</button>
+                </div>
+            </div>
+
+            <!-- TIN -->
+            <div class="col-md-3">
+                <label class="text-light">Tax Identification Number</label>
+                <InputText class="form-control form-control-sm" @bind-Value="formData.TIN" disabled="@(isEditing ? null : true)" />
+            </div>
+        </div>
+
+        <!-- Border -->
+        <div class="d-flex align-items-center mt-5 mb-3">
+            <span class="text-light me-2">Sign In Credentials</span>
+            <div class="flex-grow-1">
+                <hr class="m-0" style="border: 1px solid white; opacity: 100%;" />
+            </div>
+        </div>
+
+        <!-- Credentials Inputs -->
+        <div class="row g-2 mb-3">
+            <div class="col-3">
+                <label class="text-light">Username</label>
+                <InputText class="form-control form-control-sm" @bind-Value="formData.Username"disabled="@(isEditing ? null : true)" />
+            </div>
+
+            <div class="col-3">
+                <label class="text-light">Password</label>
+                <InputText class="form-control form-control-sm" @bind-Value="formData.Password" disabled="@(isEditing ? null : true)" />
+            </div>
+        </div>
+
+        <!-- Button -->
+        <div class="d-flex justify-content-end gap-1 mt-3">
+            <!-- Cancel button -->
+            <button class="btn btn-danger btn-secondary mx-2" @onclick="OnClose"> Cancel</button>
+
+            <!-- Edit button -->
+            <button class="btn btn-primary btn-success mx-2" @onclick="ToggleEdit">
+                @(isEditing ? "Save Changes" : "Edit Details")
+            </button>
+
+        </div>
+    </main>
+</div>
+
+@code
+{
+    private bool isEditing = false;
+
+    private AccountInfoModel formData = new();
+
+    private void ToggleEdit()
+    {
+        isEditing = !isEditing;
+    }
+
+    private void OnClose()
+    {
+        Navigation.NavigateTo($"/View_account");
+    }
+
+    public class AccountInfoModel
+    {
+        public string FirstName { get; set; } = "";
+        public string MiddleName { get; set; } = "";
+        public string LastName { get; set; } = "";
+        public string Suffix { get; set; } = "";
+        public string Age { get; set; } = "";
+        public string Sex { get; set; } = "";
+        public string CivilStatus { get; set; } = "";
+        public string Religion { get; set; } = "";
+        public string ContactNumber { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string Region { get; set; } = "";
+        public string Province { get; set; } = "";
+        public string City { get; set; } = "";
+        public string Barangay { get; set; } = "";
+        public string PostalCode { get; set; } = "";
+        public string StreetNumber { get; set; } = "";
+        public string HouseNumber { get; set; } = "";
+        public string BirthRegion { get; set; } = "";
+        public string BirthProvince { get; set; } = "";
+        public string BirthCity { get; set; } = "";
+        public string BirthDate { get; set; } = "";
+        public string Occupation { get; set; } = "";
+        public string FatherFirstName { get; set; } = "";
+        public string FatherMiddleName { get; set; } = "";
+        public string FatherLastName { get; set; } = "";
+        public string FatherSuffix { get; set; } = "";
+        public string MotherFirstName { get; set; } = "";
+        public string MotherMiddleName { get; set; } = "";
+        public string MotherLastName { get; set; } = "";
+        public string MotherSuffix { get; set; } = "";
+        public string BeneficiaryFirstName { get; set; } = "";
+        public string BeneficiaryMiddleName { get; set; } = "";
+        public string BeneficiaryLastName { get; set; } = "";
+        public string BeneficiarySuffix { get; set; } = "";
+        public string TIN { get; set; } = "";
+        public string Username { get; set; } = "";
+        public string Password { get; set; } = "";
+    }
+
+}
