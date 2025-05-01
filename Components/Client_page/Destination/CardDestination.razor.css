@@ -1,0 +1,25 @@
+﻿.shipping-container {
+    max-width: 600px;
+    color: black;
+}
+
+.extra-small {
+    font-size: 11px;
+    color: #aaa;
+}
+
+.logo {
+    height: 50px;
+    max-width: auto;
+    margin: 0;
+    display: flex;
+    justify-content: start;
+}
+
+@media (max-width: 768px) {
+    .logo {
+        justify-content: center;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+}
