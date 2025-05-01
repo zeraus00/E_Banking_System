@@ -189,7 +189,7 @@
 					<div class="col">
 						<label class="text-light">Province</label>
 						<select class="form-select form-select-sm" value="selectedProvince" @onchange="async _ => await LoadCitiesAsync(_)" required>
-							<option value="" disabled hidden>@provincePlaceHolder</option>
+							<option value="@provincePlaceHolder" hidden>@provincePlaceHolder</option>
 							@foreach (var p in provincesFromRegion)
 							{
 								<option value="@p.code">@p.name</option>
@@ -533,7 +533,6 @@
 	private List<CityViewModel> citiesFromProvince = new();
 	private List<BarangayViewModel> barangaysFromCity = new();
 
-
 	// method for getting user address
 	protected override async Task OnInitializedAsync()
 	{
@@ -641,7 +640,7 @@
 		try
 		{
 			error = string.Empty; // reset previous error
-			//	Get the value of the selection
+										//	Get the value of the selection
 			selectedRegion = e?.Value?.ToString() ?? "";
 
 			// this will reset if the user select new region
@@ -660,7 +659,7 @@
 			?? new();
 			if (provincesFromRegion.Any())
 			{
-				selectedProvince = provincesFromRegion[0].code.GetString()!;
+				selectedProvince = provincePlaceHolder;
 			}
 			//	Rerender component
 			StateHasChanged();
