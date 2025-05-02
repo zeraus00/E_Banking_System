@@ -81,7 +81,17 @@
                         {
                             <td>@transaction.MainAccount.AccountName</td>
                             <td>@transaction.CounterAccount.AccountName</td>
-                        } else
+                        } else if (transaction.TransactionType.TransactionTypeId == (int)TransactionTypes.Withdrawal)
+                        {
+                            <td>@transaction.ExternalVendor.VendorName</td>
+                            <td>--</td>
+                        }
+                        else if (transaction.TransactionType.TransactionTypeId == (int)TransactionTypes.Deposit)
+                        {
+                            <td>--</td>
+                            <td>@transaction.ExternalVendor.VendorName</td>
+                        }
+                        else
                         {
                             <td>--</td>
                             <td>--</td>

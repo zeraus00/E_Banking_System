@@ -265,7 +265,7 @@ namespace Services
 
                 //  Include TransactionType navigation property in query.
                 var query = transactionRepository
-                    .ComposeQuery(includeTransactionType: true, includeMainAccount: true, includeCounterAccount: true);
+                    .ComposeQuery(includeTransactionType: true, includeMainAccount: true, includeCounterAccount: true, includeExternalVendor: true);
                 query = transactionRepository
                     .FilterQuery(query, transactionTypeId, transactionStartDate, transactionEndDate);
                 
