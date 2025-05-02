@@ -1,10 +1,4 @@
-﻿.dashboard-container {
-    padding: 20px;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: white;
-}
-
-.date-picker {
+﻿.date-picker {
     padding: 5px;
     border: 1px solid #ccc;
     border-radius: 5px;
@@ -40,19 +34,3 @@
     font-weight: normal;
 }
 
-
-.scroll-container {
-    display: flex;
-    align-content: baseline;
-    align-items: baseline;
-    justify-content: center;
-}
-
-.arrow-ud {
-    background: rgba(0, 0, 0, 0.3);
-    border: none;
-    border-radius: 50%;
-    padding: 0.5rem;
-    cursor: pointer;
-    z-index: 10;
-}
