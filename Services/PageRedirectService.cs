@@ -42,18 +42,10 @@ namespace Services
         /// Redirects the user based on their role.
         /// </summary>
         /// <param name="user"></param>
-        public void RedirectBasedOnRole(ClaimsPrincipal user) 
+        public string GetRedirectBasedOnRole(ClaimsPrincipal user) 
         {
             int roleId = Convert.ToInt32(user.FindFirst(c => c.Type == CustomClaimTypes.ROLE_ID)?.Value ?? "0");
-            var redirectUrl = this.GetRedirectBasedOnRole(roleId);
-            
-            try
-            {
-                this.redirectWithNavigationManager(redirectUrl);
-            } catch (Exception)
-            {
-                this.redirectWithHttpContext(redirectUrl);
-            }
+            return this.GetRedirectBasedOnRole(roleId);
         }
         /// <summary>
         /// Redirects the user to the specified url using HttpContext.
@@ -77,7 +69,7 @@ namespace Services
         /// Gets the redirect url based on the role id.
         /// </summary>
         /// <param name="roleId">The role ID of the user.</param>
-        public string GetRedirectBasedOnRole(int roleId)
+        private string GetRedirectBasedOnRole(int roleId)
         {
             return roleId switch
             {

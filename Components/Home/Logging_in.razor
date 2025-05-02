@@ -31,8 +31,17 @@
 					//	Start session.
 					await userSessionService.StartSessionBasedOnRole(user);
 
-					//	Redirect based on role.
-					redirectService.RedirectBasedOnRole(user);
+					// NOTE:
+					// StartSessionBasedOnRole uses ProtectedSessionStorage,
+					// which internally relies on JavaScript interop.
+					// In Blazor Server, JS interop is only safe AFTER the first render,
+					// because the circuit isn't guaranteed to be connected before that.
+					//
+					// That's why this logic must be placed in OnAfterRenderAsync (not OnInitializedAsync),
+					// and any navigation must also be wrapped in InvokeAsync to avoid JSDisconnectedException.
+					await Task.Delay(500);
+					var redirectUrl = redirectService.GetRedirectBasedOnRole(user);
+					await InvokeAsync(() => redirectService.redirectWithNavigationManager(redirectUrl));	//	Redirect based on role.
 					return;
 				}
 				else
