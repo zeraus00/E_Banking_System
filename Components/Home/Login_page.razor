@@ -140,7 +140,8 @@
 
 		//	If already authenticated, redirect user based on role.
 		if (claimsHelperService.IsAuthenticated(user)) {
-			redirectService.RedirectBasedOnRole(user);
+			string redirectUrl = redirectService.GetRedirectBasedOnRole(user);
+			redirectService.redirectWithHttpContext(redirectUrl);
 		}
 	}
 
