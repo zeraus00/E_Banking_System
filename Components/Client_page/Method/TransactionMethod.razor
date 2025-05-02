@@ -49,7 +49,7 @@
     protected override void OnInitialized()
     {
         // Default select the first card in the list
-        selectedCardId = Cards.FirstOrDefault()?.Id;
+        selectedCardId = Cards.FirstOrDefault()?.Id ?? 0;
 
         if (NavigationManager.Uri.Contains("/Withdraw_amount") ||
             NavigationManager.Uri.Contains("/Deposit_amount"))
@@ -58,7 +58,7 @@
         }
     }
 
-    private void SelectCard(string cardId)
+    private void SelectCard(int cardId)
     {
         // Set the selected card ID when a card is clicked
         selectedCardId = cardId;

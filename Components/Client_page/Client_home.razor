@@ -241,7 +241,11 @@
                 //  Throws AccountNotFoundException is account is not found.
                 activeAccount = await userDataService.GetAccountAsync(userSession.ActiveAccountId, includeTransactions: true);
                 _currentBalance = activeAccount.Balance;
-                recentTransactions = await userDataService.GetRecentAccountTransactionsAsync(userSession.ActiveAccountId, 3);
+                recentTransactions = await userDataService
+                    .GetRecentAccountTransactionsAsync(
+                        userSession.ActiveAccountId,
+                        pageSize: 3
+                    );
 
                 //  Reload component.
                 StateHasChanged();

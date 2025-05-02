@@ -17,7 +17,8 @@
             {
                 transactionsList = await query
                      .Where(t => t.MainAccountId == mainAccountId)
-                     .Reverse()
+                     .OrderByDescending(t => t.TransactionDate)
+                     .ThenByDescending(t => t.TransactionTime)
                      .Skip(skipCount)
                      .Take(takeCount)
                      .ToListAsync();
@@ -25,7 +26,8 @@
             {
                 transactionsList = await _context.Transactions
                     .Where(t => t.MainAccountId == mainAccountId)
-                    .Reverse()
+                    .OrderByDescending(t => t.TransactionDate)
+                    .ThenByDescending(t => t.TransactionTime)
                     .Skip(skipCount)
                     .Take(takeCount)
                     .ToListAsync();

@@ -280,7 +280,7 @@ namespace Services
                 //  Return the list of transactions.
                 int skipCount = (pageNumber-1) * pageSize;
                 int takeCount = pageSize;
-                var transactionList = await transactionRepository.GetRecentTransactionsAsListAsync(accountId, takeCount, skipCount, query);
+                var transactionList = await transactionRepository.GetRecentTransactionsAsListAsync(accountId, skipCount, takeCount, query);
 
                 if (transactionList.Any())
                 {
@@ -296,9 +296,8 @@ namespace Services
             }
         }
 
-        public List<Transaction> GetTransactionListPage(List<Transaction> transactionList, int pageNumber)
+        public List<Transaction> GetTransactionListPage(List<Transaction> transactionList, int pageNumber, int pageSize = 10)
         {
-            int pageSize = 10;
             int skipCount = (pageNumber - 1) * pageSize;
             int takeCount = pageSize;
             return transactionList.Skip(skipCount).Take(takeCount).ToList();
