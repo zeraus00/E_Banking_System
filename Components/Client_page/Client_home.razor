@@ -16,8 +16,12 @@
                     <h5>Welcome Back</h5>
                     <div class="d-flex align-items-baseline gap-4">
                     <h2 class="m-0"><strong>@(string.IsNullOrWhiteSpace(_clientName) ? "clientName" : _clientName)</strong></h2>
-                        <h5 class="text-light fw-lighter m-0">
+                    <h5 class="text-light fw-lighter m-0">
                         @(string.IsNullOrWhiteSpace(_accountNumber) ? "XXXX-XXXX-XXXX" : FormatHelper.AccountNumberFormatter(_accountNumber))
+                    </h5>
+
+                    <h5 class="text-light fw-lighter m-0">
+                        _accountStatus : Active
                     </h5>
 
                     <div class="w-auto">
