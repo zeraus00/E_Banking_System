@@ -22,6 +22,12 @@ main {
     padding: 0;
 }
 
+.dashboard-container {
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: white;
+}
+
 .top-bar {
     display: flex;
     justify-content: space-between;
@@ -274,17 +280,16 @@ main {
     }
 }
 
-.dashboard-container {
-    padding: 20px;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: white;
-}
-
 .scroll-container {
     display: flex;
     align-content: baseline;
     align-items: baseline;
-    justify-content: center;
+    justify-content: end;
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    gap: 1rem;
+    z-index: 1000;
 }
 
 .arrow-ud {
@@ -294,6 +299,25 @@ main {
     padding: 0.5rem;
     cursor: pointer;
     z-index: 10;
+    width: 3rem;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    .arrow-ud:hover {
+        background-color: rgba(255, 255, 255, 0.3);
+        color: black;
+    }
+
+.page-container {
+    display: flex;
+    align-items: baseline; 
+    justify-content: start; 
+    position: fixed;
+    bottom: 2rem;
+    z-index: 1000; 
 }
 
 .square-btn {

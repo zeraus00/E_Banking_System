@@ -26,5 +26,15 @@ namespace Helpers
         {
             return balance.HasValue ? $"₱{balance.Value.ToString("#,0.00")}" : "₱0.00";
         }
+
+        public static string StringBalanceFormatter(string? balanceString)
+        {
+            if (decimal.TryParse(balanceString, out var balance))
+            {
+                return $"₱{balance.ToString("#,0.00")}";
+            }
+            return "₱0.00";
+        }
+
     }
 }
