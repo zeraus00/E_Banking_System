@@ -124,14 +124,18 @@
 
     <div class="scroll-container gap-3 mx-5" >
         <!-- Left Arrow -->
-        <button class="arrow-ud">
-            <i class="bi bi-chevron-left text-light" @onclick="PreviousPage"></i>
+        <button class="arrow-ud" @onclick="PreviousPage">
+            <i class="bi bi-chevron-left text-light" ></i>
         </button>
 
         <!-- Right Arrow -->
-        <button class="arrow-ud">
-            <i class="bi bi-chevron-right text-light" @onclick="NextPage"></i>
+        <button class="arrow-ud" @onclick="NextPage">
+            <i class="bi bi-chevron-right text-light" ></i>
         </button>
+    </div>
+
+    <div class="page-container text-center text-light mt-2 mb-3 mx-5">
+        Page @pageNumber of @masterListAvailablePages
     </div>
 
 </div>
@@ -191,23 +195,17 @@
 
     private async Task NextPage()
     {
-        pageNumber++;
-        if (pageNumber > masterListAvailablePages)
+        if (pageNumber < masterListAvailablePages)
+        {
+            pageNumber++;
+        }
+        else if (masterListPageNumber < masterListAvailablePages)
         {
             masterListPageNumber++;
             pageNumber = 1;
-            await FilterTransactionsAsync();
+        }
 
-            if (masterListAvailablePages == 0)
-            {
-                await PreviousPage();
-                return;
-            }
-        }
-        else
-        {
-            LoadTransactionListPage(pageNumber);
-        }
+        await FilterTransactionsAsync();
     }
 
     private async Task PreviousPage()
@@ -215,14 +213,14 @@
         if (pageNumber > 1)
         {
             pageNumber--;
-            LoadTransactionListPage(pageNumber);
-        } 
+        }
         else if (masterListPageNumber > 1)
         {
             masterListPageNumber--;
             pageNumber = masterListAvailablePages;
-            await FilterTransactionsAsync();
         }
+
+        await FilterTransactionsAsync();
     }
 
     private async Task ClearFilterAsync()

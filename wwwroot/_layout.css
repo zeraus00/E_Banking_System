@@ -311,6 +311,15 @@ main {
         color: black;
     }
 
+.page-container {
+    display: flex;
+    align-items: baseline; 
+    justify-content: start; 
+    position: fixed;
+    bottom: 2rem;
+    z-index: 1000; 
+}
+
 .square-btn {
     min-width: 80px;
     min-height: 80px;
