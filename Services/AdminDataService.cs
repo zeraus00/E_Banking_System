@@ -5,8 +5,6 @@ using Data.Repositories.Auth;
 using Data.Repositories.Finance;
 using Data.Repositories.User;
 using Exceptions;
-using ViewModels;
-using System.Text.Json;
 
 namespace Services
 {
@@ -20,9 +18,6 @@ namespace Services
             _userSessionService = userSessionService;
         }
 
-        public async Task StorePendingAccountSession(Account account) => await _userSessionService.UpdateAdminControlledSession(SessionSchemes.PENDING_ACCOUNT_SESSION, account.AccountId);
-        public async Task<int> GetPendingAccountSession() => ((JsonElement)await _userSessionService.GetAdminControlledSession(SessionSchemes.PENDING_ACCOUNT_SESSION)).GetInt32();
-        public async Task DeletePendingAccountSession() => await _userSessionService.EndAdminControlledSession(SessionSchemes.PENDING_ACCOUNT_SESSION);
         /// <summary>
         /// Asynchronously filters and retrieves a list of pending accounts based on optional criteria.
         /// </summary>

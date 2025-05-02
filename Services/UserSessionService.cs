@@ -5,7 +5,7 @@ using Data.Models.Finance;
 using Data.Models.User;
 using Exceptions;
 using System.Security.Claims;
-using ViewModels;
+using ViewModels.Sessions;
 
 namespace Services
 {
@@ -240,6 +240,12 @@ namespace Services
             }
         }
 
+        public async Task UpdateUserSession(UserSession userSession)
+            => await _sessionStorage.StoreSessionAsync<UserSession>(SessionSchemes.USER_SESSION, userSession);
+
+        public async Task UpdateAdminSession(AdminSession adminSession)
+            => await _sessionStorage.StoreSessionAsync<AdminSession>(SessionSchemes.ADMIN_SESSION, adminSession);
+
         /// <summary>
         /// Updates the session details with the current active account selected by the user.
         /// Fetches the session details from the session storage, updates it, then stores it back.s
@@ -276,45 +282,6 @@ namespace Services
                 throw;
             }
 
-        }
-        public async Task<object> GetAdminControlledSession(string sessionScheme, AdminSession? adminSession = null) 
-        {
-            try
-            {
-                if (adminSession is null)
-                    adminSession = await GetAdminSession();
-
-                var sessions = adminSession.Sessions;
-                return sessions.GetValueOrDefault(sessionScheme) ?? throw new AdminControlledSessionNotFound(sessionScheme);
-            }
-            catch (SessionNotFoundException)
-            {
-                throw;
-            }
-            catch (AdminControlledSessionNotFound)
-            {
-                throw;
-            }
-        }
-        public async Task EndAdminControlledSession(string sessionScheme) => await UpdateAdminControlledSession(sessionScheme, null);
-        public async Task UpdateAdminControlledSession(string sessionScheme, object? value)
-        {
-            try
-            {
-                AdminSession adminSession = await GetAdminSession();
-
-                adminSession.Sessions[sessionScheme] = value;
-
-                await _sessionStorage.StoreSessionAsync(SessionSchemes.ADMIN_SESSION, adminSession);
-            }
-            catch (SessionNotFoundException)
-            {
-                throw;
-            }
-            catch (AccountNotFoundException)
-            {
-                throw;
-            }
         }
         /// <summary>
         /// End user session.

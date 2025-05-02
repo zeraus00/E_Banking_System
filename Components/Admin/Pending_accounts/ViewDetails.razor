@@ -5,6 +5,7 @@
 @rendermode InteractiveServer
 @layout AdminMainLayout
 
+@inject AdminControlledSessionService adminControlledSessionService
 @inject AdminDataService adminDataService
 @inject PageRedirectService redirectService
 @inject UserDataService userDataService
@@ -253,7 +254,6 @@
 
 @code
 {
-    private AdminSession admminSession { get; set; } = default!;
     private int accountId { get; set; }
     private UserAuth? userAuth { get; set; }
     private UserInfo? userInfo { get; set; } 
@@ -268,7 +268,8 @@
         {
             try
             {
-                accountId = await adminDataService.GetPendingAccountSession();
+                PendingAccountSession pendingAccountSession = await adminControlledSessionService.GetPendingAccountSession();
+                accountId = pendingAccountSession.PendingAccountId;
                 userInfo = await adminDataService.GetAccountPrimaryOwner(accountId);
 
                 if (userInfo.AddressId is int addressId)
@@ -291,7 +292,7 @@
                 Console.WriteLine("ACCOUNT_NOT_FOUND: " + ex.Message);
                 error = ex.Message;
             }
-            catch (AdminControlledSessionNotFound)
+            catch (ControlledSessionNotFound)
             {
                 redirectService.redirectWithNavigationManager(PageRoutes.DASHBOARD);
             }
@@ -303,7 +304,7 @@
         try
         {
             await adminDataService.UpdatePendingAccountStatus(accountId, (int)AccountStatusTypes.Denied);
-            await adminDataService.DeletePendingAccountSession();
+            await adminControlledSessionService.ClearPendingAccountSession();
             redirectService.redirectWithNavigationManager(PageRoutes.PENDING_ACCOUNTS);
         }
         catch (AccountNotFoundException ex)
@@ -322,7 +323,7 @@
         try
         {
             await adminDataService.UpdatePendingAccountStatus(accountId, (int)AccountStatusTypes.Active);
-            await adminDataService.DeletePendingAccountSession();
+            await adminControlledSessionService.ClearPendingAccountSession();
             redirectService.redirectWithNavigationManager(PageRoutes.PENDING_ACCOUNTS);
         }
         catch (AccountNotFoundException ex)

@@ -9,6 +9,7 @@
 @inject SessionStorageService sessionStorageService
 @inject TransactionService transactionService
 @inject UserDataService userDataService
+@inject UserControlledSessionService userControlledSessionService
 @inject UserSessionService userSessionService
 
 <div class="page">
@@ -46,7 +47,7 @@
                     <div class="d-flex flex-column text-start text-light mb-0">
                         <h5 class="mb-1 fw-bold">@clientName</h5>
                         <p class="m-0"><strong>Account No.:</strong> @FormatHelper.AccountNumberFormatter(accountNumber)</p>
-                        <p class="m-0"><strong>Payment Method:</strong> _cardPayment</p>
+                        <p class="m-0"><strong>Payment Method:</strong> @cardPayment</p>
                         <p class="m-0"><strong>Date:</strong> @date</p>
                         <p class="m-0"><strong>Transaction No.:</strong> @transactionNumber</p>
                     </div>
@@ -79,7 +80,11 @@
 
 @code
 {
+    private UserSession userSession { get; set; } = default!;
+    private TransactionSession transactionSession { get; set; } = default!;
+
     private string accountNumber = "Loading...";
+    private string cardPayment = "Loading...";
     private string clientName = "Loading...";
     private decimal currentBalance = 0.00m;
     private decimal depositAmount = 0.00m;
@@ -96,11 +101,12 @@
             {
                 //  Fetch user and transaction session details from session storage.
                 //  Throws SessionNotFoundException if session is not found.
-                UserSession userSession = await userSessionService.GetUserSession();
-                TransactionSession transactionSession = await sessionStorageService.FetchSessionAsync<TransactionSession>(SessionSchemes.DEPOSIT_SESSION);
+                userSession = await userSessionService.GetUserSession();
+                transactionSession = await userControlledSessionService.GetTransactionSessionAsync(userSession);
 
                 //  Set display data.
                 accountNumber = userSession.ActiveAccountNumber;
+                cardPayment = ExternalVendors.ExternalVendorList[transactionSession.ExternalVendorId!.Value-1];
                 clientName = userSession.ActiveAccountName;
                 currentBalance = transactionSession.CurrentBalance;
                 depositAmount = transactionSession.Amount;
@@ -110,7 +116,7 @@
                 //  Reload component.
                 StateHasChanged();
             }
-            catch (SessionNotFoundException)
+            catch (ControlledSessionNotFound)
             {
                 //  Redirect user to CLIENT_HOME if they try to access the page without an ongoing transaction session.
                 redirectService.redirectWithNavigationManager(PageRoutes.CLIENT_HOME);
@@ -123,7 +129,14 @@
         try
         {
             //  Process deposit transaction.
-            await transactionService.ProcessTransactionAsync(SessionSchemes.DEPOSIT_SESSION);
+            transactionSession = await transactionService.ProcessTransactionAsync(transactionSession);
+
+            //  Store updated transaction details to user session.
+            await userControlledSessionService.SetTransactionSessionAsync(
+                (int)TransactionTypes.Deposit,
+                transactionSession,
+                userSession
+            );
 
             //  Redirect to DEPOSIT_RECEIPT page.
             redirectService.redirectWithNavigationManager(PageRoutes.DEPOSIT_RECEIPT);
@@ -136,7 +149,9 @@
     private async Task CancelDeposit()
     {
         //  Persist cancelled transaction to database and delete transaction details from session.
-        await sessionStorageService.DeleteSessionAsync(SessionSchemes.DEPOSIT_SESSION);
+        await transactionService.StoreFailedTransactionAsync(transactionSession, TransactionStatus.CANCELLED);
+
+        await userControlledSessionService.ClearTransactionSessionAsync(userSession);
 
         //  Redirect to CLIENT_HOME.
         redirectService.redirectWithNavigationManager(PageRoutes.CLIENT_HOME);

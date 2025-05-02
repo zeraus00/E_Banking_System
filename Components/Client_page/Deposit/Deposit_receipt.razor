@@ -9,6 +9,7 @@
 @inject SessionStorageService sessionStorageService
 @inject UserDataService userDataService
 @inject UserSessionService userSessionService
+@inject UserControlledSessionService userControlledSessionService
 
 
 <div class="page">
@@ -33,7 +34,7 @@
                     <h4>Total Amount Deposited: </h4>
                     <h2 class="fw-bolder mx-5">@FormatHelper.BalanceFormatter(depositAmount)</h2>
                 </div>            
-                
+
                 <h6 class="mx-5 my-3">
                     <strong>Current Balance: </strong>@FormatHelper.BalanceFormatter(currentBalance)
                 </h6>
@@ -42,7 +43,7 @@
                     <div class="d-flex flex-column text-start mb-0">
                         <h5 class="mb-1">@clientName</h5>
                         <p class="m-0"><strong>Account No.:</strong> @FormatHelper.AccountNumberFormatter(accountNumber)</p>
-                        <p class="m-0"><strong>Payment Method:</strong> _cardPayment</p>
+                        <p class="m-0"><strong>Payment Method:</strong> @cardPayment</p>
                         <p class="m-0"><strong>Date:</strong> @date</p>
                         <p class="m-0"><strong>Confirmation No.:</strong> @confirmationNumber</p>
                     </div>
@@ -57,7 +58,10 @@
 
 @code
 {
+    private UserSession userSession { get; set; } = default!;
+    private TransactionSession transactionSession { get; set; } = default!;
     private string accountNumber = "Loading...";
+    private string cardPayment = "Loading...";
     private string clientName = "Loading...";
     private decimal currentBalance = 0.00m;
     private decimal depositAmount = 0.00m;
@@ -73,11 +77,11 @@
             {
                 //  Fetch user and transaction session details from session storage.
                 //  Throws SessionNotFoundException if session is not found.
-                UserSession userSession = await userSessionService.GetUserSession();
-                TransactionSession transactionSession = await sessionStorageService.FetchSessionAsync<TransactionSession>(SessionSchemes.DEPOSIT_SESSION);
-
+                userSession = await userSessionService.GetUserSession();
+                transactionSession = await userControlledSessionService.GetTransactionSessionAsync(userSession);
                 //  Set display data.
                 accountNumber = userSession.ActiveAccountNumber;
+                cardPayment = ExternalVendors.ExternalVendorList[transactionSession.ExternalVendorId!.Value-1];
                 clientName = userSession.ActiveAccountName;
                 currentBalance = transactionSession.CurrentBalance;
                 depositAmount = transactionSession.Amount;
@@ -87,7 +91,7 @@
                 //  Reload component.
                 StateHasChanged();
             } 
-            catch (SessionNotFoundException)
+            catch (ControlledSessionNotFound)
             {
                 //  Redirect users to client home if there is no ongoing transaction session.
                 redirectService.redirectWithNavigationManager(PageRoutes.CLIENT_HOME);
@@ -98,7 +102,7 @@
     private async Task GoHome()
     {
         //  Delete transaction session details from session storage.
-        await sessionStorageService.DeleteSessionAsync(SessionSchemes.DEPOSIT_SESSION);
+        await userControlledSessionService.ClearTransactionSessionAsync(userSession);
 
         //  Redirect user to client home.
         redirectService.redirectWithNavigationManager(PageRoutes.CLIENT_HOME);
