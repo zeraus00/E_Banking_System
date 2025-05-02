@@ -7,15 +7,15 @@
 
 <AuthorizeView Roles = "@RoleNames.USER">
     <Authorized>
-            <!-- Side NavBar Layout -->
-            <nav class="sidebar">
-                <!-- Top Row -->
-                <div class="top-row border-bottom">
+        <!-- Side NavBar Layout -->
+        <nav class="sidebar">
+            <!-- Top Row -->
+            <div class="top-row border-bottom">
 
-                    <!-- Profile Picture Container (Draft) -->
-                    <div class="profile-picture_container">
-                        <div class="profile-placeholder"></div>
-                        @* 
+                <!-- Profile Picture Container (Draft) -->
+                <div class="profile-picture_container">
+                    <div class="profile-placeholder"></div>
+                    @* 
                         <label for="fileInput">
                             @if (previewImage != null)
                             {
@@ -33,67 +33,67 @@
                             <i class="fas fa-camera"></i>
                         </div>
                         <InputFile id="fileInput" style="display: none;" OnChange="HandleSelected" accept="image/*" /> *@
-                    </div>
-
-                    <div class="text-light mt-3">
-                        <p class="m-0 p-0">@_fullName</p>
-                        <p style="font-size: small;">@_email</p>
-                    </div>
-
                 </div>
 
-                <!-- Sidebar Navigation Links (Middle Row)-->
-                <div class="position-relative" onclick="document.querySelector('.toggler').click()">
-                    <p class="position-absolute text-light top-0 start-0 mx-4 my-3 fw-lighter" style="font-size: 0.75rem;">USER</p>
-                    <div class="middle-row border-bottom">
-                        <nav class="flex-column">
-                            <div class="nav-item px-3 pt-5">
-                                <NavLink class="nav-link" href="@clientHomePage" Match="NavLinkMatch.All">Home</NavLink>
-                            </div>
-                            <div class="nav-item px-3">
-                                <NavLink class="nav-link" href="@accountsPage">My Accounts</NavLink>
-                            </div>
-                            <div class="nav-item px-3">
-                                <button class="nav-link @(hasTransactionError ? "error-link" : "")" @onclick="TryRedirectToWithdrawPage">Withdraw</button>
-                            </div>
-                            <div class="nav-item px-3">
-                                <button class="nav-link @(hasTransactionError ? "error-link" : "")" @onclick="TryRedirectToDepositPage">Deposit</button>
-                            </div>
-                            <div class="nav-item px-3">
-                                <NavLink class="nav-link lh-sm" href="@transactionsPage">Transactions</NavLink>
-                            </div>
-                            <div class="nav-item px-3">
-                                <button class="nav-link @(hasTransactionError ? "error-link" : "")" @onclick="TryRedirectToWithdrawPage">Withdraw</button>
-                            </div>
-                            <div class="nav-item px-3">
-                                <button class="nav-link @(hasTransactionError ? "error-link" : "")" @onclick="TryRedirectToDepositPage">Deposit</button>
-                            </div>
-                            <div class="nav-item px-3">
-                                <NavLink class="nav-link lh-sm" href="@applyLoanPage">Apply for Loan</NavLink>
-                            </div>
-                            <div class="nav-item px-3">
-                                <NavLink class="nav-link lh-sm" href="@loanBalancePage">Check Loan Balance</NavLink>
-                            </div>
-                        </nav>
-                    </div>
+                <div class="text-light mt-3">
+                    <p class="m-0 p-0">@_fullName</p>
+                    <p style="font-size: small;">@_email</p>
                 </div>
 
-                <!-- Sidebar Navigation Links (Bottom Row) -->
-                <div class="position-relative" onclick="document.querySelector('.toggler').click()">
-                    <p class="position-absolute text-light top-0 start-0 mx-4 my-3 fw-lighter" style="font-size: 0.75rem;">OTHERS</p>
-                    <div class="bottom-row">
-                        <nav class="flex-column">
-                            <div class="nav-item px-3 pt-5">
-                                <NavLink class="nav-link" href="/Settings_page" Match="NavLinkMatch.All">Settings</NavLink>
-                            </div>
-                            <div class="nav-item px-3">
-                                <button class="nav-link" @onclick="LogOutAsync"> Logout</button>
-                            </div>
-                        </nav>
-                    </div>
-                </div>
+            </div>
 
-            </nav>
+            <!-- Sidebar Navigation Links (Middle Row)-->
+            <div class="position-relative" onclick="document.querySelector('.toggler').click()">
+                <p class="position-absolute text-light top-0 start-0 mx-4 my-3 fw-lighter" style="font-size: 0.75rem;">USER</p>
+                <div class="middle-row border-bottom">
+                    <nav class="flex-column">
+                        <div class="nav-item px-3 pt-5">
+                            <NavLink class="nav-link" href="@clientHomePage" Match="NavLinkMatch.All">Home</NavLink>
+                        </div>
+                        <div class="nav-item px-3">
+                            <NavLink class="nav-link" href="@accountsPage">My Accounts</NavLink>
+                        </div>
+                        <div class="nav-item px-3">
+                            <button class="nav-link @(hasTransactionError ? "error-link" : "")" @onclick="TryRedirectToWithdrawPage">Withdraw</button>
+                        </div>
+                        <div class="nav-item px-3">
+                            <button class="nav-link @(hasTransactionError ? "error-link" : "")" @onclick="TryRedirectToDepositPage">Deposit</button>
+                        </div>
+                        <div class="nav-item px-3">
+                            <NavLink class="nav-link lh-sm" href="@transactionsPage">Transactions</NavLink>
+                        </div>
+                        <div class="nav-item px-3">
+                            <button class="nav-link @(hasTransactionError ? "error-link" : "")" @onclick="TryRedirectToWithdrawPage">Withdraw</button>
+                        </div>
+                        <div class="nav-item px-3">
+                            <button class="nav-link @(hasTransactionError ? "error-link" : "")" @onclick="TryRedirectToDepositPage">Deposit</button>
+                        </div>
+                        <div class="nav-item px-3">
+                            <NavLink class="nav-link lh-sm" href="@applyLoanPage">Apply for Loan</NavLink>
+                        </div>
+                        <div class="nav-item px-3">
+                            <NavLink class="nav-link lh-sm" href="@loanBalancePage">Check Loan Balance</NavLink>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Sidebar Navigation Links (Bottom Row) -->
+            <div class="position-relative" onclick="document.querySelector('.toggler').click()">
+                <p class="position-absolute text-light top-0 start-0 mx-4 my-3 fw-lighter" style="font-size: 0.75rem;">OTHERS</p>
+                <div class="bottom-row">
+                    <nav class="flex-column">
+                        <div class="nav-item px-3 pt-5">
+                            <NavLink class="nav-link" href="/Settings_page" Match="NavLinkMatch.All">Settings</NavLink>
+                        </div>
+                        <div class="nav-item px-3">
+                            <button class="nav-link" @onclick="LogOutAsync"> Logout</button>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+
+        </nav>
 
     </Authorized>
 
@@ -153,54 +153,51 @@
         }
     }
 
-    private void TryRedirectToWithdrawPage()
+    private async Task TryRedirectToWithdrawPage()
     {
-        RedirectToTransactionPage(PageRoutes.WITHDRAW_AMOUNT);
+        if (activeAccountSession.AccountCanTransact)
+        {
+            redirectService.redirectWithNavigationManager(PageRoutes.WITHDRAW_AMOUNT);
+            return;
+        }
     }
 
-    private void TryRedirectToDepositPage()
+    private async Task TryRedirectToDepositPage()
     {
-        RedirectToTransactionPage(PageRoutes.DEPOSIT_AMOUNT);
+        if (activeAccountSession.AccountCanTransact)
+        {
+            redirectService.redirectWithNavigationManager(PageRoutes.DEPOSIT_AMOUNT);
+            return;
+        }
     }
 
-    private void TryRedirectToTransferPage()
+    private async Task TryRedirectToTransferPage()
     {
-        RedirectToTransactionPage(PageRoutes.TRANSFER_AMOUNT);
+        if (activeAccountSession.AccountCanTransact)
+        {
+            redirectService.redirectWithNavigationManager(PageRoutes.TRANSFER_AMOUNT);
+            return;
+        }
     }
 
     private void TryRedirectToApplyLoan()
     {
-        if (!activeAccountSession.AccountCanApplyLoan)
+        if (activeAccountSession.AccountCanApplyLoan)
         {
-            error = "You are unable to access this feature due to your account's status.";
+            redirectService.redirectWithNavigationManager(PageRoutes.APPLY_LOAN);
             return;
         }
 
-        redirectService.redirectWithNavigationManager(PageRoutes.APPLY_LOAN);
     }
 
     private void TryRedirectToLoanBalance()
     {
         if (!activeAccountSession.AccountCanPayLoan)
         {
-            error = "You are unable to access this feature due to your account's status.";
+            redirectService.redirectWithNavigationManager(PageRoutes.LOAN_BALANCE);
             return;
         }
 
-        redirectService.redirectWithNavigationManager(PageRoutes.LOAN_BALANCE);
-    }
-
-    private void RedirectToTransactionPage(string url)
-    {
-        if (!activeAccountSession.AccountCanTransact) 
-        {
-            error = "You are unable to access this feature due to your account's status.";
-            hasTransactionError = true;
-            return;
-        }
-
-        hasTransactionError = false;
-        redirectService.redirectWithNavigationManager(url);
     }
 
     private async Task LogOutAsync()
