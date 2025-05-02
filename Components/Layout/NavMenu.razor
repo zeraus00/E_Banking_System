@@ -7,90 +7,99 @@
 
 <AuthorizeView Roles = "@RoleNames.USER">
     <Authorized>
-        <!-- Side NavBar Layout -->
-        <nav class="sidebar">
-            <!-- Top Row -->
-            <div class="top-row border-bottom">
+        <div class="error-layout-wrapper">
+            @if (error.Length > 0)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <strong>@error</strong>
+                </div>
+            }
 
-                <!-- Profile Picture Container (Draft) -->
-                <div class="profile-picture_container">
-                    <div class="profile-placeholder"></div>
-                    @* 
-                    <label for="fileInput">
-                        @if (previewImage != null)
-                        {
-                            <img src="@previewImage" class="profile-picture" />
-                        }
-                        else
-                        {
-                            <div class="profile-placeholder">
-                                <span>No Image</span>
-                            </div>
-                        }
-                    </label>
+            <!-- Side NavBar Layout -->
+            <nav class="sidebar">
+                <!-- Top Row -->
+                <div class="top-row border-bottom">
 
-                    <div class="edit-overlay">
-                        <i class="fas fa-camera"></i>
+                    <!-- Profile Picture Container (Draft) -->
+                    <div class="profile-picture_container">
+                        <div class="profile-placeholder"></div>
+                        @* 
+                        <label for="fileInput">
+                            @if (previewImage != null)
+                            {
+                                <img src="@previewImage" class="profile-picture" />
+                            }
+                            else
+                            {
+                                <div class="profile-placeholder">
+                                    <span>No Image</span>
+                                </div>
+                            }
+                        </label>
+
+                        <div class="edit-overlay">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                        <InputFile id="fileInput" style="display: none;" OnChange="HandleSelected" accept="image/*" /> *@
                     </div>
-                    <InputFile id="fileInput" style="display: none;" OnChange="HandleSelected" accept="image/*" /> *@
+
+                    <div class="text-light mt-3">
+                        <p class="m-0 p-0">@_fullName</p>
+                        <p style="font-size: small;">@_email</p>
+                    </div>
+
                 </div>
 
-                <div class="text-light mt-3">
-                    <p class="m-0 p-0">@_fullName</p>
-                    <p style="font-size: small;">@_email</p>
+                <!-- Sidebar Navigation Links (Middle Row)-->
+                <div class="position-relative" onclick="document.querySelector('.toggler').click()">
+                    <p class="position-absolute text-light top-0 start-0 mx-4 my-3 fw-lighter" style="font-size: 0.75rem;">USER</p>
+                    <div class="middle-row border-bottom">
+                        <nav class="flex-column">
+                            <div class="nav-item px-3 pt-5">
+                                <NavLink class="nav-link" href="@clientHomePage" Match="NavLinkMatch.All">Home</NavLink>
+                            </div>
+                            <div class="nav-item px-3">
+                                <NavLink class="nav-link" href="@accountsPage">My Accounts</NavLink>
+                            </div>
+                            <div class="nav-item px-3">
+                                <button class="nav-link" @onclick="TryRedirectToWithdrawPage">Withdraw</button>
+                            </div>
+                            <div class="nav-item px-3">
+                                <button class="nav-link" @onclick="TryRedirectToDepositPage">Deposit</button>
+                            </div>
+                            <div class="nav-item px-3">
+                                <NavLink class="nav-link lh-sm" href="@transactionsPage">Transactions</NavLink>
+                            </div>
+                            <div class="nav-item px-3">
+                                <button class="nav-link lh-sm" @onclick="TryRedirectToTransferPage">Transfer Money</button>
+                            </div>
+                            <div class="nav-item px-3">
+                                <NavLink class="nav-link lh-sm" href="@applyLoanPage">Apply for Loan</NavLink>
+                            </div>
+                            <div class="nav-item px-3">
+                                <NavLink class="nav-link lh-sm" href="@loanBalancePage">Check Loan Balance</NavLink>
+                            </div>
+                        </nav>
+                    </div>
                 </div>
 
-            </div>
-
-            <!-- Sidebar Navigation Links (Middle Row)-->
-            <div class="position-relative" onclick="document.querySelector('.toggler').click()">
-                <p class="position-absolute text-light top-0 start-0 mx-4 my-3 fw-lighter" style="font-size: 0.75rem;">USER</p>
-                <div class="middle-row border-bottom">
-                    <nav class="flex-column">
-                        <div class="nav-item px-3 pt-5">
-                            <NavLink class="nav-link" href="@clientHomePage" Match="NavLinkMatch.All">Home</NavLink>
-                        </div>
-                        <div class="nav-item px-3">
-                            <NavLink class="nav-link" href="@accountsPage">My Accounts</NavLink>
-                        </div>
-                        <div class="nav-item px-3">
-                            <button class="nav-link" @onclick="TryRedirectToWithdrawPage">Withdraw</button>
-                        </div>
-                        <div class="nav-item px-3">
-                            <button class="nav-link" @onclick="TryRedirectToDepositPage">Deposit</button>
-                        </div>
-                        <div class="nav-item px-3">
-                            <NavLink class="nav-link lh-sm" href="@transactionsPage">Transactions</NavLink>
-                        </div>
-                        <div class="nav-item px-3">
-                            <button class="nav-link lh-sm" @onclick="TryRedirectToTransferPage">Transfer Money</button>
-                        </div>
-                        <div class="nav-item px-3">
-                            <NavLink class="nav-link lh-sm" href="@applyLoanPage">Apply for Loan</NavLink>
-                        </div>
-                        <div class="nav-item px-3">
-                            <NavLink class="nav-link lh-sm" href="@loanBalancePage">Check Loan Balance</NavLink>
-                        </div>
-                    </nav>
+                <!-- Sidebar Navigation Links (Bottom Row) -->
+                <div class="position-relative" onclick="document.querySelector('.toggler').click()">
+                    <p class="position-absolute text-light top-0 start-0 mx-4 my-3 fw-lighter" style="font-size: 0.75rem;">OTHERS</p>
+                    <div class="bottom-row">
+                        <nav class="flex-column">
+                            <div class="nav-item px-3 pt-5">
+                                <NavLink class="nav-link" href="/Settings_page" Match="NavLinkMatch.All">Settings</NavLink>
+                            </div>
+                            <div class="nav-item px-3">
+                                <button class="nav-link" @onclick="LogOutAsync"> Logout</button>
+                            </div>
+                        </nav>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Sidebar Navigation Links (Bottom Row) -->
-            <div class="position-relative" onclick="document.querySelector('.toggler').click()">
-                <p class="position-absolute text-light top-0 start-0 mx-4 my-3 fw-lighter" style="font-size: 0.75rem;">OTHERS</p>
-                <div class="bottom-row">
-                    <nav class="flex-column">
-                        <div class="nav-item px-3 pt-5">
-                            <NavLink class="nav-link" href="/Settings_page" Match="NavLinkMatch.All">Settings</NavLink>
-                        </div>
-                        <div class="nav-item px-3">
-                            <button class="nav-link" @onclick="LogOutAsync"> Logout</button>
-                        </div>
-                    </nav>
-                </div>
-            </div>
-
-        </nav>
+            </nav>
+        </div>
     </Authorized>
 
 </AuthorizeView>
