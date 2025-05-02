@@ -55,22 +55,22 @@
                             <NavLink class="nav-link" href="@accountsPage">My Accounts</NavLink>
                         </div>
                         <div class="nav-item px-3">
-                            <button class="nav-link @(hasTransactionError ? "error-link" : "")" @onclick="TryRedirectToWithdrawPage">Withdraw</button>
+                            <button class="nav-link @(hasWithdrawError ? "error-link" : "")" @onclick="TryRedirectToWithdrawPage">Withdraw</button>
                         </div>
                         <div class="nav-item px-3">
-                            <button class="nav-link @(hasTransactionError ? "error-link" : "")" @onclick="TryRedirectToDepositPage">Deposit</button>
+                            <button class="nav-link @(hasDepositError ? "error-link" : "")" @onclick="TryRedirectToDepositPage">Deposit</button>
                         </div>
                         <div class="nav-item px-3">
                             <NavLink class="nav-link lh-sm" href="@transactionsPage">Transactions</NavLink>
                         </div>
                         <div class="nav-item px-3">
-                            <button class="nav-link @(hasTransactionError ? "error-link" : "")" @onclick="TryRedirectToTransferPage">Transfer Money</button>
+                            <button class="nav-link lh-sm @(hasTransferError ? "error-link" : "")" @onclick="TryRedirectToTransferPage">Transfer Money</button>
                         </div>
                         <div class="nav-item px-3">
-                            <NavLink class="nav-link lh-sm" href="@applyLoanPage">Apply for Loan</NavLink>
+                            <button class="nav-link lh-sm @(hasApplyLoanError ? "error-link" : "")" @onclick="TryRedirectToApplyLoan">Apply for Loan</button>
                         </div>
                         <div class="nav-item px-3">
-                            <NavLink class="nav-link lh-sm" href="@loanBalancePage">Check Loan Balance</NavLink>
+                            <button class="nav-link lh-sm @(hasLoanBalanceError ? "error-link" : "")" @onclick="TryRedirectToLoanBalance">Check Loan Balance</button>
                         </div>
                     </nav>
                 </div>
@@ -115,7 +115,11 @@
 
     private string error = "";
 
-    private bool hasTransactionError = false;
+    private bool hasWithdrawError = false;
+    private bool hasDepositError = false;
+    private bool hasTransferError = false;
+    private bool hasApplyLoanError = false;
+    private bool hasLoanBalanceError = false;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -158,7 +162,10 @@
             return;
         }
 
-        hasTransactionError = true;
+        hasWithdrawError = true;
+        StateHasChanged();
+        await Task.Delay(3000);
+        hasWithdrawError = false;
         StateHasChanged();
     }
 
@@ -170,9 +177,10 @@
             return;
         }
 
-        hasTransactionError = true;
+        hasDepositError = true;
         StateHasChanged();
         await Task.Delay(3000);
+        hasDepositError = false;
         StateHasChanged();
     }
 
@@ -184,9 +192,10 @@
             return;
         }
 
-        hasTransactionError = true;
+        hasTransferError = true;
         StateHasChanged();
         await Task.Delay(3000);
+        hasTransferError = false;
         StateHasChanged();
     }
 
@@ -198,9 +207,10 @@
             return;
         }
 
-        hasTransactionError = true;
+        hasApplyLoanError = true;
         StateHasChanged();
         await Task.Delay(3000);
+        hasApplyLoanError = false;
         StateHasChanged();
     }
 
@@ -212,9 +222,10 @@
             return;
         }
 
-        hasTransactionError = true;
+        hasLoanBalanceError = true;
         StateHasChanged();
         await Task.Delay(3000);
+        hasLoanBalanceError = false;
         StateHasChanged();
     }
 
