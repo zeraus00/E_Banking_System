@@ -1,6 +1,7 @@
 ﻿@rendermode InteractiveServer
 
 @inject IWebHostEnvironment Env
+@inject UserControlledSessionService userControlledSessionService
 @inject UserSessionService userSessionService
 @inject PageRedirectService redirectService
 
@@ -96,6 +97,8 @@
 
 
 @code {
+    public UserSession userSession { get; set; } = default!;
+    public ActiveAccountSession activeAccountSession { get; set; } = default!;
     //  href routes
     private string clientHomePage = PageRoutes.CLIENT_HOME;
     private string accountsPage = PageRoutes.ACCOUNTS;
@@ -124,7 +127,9 @@
             {
                 //  Get user session details from session storage.
                 //  Throws SessionNotFoundException if session is not found.
-                UserSession userSession = await userSessionService.GetUserSession();
+                userSession = await userSessionService.GetUserSession();
+                activeAccountSession = await userControlledSessionService
+                    .GetActiveAccountSessionAsync(userSession);
 
                 //  Set display data
                 _fullName = userSession.CurrentUserName;
