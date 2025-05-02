@@ -1,6 +1,6 @@
-﻿namespace ViewModels
+﻿namespace ViewModels.RoleControlledSessions
 {
-    public class TransactionSession
+    public class TransactionSession : RoleControlledSession
     {
         public int TransactionTypeId { get; set; }
         public string TransactionNumber { get; set; } = string.Empty;

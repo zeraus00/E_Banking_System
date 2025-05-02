@@ -1,4 +1,7 @@
-﻿@page "/Dashboard"
+﻿@using Layout
+
+@page "/Dashboard"
+@layout AdminMainLayout
 @rendermode InteractiveServer
 @attribute [Authorize(Roles="Administrator")]
 
@@ -92,8 +95,6 @@
 </div>
 
 @code {
-    private AdminSession adminSession { get; set; } = default!;
-
     private DateTime? startDate = null;
     private DateTime? endDate = null;
 
@@ -108,26 +109,6 @@
         //  Get transaction list.
         transactionList = await adminDataService.GetTransactionListAsync();
         this.GetTransactionCounts();
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            try
-            {
-                //  Get admin session details from session storage.
-                //  Throws SessionNotFoundException if no session is found.
-                adminSession = await userSessionService.GetAdminSession();
-
-                //  Reload component.
-                StateHasChanged();
-            }
-            catch (SessionNotFoundException)
-            {
-                redirectService.redirectWithNavigationManager(PageRoutes.LOGGING_IN_PAGE);
-            }
-        }
     }
 
     private async Task FilterAsync()

@@ -1,4 +1,6 @@
-﻿@page "/Withdraw_confirmation"
+﻿@using Helpers;
+
+@page "/Withdraw_confirmation"
 @attribute [Authorize(Roles = "User")]
 @rendermode InteractiveServer
 
@@ -7,7 +9,7 @@
 @inject TransactionService transactionService
 @inject SessionStorageService sessionStorageService
 @inject UserSessionService userSessionService
-@using Helpers;
+@inject UserControlledSessionService userControlledSessionService
 
 <div class="page">
     <main>
@@ -42,7 +44,7 @@
                     <div class="d-flex flex-column text-start text-light mb-0">
                         <h5 class="mb-1 fw-bold">@clientName</h5>
                         <p class="m-0"><strong>Account No.:</strong> @FormatHelper.AccountNumberFormatter(accountNumber)</p>
-                        <p class="m-0"><strong>Card/Account Destination:</strong> _cardDestination</p>
+                        <p class="m-0"><strong>Card/Account Destination:</strong> @cardDestination</p>
                         <p class="m-0"><strong>Date:</strong> @date</p>
                         <p class="m-0"><strong>Transaction No.:</strong> @transactionNumber</p>
                     </div>
@@ -74,7 +76,11 @@
 
 @code 
 {
+    private UserSession userSession { get; set; } = default!;
+    private TransactionSession transactionSession { get; set; } = default!;
+
     private string accountNumber = "Loading...";
+    private string cardDestination = "Loading...";
     private string clientName = "Loading...";
     private decimal currentBalance = 0.00m;
     private decimal withdrawAmount = 0.00m;
@@ -91,11 +97,16 @@
             {
                 //  Fetch user and transaction session from storage.
                 //  Throws SessionNotFoundException if session is not found.
-                UserSession userSession = await userSessionService.GetUserSession(); 
-                TransactionSession transactionSession = await sessionStorageService.FetchSessionAsync<TransactionSession>(SessionSchemes.WITHDRAW_SESSION);
+                //  Throws ControlledSessionNotFound if transaction session is not found.
+                userSession = await userSessionService.GetUserSession();
+                transactionSession = await userControlledSessionService.GetTransactionSessionAsync(userSession);
+
+                Console.WriteLine("MAIN ACCOUNT ID: " + transactionSession.MainAccountId);
+                Console.WriteLine("ACCOUNT BALANCE: " + transactionSession.CurrentBalance);
 
                 //  Set display data.
                 accountNumber = userSession.ActiveAccountNumber;
+                cardDestination = ExternalVendors.ExternalVendorList[transactionSession.ExternalVendorId!.Value - 1];
                 clientName = userSession.ActiveAccountName;
                 currentBalance = transactionSession.CurrentBalance;
                 withdrawAmount = transactionSession.Amount;
@@ -105,7 +116,7 @@
                 //  Reload component.
                 StateHasChanged();
             } 
-            catch (SessionNotFoundException) 
+            catch (ControlledSessionNotFound) 
             {
                 //  Redirect to CLIENT_HOME if users try to access the page without an ongoing transaction session.
                 redirectService.redirectWithNavigationManager(PageRoutes.CLIENT_HOME);
@@ -118,7 +129,14 @@
         try 
         {
             //  Process withdraw transaction.
-            await transactionService.ProcessTransactionAsync(SessionSchemes.WITHDRAW_SESSION);
+            transactionSession = await transactionService.ProcessTransactionAsync(transactionSession);
+
+            //  Store updated transactionSession to session storage
+            await userControlledSessionService.SetTransactionSessionAsync(
+                (int)TransactionTypes.Withdrawal,
+                transactionSession,
+                userSession
+            );
 
             //  Redirect to WITHDRAW_RECEIPT page.
             redirectService.redirectWithNavigationManager(PageRoutes.WITHDRAW_RECEIPT);
@@ -129,6 +147,8 @@
         }
         catch (InsufficientBalanceException)
         {
+            //  Remove transaction session from session storage.
+            await userControlledSessionService.ClearTransactionSessionAsync(userSession);
             error = "You do not have sufficient balance";
         }
     }
@@ -136,7 +156,9 @@
     private async Task CancelWithdraw()
     {
         //  Persist cancelled transaction to database and delete transaction details from session storage.
-        await transactionService.TransactionCancelledAsync(SessionSchemes.WITHDRAW_SESSION);
+        await transactionService.StoreFailedTransactionAsync(transactionSession, TransactionStatus.CANCELLED);
+
+        await userControlledSessionService.ClearTransactionSessionAsync(userSession);
 
         //  Redirect to CLIENT_HOME.
         redirectService.redirectWithNavigationManager(PageRoutes.CLIENT_HOME);

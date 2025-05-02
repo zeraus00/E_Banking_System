@@ -1,4 +1,7 @@
-﻿@page "/Withdraw_amount"
+﻿@using Helpers;
+@using E_BankingSystem.Components.Client_page.Method
+
+@page "/Withdraw_amount"
 @attribute [Authorize(Roles="User")]
 @rendermode InteractiveServer
 
@@ -6,8 +9,7 @@
 @inject TransactionService transactionService
 @inject UserDataService userDataService
 @inject UserSessionService userSessionService
-@using Helpers;
-@using E_BankingSystem.Components.Client_page.Method
+@inject UserControlledSessionService userControlledSessionService
 
 <div class="page">
     <main>
@@ -52,7 +54,7 @@
 
                 <div class="mb-4 mt-2">
                     <h5 class="text-light fs-5 mx-5">Withdraw Options:</h5>
-                   <E_BankingSystem.Components.Client_page.Method.TransactionMethod />
+                    <TransactionMethod @ref="methodRef" />
 
                 </div>
 
@@ -79,6 +81,11 @@
 </div>
 
 @code {
+    public TransactionMethod? methodRef;
+
+    private UserSession userSession { get; set; } = default!;
+    private TransactionSession transactionSession { get; set; } = default!;
+
     private int accountId;
     private string accountNumber = "Loading...";
     private string clientName = "Loading...";
@@ -103,7 +110,7 @@
             {
                 //  Get user session details from session storage.
                 //  Throws SessionNotFoundException is session is not found.
-                UserSession userSession = await userSessionService.GetUserSession();
+                userSession = await userSessionService.GetUserSession();
 
                 //  Set display data.
                 accountId = userSession.ActiveAccountId;
@@ -150,18 +157,37 @@
     {
         try
         {
-            if (withdrawAmount is > 0)
-            {
-                //  Save transaction session to session storage.
-                await transactionService.InitiateTransaction(SessionSchemes.WITHDRAW_SESSION, accountId, (int)TransactionTypes.Withdrawal, withdrawAmount.Value);
+            if (withdrawAmount is not > 0)
+                throw new ArgumentException();
+            if (methodRef!.selectedCardId < 1 || methodRef!.selectedCardId > 3)
+                throw new FieldMissingException();
+            //  Create transaction session
+            transactionSession = await transactionService
+                .CreateTransactionAsync(
+                    accountId,
+                    (int)TransactionTypes.Withdrawal,
+                    withdrawAmount.Value,
+                    externalVendorId: methodRef!.selectedCardId
+                );
 
-                //  Redirect to WITHDRAW_CONFIRMATION page.
-                redirectService.redirectWithNavigationManager(PageRoutes.WITHDRAW_CONFIRMATION);
-            } else
-            {
-                error = "Withdraw amount must be greater than 0.";
-            }
-        } 
+            //  Save transaction session to sesion storage.
+            await userControlledSessionService.SetTransactionSessionAsync(
+                (int)TransactionTypes.Withdrawal,
+                transactionSession,
+                userSession
+            );
+
+            //  Redirect to WITHDRAW_CONFIRMATION page.
+            redirectService.redirectWithNavigationManager(PageRoutes.WITHDRAW_CONFIRMATION);
+        }
+        catch (ArgumentException)
+        {
+            error = "Withdraw amount must be greater than 0.";
+        }
+        catch (FieldMissingException)
+        {
+            error = "Please choose a valid payment method.";
+        }
         catch (AccountNotFoundException) 
         {
             error = "Error resolving database. Please try again later";

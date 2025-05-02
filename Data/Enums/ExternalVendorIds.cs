@@ -1,6 +1,6 @@
 ﻿namespace Data.Enums
 {
-    public enum ExternalVendors
+    public enum ExternalVendorIds
     {
         GCASH = 1,
         PAYMAYA = 2,

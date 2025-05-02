@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Exceptions;
-using ViewModels;
+using ViewModels.Sessions;
 
 namespace Services
 {
@@ -12,7 +12,7 @@ namespace Services
         {
             _sessionStorage = sessionStorage;
         }
-        public async Task StoreSessionAsync<T>(string sessionScheme, T sessionObject) where T : class
+        public async Task StoreSessionAsync<T>(string sessionScheme, T sessionObject) where T : SessionModel
         {
             try
             {
@@ -28,7 +28,7 @@ namespace Services
                     """);
             }
         }
-        public async Task<T> FetchSessionAsync<T>(string sessionScheme) where T : class
+        public async Task<T> FetchSessionAsync<T>(string sessionScheme) where T : SessionModel
         {
             var result = await _sessionStorage.GetAsync<T>(sessionScheme);
             T? sessionObject = result.Success ? result.Value : throw new SessionNotFoundException(sessionScheme);

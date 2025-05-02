@@ -1,10 +1,12 @@
-﻿@page "/Settings_page"
+﻿@using Helpers;
+
+@page "/Settings_page"
 @attribute [Authorize(Roles="User")]
 @rendermode InteractiveServer
 
 @inject PageRedirectService redirectService
 @inject UserSessionService userSessionService
-@using Helpers;
+
 
 <div class="page">
 	<main>

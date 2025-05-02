@@ -1,4 +1,6 @@
-﻿@page "/Withdraw_receipt"
+﻿@using Helpers;
+
+@page "/Withdraw_receipt"
 @attribute [Authorize(Roles = "User")]
 @rendermode InteractiveServer
 
@@ -8,7 +10,7 @@
 @inject SessionStorageService sessionStorageService
 @inject UserDataService userDataService
 @inject UserSessionService userSessionService
-@using Helpers;
+@inject UserControlledSessionService userControlledSessionService
 
 <div class="page">
     <main>
@@ -41,7 +43,7 @@
                     <div class="d-flex flex-column text-start mb-0">
                         <h5 class="mb-1">@clientName</h5>
                         <p class="mb-0"><strong>Account No.:</strong> @FormatHelper.AccountNumberFormatter(accountNumber)</p>
-                        <p class="m-0"><strong>Card/Account Destination:</strong> _cardDestination</p>
+                        <p class="m-0"><strong>Card/Account Destination:</strong> @cardDestination</p>
                         <p class="mb-0"><strong>Date:</strong> @date</p>
                         <p class="mb-0"><strong>Confirmation No.:</strong> @confirmationNumber</p>
                     </div>
@@ -56,7 +58,10 @@
 
 @code
 {
+    private UserSession userSession { get; set; } = default!;
+
     private string accountNumber = "Loading...";
+    private string cardDestination = "Loading...";
     private string clientName = "Loading...";
     private decimal currentBalance = 0.00m;
     private decimal withdrawAmount = 0.00m;
@@ -71,11 +76,14 @@
             {
                 //  Fetch transaction session details from session storage.
                 //  Throws SessionNotFoundException if session is not found.
-                UserSession userSession = await userSessionService.GetUserSession();
-                TransactionSession transactionSession = await sessionStorageService.FetchSessionAsync<TransactionSession>(SessionSchemes.WITHDRAW_SESSION);
+                //  Throws ControlledSessionNotFound if session is not found.
+                userSession = await userSessionService.GetUserSession();
+                TransactionSession transactionSession = await userControlledSessionService
+                    .GetTransactionSessionAsync(userSession);
 
                 //  Set display data.
                 accountNumber = userSession.ActiveAccountNumber;
+                cardDestination = ExternalVendors.ExternalVendorList[transactionSession.ExternalVendorId!.Value - 1];
                 clientName = userSession.ActiveAccountName;
                 currentBalance = transactionSession.CurrentBalance;
                 withdrawAmount = transactionSession.Amount;
@@ -86,7 +94,7 @@
                 StateHasChanged();
 
             } 
-            catch (SessionNotFoundException) 
+            catch (ControlledSessionNotFound) 
             {
                 //  Redirect to CLIENT_HOME if users try to access the page without an ongoing transaction session.
                 redirectService.redirectWithNavigationManager(PageRoutes.CLIENT_HOME);
@@ -97,7 +105,7 @@
     private async Task GoHome() 
     {
         //  Delete transaction session details from session storage.
-        await sessionStorageService.DeleteSessionAsync(SessionSchemes.WITHDRAW_SESSION);
+        await userControlledSessionService.ClearTransactionSessionAsync(userSession);
 
         //  Redirect user to CLIENT_HOME.
         redirectService.redirectWithNavigationManager(PageRoutes.CLIENT_HOME);

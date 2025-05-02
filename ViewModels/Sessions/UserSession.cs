@@ -1,8 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using ViewModels.RoleControlledSessions;
 
-namespace ViewModels
+namespace ViewModels.Sessions
 {
-    public class UserSession
+    public class UserSession : SessionModel
     {
         /* username
          * contactno
@@ -17,5 +17,7 @@ namespace ViewModels
         public string ActiveAccountNumber { get; set; } = string.Empty;
         public string ActiveAccountName { get; set; } = string.Empty;
         public List<int> UserAccountIdList { get; set; } = new List<int>();
+        public string TransactionSessionScheme { get; set; } = string.Empty;
+        public TransactionSession? TransactionSession { get; set; } = null;
     }
 }

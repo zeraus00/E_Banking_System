@@ -31,19 +31,28 @@ builder.Services.AddRazorComponents()
 // Authentication Services
 builder.Services.AddHttpClient();
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<AdminDataService>();
 builder.Services.AddScoped<AuthenticationStateProvider, NexusAuthenticationStateProvider>();
 builder.Services.AddScoped<ClaimsHelperService>();
 builder.Services.AddScoped<CredentialValidationService>();
 builder.Services.AddScoped<NexusAuthenticationService>();
-builder.Services.AddScoped<PageRedirectService>();
-builder.Services.AddScoped<ProtectedSessionStorage>();
-builder.Services.AddScoped<RegistrationService>();
-builder.Services.AddScoped<SessionStorageService>();
 builder.Services.AddScoped<SignInService>();
-builder.Services.AddScoped<TransactionService>();
+
+// Data services
+builder.Services.AddScoped<AdminDataService>();
 builder.Services.AddScoped<UserDataService>();
+builder.Services.AddScoped<RegistrationService>();
+builder.Services.AddScoped<TransactionService>();
+
+// Session Management Services
+builder.Services.AddScoped<AdminControlledSessionService>();
+builder.Services.AddScoped<ProtectedSessionStorage>();
+builder.Services.AddScoped<SessionStorageService>();
+builder.Services.AddScoped<UserControlledSessionService>();
 builder.Services.AddScoped<UserSessionService>();
+
+// Misc
+builder.Services.AddScoped<PageRedirectService>();
+
 
 
 builder.Services.AddAntiforgery(options =>

@@ -4,7 +4,7 @@
 @inject UserSessionService userSessionService
 @inject PageRedirectService redirectService
 
-<AuthorizeView Roles = "User">
+<AuthorizeView Roles = "@RoleNames.USER">
     <Authorized>
         <!-- Side NavBar Layout -->
         <nav class="sidebar">
@@ -96,6 +96,9 @@
 
 
 @code {
+    //  href routes
+    // private string 
+
     private string _fullName = "Loading...";
     private string _email = "Loading...";
 

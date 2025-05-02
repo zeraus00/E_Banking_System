@@ -2,6 +2,7 @@
 @attribute [Authorize(Roles="Administrator")]
 @rendermode InteractiveServer
 
+@inject AdminControlledSessionService adminControlledSessionService
 @inject AdminDataService adminDataService
 @inject NavigationManager Navigation
 @inject PageRedirectService redirectService
@@ -158,12 +159,12 @@
         //         (string.IsNullOrEmpty(selectedType) || t.AccountType == selectedType)
         //     ).ToList();
         accountList = await adminDataService
-        .FilterPendingAccountsAsync(
-        searchAccount,
-        startDate,
-        endDate,
-        (int)AccountTypes.PersonalAccount
-    );
+            .FilterPendingAccountsAsync(
+            searchAccount,
+            startDate,
+            endDate,
+            (int)AccountTypes.PersonalAccount
+        );
     }
 
     private async Task ClearFilterAsync()
@@ -180,7 +181,13 @@
     {
         try
         {
-            await adminDataService.StorePendingAccountSession(account);
+            PendingAccountSession pendingAccountSession = new PendingAccountSession()
+                {
+                    PendingAccountId = account.AccountId
+                };
+
+            await adminControlledSessionService.SetPendingAccountSession(pendingAccountSession);
+
             redirectService.redirectWithNavigationManager(PageRoutes.VIEW_DETAILS);
         } catch (SessionNotFoundException)
         {
