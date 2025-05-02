@@ -837,12 +837,17 @@
 		try
 		{
 			var file = e.File;
+			if (file == null)
+			{
+				error = "Please upload a government Id.";
+			}
 			if (file != null)
 			{
 				using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); // allow up to 10 MB
 				using var ms = new MemoryStream();
 				await stream.CopyToAsync(ms);
 				governmentId = ms.ToArray();
+				error = "";
 			}
 		}
 		catch (FieldMissingException ex)
@@ -856,12 +861,17 @@
 		try
 		{
 			var file = e.File;
+			if (file == null)
+			{
+				error = "Please upload a profile picture";
+			}
 			if (file != null)
 			{
 				using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); // allow u to 10 MB
 				using var ms = new MemoryStream();
 				await stream.CopyToAsync(ms);
 				profilePicture = ms.ToArray();
+				error = "";
 			}
 		}
 		catch (FieldMissingException ex)
@@ -918,16 +928,41 @@
 				return;
 			}
 
-			if (string.IsNullOrWhiteSpace(password) || password.Length < 6)
+			if (string.IsNullOrWhiteSpace(password))
 			{
-				error = "Invalid password, at least 6 character length is required.";
-				
+				error = "Valid password is required.";
 			}
+			else
+			{
+				if (password.Length < 6)
+				{
+					error = "Password must be at least 6 characters long.";
+				}
+				if (!Regex.IsMatch(password, "[A-Z]"))
+				{
+					error = "Password must contain at least one capital letter.";
+				}
+				if (!Regex.IsMatch(password, @"\d"))
+				{
+					error = "Password must contain at least one number.";
+				}
+				if (!Regex.IsMatch(password, "[^a-zA-Z0-9]"))
+				{
+					error = "Password must contain at least one special character (symbols like ! @ # $ % ^ & * ( ) _ + etc.).";
+				}
+			}
+
 			if (string.IsNullOrWhiteSpace(email))
 			{
 				error = "Email is required.";
-				Console.WriteLine(error);
-				return;
+			}
+			else
+			{
+				var gmailRegex = new Regex(@"^[a-zA-Z0-9._%+-]+@gmail\.com$", RegexOptions.IgnoreCase);
+				if (!gmailRegex.IsMatch(email))
+				{
+					error = "Invalid Gmail address format. Example: sample@gmail.com";
+				}
 			}
 			if (string.IsNullOrWhiteSpace(contactNumber))
 			{
