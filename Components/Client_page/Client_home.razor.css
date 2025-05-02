@@ -129,7 +129,6 @@
         font-size: 0.85rem;
     }
 
-    /* Ensure proper padding for smaller screens */
     .custom-card.transactions {
         margin: 1rem 0;
         padding: 0.75rem;

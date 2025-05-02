@@ -1,4 +1,5 @@
 ﻿@using E_BankingSystem.Components.Client_page.Accounts
+@inject NavigationManager Navigation
 
 <!-- Card Component -->
 <section class="carousel-card text-start p-3 border shadow-sm h-100">
@@ -14,10 +15,22 @@
 
             <!-- Edit Button -->
             @if (IsEditable)
-            {
-                <div class="d-flex align-items-end px-3">
-                    <button class="btn btn-primary btn-sm" @onclick="EnterEditMode">Edit</button>
-                </div>
+            {   
+                <AuthorizeView Roles="User">
+                    <Authorized>
+                    <div class="d-flex align-items-end px-3">
+                        <button class="btn btn-primary btn-sm" @onclick="EnterEditMode">Edit</button>
+                    </div>
+                    </Authorized>
+                </AuthorizeView>
+
+                    <AuthorizeView Roles="Administrator">
+                        <Authorized>
+                            <div class="d-flex align-items-end px-3">
+                                <button class="btn btn-primary btn-sm" @onclick="EnterUpdateMode">View</button>
+                            </div>
+                        </Authorized>
+                    </AuthorizeView>
             }
         </div>
         <hr />
@@ -44,15 +57,19 @@
 
     else
     {
-        <div class="form-group mb-2">
-            <label>Account Name</label>
-            <input class="form-control" @bind="editedAccountName" />
-        </div>
+        <AuthorizeView Roles="User">
+            <Authorized>
+                <div class="form-group mb-2">
+                    <label>Account Name</label>
+                    <input class="form-control" @bind="editedAccountName" />
+                </div>
 
-        <div class="d-flex justify-content-end gap-2 mt-3">
-            <button class="btn btn-secondary btn-sm" @onclick="CancelEditMode">Cancel</button>
-            <button class="btn btn-success btn-sm" @onclick="SaveChanges">Save</button>
-        </div>
+                <div class="d-flex justify-content-end gap-2 mt-3">
+                    <button class="btn btn-secondary btn-sm" @onclick="CancelEditMode">Cancel</button>
+                    <button class="btn btn-success btn-sm" @onclick="SaveChanges">Save</button>
+                </div>
+            </Authorized>
+        </AuthorizeView>
     }
 </section>
 
@@ -75,6 +92,12 @@
     {
         isEditing = true;
         editedAccountName = Account.AccountName;
+    }
+
+    private void EnterUpdateMode()
+    {
+        isEditing = true;
+        Navigation.NavigateTo($"/Update_account");
     }
 
     private void SaveChanges()

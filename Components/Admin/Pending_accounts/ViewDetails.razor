@@ -1,9 +1,6 @@
-﻿@using Layout
-
-@page "/ViewDetails"
+﻿@page "/ViewDetails"
 @attribute [Authorize(Roles="Administrator")]
 @rendermode InteractiveServer
-@layout AdminMainLayout
 
 @inject AdminControlledSessionService adminControlledSessionService
 @inject AdminDataService adminDataService

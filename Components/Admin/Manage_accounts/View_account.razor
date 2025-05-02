@@ -1,8 +1,4 @@
 ﻿@using E_BankingSystem.Components.Client_page.Accounts
-@using Layout
-
-@page "/View_account"
-@layout AdminMainLayout
 @rendermode InteractiveServer
 
 <div class="page">
@@ -17,7 +13,7 @@
             <hr class="divider" />
 
             <!-- Card Section -->
-            <div class="card-section justify-content-start mx-4">
+            <div class="card-section justify-content-between mx-4">
                 <!-- Account Card -->
                 <AccountCard Account="@mockupData" ContactNumber="09171234567" IsEditable="true" />
 

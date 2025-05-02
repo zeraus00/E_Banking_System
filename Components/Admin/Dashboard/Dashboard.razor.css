@@ -2,6 +2,8 @@
     padding: 20px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: white;
+    display: block;
+    width: 100%;
 }
 
 .date-picker {
@@ -21,14 +23,16 @@
 
 .card-section {
     display: flex;
-    gap: 3%;
+    gap: 20px;
     margin-bottom: 40px;
+    flex-wrap: wrap;
 }
 
 .data-card {
     background-color: #5cc9d8;
     padding: 20px;
-    width: 300px;
+    max-width: 300px;
+    min-width: 250px;
     border: 2px solid white;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);

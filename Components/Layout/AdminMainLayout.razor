@@ -1,4 +1,4 @@
-﻿@inherits LayoutComponentBase
+﻿@* @inherits LayoutComponentBase
 @inject NavigationManager NavManager
 @inject IWebHostEnvironment Env
 
@@ -29,4 +29,4 @@
 @code {
     private bool HideSidebar => 
     NavManager.Uri.Contains("/Logout");
-}
+} *@
