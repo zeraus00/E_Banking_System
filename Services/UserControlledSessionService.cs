@@ -3,16 +3,23 @@ using Data.Enums;
 using Exceptions;
 using ViewModels.RoleControlledSessions;
 using ViewModels.Sessions;
+using Services.DataManagement;
 
 namespace Services
 {
     public class UserControlledSessionService
     {
+        private readonly DataMaskingService _dataMaskingService;
         private readonly UserDataService _userDataService;
         private readonly UserSessionService _userSessionService;
 
-        public UserControlledSessionService(UserDataService userDataService, UserSessionService userSessionService)
+        public UserControlledSessionService(
+            DataMaskingService dataMaskingService, 
+            UserDataService userDataService, 
+            UserSessionService userSessionService
+            )
         {
+            _dataMaskingService = dataMaskingService;
             _userDataService = userDataService;
             _userSessionService = userSessionService;
         }
@@ -42,7 +49,7 @@ namespace Services
             {
                 AccountId = account.AccountId,
                 AccountName = account.AccountName,
-                AccountNumber = account.AccountNumber,
+                AccountNumber = _dataMaskingService.MaskAccountNumber(account.AccountNumber),
                 AccountStatusId = account.AccountStatusTypeId
             };
 

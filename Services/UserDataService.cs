@@ -232,7 +232,7 @@ namespace Services
                 {
                     //  Throws AccountNotFoundException if account is not found.
                     Account account = await this.GetAccountAsync(id);
-                    account.AccountNumber = _dataMaskingService.MaskAccountOrAtmNumber(account.AccountNumber);
+                    account.AccountNumber = _dataMaskingService.MaskAccountNumber(account.AccountNumber);
                     accountList.Add(account);
                 } 
                 catch (AccountNotFoundException)
@@ -286,9 +286,9 @@ namespace Services
                 {
                     foreach (var transaction in transactionList)
                     {
-                        transaction.MainAccount.AccountNumber = _dataMaskingService.MaskAccountOrAtmNumber(transaction.MainAccount.AccountNumber);
+                        transaction.MainAccount.AccountNumber = _dataMaskingService.MaskAccountNumber(transaction.MainAccount.AccountNumber);
                         if (transaction.CounterAccount is not null)
-                            transaction.CounterAccount.AccountNumber = _dataMaskingService.MaskAccountOrAtmNumber(transaction.CounterAccount.AccountNumber);
+                            transaction.CounterAccount.AccountNumber = _dataMaskingService.MaskAccountNumber(transaction.CounterAccount.AccountNumber);
                     }
                 }
 
