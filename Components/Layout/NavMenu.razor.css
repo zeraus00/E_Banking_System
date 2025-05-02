@@ -146,6 +146,11 @@
     color: white;
 }
 
+.nav-link.error-link {
+    background-color: #ffcccc !important;
+    color: #b30000 !important;
+}
+
 @media (min-width: 641px) {
     .toggler {
         display: none;
