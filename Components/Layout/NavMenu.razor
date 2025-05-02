@@ -7,6 +7,7 @@
 
 <AuthorizeView Roles = "@RoleNames.USER">
     <Authorized>
+
         <!-- Side NavBar Layout -->
         <nav class="sidebar">
             <!-- Top Row -->
@@ -16,23 +17,23 @@
                 <div class="profile-picture_container">
                     <div class="profile-placeholder"></div>
                     @* 
-                        <label for="fileInput">
-                            @if (previewImage != null)
-                            {
-                                <img src="@previewImage" class="profile-picture" />
-                            }
-                            else
-                            {
-                                <div class="profile-placeholder">
-                                    <span>No Image</span>
-                                </div>
-                            }
-                        </label>
+                    <label for="fileInput">
+                        @if (previewImage != null)
+                        {
+                            <img src="@previewImage" class="profile-picture" />
+                        }
+                        else
+                        {
+                            <div class="profile-placeholder">
+                                <span>No Image</span>
+                            </div>
+                        }
+                    </label>
 
-                        <div class="edit-overlay">
-                            <i class="fas fa-camera"></i>
-                        </div>
-                        <InputFile id="fileInput" style="display: none;" OnChange="HandleSelected" accept="image/*" /> *@
+                    <div class="edit-overlay">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <InputFile id="fileInput" style="display: none;" OnChange="HandleSelected" accept="image/*" /> *@
                 </div>
 
                 <div class="text-light mt-3">
@@ -63,10 +64,7 @@
                             <NavLink class="nav-link lh-sm" href="@transactionsPage">Transactions</NavLink>
                         </div>
                         <div class="nav-item px-3">
-                            <button class="nav-link @(hasTransactionError ? "error-link" : "")" @onclick="TryRedirectToWithdrawPage">Withdraw</button>
-                        </div>
-                        <div class="nav-item px-3">
-                            <button class="nav-link @(hasTransactionError ? "error-link" : "")" @onclick="TryRedirectToDepositPage">Deposit</button>
+                            <button class="nav-link @(hasTransactionError ? "error-link" : "")" @onclick="TryRedirectToTransferPage">Transfer Money</button>
                         </div>
                         <div class="nav-item px-3">
                             <NavLink class="nav-link lh-sm" href="@applyLoanPage">Apply for Loan</NavLink>
@@ -94,7 +92,6 @@
             </div>
 
         </nav>
-
     </Authorized>
 
 </AuthorizeView>
@@ -160,6 +157,9 @@
             redirectService.redirectWithNavigationManager(PageRoutes.WITHDRAW_AMOUNT);
             return;
         }
+
+        hasTransactionError = true;
+        StateHasChanged();
     }
 
     private async Task TryRedirectToDepositPage()
@@ -169,6 +169,11 @@
             redirectService.redirectWithNavigationManager(PageRoutes.DEPOSIT_AMOUNT);
             return;
         }
+
+        hasTransactionError = true;
+        StateHasChanged();
+        await Task.Delay(3000);
+        StateHasChanged();
     }
 
     private async Task TryRedirectToTransferPage()
@@ -178,9 +183,14 @@
             redirectService.redirectWithNavigationManager(PageRoutes.TRANSFER_AMOUNT);
             return;
         }
+
+        hasTransactionError = true;
+        StateHasChanged();
+        await Task.Delay(3000);
+        StateHasChanged();
     }
 
-    private void TryRedirectToApplyLoan()
+    private async Task TryRedirectToApplyLoan()
     {
         if (activeAccountSession.AccountCanApplyLoan)
         {
@@ -188,9 +198,13 @@
             return;
         }
 
+        hasTransactionError = true;
+        StateHasChanged();
+        await Task.Delay(3000);
+        StateHasChanged();
     }
 
-    private void TryRedirectToLoanBalance()
+    private async Task TryRedirectToLoanBalance()
     {
         if (!activeAccountSession.AccountCanPayLoan)
         {
@@ -198,6 +212,10 @@
             return;
         }
 
+        hasTransactionError = true;
+        StateHasChanged();
+        await Task.Delay(3000);
+        StateHasChanged();
     }
 
     private async Task LogOutAsync()
