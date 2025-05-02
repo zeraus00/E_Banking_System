@@ -31,7 +31,11 @@
 				{
 					//	Start session.
 					await userSessionService.StartSessionBasedOnRole(user);
-					await userControlledSessionService.SetActiveAccountSessionAsync();
+
+					//	If a user started a session, set the active account 
+					//	to the first account in their accounts list by default.
+					if (claimsHelperService.GetRoleId(user) == (int)RoleTypes.User)
+						await userControlledSessionService.SetActiveAccountSessionAsync();
 					// NOTE:
 					// StartSessionBasedOnRole uses ProtectedSessionStorage,
 					// which internally relies on JavaScript interop.
@@ -49,7 +53,7 @@
 					//	if sign in failed.
 					throw new NullReferenceException("CLAIMS PRINCIPAL IS NULL");
 			}
-		} 
+		}
 		catch (UserNotFoundException)
 		{
 			//	Redirect to LANDING_PAGE if cookie is expired and claims principal is not found.
