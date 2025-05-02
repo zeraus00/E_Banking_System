@@ -12,6 +12,9 @@
         public const string PENDING_ACCOUNTS = "/PendingAccounts";
         public const string VIEW_DETAILS = "/ViewDetails";
 
+        public const string APPLY_LOAN = "/Apply_loan";
+        public const string LOAN_BALANCE = "/Loan_balance";
+
         public const string ACCOUNTS = "/Accounts";
         public const string ADD_ACCOUNT = "/Add_account";
         public const string CLIENT_HOME = "/Client_home";
