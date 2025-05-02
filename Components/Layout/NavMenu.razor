@@ -7,14 +7,6 @@
 
 <AuthorizeView Roles = "@RoleNames.USER">
     <Authorized>
-        <div class="error-layout-wrapper">
-            @if (error.Length > 0)
-            {
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <strong>@error</strong>
-                </div>
-            }
-
             <!-- Side NavBar Layout -->
             <nav class="sidebar">
                 <!-- Top Row -->
@@ -62,16 +54,19 @@
                                 <NavLink class="nav-link" href="@accountsPage">My Accounts</NavLink>
                             </div>
                             <div class="nav-item px-3">
-                                <button class="nav-link" @onclick="TryRedirectToWithdrawPage">Withdraw</button>
+                                <button class="nav-link @(hasTransactionError ? "error-link" : "")" @onclick="TryRedirectToWithdrawPage">Withdraw</button>
                             </div>
                             <div class="nav-item px-3">
-                                <button class="nav-link" @onclick="TryRedirectToDepositPage">Deposit</button>
+                                <button class="nav-link @(hasTransactionError ? "error-link" : "")" @onclick="TryRedirectToDepositPage">Deposit</button>
                             </div>
                             <div class="nav-item px-3">
                                 <NavLink class="nav-link lh-sm" href="@transactionsPage">Transactions</NavLink>
                             </div>
                             <div class="nav-item px-3">
-                                <button class="nav-link lh-sm" @onclick="TryRedirectToTransferPage">Transfer Money</button>
+                                <button class="nav-link @(hasTransactionError ? "error-link" : "")" @onclick="TryRedirectToWithdrawPage">Withdraw</button>
+                            </div>
+                            <div class="nav-item px-3">
+                                <button class="nav-link @(hasTransactionError ? "error-link" : "")" @onclick="TryRedirectToDepositPage">Deposit</button>
                             </div>
                             <div class="nav-item px-3">
                                 <NavLink class="nav-link lh-sm" href="@applyLoanPage">Apply for Loan</NavLink>
@@ -99,7 +94,7 @@
                 </div>
 
             </nav>
-        </div>
+
     </Authorized>
 
 </AuthorizeView>
@@ -122,6 +117,8 @@
     private string _email = "Loading...";
 
     private string error = "";
+
+    private bool hasTransactionError = false;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -198,9 +195,11 @@
         if (!activeAccountSession.AccountCanTransact) 
         {
             error = "You are unable to access this feature due to your account's status.";
+            hasTransactionError = true;
             return;
         }
 
+        hasTransactionError = false;
         redirectService.redirectWithNavigationManager(url);
     }
 
