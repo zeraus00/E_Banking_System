@@ -4,6 +4,7 @@ using Data.Models.Authentication;
 using Data.Models.Finance;
 using Data.Models.User;
 using Exceptions;
+using Services.DataManagement;
 using System.Security.Claims;
 using ViewModels.Sessions;
 
@@ -17,11 +18,17 @@ namespace Services
     public class UserSessionService
     {
         private readonly ClaimsHelperService _claimsHelper;
+        private readonly DataMaskingService _dataMaskingService;
         private readonly SessionStorageService _sessionStorage;
         private readonly UserDataService _dataService;
 
-        public UserSessionService(ClaimsHelperService claimsHelper, SessionStorageService sessionStorage, UserDataService dataService)
+        public UserSessionService(
+            ClaimsHelperService claimsHelper, 
+            DataMaskingService dataMaskingService, 
+            SessionStorageService sessionStorage, 
+            UserDataService dataService)
         {
+            _dataMaskingService = dataMaskingService;
             _claimsHelper = claimsHelper;
             _sessionStorage = sessionStorage;
             _dataService = dataService;
@@ -122,7 +129,7 @@ namespace Services
                 {
                     firstAccount = accountList[0];
                     firstAccountId = firstAccount.AccountId;
-                    firstAccountNumber = firstAccount.AccountNumber;
+                    firstAccountNumber = _dataMaskingService.MaskAccountOrAtmNumber(firstAccount.AccountNumber);
                     firstAccountName = firstAccount.AccountName;
                     foreach (var account in accountList)
                     {
@@ -267,7 +274,7 @@ namespace Services
                 Account newActiveAccount = await _dataService.GetAccountAsync(accountId);
 
                 userSession.ActiveAccountId = newActiveAccount.AccountId;
-                userSession.ActiveAccountNumber = newActiveAccount.AccountNumber;
+                userSession.ActiveAccountNumber = _dataMaskingService.MaskAccountOrAtmNumber(newActiveAccount.AccountNumber);
                 userSession.ActiveAccountName = newActiveAccount.AccountName;
 
                 /*  STORE THE SESSION BACK TO SESSION STORAGE   */

@@ -9,7 +9,7 @@
     {
         public TransactionRepository(EBankingContext context) : base(context) { }
 
-        public async Task<List<Transaction>> GetTransactionsAsListAsync(int mainAccountId, IQueryable<Transaction>? query = null)
+        public async Task<List<Transaction>> GetRecentTransactionsAsListAsync(int mainAccountId, int skipCount, int takeCount, IQueryable<Transaction>? query = null)
         {
             List<Transaction> transactionsList = new();
 
@@ -17,11 +17,17 @@
             {
                 transactionsList = await query
                      .Where(t => t.MainAccountId == mainAccountId)
+                     .Reverse()
+                     .Skip(skipCount)
+                     .Take(takeCount)
                      .ToListAsync();
             } else
             {
                 transactionsList = await _context.Transactions
                     .Where(t => t.MainAccountId == mainAccountId)
+                    .Reverse()
+                    .Skip(skipCount)
+                    .Take(takeCount)
                     .ToListAsync();
             }
 

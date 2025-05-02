@@ -5,15 +5,23 @@ using Data.Repositories.Auth;
 using Data.Repositories.Finance;
 using Data.Repositories.User;
 using Exceptions;
+using Services.DataManagement;
 
 namespace Services
 {
     public class AdminDataService : Service
     {
+        private readonly DataMaskingService _dataMaskingService;
         private readonly UserDataService _userDataService;
         private readonly UserSessionService _userSessionService;
-        public AdminDataService(IDbContextFactory<EBankingContext> contextFactory, UserDataService userDataService, UserSessionService userSessionService) : base(contextFactory) 
+        public AdminDataService(
+            IDbContextFactory<EBankingContext> contextFactory,
+            DataMaskingService dataMaskingService,
+            UserDataService userDataService, 
+            UserSessionService userSessionService
+            ) : base(contextFactory) 
         {
+            _dataMaskingService = dataMaskingService;
             _userDataService = userDataService;
             _userSessionService = userSessionService;
         }
@@ -69,7 +77,7 @@ namespace Services
                 //  Mask the user's account number.
                 foreach (var account in accountList)
                 {
-                    account.AccountNumber = MaskAccountNumber(account.AccountNumber);
+                    account.AccountNumber = _dataMaskingService.MaskAccountOrAtmNumber(account.AccountNumber);
                 }
 
                 //  Get the query as list
@@ -192,13 +200,5 @@ namespace Services
                 return transactionList;
             }
         }
-        private string MaskAccountNumber(string accountNumber)
-        {
-            string maskedPart = new string('*', accountNumber.Length - 4);
-            string visiblePart = accountNumber[^4..];
-            return maskedPart + visiblePart;
-        }
-
-
     }
 }

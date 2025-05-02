@@ -4,6 +4,7 @@ using Data.Repositories.Finance;
 using Data.Repositories.User;
 using Exceptions;
 using Microsoft.Identity.Client;
+using Services.DataManagement;
 
 
 namespace Services
@@ -13,13 +14,17 @@ namespace Services
     /// </summary>
     public class UserDataService : Service
     {
+        private readonly DataMaskingService _dataMaskingService;
         /// <summary>
         /// The constructor of the UserDataService.
         /// Injects an IDbContextFactory that generates a new dbContext connection
         /// for each method to avoid concurrency.
         /// </summary>
         /// <param name="contextFactory">The IDbContextFactory</param>
-        public UserDataService(IDbContextFactory<EBankingContext> contextFactory) : base(contextFactory) { }
+        public UserDataService(IDbContextFactory<EBankingContext> contextFactory, DataMaskingService dataMaskingService) : base(contextFactory) 
+        {
+            _dataMaskingService = dataMaskingService;
+        }
 
         /// <summary>
         /// Attempts to retrieve a UserAuth from the database with specified includes.
@@ -227,6 +232,7 @@ namespace Services
                 {
                     //  Throws AccountNotFoundException if account is not found.
                     Account account = await this.GetAccountAsync(id);
+                    account.AccountNumber = _dataMaskingService.MaskAccountOrAtmNumber(account.AccountNumber);
                     accountList.Add(account);
                 } 
                 catch (AccountNotFoundException)
@@ -252,8 +258,9 @@ namespace Services
         /// </returns>
         public async Task<List<Transaction>> GetRecentAccountTransactionsAsync(
             int accountId, 
-            int? transactionCount = null,
             int transactionTypeId = 0,
+            int pageSize = 50,
+            int pageNumber = 1,
             DateTime? transactionStartDate = null,
             DateTime? transactionEndDate = null
             )
@@ -268,20 +275,35 @@ namespace Services
                     .ComposeQuery(includeTransactionType: true, includeMainAccount: true, includeCounterAccount: true, includeExternalVendor: true);
                 query = transactionRepository
                     .FilterQuery(query, transactionTypeId, transactionStartDate, transactionEndDate);
-                
+
 
                 //  Return the list of transactions.
-                var transactionList = await transactionRepository.GetTransactionsAsListAsync(accountId, query);
-                transactionList.Reverse();
+                int skipCount = (pageNumber-1) * pageSize;
+                int takeCount = pageSize;
+                var transactionList = await transactionRepository.GetRecentTransactionsAsListAsync(accountId, takeCount, skipCount, query);
 
-                // Check if 'transactionCount' is an integer and greater than 0
-                // If true, return the first 'count' number of elements from 'transactionList' as a list
-                // If false (either 'transactionCount' is not an integer or count <= 0), return the entire 'transactionList' as is
-                return transactionCount is int count  && count > 0
-                    ? transactionList.Take(count).ToList() 
-                    : transactionList;
+                if (transactionList.Any())
+                {
+                    foreach (var transaction in transactionList)
+                    {
+                        transaction.MainAccount.AccountNumber = _dataMaskingService.MaskAccountOrAtmNumber(transaction.MainAccount.AccountNumber);
+                        if (transaction.CounterAccount is not null)
+                            transaction.CounterAccount.AccountNumber = _dataMaskingService.MaskAccountOrAtmNumber(transaction.CounterAccount.AccountNumber);
+                    }
+                }
+
+                return transactionList;
             }
         }
+
+        public List<Transaction> GetTransactionListPage(List<Transaction> transactionList, int pageNumber)
+        {
+            int pageSize = 10;
+            int skipCount = (pageNumber - 1) * pageSize;
+            int takeCount = pageSize;
+            return transactionList.Skip(skipCount).Take(takeCount).ToList();
+        }
+
         /// <summary>
         /// Asynchronously retrieves a list of the account ids associated with the user auth id.
         /// </summary>

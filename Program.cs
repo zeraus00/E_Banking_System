@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Services;
+using Services.DataManagement;
 using System.Security.Claims;
 using ViewModels;
 using Microsoft.AspNetCore.Antiforgery;
@@ -39,6 +40,7 @@ builder.Services.AddScoped<SignInService>();
 
 // Data services
 builder.Services.AddScoped<AdminDataService>();
+builder.Services.AddScoped<DataMaskingService>();
 builder.Services.AddScoped<UserDataService>();
 builder.Services.AddScoped<RegistrationService>();
 builder.Services.AddScoped<TransactionService>();
