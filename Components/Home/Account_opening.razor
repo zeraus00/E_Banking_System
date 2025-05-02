@@ -3,6 +3,7 @@
 @using System.Text.Json;
 @using Data.Constants
 @using Microsoft.AspNetCore.Components.Forms
+@using System.Text.RegularExpressions;
 
 @page "/Account_opening"
 @rendermode InteractiveServer
@@ -203,7 +204,7 @@
 					<div class="col">
 						<label class="text-light">Municipality/City</label>
 						<select class="form-select form-select-sm" value="selectedCity" @onchange="async _ => await LoadBarangaysAsync(_)" required>
-							<option value="" disabled hidden>@cityPlaceHolder</option>
+							<option value="@cityPlaceHolder" hidden>@cityPlaceHolder</option>
 							@foreach (var c in citiesFromProvince)
 							{
 								<option value="@c.code">@c.name</option>
@@ -215,7 +216,7 @@
 					<div class="col">
 						<label class="text-light">Barangay</label>
 						<select class="form-select form-select-sm" value="selectedBarangay" required>
-							<option value="" disabled hidden>@barangayPlaceHolder</option>
+							<option value="@cityPlaceHolder" hidden>@cityPlaceHolder</option>
 							@foreach (var b in barangaysFromCity)
 							{
 								<option value="@b.code">@b.name</option>
@@ -255,7 +256,7 @@
 					<div class="col">
 						<label class="text-light">Region</label>
 						<select class="form-select form-select-sm" value="selectedBirthRegion" @onchange="async _ => await LoadBirthProvincesAsync(_)" required>
-							<option value="" disabled hidden>@regionPlaceHolder</option>
+							<option value="" hidden>@regionPlaceHolder</option>
 							@foreach (var r in birthRegions)
 							{
 								<option value="@r.code">@r.regionName</option>
@@ -267,7 +268,7 @@
 					<div class="col">
 						<label class="text-light">Province</label>
 						<select class="form-select form-select-sm" value="selectedBirthProvince" @onchange="async _ => await LoadBirthCitiesAsync(_)" required>
-							<option value="" disabled hidden>@provincePlaceHolder</option>
+							<option value="@provincePlaceHolder" hidden>@provincePlaceHolder</option>
 							@foreach (var p in birthProvinces)
 							{
 								<option value="@p.code">@p.name</option>
@@ -279,7 +280,7 @@
 					<div class="col">
 						<label class="text-light" >City</label>
 						<select class="form-select form-select-sm" value="selectedBirthCity" required>
-							<option value="" disabled hidden>@cityPlaceHolder</option>
+							<option value="@cityPlaceHolder" hidden>@cityPlaceHolder</option>
 							@foreach (var c in birthCities)
 							{
 								<option value="@c.code">@c.name</option>
@@ -640,7 +641,7 @@
 		try
 		{
 			error = string.Empty; // reset previous error
-										//	Get the value of the selection
+			//	Get the value of the selection
 			selectedRegion = e?.Value?.ToString() ?? "";
 
 			// this will reset if the user select new region
@@ -694,7 +695,7 @@
 			//	Default the selection to the first option each time provinces are updated.
 			if (citiesFromProvince.Any())
 			{
-				selectedCity = citiesFromProvince[0].code.GetString()!;
+				selectedCity = cityPlaceHolder; //citiesFromProvince[0].code.GetString()!;
 			}
 			//	Rerender component
 			StateHasChanged();
@@ -710,6 +711,7 @@
 		try
 		{
 			error = string.Empty; // reset previous error
+			selectedCity = e?.Value?.ToString() ?? "";
 
 			selectedBarangay = string.Empty;
 			barangaysFromCity = new();
@@ -919,8 +921,7 @@
 			if (string.IsNullOrWhiteSpace(password) || password.Length < 6)
 			{
 				error = "Invalid password, at least 6 character length is required.";
-				Console.WriteLine(error);
-				return;
+				
 			}
 			if (string.IsNullOrWhiteSpace(email))
 			{
@@ -976,11 +977,6 @@
 				error = "Mother's full name is required.";
 				return;
 			}
-			// if (string.IsNullOrWhiteSpace(beneficiaryFirstName) || string.IsNullOrWhiteSpace(beneficiaryLastName))
-			// {
-			// 	error = "Beneficiary's full name is required.";
-			// 	return;
-			// }
 
 			// Validation for address
 			if (string.IsNullOrWhiteSpace(houseNo))
@@ -995,12 +991,7 @@
 				Console.WriteLine(error);
 				return;
 			}
-			// if (regionId == 0 || provinceId == 0 || cityId == 0 || barangayId == 0)
-			// {
-			// 	error = "Complete address (region, province, city, barangay) is required.";
-			// 	Console.WriteLine(error);
-			// 	return;
-			// }
+
 			if (postalCode == 0)
 			{
 				error = "Postal code is required.";
@@ -1014,13 +1005,6 @@
 				Console.WriteLine(error);
 				return;
 			}
-
-			// if (string.IsNullOrEmpty(customReligion))
-			// {
-			// 	error = "Religon is required.";
-			// 	Console.WriteLine(error);
-			// 	return;
-			// }
 
 			Console.WriteLine("ERRRO CHECKS PASSED.");
 
