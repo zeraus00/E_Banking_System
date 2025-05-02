@@ -123,6 +123,7 @@ namespace Services
                 int firstAccountId = 0;
                 string firstAccountNumber = string.Empty;
                 string firstAccountName = "ACCOUNT_NAME_NOT_FOUND";
+                int firstAccountStatusId = 0;
                 List<int> accountIdList = new();
 
                 if (accountList.Any())
@@ -131,6 +132,7 @@ namespace Services
                     firstAccountId = firstAccount.AccountId;
                     firstAccountNumber = _dataMaskingService.MaskAccountOrAtmNumber(firstAccount.AccountNumber);
                     firstAccountName = firstAccount.AccountName;
+                    firstAccountStatusId = firstAccount.AccountStatusTypeId;
                     foreach (var account in accountList)
                     {
                         accountIdList.Add(account.AccountId);
@@ -146,6 +148,7 @@ namespace Services
                     ActiveAccountId = firstAccountId,
                     ActiveAccountNumber = firstAccountNumber,
                     ActiveAccountName = firstAccountName,
+                    ActiveAccountStatusId = firstAccountStatusId,
                     UserAccountIdList = accountIdList
                 };
 
@@ -276,6 +279,7 @@ namespace Services
                 userSession.ActiveAccountId = newActiveAccount.AccountId;
                 userSession.ActiveAccountNumber = _dataMaskingService.MaskAccountOrAtmNumber(newActiveAccount.AccountNumber);
                 userSession.ActiveAccountName = newActiveAccount.AccountName;
+                userSession.ActiveAccountStatusId = newActiveAccount.AccountStatusTypeId;
 
                 /*  STORE THE SESSION BACK TO SESSION STORAGE   */
                 await _sessionStorage.StoreSessionAsync(SessionSchemes.USER_SESSION, userSession);
