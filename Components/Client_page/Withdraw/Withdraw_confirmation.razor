@@ -77,6 +77,7 @@
 @code 
 {
     private UserSession userSession { get; set; } = default!;
+    private ActiveAccountSession activeAccountSession { get; set; } = default!;
     private TransactionSession transactionSession { get; set; } = default!;
 
     private string accountNumber = "Loading...";
@@ -99,15 +100,13 @@
                 //  Throws SessionNotFoundException if session is not found.
                 //  Throws ControlledSessionNotFound if transaction session is not found.
                 userSession = await userSessionService.GetUserSession();
+                activeAccountSession = await userControlledSessionService.GetActiveAccountSessionAsync(userSession);
                 transactionSession = await userControlledSessionService.GetTransactionSessionAsync(userSession);
 
-                Console.WriteLine("MAIN ACCOUNT ID: " + transactionSession.MainAccountId);
-                Console.WriteLine("ACCOUNT BALANCE: " + transactionSession.CurrentBalance);
-
                 //  Set display data.
-                accountNumber = userSession.ActiveAccountNumber;
+                accountNumber = activeAccountSession.AccountNumber;
                 cardDestination = ExternalVendors.ExternalVendorList[transactionSession.ExternalVendorId!.Value - 1];
-                clientName = userSession.ActiveAccountName;
+                clientName = activeAccountSession.AccountName;
                 currentBalance = transactionSession.CurrentBalance;
                 withdrawAmount = transactionSession.Amount;
                 transactionNumber = transactionSession.TransactionNumber;

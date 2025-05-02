@@ -5,6 +5,7 @@
 @rendermode InteractiveServer
 
 @inject PageRedirectService redirectService
+@inject UserControlledSessionService userControlledSessionService
 @inject UserSessionService userSessionService
 
 
@@ -79,6 +80,8 @@
 
 @code 
 {
+	private UserSession userSession { get; set; } = default!;
+	private ActiveAccountSession activeAccountSession { get; set; } = default!;
 	private string email = "Loading...";
 	private string accountNumber = "Loading...";
 	private string clientName = "Loading...";
@@ -92,11 +95,12 @@
 			{
 				//	Get user session details from session storage.
 				//	Throws SessionNotFoundException if session is not found.
-				UserSession userSession = await userSessionService.GetUserSession();
+				userSession = await userSessionService.GetUserSession();
+				activeAccountSession = await userControlledSessionService.GetActiveAccountSessionAsync(userSession);
 
 				//	Set display data.
 				email = userSession.CurrentUserEmail;
-				accountNumber = userSession.ActiveAccountNumber;
+				accountNumber = activeAccountSession.AccountNumber;
 				clientName = userSession.CurrentUserName;
 				contactNo = userSession.CurrentUserContact;
 

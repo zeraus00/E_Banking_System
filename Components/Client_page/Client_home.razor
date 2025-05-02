@@ -5,6 +5,7 @@
 @attribute [Authorize(Roles = "User")]
 @rendermode InteractiveServer
 
+@inject UserControlledSessionService userControlledSessionService
 @inject UserDataService userDataService
 @inject UserSessionService userSessionService
 @inject PageRedirectService redirectService
@@ -25,7 +26,7 @@
                     </h5>
 
                     <div class="w-auto">
-                        <select class="form-select form-select-sm" value="@selectedAccountId" @onchange="async _ => await GetSelectedAccount(_)" required>
+                        <select class="form-select form-select-sm" value="@selectedAccountId" @onchange="async _ => await UpdateSelectedAccount(_)" required>
                             <option value= "" diasbled hidden>@_clientName</option>
                             @foreach(var account in accountList)
                             {
@@ -171,7 +172,8 @@
 
 
 @code {
-    UserSession userSession;
+    UserSession userSession { get; set; } = default!;
+    ActiveAccountSession activeAccountSession {get;set;} = default!;
 
     // Mock data for demonstration — replace with real data from your backend
     private List<Account> accountList = new();
@@ -210,13 +212,15 @@
     }
 
 
-    public async Task GetSelectedAccount(ChangeEventArgs? e = null)
+    public async Task UpdateSelectedAccount(ChangeEventArgs? e = null)
     {
         //  Get the value of the selection
         selectedAccountId = Convert.ToInt32(e?.Value?.ToString());
 
         //  Update the current account details in the session.
-        await userSessionService.UpdateCurrentAccountInSession(selectedAccountId);
+        Account account = await userDataService.GetAccountAsync(selectedAccountId);
+        ActiveAccountSession newActiveAccount = userControlledSessionService.CreateActiveAccountSession(account);
+        await userControlledSessionService.SetActiveAccountSessionAsync(newActiveAccount, userSession);
 
 
         //  Reload page.
@@ -232,22 +236,24 @@
                 //  Get user session details from session storage.
                 //  Throws SessionNotFoundException if session is not found.
                 userSession = await userSessionService.GetUserSession();
-
-                //  Set display data.
-                _clientName = userSession.ActiveAccountName;
-                _accountNumber = userSession.ActiveAccountNumber;
-                _clientPhone = userSession.CurrentUserContact;
+                activeAccountSession = await userControlledSessionService.GetActiveAccountSessionAsync(userSession);
 
                 //  Get account list.
                 await this.LoadAccountList();
 
                 //  Get active account.
                 //  Throws AccountNotFoundException is account is not found.
-                activeAccount = await userDataService.GetAccountAsync(userSession.ActiveAccountId, includeTransactions: true);
+                activeAccount = await userDataService.GetAccountAsync(activeAccountSession.AccountId);
+
+                //  Set display data.
+                _clientName = activeAccountSession.AccountName;
+                _accountNumber = activeAccountSession.AccountNumber;
+                _clientPhone = userSession.CurrentUserContact;
                 _currentBalance = activeAccount.Balance;
+                //  Get 3 most recent transactions of the account.
                 recentTransactions = await userDataService
                     .GetRecentAccountTransactionsAsync(
-                        userSession.ActiveAccountId,
+                        activeAccountSession.AccountId,
                         pageSize: 3
                     );
 
@@ -256,7 +262,7 @@
             }
             catch (SessionNotFoundException)
             {
-                //  Redirect user to loggin_in_page if there is no existing session.
+                //  Redirect user to LOGGING_IN_PAGE if there is no existing session.
                 redirectService.redirectWithNavigationManager(PageRoutes.LOGGING_IN_PAGE);
             }
             catch (AccountNotFoundException)

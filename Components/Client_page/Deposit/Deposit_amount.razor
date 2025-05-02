@@ -83,9 +83,10 @@
     private TransactionMethod? methodRef;
 
     private UserSession userSession { get; set; } = default!;
+    private ActiveAccountSession activeAccountSession { get; set; } = default!;
     private TransactionSession transactionSession { get; set; } = default!;
 
-    private Account? Account;
+    private Account? account;
 
     private int accountId;
     private string accountNumber = "Loading...";
@@ -104,14 +105,18 @@
                 //  Get user session details from session storage.
                 //  Throws SessionNotFoundException is session is not found.
                 userSession = await userSessionService.GetUserSession();
-                accountId = userSession.ActiveAccountId;
-                accountNumber = userSession.ActiveAccountNumber;
-                clientName = userSession.ActiveAccountName;
+                activeAccountSession = await userControlledSessionService.GetActiveAccountSessionAsync();
 
+                //  Get account id.
+                accountId = activeAccountSession.AccountId;
                 //  Get account from database.
                 //  Throws AccountNotFoundException if account is not found.
-                Account = await userDataService.GetAccountAsync(accountId);
-                currentBalance = Account.Balance;
+                account = await userDataService.GetAccountAsync(accountId);
+
+                //  Set display data.
+                accountNumber = activeAccountSession.AccountNumber;
+                clientName = activeAccountSession.AccountName;
+                currentBalance = account.Balance;
 
                 StateHasChanged();
             }

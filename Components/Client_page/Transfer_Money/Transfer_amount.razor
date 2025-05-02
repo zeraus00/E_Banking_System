@@ -7,6 +7,7 @@
 @inject NavigationManager NavigationManager
 @inject ClaimsHelperService claimsHelperService
 @inject PageRedirectService redirectService
+@inject UserControlledSessionService userControlledSessionService
 @inject UserDataService userDataService
 @inject UserSessionService userSessionService
 
@@ -49,7 +50,7 @@
                             <option value="Other">Other Account</option>
                         </select>
                     </div>
-                
+
                     @if (transferType == "Own")
                     {
                         <!-- Own Account Selected -->
@@ -73,12 +74,12 @@
                             <div class="col-12 col-md-6">
                                 <label class="text-light">Enter Account Number</label>
                                 <input type="number" class="form-control form-control-custom mb-1" placeholder="Account Number"
-                                       @bind="otherAccountNumber" required />
+                                @bind="otherAccountNumber" required />
                             </div>
                             <div class="col-12 col-md-6">
                                 <label class="text-light">Enter Account Name</label>
                                 <input class="form-control form-control-custom mb-1" placeholder="Account Name"
-                                       @bind="otherAccountName" required />
+                                @bind="otherAccountName" required />
                             </div>
                         </div>
                     }
@@ -118,6 +119,8 @@
 
 @code
 {
+    private UserSession userSession { get; set; } = default!;
+    private ActiveAccountSession activeAccountSession { get; set; } = default!;
     private Account? Account;
 
     private int accountId;
@@ -144,23 +147,25 @@
             {
                 //  Get user session details.
                 //  Throws UserNotFoundException if session is not found.
-                UserSession userSession = await userSessionService.GetUserSession();
-                accountId = userSession.ActiveAccountId;
-
-                //  Set display data.
-                accountNumber = userSession.ActiveAccountNumber;
-                clientName = userSession.ActiveAccountName;
+                userSession = await userSessionService.GetUserSession();
+                activeAccountSession = await userControlledSessionService.GetActiveAccountSessionAsync(userSession);
 
                 //  Get account from database
                 //  Throws AccountNotFoundException if account is not found.
+                accountId = activeAccountSession.AccountId;
                 Account = await userDataService.GetAccountAsync(accountId);
+
+                //  Set display data.
+                accountNumber = activeAccountSession.AccountNumber;
+                clientName = activeAccountSession.AccountName;
                 currentBalance = Account.Balance;
 
+                //  Reload component.
                 StateHasChanged();
             }
             catch (SessionNotFoundException)
             {
-                //  Redirect to logging in page
+                //  Redirect to LOGGING_IN_PAGE.
                 redirectService.redirectWithNavigationManager(PageRoutes.LOGGING_IN_PAGE);
             }
             catch (AccountNotFoundException)

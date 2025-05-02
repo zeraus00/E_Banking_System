@@ -59,6 +59,7 @@
 @code
 {
     private UserSession userSession { get; set; } = default!;
+    private ActiveAccountSession activeAccountSession { get; set; } = default!;
     private TransactionSession transactionSession { get; set; } = default!;
     private string accountNumber = "Loading...";
     private string cardPayment = "Loading...";
@@ -78,11 +79,12 @@
                 //  Fetch user and transaction session details from session storage.
                 //  Throws SessionNotFoundException if session is not found.
                 userSession = await userSessionService.GetUserSession();
+                activeAccountSession = await userControlledSessionService.GetActiveAccountSessionAsync(userSession);
                 transactionSession = await userControlledSessionService.GetTransactionSessionAsync(userSession);
                 //  Set display data.
-                accountNumber = userSession.ActiveAccountNumber;
+                accountNumber = activeAccountSession.AccountNumber;
                 cardPayment = ExternalVendors.ExternalVendorList[transactionSession.ExternalVendorId!.Value-1];
-                clientName = userSession.ActiveAccountName;
+                clientName = activeAccountSession.AccountName;
                 currentBalance = transactionSession.CurrentBalance;
                 depositAmount = transactionSession.Amount;
                 date = transactionSession.TransactionDate;

@@ -3,6 +3,7 @@
 @rendermode InteractiveServer
 
 @inject ClaimsHelperService claimsHelperService
+@inject UserControlledSessionService userControlledSessionService
 @inject UserSessionService userSessionService
 @inject PageRedirectService redirectService
 
@@ -30,7 +31,7 @@
 				{
 					//	Start session.
 					await userSessionService.StartSessionBasedOnRole(user);
-
+					await userControlledSessionService.SetActiveAccountSessionAsync();
 					// NOTE:
 					// StartSessionBasedOnRole uses ProtectedSessionStorage,
 					// which internally relies on JavaScript interop.
