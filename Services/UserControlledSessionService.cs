@@ -8,13 +8,46 @@ namespace Services
 {
     public class UserControlledSessionService
     {
+        private readonly UserDataService _userDataService;
         private readonly UserSessionService _userSessionService;
 
-        public UserControlledSessionService(UserSessionService userSessionService)
+        public UserControlledSessionService(UserDataService userDataService, UserSessionService userSessionService)
         {
+            _userDataService = userDataService;
             _userSessionService = userSessionService;
         }
 
+        public async Task<ActiveAccountSession> GetActiveAccountSessionAsync(UserSession? userSession = null)
+        => userSession is null
+            ? (await _userSessionService.GetUserSession()).ActiveAccountSession
+            : userSession.ActiveAccountSession;
+
+        public async Task SetActiveAccountSessionAsync(ActiveAccountSession? activeAccountSession=null, UserSession? userSession = null)
+        {
+            if (userSession is null)
+                userSession = await _userSessionService.GetUserSession();
+            
+            if (activeAccountSession is null)
+            {
+                int accountId = userSession.UserAccountIdList[0];
+                Account account = await _userDataService.GetAccountAsync(accountId);
+                activeAccountSession = CreateActiveAccountSession(account);
+            }
+            userSession.ActiveAccountSession = SetAccountPermissions(activeAccountSession);
+            await _userSessionService.UpdateUserSession(userSession);
+        }
+        public ActiveAccountSession CreateActiveAccountSession(Account account)
+        {
+            ActiveAccountSession activeAccountSession = new ActiveAccountSession
+            {
+                AccountId = account.AccountId,
+                AccountName = account.AccountName,
+                AccountNumber = account.AccountNumber,
+                AccountStatusId = account.AccountStatusTypeId
+            };
+
+            return SetAccountPermissions(activeAccountSession);
+        }
         public async Task<TransactionSession> GetTransactionSessionAsync(UserSession? userSession = null)
         {
             if (userSession is null)
@@ -44,5 +77,30 @@ namespace Services
             _ => string.Empty
         };
 
+        private ActiveAccountSession SetAccountPermissions(ActiveAccountSession activeAccountSession)
+        {
+            activeAccountSession.AccountCanTransact = activeAccountSession.AccountStatusId switch
+            {
+                (int)AccountStatusTypes.Active => true,
+                (int)AccountStatusTypes.Restricted => true,
+                _ => false
+            };
+
+            activeAccountSession.AccountCanApplyLoan = activeAccountSession.AccountStatusId switch
+            {
+                (int)AccountStatusTypes.Active => true,
+                _ => false
+            };
+
+            activeAccountSession.AccountCanPayLoan = activeAccountSession.AccountStatusId switch
+            {
+                (int)AccountStatusTypes.Pending => false,
+                (int)AccountStatusTypes.Closed => false,
+                (int)AccountStatusTypes.Denied => false,
+                _ => true
+            };
+
+            return activeAccountSession;
+        }
     }
 }

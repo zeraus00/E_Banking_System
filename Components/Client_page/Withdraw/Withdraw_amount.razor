@@ -84,6 +84,7 @@
     public TransactionMethod? methodRef;
 
     private UserSession userSession { get; set; } = default!;
+    private ActiveAccountSession activeAccountSession { get; set; } = default!;
     private TransactionSession transactionSession { get; set; } = default!;
 
     private int accountId;
@@ -111,17 +112,19 @@
                 //  Get user session details from session storage.
                 //  Throws SessionNotFoundException is session is not found.
                 userSession = await userSessionService.GetUserSession();
-
-                //  Set display data.
-                accountId = userSession.ActiveAccountId;
-                accountNumber = userSession.ActiveAccountNumber;
-                clientName = userSession.ActiveAccountName;
+                activeAccountSession = await userControlledSessionService.GetActiveAccountSessionAsync(userSession);
 
                 //  Get Account from database.
                 //  Throws AccountNotFoundException if account is not found.
-                Account Account = await userDataService.GetAccountAsync(accountId);
-                currentBalance = Account.Balance;
+                accountId = activeAccountSession.AccountId;
+                Account account = await userDataService.GetAccountAsync(accountId);
 
+                //  Set display data.
+                accountNumber = activeAccountSession.AccountNumber;
+                clientName = activeAccountSession.AccountName;
+                currentBalance = account.Balance;
+                
+                //  Reload component.
                 StateHasChanged();
             }
             catch (SessionNotFoundException)
@@ -190,11 +193,11 @@
         }
         catch (AccountNotFoundException) 
         {
-            error = "Error resolving database. Please try again later";
+            error = "Error resolving database. Please try again later.";
         }
         catch (InsufficientBalanceException)
         {
-            error = "You do not have sufficient balance";
+            error = "You do not have sufficient balance.";
         }
     }
 }

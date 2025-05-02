@@ -6,6 +6,7 @@ using Data.Models.User;
 using Exceptions;
 using Services.DataManagement;
 using System.Security.Claims;
+using ViewModels.RoleControlledSessions;
 using ViewModels.Sessions;
 
 namespace Services
@@ -24,8 +25,8 @@ namespace Services
 
         public UserSessionService(
             ClaimsHelperService claimsHelper, 
-            DataMaskingService dataMaskingService, 
-            SessionStorageService sessionStorage, 
+            DataMaskingService dataMaskingService,
+            SessionStorageService sessionStorage,
             UserDataService dataService)
         {
             _dataMaskingService = dataMaskingService;
@@ -111,46 +112,25 @@ namespace Services
                 UserInfo userInfo = await _dataService.TryGetUserInfoAsync(userInfoId, includeUserName: true);
 
                 /*  GET USER SESSION FIELDS  */
+                UserSession userSession = new();
 
                 //  Get full name.
-                string fullName = await _dataService.GetUserFullName(userInfo) ?? "NAME_NOT_FOUND.";
-
+                userSession.CurrentUserName = await _dataService.GetUserFullName(userInfo) ?? "NAME_NOT_FOUND.";
+                userSession.CurrentUserEmail = userAuth.Email;
+                userSession.CurrentUserContact = userInfo.ContactNumber;
                 //  Get account list.
                 List<Account> accountList = userAuth.Accounts.ToList();
-
-                //  When starting a session, use the first account in the list as the current account.
-                Account firstAccount;
-                int firstAccountId = 0;
-                string firstAccountNumber = string.Empty;
-                string firstAccountName = "ACCOUNT_NAME_NOT_FOUND";
-                int firstAccountStatusId = 0;
                 List<int> accountIdList = new();
 
                 if (accountList.Any())
                 {
-                    firstAccount = accountList[0];
-                    firstAccountId = firstAccount.AccountId;
-                    firstAccountNumber = _dataMaskingService.MaskAccountOrAtmNumber(firstAccount.AccountNumber);
-                    firstAccountName = firstAccount.AccountName;
-                    firstAccountStatusId = firstAccount.AccountStatusTypeId;
                     foreach (var account in accountList)
                     {
                         accountIdList.Add(account.AccountId);
                     }
                 }
 
-                /*  ASSIGN USER SESSION FIELDS  */
-                UserSession userSession = new UserSession
-                {
-                    CurrentUserName = fullName,
-                    CurrentUserEmail = userAuth.Email,
-                    CurrentUserContact = userInfo.ContactNumber,
-                    ActiveAccountId = firstAccountId,
-                    ActiveAccountNumber = firstAccountNumber,
-                    ActiveAccountName = firstAccountName,
-                    ActiveAccountStatusId = firstAccountStatusId,
-                    UserAccountIdList = accountIdList
-                };
+                userSession.UserAccountIdList = accountIdList;
 
                 /*  CREATE A SESSION    */
                 await _sessionStorage.StoreSessionAsync(SessionSchemes.USER_SESSION, userSession);
@@ -256,44 +236,6 @@ namespace Services
         public async Task UpdateAdminSession(AdminSession adminSession)
             => await _sessionStorage.StoreSessionAsync<AdminSession>(SessionSchemes.ADMIN_SESSION, adminSession);
 
-        /// <summary>
-        /// Updates the session details with the current active account selected by the user.
-        /// Fetches the session details from the session storage, updates it, then stores it back.s
-        /// </summary>
-        /// <param name="accountId">The account id of the new selected active account.</param>
-        /// <returns></returns>
-        /// <exception cref="SessionNotFoundException">Thrown if no session is found.</exception>
-        /// <exception cref="AccountNotFoundException">Thrown if no account is found.</exception>
-        public async Task UpdateCurrentAccountInSession(int accountId)
-        {
-            try
-            {
-                //  Retrieve user session details from session storage.
-                //  Throws SessionNotFoundException if sesion is not found.
-                UserSession userSession = await _sessionStorage.FetchSessionAsync<UserSession>(SessionSchemes.USER_SESSION);
-
-                //  Retrieve the account number of the new selected account.
-                //  Throws AccountNotFoundException if account is not found.
-                Account newActiveAccount = await _dataService.GetAccountAsync(accountId);
-
-                userSession.ActiveAccountId = newActiveAccount.AccountId;
-                userSession.ActiveAccountNumber = _dataMaskingService.MaskAccountOrAtmNumber(newActiveAccount.AccountNumber);
-                userSession.ActiveAccountName = newActiveAccount.AccountName;
-                userSession.ActiveAccountStatusId = newActiveAccount.AccountStatusTypeId;
-
-                /*  STORE THE SESSION BACK TO SESSION STORAGE   */
-                await _sessionStorage.StoreSessionAsync(SessionSchemes.USER_SESSION, userSession);
-            } 
-            catch (SessionNotFoundException)
-            {
-                throw;
-            }
-            catch (AccountNotFoundException)
-            {
-                throw;
-            }
-
-        }
         /// <summary>
         /// End user session.
         /// </summary>

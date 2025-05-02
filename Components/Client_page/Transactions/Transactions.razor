@@ -5,6 +5,7 @@
 @inject NavigationManager NavigationManager
 @inject PageRedirectService redirectService
 @inject UserDataService userDataService
+@inject UserControlledSessionService userControlledSessionService
 @inject UserSessionService userSessionService
 
 <div class="main">
@@ -135,6 +136,8 @@
 </div>
 
 @code {
+    private UserSession userSession { get; set; } = default!;
+    private ActiveAccountSession activeAccountSession { get; set; } = default;
     private string error = "";
 
     private DateTime? startDate;
@@ -169,9 +172,10 @@
             {
                 //  Get user session details from session storage
                 //  Throws SessionNotFoundException if session is not found.
-                UserSession userSession = await userSessionService.GetUserSession();
-
-                accountId = userSession.ActiveAccountId;
+                userSession = await userSessionService.GetUserSession();
+                activeAccountSession = await userControlledSessionService
+                    .GetActiveAccountSessionAsync(userSession);
+                accountId = activeAccountSession.AccountId;
 
                 //  Get transaction list from database.
                 pageNumber = 1;
