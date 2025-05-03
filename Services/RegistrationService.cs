@@ -289,11 +289,13 @@ namespace Services
                 throw new FieldMissingException("Password is required.");
             }
 
+            string hashedPassword = Helpers.BcryptHelper.HashPassword(password);
+
             var UserAuthBuilder = new UserAuthBuilder()
                .WithRoleId((int)RoleTypes.User)
                .WithUserName(username)
                .WithEmail(email)
-               .WithPassword(password);
+               .WithPassword(hashedPassword);
 
             UserAuth userAuth = UserAuthBuilder.Build();
 
