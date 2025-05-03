@@ -114,13 +114,13 @@
 					<!-- Age -->
 					<div class="col-1">
 						<label class="text-light">Age</label>
-						<input class="form-control form-control-sm" type="number" placeholder="Age" required>
+						<input class="form-control form-control-sm" @bind="age" type="number" placeholder="Age" required>
 					</div>
 
 					<!-- Sex -->
 					<div class="col-1">
 						<label class="text-light">Sex</label>
-						<select class="form-select form-select-sm" required>
+						<select class="form-select form-select-sm" @bind="selectedSex" required>
 							<option>Male</option>
 							<option>Female</option>
 						</select>
@@ -129,7 +129,7 @@
 					<!-- Civil  Status -->
 					<div class="col-2">
 						<label class="text-light">Civil Status</label>
-						<select class="form-select form-select-sm" required>
+						<select class="form-select form-select-sm" @bind="selectedCivilStatus" required>
 							<option>Single</option>
 							<option>Married</option>
 							<option>Separated</option>
@@ -279,7 +279,7 @@
 
 					<!-- City -->
 					<div class="col">
-						<label class="text-light" >City</label>
+						<label class="text-light" >Municipality/City</label>
 						<select class="form-select form-select-sm" value="selectedBirthCity" required>
 							<option value="@cityPlaceHolder" hidden>@cityPlaceHolder</option>
 							@foreach (var c in birthCities)
