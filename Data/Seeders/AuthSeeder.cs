@@ -1,4 +1,5 @@
-﻿using Data.Repositories.Auth;
+﻿using Data.Constants;
+using Data.Repositories.Auth;
 using Data.Repositories.Finance;
 
 namespace Data.Seeders
@@ -74,6 +75,21 @@ namespace Data.Seeders
 
                 await _context.SaveChangesAsync();
             }
+        }
+
+        public async Task SeedAccessRoles()
+        {
+            if (!await _context.AccessRoles.AnyAsync())
+            {
+                foreach(var roleName in AccessRoleNames.AsList)
+                {
+                    AccessRole accessRole = new AccessRole();
+                    accessRole.AccessRoleName = roleName;
+                    await _context.AccessRoles.AddAsync(accessRole);
+                }
+
+                await _context.SaveChangesAsync();
+            }    
         }
     }
 }

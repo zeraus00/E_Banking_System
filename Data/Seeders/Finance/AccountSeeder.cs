@@ -114,6 +114,36 @@ namespace Data.Seeders.Finance
             }
             
         }
+
+        public async Task UpdateAccountAndUserInfoLinks()
+        {
+            if (await _context.UsersInfo.AnyAsync())
+            {
+                List<UserInfo> usersInfo = await _context
+                    .UsersInfo
+                    .Include(ui => ui.UserAuth)
+                    .ThenInclude(ua => ua.Accounts)
+                    .ToListAsync();
+
+                foreach (var userInfo in usersInfo)
+                {
+                    List<Account> accounts = userInfo.UserAuth.Accounts.ToList();
+
+                    foreach (var account in accounts)
+                    {
+                        var link = new UserInfoAccount
+                        {
+                            UserInfoId = userInfo.UserInfoId,
+                            AccessRoleId = (int)AccessRoles.PRIMARY_OWNER,
+                            AccountId = account.AccountId
+                        };
+
+                        await _context.UsersInfoAccounts.AddAsync(link);
+                    }
+
+                }
+            }
+        }
     }
 
 }
