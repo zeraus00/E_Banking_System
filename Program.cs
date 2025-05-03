@@ -86,15 +86,6 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var contextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<EBankingContext>>();
-    await using (var dbContext = await contextFactory.CreateDbContextAsync())
-    {
-
-        //dbContext.Database.EnsureDeleted();
-        dbContext.Database.EnsureCreated();
-        // Apply migrations (this will create or update the database schema)
-        // dbContext.Database.Migrate();
-    }
-
     // Seed data (this ensures that only new data is added)
     await SeedData(contextFactory);
 }
