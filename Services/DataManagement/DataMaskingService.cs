@@ -2,10 +2,10 @@
 {
     public class DataMaskingService
     {
-        public string MaskAccountOrAtmNumber(string accountNumber)
+        public string MaskAccountNumber(string accountNumber)
         {
-            string maskedPart = new string('*', accountNumber.Length - 4);
-            string visiblePart = accountNumber[^4..];
+            string maskedPart = new string('*', accountNumber.Length - 3);
+            string visiblePart = accountNumber[^3..];
             return maskedPart + visiblePart;
         }
 

@@ -7,6 +7,7 @@
 
 <AuthorizeView Roles = "@RoleNames.USER">
     <Authorized>
+
         <!-- Side NavBar Layout -->
         <nav class="sidebar">
             <!-- Top Row -->
@@ -54,22 +55,22 @@
                             <NavLink class="nav-link" href="@accountsPage">My Accounts</NavLink>
                         </div>
                         <div class="nav-item px-3">
-                            <button class="nav-link" @onclick="TryRedirectToWithdrawPage">Withdraw</button>
+                            <button class="nav-link @(hasWithdrawError ? "error-link" : "")" @onclick="TryRedirectToWithdrawPage">Withdraw</button>
                         </div>
                         <div class="nav-item px-3">
-                            <button class="nav-link" @onclick="TryRedirectToDepositPage">Deposit</button>
+                            <button class="nav-link @(hasDepositError ? "error-link" : "")" @onclick="TryRedirectToDepositPage">Deposit</button>
                         </div>
                         <div class="nav-item px-3">
                             <NavLink class="nav-link lh-sm" href="@transactionsPage">Transactions</NavLink>
                         </div>
                         <div class="nav-item px-3">
-                            <button class="nav-link lh-sm" @onclick="TryRedirectToTransferPage">Transfer Money</button>
+                            <button class="nav-link lh-sm @(hasTransferError ? "error-link" : "")" @onclick="TryRedirectToTransferPage">Transfer Money</button>
                         </div>
                         <div class="nav-item px-3">
-                            <NavLink class="nav-link lh-sm" href="@applyLoanPage">Apply for Loan</NavLink>
+                            <button class="nav-link lh-sm @(hasApplyLoanError ? "error-link" : "")" @onclick="TryRedirectToApplyLoan">Apply for Loan</button>
                         </div>
                         <div class="nav-item px-3">
-                            <NavLink class="nav-link lh-sm" href="@loanBalancePage">Check Loan Balance</NavLink>
+                            <button class="nav-link lh-sm @(hasLoanBalanceError ? "error-link" : "")" @onclick="TryRedirectToLoanBalance">Check Loan Balance</button>
                         </div>
                     </nav>
                 </div>
@@ -114,6 +115,12 @@
 
     private string error = "";
 
+    private bool hasWithdrawError = false;
+    private bool hasDepositError = false;
+    private bool hasTransferError = false;
+    private bool hasApplyLoanError = false;
+    private bool hasLoanBalanceError = false;
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -147,52 +154,79 @@
         }
     }
 
-    private void TryRedirectToWithdrawPage()
+    private async Task TryRedirectToWithdrawPage()
     {
-        RedirectToTransactionPage(PageRoutes.WITHDRAW_AMOUNT);
-    }
-
-    private void TryRedirectToDepositPage()
-    {
-        RedirectToTransactionPage(PageRoutes.DEPOSIT_AMOUNT);
-    }
-
-    private void TryRedirectToTransferPage()
-    {
-        RedirectToTransactionPage(PageRoutes.TRANSFER_AMOUNT);
-    }
-
-    private void TryRedirectToApplyLoan()
-    {
-        if (!activeAccountSession.AccountCanApplyLoan)
+        if (activeAccountSession.AccountCanTransact)
         {
-            error = "You are unable to access this feature due to your account's status.";
+            redirectService.redirectWithNavigationManager(PageRoutes.WITHDRAW_AMOUNT);
             return;
         }
 
-        redirectService.redirectWithNavigationManager(PageRoutes.APPLY_LOAN);
+        hasWithdrawError = true;
+        StateHasChanged();
+        await Task.Delay(3000);
+        hasWithdrawError = false;
+        StateHasChanged();
     }
 
-    private void TryRedirectToLoanBalance()
+    private async Task TryRedirectToDepositPage()
     {
-        if (!activeAccountSession.AccountCanPayLoan)
+        if (activeAccountSession.AccountCanTransact)
         {
-            error = "You are unable to access this feature due to your account's status.";
+            redirectService.redirectWithNavigationManager(PageRoutes.DEPOSIT_AMOUNT);
             return;
         }
 
-        redirectService.redirectWithNavigationManager(PageRoutes.LOAN_BALANCE);
+        hasDepositError = true;
+        StateHasChanged();
+        await Task.Delay(3000);
+        hasDepositError = false;
+        StateHasChanged();
     }
 
-    private void RedirectToTransactionPage(string url)
+    private async Task TryRedirectToTransferPage()
     {
-        if (!activeAccountSession.AccountCanTransact) 
+        if (activeAccountSession.AccountCanTransact)
         {
-            error = "You are unable to access this feature due to your account's status.";
+            redirectService.redirectWithNavigationManager(PageRoutes.TRANSFER_AMOUNT);
             return;
         }
 
-        redirectService.redirectWithNavigationManager(url);
+        hasTransferError = true;
+        StateHasChanged();
+        await Task.Delay(3000);
+        hasTransferError = false;
+        StateHasChanged();
+    }
+
+    private async Task TryRedirectToApplyLoan()
+    {
+        if (activeAccountSession.AccountCanApplyLoan)
+        {
+            redirectService.redirectWithNavigationManager(PageRoutes.APPLY_LOAN);
+            return;
+        }
+
+        hasApplyLoanError = true;
+        StateHasChanged();
+        await Task.Delay(3000);
+        hasApplyLoanError = false;
+        StateHasChanged();
+    }
+
+    private async Task TryRedirectToLoanBalance()
+    {
+        if (activeAccountSession.AccountCanPayLoan)
+        {
+            redirectService.redirectWithNavigationManager(PageRoutes.LOAN_BALANCE);
+            return;
+        }
+
+        hasLoanBalanceError = true;
+        StateHasChanged();
+        await Task.Delay(3000);
+        hasLoanBalanceError = false;
+        StateHasChanged();
     }
 
     private async Task LogOutAsync()

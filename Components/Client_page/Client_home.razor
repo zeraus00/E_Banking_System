@@ -24,7 +24,7 @@
                     </h5>
 
                     <h5 class="text-light fw-lighter m-0">
-                        _accountStatus : Active
+                        Account Status: @_accountStatus
                     </h5>
 
                     <div class="w-auto">
@@ -192,6 +192,7 @@
     private int selectedAccountId;
     private string _clientName = "Loading...";
     private string _accountNumber = "Loading...";
+    private string _accountStatus = "Loading...";
     private decimal? _currentBalance = 0.00m;
     private string _clientPhone = "Loading...";
     private bool showNotifications = false;
@@ -258,6 +259,7 @@
                 //  Set display data.
                 _clientName = activeAccountSession.AccountName;
                 _accountNumber = activeAccountSession.AccountNumber;
+                _accountStatus = AccountStatusTypeNames.AccountStatusTypeList[activeAccountSession.AccountStatusId-1];
                 _clientPhone = userSession.CurrentUserContact;
                 _currentBalance = activeAccount.Balance;
                 //  Get 3 most recent transactions of the account.
@@ -266,6 +268,9 @@
                         activeAccountSession.AccountId,
                         pageSize: 3
                     );
+
+                //  Notify the user if their are permission restrictions in their account.
+                this.VerifyAccountPermissions();
 
                 //  Reload component.
                 StateHasChanged();
@@ -281,6 +286,17 @@
                 error = "Error resolving database. Please try again later.";
             }
         }
+    }
+
+    private void VerifyAccountPermissions()
+    {
+        bool hasRestrictions = (
+            !activeAccountSession.AccountCanTransact ||
+            !activeAccountSession.AccountCanApplyLoan ||
+            !activeAccountSession.AccountCanPayLoan
+        );
+        if (hasRestrictions)
+            error = "You will be unable to access some features due to your account's status.";
     }
 
     private async Task LoadAccountList()

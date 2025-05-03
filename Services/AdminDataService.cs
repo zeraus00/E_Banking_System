@@ -77,7 +77,7 @@ namespace Services
                 //  Mask the user's account number.
                 foreach (var account in accountList)
                 {
-                    account.AccountNumber = _dataMaskingService.MaskAccountOrAtmNumber(account.AccountNumber);
+                    account.AccountNumber = _dataMaskingService.MaskAccountNumber(account.AccountNumber);
                 }
 
                 //  Get the query as list

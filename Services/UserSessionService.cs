@@ -116,7 +116,7 @@ namespace Services
 
                 //  Get full name.
                 userSession.CurrentUserName = await _dataService.GetUserFullName(userInfo) ?? "NAME_NOT_FOUND.";
-                userSession.CurrentUserEmail = userAuth.Email;
+                userSession.CurrentUserEmail = _dataMaskingService.MaskEmail(userAuth.Email);
                 userSession.CurrentUserContact = userInfo.ContactNumber;
                 //  Get account list.
                 List<Account> accountList = userAuth.Accounts.ToList();
@@ -173,7 +173,7 @@ namespace Services
                 UserInfo userInfo = await _dataService.TryGetUserInfoAsync(userInfoId, includeUserName: true);
 
                 /*  GET ADMIN SESSION FIELDS */
-                string email = userAuth.Email;
+                string email = _dataMaskingService.MaskEmail(userAuth.Email);
                 string fullname = await _dataService.GetUserFullName(userInfo) ?? "NAME_NOT_FOUND";
 
                 /*  ASSIGN ADMIN SESSION FIELDS */
