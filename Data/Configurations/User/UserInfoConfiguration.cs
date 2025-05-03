@@ -127,15 +127,6 @@ namespace Data.Configurations.User
                 .WithMany(r => r.UsersInfo)
                 .HasForeignKey(ui => ui.ReligionId)
                 .OnDelete(DeleteBehavior.SetNull);
-
-            UsersInfo
-                .HasMany(ui => ui.Accounts)
-                .WithMany(a => a.UsersInfo)
-                .UsingEntity<Dictionary<string, int>>(
-                    "UsersInfoAccount",
-                    j => j.HasOne<Account>().WithMany().HasForeignKey("AccountId").OnDelete(DeleteBehavior.Restrict),
-                    j => j.HasOne<UserInfo>().WithMany().HasForeignKey("UserInfoId").OnDelete(DeleteBehavior.Restrict)
-                );
         }
     }
 }
