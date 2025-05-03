@@ -2,6 +2,7 @@
 using Data;
 using Data.Repositories.Auth;
 using Data.Enums;
+using Helpers;
 
 namespace Services
 {
@@ -34,7 +35,7 @@ namespace Services
                 IQueryable<UserAuth> query = userAuthRepo.QueryIncludeAll();
                 UserAuth? userAuth = await userAuthRepo.GetUserAuthByUserNameOrEmailAsync(trimmedEmail, query);
 
-                if (userAuth == null || !this.IsPasswordValid(userAuth, trimmedPassword))
+                if (userAuth == null || !this.IsPasswordValid(userAuth, password))
                 {
                     return null;
                 }
@@ -52,7 +53,7 @@ namespace Services
         /// <returns></returns>
         public bool IsPasswordValid(UserAuth userAuth, string password)
         {
-            return userAuth.Password.Equals(password);
+            return BcryptHelper.VerifyPassword(password, userAuth.Password);
         }
 
         /// <summary>

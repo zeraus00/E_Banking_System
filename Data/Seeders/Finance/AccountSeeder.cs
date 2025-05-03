@@ -16,19 +16,19 @@ namespace Data.Seeders.Finance
         {
             if (!await _context.Accounts.AnyAsync())
             {
-                var accountNumber = new CredentialFactory()
+                var accountNumber = CredentialFactory
                     .GenerateAccountNumber(
                         DateTime.Now.Date,
                         (int)AccountTypes.PersonalAccount,
                         (int)AccountProductTypes.Checking
                     );
-                var atmNumber = new CredentialFactory()
+                var atmNumber = CredentialFactory
                     .GenerateAtmNumber(
                         DateTime.Now.Date,
                         (int)AccountTypes.PersonalAccount,
                         (int)AccountProductTypes.Checking
                     );
-                var accountName = new CredentialFactory()
+                var accountName = CredentialFactory
                     .GenerateAccountName(
                         (int)AccountTypes.PersonalAccount,
                         (int)AccountProductTypes.Checking
@@ -43,19 +43,19 @@ namespace Data.Seeders.Finance
                     .WithAccountStatus((int)AccountStatusTypes.Active)
                     .WithBalance(696969)
                     .Build();
-                var accountNumber2 = new CredentialFactory()
+                var accountNumber2 = CredentialFactory
                     .GenerateAccountNumber(
                         DateTime.Now.Date,
                         (int)AccountTypes.JointAccount,
                         (int)AccountProductTypes.Savings
                     );
-                var atmNumber2 = new CredentialFactory()
+                var atmNumber2 = CredentialFactory
                     .GenerateAtmNumber(
                         DateTime.Now.Date,
                         (int)AccountTypes.JointAccount,
                         (int)AccountProductTypes.Savings
                     );
-                var accountName2 = new CredentialFactory()
+                var accountName2 = CredentialFactory
                     .GenerateAccountName(
                         (int)AccountTypes.JointAccount,
                         (int)AccountProductTypes.Savings
@@ -81,25 +81,24 @@ namespace Data.Seeders.Finance
         {
             if (await _context.Accounts.AnyAsync())
             {
-                CredentialFactory factory = new CredentialFactory();
 
                 List<Account> accounts = await _context.Accounts.ToListAsync();
 
                 foreach (var account in accounts)
                 {
-                    account.ATMNumber = factory
+                    account.ATMNumber = CredentialFactory
                         .GenerateAtmNumber(
                             account.DateOpened,
                             account.AccountTypeId,
                             account.AccountProductTypeId
                         );
-                    account.AccountNumber = factory
+                    account.AccountNumber = CredentialFactory
                         .GenerateAccountNumber(
                             account.DateOpened,
                             account.AccountTypeId,
                             account.AccountProductTypeId
                         );
-                    account.AccountName = factory
+                    account.AccountName = CredentialFactory
                         .GenerateAccountName(
                             account.AccountTypeId,
                             account.AccountProductTypeId

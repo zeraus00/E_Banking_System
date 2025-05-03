@@ -9,6 +9,7 @@ using Data.Models.User;
 using Data.Repositories.Finance;
 using Data.Models.Finance;
 using Data.Models.Place;
+using Services.DataManagement;
 using System.IO;
 using ViewModels;
 
@@ -404,14 +405,16 @@ namespace Services
             }
 
             DateTime creationDate = DateTime.UtcNow.Date;
-            string accountNumber = GenerateAccountNumber(creationDate, accountTypeId, accountProductTypeId);
-            string accountName = GenerateAccountName(accountTypeId, accountProductTypeId);
+            string accountNumber = CredentialFactory.GenerateAccountNumber(creationDate, accountTypeId, accountProductTypeId);
+            string atmNumber = CredentialFactory.GenerateAtmNumber(creationDate, accountTypeId, accountProductTypeId);
+            string accountName = CredentialFactory.GenerateAccountName(accountTypeId, accountProductTypeId);
 
             var accountBuilder = new AccountBuilder();
             accountBuilder
                 .WithAccountType(accountTypeId)
                 .WithAccountProductTypeId(accountProductTypeId)
                 .WithAccountNumber(accountNumber)
+                .WithATMNumber(atmNumber)
                 .WithAccountName(accountName)
                 .WithAccountStatus((int)AccountStatusTypes.Pending)
                 .WithBalance(0);
@@ -463,15 +466,25 @@ namespace Services
             }
         }
 
-        private string GenerateAccountNumber(DateTime creationDate, int accountTypeId, int accountProductTypeId)
+        public async Task SyncUserInfoAndAccount(int userInfoId, int accountId)
         {
-            return $"{accountProductTypeId}{accountTypeId}{creationDate:yMMdd}{Random.Shared.Next(1000, 10000)}";
-        }
-        private string GenerateAccountName(int accountTypeId, int accountProductTypeId)
-        {
-            var firstPart = new AccountTypeNames().AccountTypeNameList[accountTypeId][..3];
-            var secondPart = new AccountProductTypeNames().AccountProductTypeNameList[accountProductTypeId][..3];
-            return $"{firstPart}-{secondPart}-{Guid.NewGuid().ToString().Substring(0, 6).ToUpper()}";
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                var userInfoRepo = new UserInfoRepository(dbContext);
+
+                var query = userInfoRepo.Query.IncludeUserInfoAccounts().GetQuery();
+
+                var userInfo = await userInfoRepo.GetUserInfoByIdAsync(userInfoId, query);
+
+                UserInfoAccount link = new UserInfoAccount
+                {
+                    UserInfoId = userInfoId,
+                    AccessRoleId = (int)AccessRoles.PRIMARY_OWNER,
+                    AccountId = accountId
+                };
+
+                userInfo!.UserInfoAccounts.Add(link);
+            }
         }
 
     }

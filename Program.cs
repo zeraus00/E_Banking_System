@@ -165,10 +165,7 @@ static async Task SeedData(IDbContextFactory<EBankingContext> contextFactory)
         // Seed Names and UsersInfo
         await userInfoSeeders.SeedUserInfos();
 
-        //await accountSeeders.SeedOrUpdateAtmNumbers();
-
         await authSeeders.SeedAccessRoles();
-        await accountSeeders.UpdateAccountAndUserInfoLinks();
     }
 
 }

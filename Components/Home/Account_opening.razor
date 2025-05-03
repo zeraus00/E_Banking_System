@@ -141,7 +141,7 @@
 					<div class="col">
 						<label class="text-light">Religion</label>
 						<select class="form-select form-select-sm" @bind="selectedReligion">
-							
+
 							@foreach (var religion in religionOptions)
 							{
 								<option value="@religion">@religion</option>
@@ -658,7 +658,7 @@
 		try
 		{
 			error = string.Empty; // reset previous error
-			//	Get the value of the selection
+										//	Get the value of the selection
 			selectedRegion = e?.Value?.ToString() ?? "";
 
 			// this will reset if the user select new region
@@ -693,7 +693,7 @@
 		try
 		{
 			error = string.Empty; // reset previous error
-			//	Get the value of the selection
+										//	Get the value of the selection
 			selectedProvince = e?.Value?.ToString() ?? "";
 
 			selectedCity = string.Empty;
@@ -1042,7 +1042,7 @@
 			if (string.IsNullOrWhiteSpace(houseNo))
 			{
 				error = "House number is required.";
-	
+
 			}
 			if (string.IsNullOrWhiteSpace(street))
 			{
@@ -1104,7 +1104,7 @@
 
 			Console.WriteLine($"ACCOUNT AND AUTH: {userAccount.AccountId} {userAuth.UserAuthId}");
 
-			UserInfo UserInfo = await RegistrationService.RegisterUserInfo(
+			UserInfo userInfo = await RegistrationService.RegisterUserInfo(
 				userAuth.UserAuthId,
 				userAccount.AccountTypeId,
 				userAccount.AccountProductTypeId,
@@ -1123,9 +1123,11 @@
 				profilePicture,
 				governmentId,
 				beneficiaryAccountId
-				);
+			);
 
-			Console.WriteLine($"UserInfo: {UserInfo.UserInfoId}");
+			await RegistrationService.SyncUserInfoAndAccount(userInfo.UserInfoId, userAccount.AccountId);
+
+			Console.WriteLine($"UserInfo: {userInfo.UserInfoId}");
 
 			NavigationManager.NavigateTo("/PendingApproval");
 		}

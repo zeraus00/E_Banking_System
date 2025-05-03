@@ -1,6 +1,7 @@
 ﻿using Data.Constants;
 using Data.Repositories.Auth;
 using Data.Repositories.Finance;
+using Helpers;
 
 namespace Data.Seeders
 {
@@ -48,13 +49,15 @@ namespace Data.Seeders
                     (3, "employee", "employee@gmail.com", "employee123")
                 };
 
+
+
                 foreach (var (roleId, userName, email, password) in users)
                 {
                     userAuthBuilder
                         .WithRoleId(roleId)
                         .WithUserName(userName)
                         .WithEmail(email)
-                        .WithPassword(password);
+                        .WithPassword(BcryptHelper.HashPassword(password.Trim()));
 
                     var userAuth = userAuthBuilder.Build();
 

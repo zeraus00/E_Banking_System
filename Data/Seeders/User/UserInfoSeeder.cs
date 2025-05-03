@@ -1,4 +1,5 @@
-﻿using Data.Repositories.User;
+﻿using Data.Enums;
+using Data.Repositories.User;
 
 namespace Data.Seeders.User
 {
@@ -105,6 +106,30 @@ namespace Data.Seeders.User
                 await _userInfoRepository.AddAsync(adminInfo);
 
                 await _userInfoRepository.SaveChangesAsync();
+
+                List<UserInfo> usersInfo = await _context
+                    .UsersInfo
+                    .Include(ui => ui.UserAuth)
+                    .ThenInclude(ua => ua.Accounts)
+                    .ToListAsync();
+
+                foreach (var ui in usersInfo)
+                {
+                    List<Account> accounts = ui.UserAuth.Accounts.ToList();
+
+                    foreach (var account in accounts)
+                    {
+                        var link = new UserInfoAccount
+                        {
+                            UserInfoId = ui.UserInfoId,
+                            AccessRoleId = (int)AccessRoles.PRIMARY_OWNER,
+                            AccountId = account.AccountId
+                        };
+
+                        await _context.UsersInfoAccounts.AddAsync(link);
+                    }
+
+                }
             }
 
 
