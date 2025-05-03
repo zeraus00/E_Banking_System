@@ -430,7 +430,7 @@
 					<!-- Password -->
 					<div class="col-3">
 						<label class="text-light">Password</label>
-						<input type="password" class="form-control form-control-sm" placeholder="Password" required>
+						<input @bind="password" type="password" class="form-control form-control-sm" placeholder="Password" required>
 					</div>
 				</div>
 
@@ -950,27 +950,18 @@
 			if (string.IsNullOrWhiteSpace(userFirstName))
 			{
 				error = "First name is required.";
-				Console.WriteLine(error);
-				return;
+
 			}
-			if (string.IsNullOrWhiteSpace(userFirstName))
-			{
-				error = "Last name is required.";
-				Console.WriteLine(error);
-				return;
-			}
+
 
 			if (string.IsNullOrWhiteSpace(userName))
 			{
 				error = "Username is required.";
-				Console.WriteLine(error);
-				return;
+
 			}
 			if (age < 18)
 			{
 				error = "Invalid age, at least 18 years old is required.";
-				Console.WriteLine(error);
-				return;
 			}
 
 			if (string.IsNullOrWhiteSpace(password))
@@ -1039,11 +1030,14 @@
 				Console.WriteLine(error);
 				return;
 			}
-			if (string.IsNullOrWhiteSpace(selectedReligion))
+
+			if (string.IsNullOrWhiteSpace(customReligion))
 			{
 				error = "Religion is required.";
-				Console.WriteLine(error);
-				return;
+			}
+			if (selectedReligion == "Others")
+			{
+				error = "Please specify your religion.";
 			}
 
 			// // Validation for names
