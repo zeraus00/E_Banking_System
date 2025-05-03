@@ -335,7 +335,8 @@ namespace Services
             string taxIdentificationNumber,
             string civilStatus,
             byte[] profilePicture,
-            byte[] governmentId
+            byte[] governmentId,
+            int? beneficiaryAccountId = null
             ) 
         {
             if (string.IsNullOrWhiteSpace(contactNumber)) 
@@ -422,6 +423,22 @@ namespace Services
                 await accountRepo.SaveChangesAsync(); 
                 return userAccount;
             }
+        }
+
+        public async Task<Account?> GetExistingBeneficiaryAccountAsycn(string accountName, string accountNumber) 
+        {
+            accountName = accountName.Trim().ToUpper();
+            accountNumber = accountNumber.Trim();
+
+            await using var dbContext = await _contextFactory.CreateDbContextAsync();
+            AccountRepository accountRepo = new AccountRepository(dbContext);
+
+            IQueryable<Account> Query = accountRepo.Query
+                .HasAccountNumber(accountNumber)
+                .HasAccountName(accountName)
+                .GetQuery();
+
+            return await Query.FirstOrDefaultAsync();
         }
 
         public async Task SyncUserAuthAndAccount(int userAuthId, int accountId)
