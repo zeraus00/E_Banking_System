@@ -90,6 +90,7 @@ namespace Data.Configurations.User
              *  BirthsInfo (many-to-one)
              *  Addresses (many-to-one)
              *  Religions (many-to-one)
+             *  Accounts (many-to-many)
              */
             UsersInfo
                 .HasOne(ui => ui.UserAuth)
@@ -126,6 +127,15 @@ namespace Data.Configurations.User
                 .WithMany(r => r.UsersInfo)
                 .HasForeignKey(ui => ui.ReligionId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            UsersInfo
+                .HasMany(ui => ui.Accounts)
+                .WithMany(a => a.UsersInfo)
+                .UsingEntity<Dictionary<string, int>>(
+                    "UsersInfoAccount",
+                    j => j.HasOne<Account>().WithMany().HasForeignKey("AccountId").OnDelete(DeleteBehavior.Restrict),
+                    j => j.HasOne<UserInfo>().WithMany().HasForeignKey("UserInfoId").OnDelete(DeleteBehavior.Restrict)
+                );
         }
     }
 }

@@ -41,6 +41,7 @@ namespace Data.Repositories.User
             public UserInfoQuery IncludeFatherName(bool include = true) => include ? Include(ui => ui.FatherName) : this;
             public UserInfoQuery IncludeMotherName(bool include = true) => include ? Include(ui => ui.MotherName) : this;
             public UserInfoQuery IncludeReligion(bool include = true) => include ? Include(ui => ui.Religion) : this;
+            public UserInfoQuery IncludeAccounts(bool include = true) => include ? Include(ui => ui.Accounts) : this;
         }
 
         #endregion Read Methods
