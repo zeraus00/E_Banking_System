@@ -141,6 +141,7 @@
 					<div class="col">
 						<label class="text-light">Religion</label>
 						<select class="form-select form-select-sm" @bind="selectedReligion">
+							
 							@foreach (var religion in religionOptions)
 							{
 								<option value="@religion">@religion</option>
@@ -913,16 +914,6 @@
 
 	private async Task CheckBeneficiaryAccount()
 	{
-		//if (string.IsNullOrWhiteSpace(beneficiaryAccountName))
-		//{
-		//	error = "Please enter Account Name";
-		//	showBeneficiaryCheckResult = true;
-		//}
-		//if (string.IsNullOrWhiteSpace(beneficiaryAccountNumber))
-		//{
-		//	error = "Please enter Account Number";
-		//	showBeneficiaryCheckResult = true;
-		//}
 
 		var result = await RegistrationService.GetExistingBeneficiaryAccountAsycn(beneficiaryAccountName, beneficiaryAccountNumber);
 
@@ -1003,32 +994,27 @@
 			if (string.IsNullOrWhiteSpace(contactNumber))
 			{
 				error = "Contact number is required.";
-				Console.WriteLine(error);
-				return;
+
 			}
 			if (string.IsNullOrWhiteSpace(Occupation))
 			{
 				error = "Occupation is required.";
-				Console.WriteLine(error);
-				return;
+
 			}
 			if (string.IsNullOrWhiteSpace(taxIdentificationNumber))
 			{
 				error = "Tax Identification Number is required.";
-				Console.WriteLine(error);
-				return;
+
 			}
 			if (string.IsNullOrWhiteSpace(selectedSex))
 			{
 				error = "Sex is required.";
-				Console.WriteLine(error);
-				return;
+
 			}
 			if (string.IsNullOrWhiteSpace(selectedCivilStatus))
 			{
 				error = "Civil status is required.";
-				Console.WriteLine(error);
-				return;
+
 			}
 
 			if (string.IsNullOrWhiteSpace(customReligion))
@@ -1044,40 +1030,35 @@
 			if (string.IsNullOrWhiteSpace(fatherFirstName) || string.IsNullOrWhiteSpace(fatherLastName))
 			{
 				error = "Father's full name is required.";
-				return;
+
 			}
 			if (string.IsNullOrWhiteSpace(motherFirstName) || string.IsNullOrWhiteSpace(motherLastName))
 			{
 				error = "Mother's full name is required.";
-				return;
+
 			}
 
 			// Validation for address
 			if (string.IsNullOrWhiteSpace(houseNo))
 			{
 				error = "House number is required.";
-				Console.WriteLine(error);
-				return;
+	
 			}
 			if (string.IsNullOrWhiteSpace(street))
 			{
 				error = "Street name is required.";
-				Console.WriteLine(error);
-				return;
 			}
 
 			if (postalCode == 0)
 			{
 				error = "Postal code is required.";
-				Console.WriteLine(error);
-				return;
+
 			}
 
 			if (birthDate == DateTime.MinValue)
 			{
 				error = "Valid birth date is required.";
-				Console.WriteLine(error);
-				return;
+
 			}
 
 			Console.WriteLine("ERRRO CHECKS PASSED.");
