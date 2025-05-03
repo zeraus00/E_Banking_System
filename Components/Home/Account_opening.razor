@@ -216,7 +216,7 @@
 					<!-- Barangay -->
 					<div class="col">
 						<label class="text-light">Barangay</label>
-						<select class="form-select form-select-sm" value="selectedBarangay" required>
+						<select class="form-select form-select-sm" @bind="selectedBarangay" required>
 							<option value="@cityPlaceHolder" hidden>@cityPlaceHolder</option>
 							@foreach (var b in barangaysFromCity)
 							{
@@ -280,7 +280,7 @@
 					<!-- City -->
 					<div class="col">
 						<label class="text-light" >Municipality/City</label>
-						<select class="form-select form-select-sm" value="selectedBirthCity" required>
+						<select class="form-select form-select-sm" @bind="selectedBirthCity" required>
 							<option value="@cityPlaceHolder" hidden>@cityPlaceHolder</option>
 							@foreach (var c in birthCities)
 							{
