@@ -12,9 +12,11 @@ namespace Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             /*  Configure Authentication Schema
+             *  Configure AccessRoles Table
              *  Configure UsersAuth Table
              *  Configure Roles Table
              */
+            modelBuilder.ApplyConfiguration(new AccessRoleConfiguration());
             modelBuilder.ApplyConfiguration(new UserAuthConfiguration());
             modelBuilder.ApplyConfiguration(new RoleConfiguration());
 
@@ -63,6 +65,11 @@ namespace Data
             modelBuilder.ApplyConfiguration(new ReligionConfiguration());
             modelBuilder.ApplyConfiguration(new UserInfoConfiguration());
 
+            /*
+             * Configure UserInfo and Accounts Join Entity
+             */
+
+            modelBuilder.ApplyConfiguration(new UsersInfoAccountConfiguration());
 
             base.OnModelCreating(modelBuilder);
         }
@@ -70,6 +77,7 @@ namespace Data
         /*  Add DbSet for each model    */
 
         //  Authentication
+        public DbSet<AccessRole> AccessRoles { get; set; }
         public DbSet<UserAuth> UsersAuth { get; set; }
         public DbSet<Role> Roles { get; set; }
 
@@ -98,6 +106,9 @@ namespace Data
         public DbSet<Religion> Religions { get; set; }
         public DbSet<UserInfo> UsersInfo { get; set; }
 
+
+        //  Join Entity
+        public DbSet<UserInfoAccount> UsersInfoAccounts { get; set; }
     }
 
 }

@@ -90,6 +90,7 @@ namespace Data.Configurations.User
              *  BirthsInfo (many-to-one)
              *  Addresses (many-to-one)
              *  Religions (many-to-one)
+             *  Accounts (many-to-many)
              */
             UsersInfo
                 .HasOne(ui => ui.UserAuth)

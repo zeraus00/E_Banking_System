@@ -78,6 +78,7 @@
              *  AccountStatusTypes (many-to-one)
              *  LinkedBeneficiary Accounts (self-referencing many-to-one)
              *  UsersAuth (many-to-many)
+             *  UsersInfo (many-to-many)
              *  Transactions (one-to-many)
              *  Loans (one-to-many)
              *  LoanTransactions (one-to-many)

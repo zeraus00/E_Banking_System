@@ -15,7 +15,7 @@
             {
                 foreach (var account in Accounts)
                 {
-                    <AccountCard Account="account" ContactNumber="@(UserInfo?.ContactNumber ?? "09123456789")" IsEditable="IsEditable" />
+                    <AccountCard Account="account" ContactNumber="@(account?.AccountContactNo ?? "09123456789")" IsEditable="IsEditable" />
                 }
             }
         </div>
@@ -27,7 +27,7 @@
 
         <!-- Pagination Dots -->
         <div class="carousel-pagination d-flex justify-content-center mt-3">
-            @for (int i = 0; i < Accounts.Count; i++)
+            @for (int i = 0; i < Accounts!.Count; i++)
             {
                 <button class="dot mx-1 @(activeIndex == i ? "active" : "")" @onclick="@(() => ScrollToCard(i))"></button>
             }
