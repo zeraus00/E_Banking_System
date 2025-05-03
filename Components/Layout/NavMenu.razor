@@ -216,7 +216,7 @@
 
     private async Task TryRedirectToLoanBalance()
     {
-        if (!activeAccountSession.AccountCanPayLoan)
+        if (activeAccountSession.AccountCanPayLoan)
         {
             redirectService.redirectWithNavigationManager(PageRoutes.LOAN_BALANCE);
             return;

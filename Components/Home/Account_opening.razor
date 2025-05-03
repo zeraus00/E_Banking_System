@@ -352,17 +352,29 @@
 						<label class="text-light">Beneficiary's Name</label>
 						<div class="row g-2">
 							<div class="col-3">
-								<input class="form-control form-control-sm" @bind="beneficiaryFirstName" placeholder="First Name">
+								<input class="form-control form-control-sm" @bind="beneficiaryAccountName" @bind:event="oninput" placeholder="Full Name">
 							</div>
 							<div class="col-3">
-								<input class="form-control form-control-sm" @bind="beneficiaryMiddleName" placeholder="Middle Name">
+								<input class="form-control form-control-sm" @bind="beneficiaryAccountNumber" @bind:event="oninput" placeholder="Account Number">
 							</div>
-							<div class="col-3">
-								<input class="form-control form-control-sm" @bind="beneficiaryLastName" placeholder="Last Name">
+							<div class="col-2">
+								<button class="btn btn-sm btn-primary w-100" @onclick="CheckBeneficiaryAccount">
+									Check Account
+								</button>
 							</div>
-							<div class="col-1">
-								<input class="form-control form-control-sm" @bind="beneficiarySuffix" placeholder="Suffix">
-							</div>
+							@if (showBeneficiaryCheckResult)
+							{
+								<div class="mt-1 text-sm text-white">
+									@if (!string.IsNullOrEmpty(noBeneficiaryFound))
+									{
+										<span class="text-danger">@noBeneficiaryFound</span>
+									}
+									else
+									{
+										<span class="text-success">@beneficiaryCheckMessage</span>
+									}
+								</div>
+							}
 						</div>
 					</div>
 				</div>
@@ -445,6 +457,7 @@
 @code {
 
 	private string error = string.Empty;
+	private string noBeneficiaryFound = string.Empty;
 
 
 	// user basic info
@@ -519,10 +532,13 @@
 	public string motherLastName = string.Empty;
 	public string motherSuffix = string.Empty;
 
-	public string beneficiaryFirstName = string.Empty;
-	public string beneficiaryMiddleName = string.Empty;
-	public string beneficiaryLastName = string.Empty;
-	public string beneficiarySuffix = string.Empty;
+	public string beneficiaryAccountName = string.Empty;
+	public string beneficiaryAccountNumber = string.Empty;
+	public string beneficiaryCheckMessage = string.Empty;
+	private bool showBeneficiaryCheckResult = false;
+	public int? beneficiaryAccountId = null;
+
+
 
 	<!--user birth info address--> 
 	private List<RegionViewModel> birthRegions = new();
@@ -895,6 +911,35 @@
 		"Others"
 	};
 
+	private async Task CheckBeneficiaryAccount()
+	{
+		//if (string.IsNullOrWhiteSpace(beneficiaryAccountName))
+		//{
+		//	error = "Please enter Account Name";
+		//	showBeneficiaryCheckResult = true;
+		//}
+		//if (string.IsNullOrWhiteSpace(beneficiaryAccountNumber))
+		//{
+		//	error = "Please enter Account Number";
+		//	showBeneficiaryCheckResult = true;
+		//}
+
+		var result = await RegistrationService.GetExistingBeneficiaryAccountAsycn(beneficiaryAccountName, beneficiaryAccountNumber);
+
+		if (result != null)
+		{
+			beneficiaryCheckMessage = "Account Exist.";
+			beneficiaryAccountId = result.AccountId;
+		}
+		else
+		{
+			beneficiaryCheckMessage = "Account not found. Please double-check the details.";
+			beneficiaryAccountId = null;
+		}
+
+		showBeneficiaryCheckResult = true;
+	}
+
 	private async Task RegisterUserAsync()
 	{
 		try
@@ -1004,8 +1049,8 @@
 			// // Validation for names
 			if (string.IsNullOrWhiteSpace(fatherFirstName) || string.IsNullOrWhiteSpace(fatherLastName))
 			{
-			 	error = "Father's full name is required.";
-			 	return;
+				error = "Father's full name is required.";
+				return;
 			}
 			if (string.IsNullOrWhiteSpace(motherFirstName) || string.IsNullOrWhiteSpace(motherLastName))
 			{
@@ -1101,7 +1146,8 @@
 				taxIdentificationNumber,
 				selectedCivilStatus,
 				profilePicture,
-				governmentId
+				governmentId,
+				beneficiaryAccountId
 				);
 
 			Console.WriteLine($"UserInfo: {UserInfo.UserInfoId}");
