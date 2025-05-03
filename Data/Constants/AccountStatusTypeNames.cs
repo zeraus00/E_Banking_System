@@ -12,7 +12,7 @@
         public const string RESTRICTED = "RESTRICTED";
         public const string DENIED = "DENIED";
 
-        public static readonly List<string> AccountStatusTypeList = new()
+        public static List<string> AS_STRING_LIST { get; } = new()
         {
             ACTIVE,
             PENDING,
@@ -23,6 +23,19 @@
             FROZEN,
             RESTRICTED,
             DENIED
+        };
+
+        public static List<AccountStatusType> AS_ACCOUNT_STATUS_TYPE_LIST { get; } = new()
+        {
+            new AccountStatusType { AccountStatusTypeName = ACTIVE },
+            new AccountStatusType { AccountStatusTypeName = PENDING },
+            new AccountStatusType { AccountStatusTypeName = INACTIVE },
+            new AccountStatusType { AccountStatusTypeName = DORMANT },
+            new AccountStatusType { AccountStatusTypeName = CLOSED },
+            new AccountStatusType { AccountStatusTypeName = SUSPENDED },
+            new AccountStatusType { AccountStatusTypeName = FROZEN },
+            new AccountStatusType { AccountStatusTypeName = RESTRICTED },
+            new AccountStatusType { AccountStatusTypeName = DENIED }
         };
     }
 }

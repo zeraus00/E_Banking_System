@@ -16,7 +16,7 @@ namespace Data.Seeders.Finance
         {
             if (!await _context.LoanTypes.AnyAsync())
             {
-                foreach(var loanType in LoanTypes.LOAN_TYPE_LIST)
+                foreach(var loanType in LoanTypeNames.AS_LOAN_TYPE_LIST)
                 {
                     await _loanTypeRepo.AddAsync(loanType);
                 }

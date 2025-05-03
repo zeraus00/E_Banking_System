@@ -81,7 +81,7 @@ namespace Data.Seeders
         {
             if (!await _context.AccessRoles.AnyAsync())
             {
-                foreach(var roleName in AccessRoleNames.AsList)
+                foreach(var roleName in AccessRoleNames.AS_STRING_LIST)
                 {
                     AccessRole accessRole = new AccessRole();
                     accessRole.AccessRoleName = roleName;

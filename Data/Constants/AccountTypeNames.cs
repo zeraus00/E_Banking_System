@@ -10,5 +10,17 @@
             PERSONAL_ACCOUNT,
             JOINT_ACCOUNT
         };
+
+        public static List<string> AS_STRING_LIST { get; } = new()
+        {
+            PERSONAL_ACCOUNT,
+            JOINT_ACCOUNT
+        };
+
+        public static List<AccountType> AS_ACCOUNT_TYPE_LIST { get; } = new()
+        {
+            new AccountType { AccountTypeName = PERSONAL_ACCOUNT },
+            new AccountType { AccountTypeName = JOINT_ACCOUNT }
+        };
     }
 }

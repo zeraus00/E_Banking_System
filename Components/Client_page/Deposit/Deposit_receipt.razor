@@ -83,7 +83,7 @@
                 transactionSession = await userControlledSessionService.GetTransactionSessionAsync(userSession);
                 //  Set display data.
                 accountNumber = activeAccountSession.AccountNumber;
-                cardPayment = ExternalVendors.ExternalVendorList[transactionSession.ExternalVendorId!.Value-1];
+                cardPayment = ExternalVendorNames.AS_STRING_LIST[transactionSession.ExternalVendorId!.Value-1];
                 clientName = activeAccountSession.AccountName;
                 currentBalance = transactionSession.CurrentBalance;
                 depositAmount = transactionSession.Amount;

@@ -105,7 +105,7 @@
 
                 //  Set display data.
                 accountNumber = activeAccountSession.AccountNumber;
-                cardDestination = ExternalVendors.ExternalVendorList[transactionSession.ExternalVendorId!.Value - 1];
+                cardDestination = ExternalVendorNames.AS_STRING_LIST[transactionSession.ExternalVendorId!.Value - 1];
                 clientName = activeAccountSession.AccountName;
                 currentBalance = transactionSession.CurrentBalance;
                 withdrawAmount = transactionSession.Amount;

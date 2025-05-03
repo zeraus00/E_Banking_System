@@ -1,4 +1,6 @@
-﻿namespace Data.Configurations.JoinEntity
+﻿using Data.Enums;
+
+namespace Data.Configurations.JoinEntity
 {
     public class UsersInfoAccountConfiguration : IEntityTypeConfiguration<UserInfoAccount>
     {

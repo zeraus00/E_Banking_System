@@ -1,6 +1,6 @@
 ﻿namespace Data.Constants
 {
-    public class LoanTypes
+    public class LoanTypeNames
     {
         public const string PERSONAL_LOAN = "Personal Loan";
         public const string HOME_LOAN = "Home loan";
@@ -9,7 +9,7 @@
         public const string UNSECURED_LOAN = "Unsecured loan";
         public const string MICROLOAN = "Microloan";
 
-        public static List<string> LOAN_TYPE_NAMES { get; } = new()
+        public static List<string> AS_STRING_LIST { get; } = new()
         {
             PERSONAL_LOAN,
             HOME_LOAN,
@@ -59,7 +59,7 @@
             LoanTermInMonths = 6
         };
 
-        public static List<LoanType> LOAN_TYPE_LIST { get; } = new()
+        public static List<LoanType> AS_LOAN_TYPE_LIST { get; } = new()
         {
             PERSONAL_LOAN_TYPE,
             HOME_LOAN_TYPE,

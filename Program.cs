@@ -87,6 +87,7 @@ using (var scope = app.Services.CreateScope())
 {
     var contextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<EBankingContext>>();
     // Seed data (this ensures that only new data is added)
+
     await SeedData(contextFactory);
 }
 
@@ -143,7 +144,6 @@ static async Task SeedData(IDbContextFactory<EBankingContext> contextFactory)
         AccountTypeSeeder accountTypeSeeders = new AccountTypeSeeder(dbContext);
         TransactionTypesSeeder transactionTypesSeeder = new TransactionTypesSeeder(dbContext);
         LoanTypeSeeder loanTypeSeeder = new LoanTypeSeeder(dbContext);
-        NameSeeder nameSeeders = new NameSeeder(dbContext);
         UserInfoSeeder userInfoSeeders = new UserInfoSeeder(dbContext);
 
 
