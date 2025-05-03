@@ -10,86 +10,138 @@
 
 <div class="dashboard-page">
     <div class="dashboard-container">
-        <div class="dashboard-container">
 
-            <!-- Top Bar -->
-            <div class="top-bar mx-3">
-                <h2>Admin Dashboard</h2>
-            </div>
+        <!-- Top Bar -->
+        <div class="top-bar mx-3">
+            <h2>Admin Dashboard</h2>
+        </div>
 
-            <hr class="divider" />
+        <hr class="divider" />
 
-            <div class="top-bar-right mb-4">
-                <div class="d-flex align-items-center gap-3 flex-wrap">
-                    <!-- Start Date -->
-                    <div class="d-flex align-items-center gap-3">
-                        <label class="text-light mb-0" style="white-space: nowrap;">Start Date</label>
-                        <InputDate class="form-control form-control-sm" @bind-Value="startDate" />
-                    </div>
-
-                    <!-- End Date -->
-                    <div class="d-flex align-items-center gap-3">
-                        <label class="text-light mb-0" style="white-space: nowrap;">End Date</label>
-                        <InputDate class="form-control form-control-sm" @bind-Value="endDate" />
-                    </div>
-
-                    <!-- Filter Buttons -->
-                    <button class="btn btn-primary btn-sm shadow-sm" @onclick="FilterAsync">Filter</button>
-                    <button class="btn btn-danger btn-sm shadow-sm" @onclick="ClearFilterAsync">Clear Filter</button>
+        <div class="top-bar-right mb-4">
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+                <!-- Start Date -->
+                <div class="d-flex align-items-center gap-3">
+                    <label class="text-light mb-0" style="white-space: nowrap;">Start Date</label>
+                    <InputDate class="form-control form-control-sm" @bind-Value="startDate" />
                 </div>
+
+                <!-- End Date -->
+                <div class="d-flex align-items-center gap-3">
+                    <label class="text-light mb-0" style="white-space: nowrap;">End Date</label>
+                    <InputDate class="form-control form-control-sm" @bind-Value="endDate" />
+                </div>
+
+                <!-- Filter Buttons -->
+                <button class="btn btn-primary btn-sm shadow-sm" @onclick="FilterAsync">Filter</button>
+                <button class="btn btn-danger btn-sm shadow-sm" @onclick="ClearFilterAsync">Clear Filter</button>
             </div>
+        </div>
 
-            <hr class="divider" />
+        <hr class="divider" />
 
-            <!-- Card Section -->
-            <div class="card-section justify-content-center mx-4">
+        <div class="card-section">
+
+            <div class="card-section justify-content-center mx-4 gap-3">
+
+                <div class="container order p-1 mb-3">
+                    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-2 row-cols-lg-4 g-3">
+
+                        <!-- Total Transaction Volume Card -->
+                        <div class="col">
+                            <div class="card text-dark text-center">
+                                <div class="card-body">
+                                    <p class="card-title">Total Transaction Volume</p>
+                                    <p class="number text-center">_totalTransactionVolume</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Net Movement Card -->
+                        <div class="col">
+                            <div class="card text-dark text-center">
+                                <div class="card-body">
+                                    <p class="card-title">Net Movement</p>
+                                    <p class="number text-center">_netMovement</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- New Accounts Opened Card -->
+                        <div class="col">
+                            <div class="card text-dark text-center">
+                                <div class="card-body">
+                                    <p class="card-title">New Accounts Opened</p>
+                                    <p class="number text-center">_newAccounts</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Closed/Deactivated Accounts Card -->
+                        <div class="col">
+                            <div class="card text-dark text-center">
+                                <div class="card-body">
+                                    <p class="card-title">Closed/Deactivated Accounts</p>
+                                    <p class="number text-center">_closedAccounts</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
                 <!-- Withdraw Card -->
                 <div class="data-card">
-                    <h3>Withdrawals</h3>
+                    <h5>Withdrawals</h5>
                     <p class="number">@withdrawalCount</p>
                     <div class="card-footer">
-                        <div class="footer-item">
-                            <i class="icon-calendar"></i> <span class="text-danger">▼ 3%</span>
-                        </div>
-                        <div class="footer-item">
-                            <i class="icon-calendar"></i> <span class="text-success">▲ 4%</span>
-                        </div>
+                        <p class="m-0">_totalWithdrawalAmount</p>
                     </div>
                 </div>
 
                 <!-- Deposits Card -->
                 <div class="data-card">
-                    <h3>Deposits</h3>
+                    <h5>Deposits</h5>
                     <p class="number">@depositCount</p>
                     <div class="card-footer">
-                        <div class="footer-item">
-                            <i class="icon-calendar"></i> <span class="text-danger">▼ 3%</span>
-                        </div>
-                        <div class="footer-item">
-                            <i class="icon-calendar"></i> <span class="text-success">▲ 4%</span>
-                        </div>
+                        <p class="m-0">_totalDepositAmount</p>
                     </div>
                 </div>
 
-                <!-- Empty Cards -->
-                <div class="data-card"></div>
-                <div class="data-card"></div>
+                <!-- Transfers Card -->
+                <div class="data-card">
+                    <h5>Transfers</h5>
+                    <p class="number">_transferCount</p>
+                    <div class="card-footer">
+                        <p class="m-0">_totalTransferAmount</p>
+                    </div>
+                </div>
 
-            </div>
-
-            <!-- Line Chart Section -->
-            <div class="chart-section">
-                <h3>Template Line Chart</h3>
-
-                <!-- Insert chart component here -->
-                <div class="chart-placeholder">
-                    <!-- Placeholder for now -->
-                    <p>Chart placeholder</p>
+                <!-- Loans Card -->
+                <div class="data-card">
+                    <h5>Loans</h5>
+                    <p class="number">_loanCount</p>
+                    <div class="card-footer">
+                        <p class="m-0">_totalLoanAmount</p>
+                    </div>
                 </div>
 
             </div>
 
         </div>
+
+        <!-- Line Chart Section -->
+        <div class="chart-section">
+            <h3>Template Line Chart</h3>
+
+            <!-- Insert chart component here -->
+            <div class="chart-placeholder">
+                <!-- Placeholder for now -->
+                <p>Chart placeholder</p>
+            </div>
+
+        </div>
+
     </div>
 </div>
 
