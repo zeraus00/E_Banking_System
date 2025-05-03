@@ -104,6 +104,10 @@ namespace Data.Seeders.Finance
                             account.AccountTypeId,
                             account.AccountProductTypeId
                         );
+                    var contactPart1 = $"{Random.Shared.Next(10, 20)}";
+                    var contactPart2 = $"{Random.Shared.Next(500, 1000)}";
+                    var contactPart3 = $"{Random.Shared.Next(1000, 10000)}";
+                    account.AccountContactNo = $"09{contactPart1}{contactPart2}{contactPart3}";
                 }
 
                 await _context.SaveChangesAsync();
