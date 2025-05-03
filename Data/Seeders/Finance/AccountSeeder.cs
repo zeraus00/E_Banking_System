@@ -1,5 +1,6 @@
 ﻿using Data.Repositories.Finance;
 using Data.Enums;
+using Services.DataManagement;
 
 namespace Data.Seeders.Finance
 {
@@ -15,23 +16,57 @@ namespace Data.Seeders.Finance
         {
             if (!await _context.Accounts.AnyAsync())
             {
+                var accountNumber = new CredentialFactory()
+                    .GenerateAccountNumber(
+                        DateTime.Now.Date,
+                        (int)AccountTypes.PersonalAccount,
+                        (int)AccountProductTypes.Checking
+                    );
+                var atmNumber = new CredentialFactory()
+                    .GenerateAtmNumber(
+                        DateTime.Now.Date,
+                        (int)AccountTypes.PersonalAccount,
+                        (int)AccountProductTypes.Checking
+                    );
+                var accountName = new CredentialFactory()
+                    .GenerateAccountName(
+                        (int)AccountTypes.PersonalAccount,
+                        (int)AccountProductTypes.Checking
+                    );
                 var account = new AccountBuilder()
                     .WithAccountType((int)AccountTypes.PersonalAccount)
                     .WithAccountProductTypeId((int)AccountProductTypes.Checking)
-                    .WithAccountNumber("123456789ABC")
-                    .WithATMNumber("1234567891011123")
-                    .WithAccountName("Bogart Dela Mon Sr.")
+                    .WithAccountNumber(accountNumber)
+                    .WithATMNumber(atmNumber)
+                    .WithAccountName(accountName)
                     .WithAccountContactNo("11122233344")
                     .WithAccountStatus((int)AccountStatusTypes.Active)
                     .WithBalance(696969)
                     .Build();
+                var accountNumber2 = new CredentialFactory()
+                    .GenerateAccountNumber(
+                        DateTime.Now.Date,
+                        (int)AccountTypes.JointAccount,
+                        (int)AccountProductTypes.Savings
+                    );
+                var atmNumber2 = new CredentialFactory()
+                    .GenerateAtmNumber(
+                        DateTime.Now.Date,
+                        (int)AccountTypes.JointAccount,
+                        (int)AccountProductTypes.Savings
+                    );
+                var accountName2 = new CredentialFactory()
+                    .GenerateAccountName(
+                        (int)AccountTypes.JointAccount,
+                        (int)AccountProductTypes.Savings
+                    );
                 var account2 = new AccountBuilder()
                     .WithAccountType((int)AccountTypes.JointAccount)
                     .WithAccountProductTypeId((int)AccountProductTypes.Savings)
-                    .WithAccountNumber("222333444ABC")
-                    .WithATMNumber("1111222233334444")
+                    .WithAccountNumber(accountNumber2)
+                    .WithATMNumber(atmNumber2)
                     .WithAccountContactNo("55566677788")
-                    .WithAccountName("Bogart Dela Mon Jr.")
+                    .WithAccountName(accountName2)
                     .WithAccountStatus((int)AccountStatusTypes.Active)
                     .WithBalance(100000)
                     .Build();
@@ -41,5 +76,44 @@ namespace Data.Seeders.Finance
                 await _accountRepository.SaveChangesAsync();
             }
         }
+
+        public async Task SeedOrUpdateAtmNumbers()
+        {
+            if (await _context.Accounts.AnyAsync())
+            {
+                CredentialFactory factory = new CredentialFactory();
+
+                List<Account> accounts = await _context.Accounts.ToListAsync();
+
+                foreach (var account in accounts)
+                {
+                    account.ATMNumber = factory
+                        .GenerateAtmNumber(
+                            account.DateOpened,
+                            account.AccountTypeId,
+                            account.AccountProductTypeId
+                        );
+                    account.AccountNumber = factory
+                        .GenerateAccountNumber(
+                            account.DateOpened,
+                            account.AccountTypeId,
+                            account.AccountProductTypeId
+                        );
+                    account.AccountName = factory
+                        .GenerateAccountName(
+                            account.AccountTypeId,
+                            account.AccountProductTypeId
+                        );
+                    var contactPart1 = $"{Random.Shared.Next(10, 20)}";
+                    var contactPart2 = $"{Random.Shared.Next(500, 1000)}";
+                    var contactPart3 = $"{Random.Shared.Next(1000, 10000)}";
+                    account.AccountContactNo = $"09{contactPart1}{contactPart2}{contactPart3}";
+                }
+
+                await _context.SaveChangesAsync();
+            }
+            
+        }
     }
+
 }
