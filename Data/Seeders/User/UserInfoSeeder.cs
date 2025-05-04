@@ -102,37 +102,27 @@ namespace Data.Seeders.User
                     .WithCivilStatus("Committed to Relapsing")
                     .Build();
 
+                userInfo.UserInfoAccounts.Add(
+                    new UserInfoAccount
+                    {
+                        UserInfoId = userInfo.UserInfoId,
+                        AccessRoleId = (int)AccessRoles.PRIMARY_OWNER,
+                        AccountId = 1
+                    });
+
+                userInfo.UserInfoAccounts.Add(
+                    new UserInfoAccount
+                    {
+                        UserInfoId = userInfo.UserInfoId,
+                        AccessRoleId = (int)AccessRoles.SECONDARY_OWNER,
+                        AccountId = 2
+                    });
+
                 await _userInfoRepository.AddAsync(userInfo);
                 await _userInfoRepository.AddAsync(adminInfo);
 
                 await _userInfoRepository.SaveChangesAsync();
-
-                List<UserInfo> usersInfo = await _context
-                    .UsersInfo
-                    .Include(ui => ui.UserAuth)
-                    .ThenInclude(ua => ua.Accounts)
-                    .ToListAsync();
-
-                foreach (var ui in usersInfo)
-                {
-                    List<Account> accounts = ui.UserAuth.Accounts.ToList();
-
-                    foreach (var account in accounts)
-                    {
-                        var link = new UserInfoAccount
-                        {
-                            UserInfoId = ui.UserInfoId,
-                            AccessRoleId = (int)AccessRoles.PRIMARY_OWNER,
-                            AccountId = account.AccountId
-                        };
-
-                        await _context.UsersInfoAccounts.AddAsync(link);
-                    }
-
-                }
             }
-
-
         }
     }
 }
