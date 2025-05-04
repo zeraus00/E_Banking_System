@@ -1094,7 +1094,7 @@
 			Console.WriteLine($"RELIGION {UserReligion.ReligionId}");
 
 
-			Account userAccount = await RegistrationService.RegisterAccount(accountTypeId, accountProductTypeId);
+			Account userAccount = await RegistrationService.RegisterAccount(accountTypeId, accountProductTypeId, contactNumber, beneficiaryAccountId);
 			UserAuth userAuth = await RegistrationService.RegisterUserAuth(userName, email, password);
 			await RegistrationService.SyncUserAuthAndAccount(userAuth.UserAuthId, userAccount.AccountId);
 
@@ -1117,8 +1117,7 @@
 				taxIdentificationNumber,
 				selectedCivilStatus,
 				profilePicture!,
-				governmentId!,
-				beneficiaryAccountId
+				governmentId!
 			);
 
 			await RegistrationService.SyncUserInfoAndAccount(userInfo.UserInfoId, userAccount.AccountId);

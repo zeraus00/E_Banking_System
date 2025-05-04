@@ -341,8 +341,7 @@ namespace Services
             string taxIdentificationNumber,
             string civilStatus,
             byte[] profilePicture,
-            byte[] governmentId,
-            int? beneficiaryAccountId = null
+            byte[] governmentId
             ) 
         {
             if (string.IsNullOrWhiteSpace(contactNumber)) 
@@ -395,7 +394,7 @@ namespace Services
             }
         }
 
-        public async Task<Account> RegisterAccount(int accountTypeId,int accountProductTypeId) 
+        public async Task<Account> RegisterAccount(int accountTypeId,int accountProductTypeId, string contactNumber, int? linkedBeneficiaryId = null) 
         {
             if (accountTypeId <= 0) 
             {
@@ -420,7 +419,11 @@ namespace Services
                 .WithATMNumber(atmNumber)
                 .WithAccountName(accountName)
                 .WithAccountStatus((int)AccountStatusTypes.Pending)
-                .WithBalance(0);
+                .WithBalance(0)
+                .WithAccountContactNo(contactNumber);
+
+            if (linkedBeneficiaryId is int beneficiaryId)
+                accountBuilder.WithLinkedBeneficiaryId(beneficiaryId);
 
             Account userAccount = accountBuilder.Build();
 
