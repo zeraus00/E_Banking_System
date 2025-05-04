@@ -710,7 +710,7 @@
 			barangaysFromCity = new();
 
 			//	Get the municipalities from the api.
-			var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/municipalities/");
+			var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/cities-municipalities/");
 			citiesFromProvince = JsonSerializer.Deserialize<List<CityViewModel>>(json)?
 			.Where(c => c.provinceCode.ToString() == selectedProvince)
 			.ToList()
@@ -738,7 +738,9 @@
 
 			var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/barangays/");
 			barangaysFromCity = JsonSerializer.Deserialize<List<BarangayViewModel>>(json)?
-			.Where(b => b.municipalityCode.ToString() == selectedCity)
+			.Where(
+				b => b.municipalityCode.ToString() == selectedCity
+				|| b.cityCode.ToString() == selectedCity)
 			.ToList()
 			?? new();
 			selectedBarangay = string.Empty;
