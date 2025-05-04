@@ -51,8 +51,8 @@
 					<!-- Account Sub Type -->
 					<div class="col-2">
 						<label class="text-light">Account Sub-Type</label>
-						<select class="form-select form-select-sm" @bind="selectedAccountTypeName" required>
-							<option value="" disabled hidden>--select account type--</option>
+						<select class="form-select form-select-sm" @bind="selectedAccountTypeName">
+							<option value="" hidden>@subTypePlaceHolder</option>
 							@foreach (var accountType in accountTypeNames.AccountTypeNameList)
 							{
 								<option value="@accountType">@accountType</option>
@@ -63,8 +63,8 @@
 					<!-- Account Product Type -->
 					<div class="col-2">
 						<label class="text-light">Account Product Type</label>
-						<select class="form-select form-select-sm" @bind="selectedAccountProductTypeName" required>
-							<option value="" disabled hidden>-- Select Product Type --</option>
+						<select class="form-select form-select-sm" @bind="selectedAccountProductTypeName">
+							<option value="" hidden>@productTypePlaceHolder</option>
 							@foreach (var productType in accountProductTypeNames.AccountProductTypeNameList)
 							{
 								<option value="@productType">@productType</option>
@@ -120,7 +120,8 @@
 					<!-- Sex -->
 					<div class="col-1">
 						<label class="text-light">Sex</label>
-						<select class="form-select form-select-sm" @bind="selectedSex" required>
+						<select class="form-select form-select-sm" @bind="selectedSex">
+							<option value="" disabled hidden>@sexPlaceHolder</option>
 							<option>Male</option>
 							<option>Female</option>
 						</select>
@@ -129,7 +130,8 @@
 					<!-- Civil  Status -->
 					<div class="col-2">
 						<label class="text-light">Civil Status</label>
-						<select class="form-select form-select-sm" @bind="selectedCivilStatus" required>
+						<select class="form-select form-select-sm" @bind="selectedCivilStatus">
+							<option value="" hidden>@civilStatusPlaceHolder</option>
 							<option>Single</option>
 							<option>Married</option>
 							<option>Separated</option>
@@ -141,7 +143,7 @@
 					<div class="col">
 						<label class="text-light">Religion</label>
 						<select class="form-select form-select-sm" @bind="selectedReligion">
-
+							<option value="" hidden>@religionPlaceHolder</option>
 							@foreach (var religion in religionOptions)
 							{
 								<option value="@religion">@religion</option>
@@ -179,7 +181,7 @@
 					<div class="col">
 						<label class="text-light">Region</label>
 						<select class="form-select form-select-sm" value="selectedRegion" @onchange="async _ => await LoadProvinceAsync(_)" required>
-							<option value="" disabled hidden>@regionPlaceHolder</option>
+							<option value="" hidden>@regionPlaceHolder</option>
 							@foreach (var r in regions)
 							{
 								<option value="@r.code">@r.regionName</option>
@@ -191,7 +193,7 @@
 					<div class="col">
 						<label class="text-light">Province</label>
 						<select class="form-select form-select-sm" value="selectedProvince" @onchange="async _ => await LoadCitiesAsync(_)" required>
-							<option value="@provincePlaceHolder" hidden>@provincePlaceHolder</option>
+							<option value="" hidden>@provincePlaceHolder</option>
 							@foreach (var p in provincesFromRegion)
 							{
 								<option value="@p.code">@p.name</option>
@@ -205,7 +207,7 @@
 					<div class="col">
 						<label class="text-light">Municipality/City</label>
 						<select class="form-select form-select-sm" value="selectedCity" @onchange="async _ => await LoadBarangaysAsync(_)" required>
-							<option value="@cityPlaceHolder" hidden>@cityPlaceHolder</option>
+							<option value="" hidden>@cityPlaceHolder</option>
 							@foreach (var c in citiesFromProvince)
 							{
 								<option value="@c.code">@c.name</option>
@@ -217,7 +219,7 @@
 					<div class="col">
 						<label class="text-light">Barangay</label>
 						<select class="form-select form-select-sm" @bind="selectedBarangay" required>
-							<option value="@cityPlaceHolder" hidden>@cityPlaceHolder</option>
+							<option value="" hidden>@barangayPlaceHolder</option>
 							@foreach (var b in barangaysFromCity)
 							{
 								<option value="@b.code">@b.name</option>
@@ -269,7 +271,7 @@
 					<div class="col">
 						<label class="text-light">Province</label>
 						<select class="form-select form-select-sm" value="selectedBirthProvince" @onchange="async _ => await LoadBirthCitiesAsync(_)" required>
-							<option value="@provincePlaceHolder" hidden>@provincePlaceHolder</option>
+							<option value="" hidden>@provincePlaceHolder</option>
 							@foreach (var p in birthProvinces)
 							{
 								<option value="@p.code">@p.name</option>
@@ -281,7 +283,7 @@
 					<div class="col">
 						<label class="text-light" >Municipality/City</label>
 						<select class="form-select form-select-sm" @bind="selectedBirthCity" required>
-							<option value="@cityPlaceHolder" hidden>@cityPlaceHolder</option>
+							<option value="" hidden>@cityPlaceHolder</option>
 							@foreach (var c in birthCities)
 							{
 								<option value="@c.code">@c.name</option>
@@ -460,6 +462,18 @@
 	private string error = string.Empty;
 	private string noBeneficiaryFound = string.Empty;
 
+	//drop down selection place holders
+	public const string subTypePlaceHolder = "--Select Sub-Type--";
+	public const string productTypePlaceHolder = "--Select Product Type--";
+	public const string sexPlaceHolder = "--Select Sex--";
+	public const string civilStatusPlaceHolder = "--Select Civil Status--";
+	public const string religionPlaceHolder = "--Select Religion--";
+
+	public const string regionPlaceHolder = "--Select Region--";
+	public const string provincePlaceHolder = "--Select Province--";
+	public const string cityPlaceHolder = "--Select City--";
+	public const string barangayPlaceHolder = "--Select Barangay--";
+
 
 	// user basic info
 	public string userFirstName = string.Empty;
@@ -478,8 +492,8 @@
 	public string customReligion = string.Empty;
 
 	// user profile picture and government id
-	private byte[] profilePicture;
-	private byte[] governmentId;
+	private byte[]? profilePicture;
+	private byte[]? governmentId;
 
 	// Account
 	private AccountTypeNames accountTypeNames = new();
@@ -515,12 +529,6 @@
 	public int provinceId;
 	public int cityId;
 	public int barangayId;
-
-	//drop down selection place holders
-	public const string regionPlaceHolder = "--Select Region--";
-	public const string provincePlaceHolder = "--Select Province--";
-	public const string cityPlaceHolder = "--Select City--";
-	public const string barangayPlaceHolder = "--Select Barangay--";
 
 	//Parents Name And Beneficiary
 	public string fatherFirstName = string.Empty;
@@ -558,6 +566,10 @@
 		{
 			await LoadRegionAsync();
 			await LoadBirthRegionsAsync();
+			selectedProvince = string.Empty;
+			selectedCity = string.Empty;
+			selectedBarangay = string.Empty;
+
 			dataSeeding();
 		}
 		catch (FieldMissingException ex)
@@ -580,9 +592,7 @@
 		contactNumber = "09669072782";
 		Occupation = "MACHO DANCER";
 		taxIdentificationNumber = "012345678910";
-		selectedSex = "MALE";
-		selectedCivilStatus = "OPPRESSED";
-		selectedReligion = "Roman Catholic";
+		// selectedReligion = "Roman Catholic";
 
 
 		// // user profile picture and government id
@@ -591,9 +601,9 @@
 
 		// // Account
 		// private AccountTypeNames accountTypeNames = new();
-		// private AccountProductTypeNames accountProductTypeNames = new();
-		selectedAccountTypeName = AccountTypeNames.PERSONAL_ACCOUNT;
-		selectedAccountProductTypeName = AccountProductTypeNames.SAVINGS;
+		// // private AccountProductTypeNames accountProductTypeNames = new();
+		// selectedAccountTypeName = AccountTypeNames.PERSONAL_ACCOUNT;
+		// selectedAccountProductTypeName = AccountProductTypeNames.SAVINGS;
 
 
 
@@ -643,8 +653,9 @@
 				return;
 			}
 			regions = JsonSerializer.Deserialize<List<RegionViewModel>>(json) ?? new();
-			if (regions is not null)
-				selectedRegion = regions[0].code.GetString()!;
+			selectedProvince = string.Empty;
+			selectedCity = string.Empty;
+			selectedBarangay = string.Empty;
 		}
 		catch (FieldMissingException ex)
 		{
@@ -659,7 +670,7 @@
 		{
 			error = string.Empty; // reset previous error
 										//	Get the value of the selection
-			selectedRegion = e?.Value?.ToString() ?? "";
+			selectedRegion = e?.Value?.ToString() ?? string.Empty;
 
 			// this will reset if the user select new region
 			selectedProvince = string.Empty;
@@ -675,12 +686,8 @@
 			.Where(p => p.regionCode.ToString() == selectedRegion)
 			.ToList()
 			?? new();
-			if (provincesFromRegion.Any())
-			{
-				selectedProvince = provincePlaceHolder;
-			}
+			selectedProvince = string.Empty;
 			//	Rerender component
-			StateHasChanged();
 		}
 		catch (FieldMissingException ex)
 		{
@@ -694,7 +701,7 @@
 		{
 			error = string.Empty; // reset previous error
 										//	Get the value of the selection
-			selectedProvince = e?.Value?.ToString() ?? "";
+			selectedProvince = e?.Value?.ToString() ?? string.Empty;
 
 			selectedCity = string.Empty;
 			selectedBarangay = string.Empty;
@@ -710,12 +717,8 @@
 			?? new();
 
 			//	Default the selection to the first option each time provinces are updated.
-			if (citiesFromProvince.Any())
-			{
-				selectedCity = cityPlaceHolder; //citiesFromProvince[0].code.GetString()!;
-			}
+			selectedCity = string.Empty; 
 			//	Rerender component
-			StateHasChanged();
 		}
 		catch (FieldMissingException ex)
 		{
@@ -728,7 +731,7 @@
 		try
 		{
 			error = string.Empty; // reset previous error
-			selectedCity = e?.Value?.ToString() ?? "";
+			selectedCity = e?.Value?.ToString() ?? string.Empty;
 
 			selectedBarangay = string.Empty;
 			barangaysFromCity = new();
@@ -738,12 +741,8 @@
 			.Where(b => b.municipalityCode.ToString() == selectedCity)
 			.ToList()
 			?? new();
-			if (barangaysFromCity.Any())
-			{
-				selectedBarangay = barangaysFromCity[0].code.GetString()!;
-			}
+			selectedBarangay = string.Empty;
 			//	Rerender component
-			StateHasChanged();
 		}
 		catch (FieldMissingException ex)
 		{
@@ -762,10 +761,9 @@
 				return;
 			}
 			birthRegions = JsonSerializer.Deserialize<List<RegionViewModel>>(json) ?? new();
-			if (selectedRegion.Any())
-			{
-				selectedRegion = birthRegions[0].code.GetString()!;
-			}
+			selectedProvince = string.Empty;
+			selectedCity = string.Empty;
+			selectedBarangay = string.Empty;
 		}
 		catch (FieldMissingException ex)
 		{
@@ -792,11 +790,7 @@
 			.Where(p => p.regionCode.ToString() == selectedBirthRegion)
 			.ToList()
 			?? new();
-			if (birthProvinces.Any())
-			{
-				selectedBirthProvince = birthProvinces[0].code.GetString()!;
-			}
-			StateHasChanged();
+			selectedBirthProvince = string.Empty;
 		}
 		catch (FieldMissingException ex)
 		{
@@ -822,12 +816,8 @@
 			?? new();
 
 			//	Default the selection to the first option each time provinces are updated.
-			if (citiesFromProvince.Any())
-			{
-				selectedBirthCity = birthCities[0].code.GetString()!;
-			}
+			selectedBirthCity = string.Empty;
 			//	Rerender component
-			StateHasChanged();
 		}
 		catch (FieldMissingException ex)
 		{
@@ -938,6 +928,14 @@
 			Console.WriteLine("CLICKED");
 			error = string.Empty;
 
+			if (string.IsNullOrWhiteSpace(selectedAccountTypeName))
+			{
+				error = "Account Type is required.";
+			}
+
+			if (string.IsNullOrWhiteSpace(selectedAccountProductTypeName))
+				error = "Account Product Type is required.";
+
 			if (string.IsNullOrWhiteSpace(userFirstName))
 			{
 				error = "First name is required.";
@@ -1017,11 +1015,11 @@
 
 			}
 
-			if (string.IsNullOrWhiteSpace(customReligion))
+			if (string.IsNullOrWhiteSpace(selectedRegion))
 			{
 				error = "Religion is required.";
 			}
-			if (selectedReligion == "Others")
+			if (selectedReligion == "Others" && string.IsNullOrWhiteSpace(customReligion))
 			{
 				error = "Please specify your religion.";
 			}
@@ -1039,6 +1037,17 @@
 			}
 
 			// Validation for address
+			bool hasMissingFieldAddress = (
+				string.IsNullOrWhiteSpace(selectedRegion)
+				|| string.IsNullOrWhiteSpace(selectedProvince)
+				|| string.IsNullOrWhiteSpace(selectedCity)
+				|| string.IsNullOrWhiteSpace(selectedBarangay)
+			);
+			if (hasMissingFieldAddress)
+			{
+				error = "Full current address is required.";
+			}
+
 			if (string.IsNullOrWhiteSpace(houseNo))
 			{
 				error = "House number is required.";
@@ -1047,6 +1056,17 @@
 			if (string.IsNullOrWhiteSpace(street))
 			{
 				error = "Street name is required.";
+			}
+
+			bool hasMissingFieldBirthAddress = (
+				string.IsNullOrWhiteSpace(selectedBirthRegion)
+				|| string.IsNullOrWhiteSpace(selectedBirthProvince)
+				|| string.IsNullOrWhiteSpace(selectedBirthCity)
+			);
+
+			if (hasMissingFieldBirthAddress)
+			{
+				error = "Full birth address is required.";
 			}
 
 			if (postalCode == 0)
@@ -1061,7 +1081,21 @@
 
 			}
 
-			Console.WriteLine("ERRRO CHECKS PASSED.");
+			//	File uploads
+			if (profilePicture is null)
+			{
+				error = "Please upload a profile picture.";
+			}
+
+			if (governmentId is null)
+			{
+				error = "Please upload a government id picture";
+			}
+
+			if (!string.IsNullOrWhiteSpace(error))
+				return;
+
+			Console.WriteLine("ERROR CHECKS PASSED.");
 
 			accountTypeId = accountTypeNames.AccountTypeNameList.IndexOf(selectedAccountTypeName) + 1;
 			accountProductTypeId = accountProductTypeNames.AccountProductTypeNameList.IndexOf(selectedAccountProductTypeName) + 1;
@@ -1120,8 +1154,8 @@
 				Occupation,
 				taxIdentificationNumber,
 				selectedCivilStatus,
-				profilePicture,
-				governmentId,
+				profilePicture!,
+				governmentId!,
 				beneficiaryAccountId
 			);
 
