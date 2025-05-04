@@ -109,28 +109,44 @@ namespace Services
                 UserAuth userAuth = await _dataService.TryGetUserAuthAsync(userAuthId, includeAccounts: true);
 
                 //  Throws a UserNotFoundException if UserInfo is not found.
-                UserInfo userInfo = await _dataService.TryGetUserInfoAsync(userInfoId, includeUserName: true);
+                UserInfo userInfo = await _dataService.TryGetUserInfoAsync(userInfoId, includeUserName: true, includeUserInfoAccounts: true);
 
                 /*  GET USER SESSION FIELDS  */
                 UserSession userSession = new();
 
+
+                userSession.UserAuthId = userAuth.UserAuthId;
+                userSession.UserInfoId = userInfo.UserInfoId;
                 //  Get full name.
                 userSession.CurrentUserName = await _dataService.GetUserFullName(userInfo) ?? "NAME_NOT_FOUND.";
                 userSession.CurrentUserEmail = _dataMaskingService.MaskEmail(userAuth.Email);
                 userSession.CurrentUserContact = userInfo.ContactNumber;
                 //  Get account list.
-                List<Account> accountList = userAuth.Accounts.ToList();
-                List<int> accountIdList = new();
+                List<Account> onlineAccountList = userAuth.Accounts.ToList();
+                List<UserInfoAccount> userAccountLinks = userInfo.UserInfoAccounts.ToList();
+                List<LinkedAccount> userAccountList = new();
 
-                if (accountList.Any())
+                if (onlineAccountList.Any())
                 {
-                    foreach (var account in accountList)
+                    foreach (var account in onlineAccountList)
                     {
-                        accountIdList.Add(account.AccountId);
+                        LinkedAccount accountSession = new()
+                        {
+                            UserAccessRoleId = userAccountLinks
+                                .Where(link => link.AccountId == account.AccountId)
+                                .FirstOrDefault()!
+                                .AccessRoleId,
+                            AccountId = account.AccountId,
+                            AccountName = account.AccountName,
+                            AccountNumber = new DataMaskingService().MaskAccountNumber(account.AccountNumber),
+                            AccountContactNo = account.AccountContactNo,
+                            AccountStatusId = account.AccountStatusTypeId
+                        };
+                        userAccountList.Add(accountSession);
                     }
                 }
 
-                userSession.UserAccountIdList = accountIdList;
+                userSession.UserAccountList = userAccountList;
 
                 /*  CREATE A SESSION    */
                 await _sessionStorage.StoreSessionAsync(SessionSchemes.USER_SESSION, userSession);

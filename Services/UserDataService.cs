@@ -62,7 +62,8 @@ namespace Services
             bool includeAddress = false,
             bool includeFatherName = false,
             bool includeMotherName = false,
-            bool includeReligion = false
+            bool includeReligion = false,
+            bool includeUserInfoAccounts = false
             )
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
@@ -85,6 +86,8 @@ namespace Services
                     queryBuilder.IncludeMotherName();
                 if (includeReligion)
                     queryBuilder.IncludeReligion();
+                if (includeUserInfoAccounts)
+                    queryBuilder.IncludeUserInfoAccounts();
 
                 var query = queryBuilder.GetQuery();
                     
@@ -342,6 +345,7 @@ namespace Services
             int accountId,
             bool includeAccountType = false,
             bool includeUsersAuth = false,
+            bool includeUsersInfoAccount = false,
             bool includeTransactions = false,
             bool includeLoans = false
             )
@@ -362,6 +366,7 @@ namespace Services
                     query = accountRepo.Query
                         .IncludeAccountType(includeAccountType)
                         .IncludeUsersAuth(includeUsersAuth)
+                        .IncludeUsersInfoAccount(includeUsersInfoAccount)
                         .IncludeMainTransactions(includeTransactions)
                         .IncludeLoans(includeLoans)
                         .GetQuery();

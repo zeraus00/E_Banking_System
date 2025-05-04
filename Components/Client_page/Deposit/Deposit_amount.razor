@@ -83,7 +83,7 @@
     private TransactionMethod? methodRef;
 
     private UserSession userSession { get; set; } = default!;
-    private ActiveAccountSession activeAccountSession { get; set; } = default!;
+    private LinkedAccount activeAccountSession { get; set; } = default!;
     private TransactionSession transactionSession { get; set; } = default!;
 
     private Account? account;
@@ -106,7 +106,7 @@
                 //  Get user session details from session storage.
                 //  Throws SessionNotFoundException is session is not found.
                 userSession = await userSessionService.GetUserSession();
-                activeAccountSession = await userControlledSessionService.GetActiveAccountSessionAsync();
+                activeAccountSession = await userControlledSessionService.GetActiveAccountSessionAsync(userSession);
 
                 //  Get account id.
                 accountId = activeAccountSession.AccountId;

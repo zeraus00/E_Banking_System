@@ -23,30 +23,38 @@ namespace Services
             _userDataService = userDataService;
             _userSessionService = userSessionService;
         }
+        /*      User Account List       */
+        public async Task<List<LinkedAccount>> GetUserAccountListAsync(UserSession? userSession = null)
+        => userSession is null
+            ? (await _userSessionService.GetUserSession()).UserAccountList
+            : userSession.UserAccountList;
 
-        public async Task<ActiveAccountSession> GetActiveAccountSessionAsync(UserSession? userSession = null)
+        /*      Active Account Session      */
+        public async Task<LinkedAccount> GetActiveAccountSessionAsync(UserSession? userSession = null)
         => userSession is null
             ? (await _userSessionService.GetUserSession()).ActiveAccountSession
             : userSession.ActiveAccountSession;
 
-        public async Task SetActiveAccountSessionAsync(ActiveAccountSession? activeAccountSession=null, UserSession? userSession = null)
+        public async Task SetActiveAccountSessionAsync(LinkedAccount? activeAccountSession=null, UserSession? userSession = null)
         {
             if (userSession is null)
                 userSession = await _userSessionService.GetUserSession();
             
             if (activeAccountSession is null)
             {
-                int accountId = userSession.UserAccountIdList[0];
-                Account account = await _userDataService.GetAccountAsync(accountId);
-                activeAccountSession = CreateActiveAccountSession(account);
+                //int accountId = userSession.UserAccountIdList[0];
+                //Account account = await _userDataService.GetAccountAsync(accountId);
+                //activeAccountSession = CreateAccountSession(account);
+                activeAccountSession = userSession.UserAccountList[0];
             }
             userSession.ActiveAccountSession = SetAccountPermissions(activeAccountSession);
             await _userSessionService.UpdateUserSession(userSession);
         }
-        public ActiveAccountSession CreateActiveAccountSession(Account account)
+        public LinkedAccount CreateAccountSession(Account account)
         {
-            ActiveAccountSession activeAccountSession = new ActiveAccountSession
+            LinkedAccount activeAccountSession = new LinkedAccount
             {
+
                 AccountId = account.AccountId,
                 AccountName = account.AccountName,
                 AccountNumber = _dataMaskingService.MaskAccountNumber(account.AccountNumber),
@@ -55,6 +63,8 @@ namespace Services
 
             return SetAccountPermissions(activeAccountSession);
         }
+
+        /*      Transaction Session     */
         public async Task<TransactionSession> GetTransactionSessionAsync(UserSession? userSession = null)
         {
             if (userSession is null)
@@ -69,13 +79,16 @@ namespace Services
         {
             if (userSession is null)
                 userSession = await _userSessionService.GetUserSession();
-            var transactionSessionScheme = GetControlledSessionScheme(transactionTypeId);
+            var transactionSessionScheme = GetTransactionSessionScheme(transactionTypeId);
             userSession.TransactionSessionScheme = transactionSessionScheme;
             userSession.TransactionSession = transactionSession;
             await _userSessionService.UpdateUserSession(userSession);
         }
 
-        private string GetControlledSessionScheme(int transactionTypeId) => transactionTypeId switch
+
+        /*      Helper Methods      */
+
+        private string GetTransactionSessionScheme(int transactionTypeId) => transactionTypeId switch
         {
             (int)TransactionTypes.Deposit => SessionSchemes.DEPOSIT_SESSION,
             (int)TransactionTypes.Withdrawal => SessionSchemes.WITHDRAW_SESSION,
@@ -84,7 +97,7 @@ namespace Services
             _ => string.Empty
         };
 
-        private ActiveAccountSession SetAccountPermissions(ActiveAccountSession activeAccountSession)
+        private LinkedAccount SetAccountPermissions(LinkedAccount activeAccountSession)
         {
             activeAccountSession.AccountCanTransact = activeAccountSession.AccountStatusId switch
             {

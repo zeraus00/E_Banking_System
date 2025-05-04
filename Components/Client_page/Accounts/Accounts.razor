@@ -7,6 +7,7 @@
 @inject PageRedirectService redirectService
 @inject UserDataService userDataService
 @inject UserSessionService userSessionService
+@inject UserControlledSessionService userControlledSessionService
 
 <div class="page">
     <main>
@@ -62,6 +63,7 @@
 
     private ClaimsPrincipal? user;
     private List<Account> accounts = new();
+    private List<LinkedAccount> userAccountList = new();
     private UserInfo? userInfo;
     private bool IsEditable { get; set; } = false; // Default to view mode
 
@@ -89,7 +91,8 @@
 
                 //  Get list of accounts from database.
                 //  Returns empty list of no accounts are found.
-                accounts = await userDataService.GetAccountListAsync(userSession.UserAccountIdList);
+                //  accounts = await userDataService.GetAccountListAsync(userSession.UserAccountIdList);
+                userAccountList = await userControlledSessionService.GetUserAccountListAsync(userSession);
 
                 StateHasChanged();
             }
