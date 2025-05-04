@@ -9,6 +9,7 @@
 
 
         /*  Navigation Properties   */
+        public ICollection<City> Cities { get; set; } = new List<City>();
         public ICollection<Province> Provinces { get; set; } = new List<Province>(); 
         public ICollection<Address> Addresses { get; set; } = new List<Address>(); 
         public ICollection<BirthInfo> BirthsInfo { get; set; } = new List<BirthInfo>();

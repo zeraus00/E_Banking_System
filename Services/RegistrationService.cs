@@ -59,7 +59,7 @@ namespace Services
             }
         }
 
-        public async Task<BirthInfo> RegisterBirthInfo(DateTime birthDate, int birthCityId, int birthProvinceId, int birthRegiodId) 
+        public async Task<BirthInfo> RegisterBirthInfo(DateTime birthDate, int birthCityId, int? birthProvinceId, int birthRegiodId) 
         {
             if (birthDate == default) 
             {
@@ -70,12 +70,6 @@ namespace Services
             {
                 throw new FieldMissingException("City is required.");
             }
-
-            if (birthProvinceId <= 0) 
-            {
-                throw new FieldMissingException("Province is required.");
-            }
-
             if (birthRegiodId <= 0) 
             {
                 throw new FieldMissingException("Region is required.");
@@ -84,8 +78,10 @@ namespace Services
             var birthInfoBuilder = new BirthInfoBuilder()
             .WithBirthDate(birthDate)
             .WithCityId(birthCityId)
-            .WithProvinceId(birthProvinceId)
             .WithRegionId(birthRegiodId);
+
+            if (birthProvinceId is int id)
+                birthInfoBuilder.WithProvinceId(id);
 
             BirthInfo UserBirthInfo = birthInfoBuilder.Build();
 
@@ -98,7 +94,7 @@ namespace Services
             }
         }
 
-        public async Task<Address> RegisterAddress(string houseNo, string street, int barangayId, int cityId, int provinceId, int regionId, int postalCode) 
+        public async Task<Address> RegisterAddress(string houseNo, string street, int barangayId, int cityId, int? provinceId, int regionId, int postalCode) 
         {
             if (string.IsNullOrWhiteSpace(houseNo)) 
             {
@@ -119,11 +115,6 @@ namespace Services
             {
                 throw new FieldMissingException("City is required.");
             }
-
-            if (provinceId <= 0) 
-            {
-                throw new FieldMissingException("Province is required.");
-            }
             if (regionId <= 0) 
             {
                 throw new FieldMissingException("Region is required.");
@@ -139,9 +130,10 @@ namespace Services
                 .WithStreet(street)
                 .WithBarangayId(barangayId)
                 .WithCityId(cityId)
-                .WithProvinceId(provinceId)
                 .WithRegionId(regionId)
                 .WithPostalCode(postalCode);
+            if (provinceId is int id)
+                AddressBuilder.WithProvinceId(id);
 
 
             Address UserAddress = AddressBuilder.Build();
@@ -178,10 +170,13 @@ namespace Services
                 return region.RegionId;
             }
         }
-        public async Task<int> RegisterProvince(string selectedCode, List<ProvinceViewModel> provinceList)
+        public async Task<int?> RegisterProvince(string selectedCode, int regionId, List<ProvinceViewModel> provinceList)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
+                if (selectedCode.Equals(FieldPlaceHolders.PROVINCE_CODE_NOT_FOUND))
+                    return null;
+
                 var provinceRepo = new ProvinceRepository(dbContext);
 
                 ProvinceViewModel selectedProvince = provinceList
@@ -194,6 +189,7 @@ namespace Services
                     province = new();
                     province.ProvinceCode = selectedCode.Trim();
                     province.ProvinceName = selectedProvince.name.GetString()?.Trim() ?? FieldPlaceHolders.PROVINCE_NAME_NOT_FOUND;
+                    province.RegionId = regionId;
 
                     await provinceRepo.AddAsync(province);
                     await provinceRepo.SaveChangesAsync();
@@ -203,7 +199,7 @@ namespace Services
             }
         }
 
-        public async Task<int> RegisterCity(string selectedCode, List<CityViewModel> cityList)
+        public async Task<int> RegisterCity(string selectedCode, int? provinceId, int? regionId, List<CityViewModel> cityList)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
@@ -220,6 +216,12 @@ namespace Services
                     city.CityCode = selectedCode.Trim();
                     city.CityName = selectedCity.name.GetString()?.Trim() ?? FieldPlaceHolders.CITY_NAME_NOT_FOUND;
 
+                    if (provinceId is int provId)
+                        city.ProvinceId = provId;
+
+                    if (regionId is int regId)
+                        city.RegionId = regId;
+
                     await cityRepo.AddAsync(city);
                     await cityRepo.SaveChangesAsync();
                 }
@@ -228,7 +230,7 @@ namespace Services
             }
         }
 
-        public async Task<int> RegisterBarangay(string selectedCode, List<BarangayViewModel> barangayList)
+        public async Task<int> RegisterBarangay(string selectedCode, int cityId, List<BarangayViewModel> barangayList)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
@@ -244,7 +246,7 @@ namespace Services
                     barangay = new();
                     barangay.BarangayCode = selectedCode.Trim();
                     barangay.BarangayName = selectedBarangay.name.GetString()?.Trim() ?? FieldPlaceHolders.CITY_NAME_NOT_FOUND;
-
+                    barangay.CityId = cityId;
                     await barangayRepo.AddAsync(barangay);
                     await barangayRepo.SaveChangesAsync();
                 }

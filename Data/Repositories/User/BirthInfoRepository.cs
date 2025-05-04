@@ -34,9 +34,9 @@
     public class BirthInfoBuilder
     {
         private DateTime _birthDate;
-        private int _cityId;
-        private int _provinceId;
-        private int _regionId;
+        private int? _cityId;
+        private int? _provinceId;
+        private int? _regionId;
 
         #region Builder Methods
         public BirthInfoBuilder WithBirthDate(DateTime birthDate)

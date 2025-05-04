@@ -194,6 +194,10 @@
 						<label class="text-light">Province</label>
 						<select class="form-select form-select-sm" value="selectedProvince" @onchange="async _ => await LoadCitiesAsync(_)" required>
 							<option value="" hidden>@provincePlaceHolder</option>
+							@if (!provincesFromRegion.Any())
+							{
+								<option value="@FieldPlaceHolders.PROVINCE_CODE_NOT_FOUND">No Province</option>
+							}
 							@foreach (var p in provincesFromRegion)
 							{
 								<option value="@p.code">@p.name</option>
@@ -272,6 +276,10 @@
 						<label class="text-light">Province</label>
 						<select class="form-select form-select-sm" value="selectedBirthProvince" @onchange="async _ => await LoadBirthCitiesAsync(_)" required>
 							<option value="" hidden>@provincePlaceHolder</option>
+							@if (!birthProvinces.Any())
+							{
+								<option value="@FieldPlaceHolders.PROVINCE_CODE_NOT_FOUND">No Province</option>
+							}
 							@foreach (var p in birthProvinces)
 							{
 								<option value="@p.code">@p.name</option>
@@ -512,7 +520,7 @@
 	public string selectedBirthProvince = string.Empty;
 	public string selectedBirthRegion = string.Empty;
 	public int birthCityId;
-	public int birthProvinceId;
+	public int? birthProvinceId;
 	public int birthRegionId;
 
 
@@ -526,7 +534,7 @@
 	public string userPostalCode = string.Empty;
 	public int postalCode;
 	public int regionId;
-	public int provinceId;
+	public int? provinceId;
 	public int cityId;
 	public int barangayId;
 
@@ -677,7 +685,6 @@
 			selectedCity = string.Empty;
 			selectedBarangay = string.Empty;
 
-			provincesFromRegion = new();
 			citiesFromProvince = new();
 			barangaysFromCity = new();
 
@@ -687,6 +694,17 @@
 			.ToList()
 			?? new();
 			selectedProvince = string.Empty;
+			if (!provincesFromRegion.Any())
+			{
+				selectedProvince = FieldPlaceHolders.PROVINCE_CODE_NOT_FOUND;
+				json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/cities-municipalities/");
+				citiesFromProvince = JsonSerializer.Deserialize<List<CityViewModel>>(json)?
+					.Where(c => c.regionCode.ToString() == selectedRegion)
+					.ToList()
+					?? new();
+				selectedCity = string.Empty;
+			}
+
 			//	Rerender component
 		}
 		catch (FieldMissingException ex)
@@ -702,6 +720,9 @@
 			error = string.Empty; // reset previous error
 										//	Get the value of the selection
 			selectedProvince = e?.Value?.ToString() ?? string.Empty;
+
+			if (selectedProvince.Equals(FieldPlaceHolders.PROVINCE_CODE_NOT_FOUND))
+				return;
 
 			selectedCity = string.Empty;
 			selectedBarangay = string.Empty;
@@ -781,7 +802,6 @@
 			error = string.Empty; // reset previous error
 			selectedBirthRegion = e?.Value?.ToString() ?? "";
 
-			birthProvinces = new();
 			selectedBirthProvince = string.Empty;
 
 			birthCities = new();
@@ -793,6 +813,17 @@
 			.ToList()
 			?? new();
 			selectedBirthProvince = string.Empty;
+
+			if (!birthProvinces.Any())
+			{
+				selectedBirthProvince = FieldPlaceHolders.PROVINCE_CODE_NOT_FOUND;
+				json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/cities-municipalities/");
+				birthCities = JsonSerializer.Deserialize<List<CityViewModel>>(json)?
+					.Where(c => c.regionCode.ToString() == selectedRegion)
+					.ToList()
+					?? new();
+				selectedBirthCity = string.Empty;
+			}
 		}
 		catch (FieldMissingException ex)
 		{
@@ -806,6 +837,8 @@
 		{
 			error = string.Empty; // reset previous error
 			selectedBirthProvince = e?.Value?.ToString() ?? "";
+			if (selectedBirthProvince.Equals(FieldPlaceHolders.PROVINCE_CODE_NOT_FOUND))
+				return;
 
 			birthCities = new();
 			selectedBirthCity = string.Empty;
@@ -1104,15 +1137,15 @@
 			Console.WriteLine(accountTypeId + " " + accountProductTypeId);
 
 			regionId = await RegistrationService.RegisterRegion(selectedRegion, regions);
-			provinceId = await RegistrationService.RegisterProvince(selectedProvince, provincesFromRegion);
-			cityId = await RegistrationService.RegisterCity(selectedCity, citiesFromProvince);
-			barangayId = await RegistrationService.RegisterBarangay(selectedBarangay, barangaysFromCity);
+			provinceId = await RegistrationService.RegisterProvince(selectedProvince, regionId, provincesFromRegion);
+			cityId = await RegistrationService.RegisterCity(selectedCity, provinceId, regionId, citiesFromProvince);
+			barangayId = await RegistrationService.RegisterBarangay(selectedBarangay, cityId, barangaysFromCity);
 
 			Console.WriteLine($"PLACE IDS {regionId} {provinceId} {cityId} {barangayId} ");
 
 			birthRegionId = await RegistrationService.RegisterRegion(selectedBirthRegion, birthRegions);
-			birthProvinceId = await RegistrationService.RegisterProvince(selectedBirthProvince, birthProvinces);
-			birthCityId = await RegistrationService.RegisterCity(selectedBirthCity, birthCities);
+			birthProvinceId = await RegistrationService.RegisterProvince(selectedBirthProvince, birthRegionId, birthProvinces);
+			birthCityId = await RegistrationService.RegisterCity(selectedBirthCity, birthProvinceId, birthRegionId, birthCities);
 
 			Console.WriteLine($"BIRTH PLACE IDS {birthRegionId} {birthProvinceId} {birthCityId}");
 

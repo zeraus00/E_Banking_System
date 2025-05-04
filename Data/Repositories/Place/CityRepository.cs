@@ -25,6 +25,7 @@
         private string _cityCode = string.Empty;
         private string _cityName = string.Empty;
         private int? _provinceId;
+        private int? _regionId;
 
         public CityBuilder WithCityCode (string cityCode)
         {
@@ -43,6 +44,12 @@
             return this;
         }
 
+        public CityBuilder WithRegionId(int regionId)
+        {
+            _regionId = regionId;
+            return this;
+        }
+
         /// <summary>
         /// Builds the City object with the specified properties
         /// </summary>
@@ -53,7 +60,8 @@
             {
                 CityCode = _cityCode,
                 CityName = _cityName,
-                ProvinceId = _provinceId
+                ProvinceId = _provinceId,
+                RegionId = _regionId
             };
         }
     }
