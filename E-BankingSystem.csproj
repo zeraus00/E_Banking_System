@@ -59,6 +59,7 @@
 
   <ItemGroup>
     <Folder Include="Data\Seeders\Auth\" />
+    <Folder Include="Services\NewFolder\" />
   </ItemGroup>
 
 </Project>

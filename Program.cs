@@ -42,6 +42,7 @@ builder.Services.AddScoped<SignInService>();
 
 // Data services
 builder.Services.AddScoped<AdminDataService>();
+builder.Services.AddScoped<ApiLoaderService>();
 builder.Services.AddScoped<CredentialFactory>();
 builder.Services.AddScoped<DataMaskingService>();
 builder.Services.AddScoped<UserDataService>();

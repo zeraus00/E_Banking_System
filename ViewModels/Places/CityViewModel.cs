@@ -2,7 +2,7 @@ using System.Text.Json;
 
 namespace ViewModels.Places
 {
-    public class CityViewModel
+    public class CityViewModel : ILocationUnitViewModel
     {
         public JsonElement code { get; set; }
         public JsonElement name { get; set; }
