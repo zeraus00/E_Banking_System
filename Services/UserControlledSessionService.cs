@@ -26,8 +26,8 @@ namespace Services
         /*      User Account List       */
         public async Task<List<LinkedAccount>> GetUserAccountListAsync(UserSession? userSession = null)
         => userSession is null
-            ? (await _userSessionService.GetUserSession()).UserAccountList
-            : userSession.UserAccountList;
+            ? (await _userSessionService.GetUserSession()).LinkedAccountList
+            : userSession.LinkedAccountList;
 
         /*      Active Account Session      */
         public async Task<LinkedAccount> GetActiveAccountSessionAsync(UserSession? userSession = null)
@@ -45,7 +45,7 @@ namespace Services
                 //int accountId = userSession.UserAccountIdList[0];
                 //Account account = await _userDataService.GetAccountAsync(accountId);
                 //activeAccountSession = CreateAccountSession(account);
-                activeAccountSession = userSession.UserAccountList[0];
+                activeAccountSession = userSession.LinkedAccountList[0];
             }
             userSession.ActiveAccountSession = SetAccountPermissions(activeAccountSession);
             await _userSessionService.UpdateUserSession(userSession);

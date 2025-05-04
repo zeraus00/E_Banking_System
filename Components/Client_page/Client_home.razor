@@ -230,7 +230,7 @@
         selectedAccountId = Convert.ToInt32(e?.Value?.ToString());
 
         //  Get the new active account
-        LinkedAccount? newAccountSession = userSession.UserAccountList
+        LinkedAccount? newAccountSession = userSession.LinkedAccountList
             .Where(a => a.AccountId == selectedAccountId)
             .FirstOrDefault();
         //  Update the current account details in the session.
@@ -308,6 +308,6 @@
 
     private void LoadAccountList()
     {
-        userAccountList = userSession.UserAccountList;
+        userAccountList = userSession.LinkedAccountList;
     }
 }

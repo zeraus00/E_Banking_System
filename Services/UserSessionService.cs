@@ -146,7 +146,7 @@ namespace Services
                     }
                 }
 
-                userSession.UserAccountList = userAccountList;
+                userSession.LinkedAccountList = userAccountList;
 
                 /*  CREATE A SESSION    */
                 await _sessionStorage.StoreSessionAsync(SessionSchemes.USER_SESSION, userSession);

@@ -17,7 +17,7 @@ namespace ViewModels.Sessions
         public string CurrentUserContact { get; set; } = string.Empty;
 
         //  For user account sessions.
-        public List<LinkedAccount> UserAccountList { get; set; } = new();
+        public List<LinkedAccount> LinkedAccountList { get; set; } = new();
         public LinkedAccount ActiveAccountSession { get; set; } = new();
 
         //  For transaction session.
