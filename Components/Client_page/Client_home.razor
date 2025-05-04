@@ -190,6 +190,7 @@
     private int selectedAccountId { get; set; }
     private Account? activeAccount;
     private List<Transaction> recentTransactions = new();
+    private string _accessRole = "Loading...";
     private string _clientName = "Loading...";
     private string _accountNumber = "Loading...";
     private string _accountStatus = "Loading...";
@@ -262,6 +263,7 @@
                 activeAccount = await userDataService.GetAccountAsync(activeAccountSession.AccountId);
 
                 //  Set display data.
+                _accessRole = AccessRoleNames.AS_STRING_LIST[activeAccountSession.UserAccessRoleId - 1];
                 _clientName = activeAccountSession.AccountName;
                 _accountNumber = activeAccountSession.AccountNumber;
                 _accountStatus = AccountStatusTypeNames.AS_STRING_LIST[activeAccountSession.AccountStatusId-1];
