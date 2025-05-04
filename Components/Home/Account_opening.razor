@@ -7,6 +7,7 @@
 
 @page "/Account_opening"
 @rendermode InteractiveServer
+@inject ApiLoaderService apiLoaderService
 @inject NavigationManager NavigationManager
 @inject RegistrationService RegistrationService
 @inject HttpClient HttpClient
@@ -180,7 +181,7 @@
 					<!-- Region -->
 					<div class="col">
 						<label class="text-light">Region</label>
-						<select class="form-select form-select-sm" value="selectedRegion" @onchange="async _ => await LoadProvinceAsync(_)" required>
+						<select class="form-select form-select-sm" @bind="selectedRegion" @bind:after="OnRegionChangeAsync" required>
 							<option value="" hidden>@regionPlaceHolder</option>
 							@foreach (var r in regions)
 							{
@@ -192,13 +193,13 @@
 					<!-- Province -->
 					<div class="col">
 						<label class="text-light">Province</label>
-						<select class="form-select form-select-sm" value="selectedProvince" @onchange="async _ => await LoadCitiesAsync(_)" required>
+						<select class="form-select form-select-sm" @bind="selectedProvince" @bind:after="OnProvinceChangeAsync" required>
 							<option value="" hidden>@provincePlaceHolder</option>
-							@if (!provincesFromRegion.Any())
+							@if (!provinces.Any())
 							{
 								<option value="@FieldPlaceHolders.PROVINCE_CODE_NOT_FOUND">No Province</option>
 							}
-							@foreach (var p in provincesFromRegion)
+							@foreach (var p in provinces)
 							{
 								<option value="@p.code">@p.name</option>
 							}
@@ -210,9 +211,9 @@
 					<!-- Municipality/City -->
 					<div class="col">
 						<label class="text-light">Municipality/City</label>
-						<select class="form-select form-select-sm" value="selectedCity" @onchange="async _ => await LoadBarangaysAsync(_)" required>
+						<select class="form-select form-select-sm" @bind="selectedCity" @bind:after="OnCityChangeAsync" required>
 							<option value="" hidden>@cityPlaceHolder</option>
-							@foreach (var c in citiesFromProvince)
+							@foreach (var c in cities)
 							{
 								<option value="@c.code">@c.name</option>
 							}
@@ -224,7 +225,7 @@
 						<label class="text-light">Barangay</label>
 						<select class="form-select form-select-sm" @bind="selectedBarangay" required>
 							<option value="" hidden>@barangayPlaceHolder</option>
-							@foreach (var b in barangaysFromCity)
+							@foreach (var b in barangays)
 							{
 								<option value="@b.code">@b.name</option>
 							}
@@ -262,7 +263,7 @@
 					<!-- Region -->
 					<div class="col">
 						<label class="text-light">Region</label>
-						<select class="form-select form-select-sm" value="selectedBirthRegion" @onchange="async _ => await LoadBirthProvincesAsync(_)" required>
+						<select class="form-select form-select-sm" @bind="selectedBirthRegion" @bind:after="OnBirthRegionChangeAsync" required>
 							<option value="" hidden>@regionPlaceHolder</option>
 							@foreach (var r in birthRegions)
 							{
@@ -274,7 +275,7 @@
 					<!-- Province -->
 					<div class="col">
 						<label class="text-light">Province</label>
-						<select class="form-select form-select-sm" value="selectedBirthProvince" @onchange="async _ => await LoadBirthCitiesAsync(_)" required>
+						<select class="form-select form-select-sm" @bind="selectedBirthProvince" @bind:after="OnBirthProvinceChangeAsync" required>
 							<option value="" hidden>@provincePlaceHolder</option>
 							@if (!birthProvinces.Any())
 							{
@@ -563,9 +564,25 @@
 	private List<CityViewModel> birthCities = new();
 	<!--user full address-->
 	private List<RegionViewModel> regions = new List<RegionViewModel>();
-	private List<ProvinceViewModel> provincesFromRegion = new();	//	use this for the drop down selection
-	private List<CityViewModel> citiesFromProvince = new();
-	private List<BarangayViewModel> barangaysFromCity = new();
+	private List<ProvinceViewModel> provinces = new();	//	use this for the drop down selection
+	private List<CityViewModel> cities = new();
+	private List<BarangayViewModel> barangays = new();
+
+	private List<string> religionOptions = new List<string>
+	{
+		"Roman Catholic",
+		"Islam",
+		"Iglesia ni Cristo",
+		"Evangelical",
+		"Seventh-day Adventist",
+		"Born Again",
+		"Buddhism",
+		"Hinduism",
+		"Judaism",
+		"Orthodox",
+		"Others"
+	};
+
 
 	// method for getting user address
 	protected override async Task OnInitializedAsync()
@@ -574,9 +591,6 @@
 		{
 			await LoadRegionAsync();
 			await LoadBirthRegionsAsync();
-			selectedProvince = string.Empty;
-			selectedCity = string.Empty;
-			selectedBarangay = string.Empty;
 
 			dataSeeding();
 		}
@@ -602,34 +616,10 @@
 		taxIdentificationNumber = "012345678910";
 		// selectedReligion = "Roman Catholic";
 
-
-		// // user profile picture and government id
-		// private byte[] profilePicture;
-		// private byte[] governmentId;
-
-		// // Account
-		// private AccountTypeNames accountTypeNames = new();
-		// // private AccountProductTypeNames accountProductTypeNames = new();
-		// selectedAccountTypeName = AccountTypeNames.PERSONAL_ACCOUNT;
-		// selectedAccountProductTypeName = AccountProductTypeNames.SAVINGS;
-
-
-
-		// // user Birth Info
 		age = 69;
-		// public DateTime birthDate;
-		// selectedBirthCity = string.Empty;
-		// public string selectedBirthProvince = string.Empty;
-		// public string selectedBirthRegion = string.Empty;
-		// public int birthCityId;
-		// public int birthProvinceId;
-		// public int birthRegionId;
 
-
-		// //address info
 		houseNo = "10";
 		street = "25";
-
 		postalCode = 4028;
 
 		// //Parents Name And Beneficiary
@@ -654,16 +644,15 @@
 	{
 		try
 		{
-			var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/regions/");
-			if (string.IsNullOrWhiteSpace(json))
-			{
-				error = "No regions data found.";
-				return;
-			}
-			regions = JsonSerializer.Deserialize<List<RegionViewModel>>(json) ?? new();
-			selectedProvince = string.Empty;
-			selectedCity = string.Empty;
-			selectedBarangay = string.Empty;
+			regions = await apiLoaderService.GetRegionsAsync();
+		}
+		catch (ApiException ex)
+		{
+			error = ex.Message;
+		}
+		catch (InvalidOperationException ex)
+		{
+			error = ex.Message;
 		}
 		catch (FieldMissingException ex)
 		{
@@ -672,40 +661,28 @@
 	}
 
 	//	Pass the ChangeEventArgs instance ONLY FOR drop down selections that need updating.
-	private async Task LoadProvinceAsync(ChangeEventArgs? e = null)
+	private async Task OnRegionChangeAsync()
 	{
 		try
 		{
 			error = string.Empty; // reset previous error
-										//	Get the value of the selection
-			selectedRegion = e?.Value?.ToString() ?? string.Empty;
 
-			// this will reset if the user select new region
+			provinces = await apiLoaderService.GetProvincesFromRegionAsync(selectedRegion);
+			if (!provinces.Any())
+			{
+				cities = await apiLoaderService.GetCitiesMunicipalitesFromRegionAsync(selectedRegion);
+				selectedProvince = FieldPlaceHolders.PROVINCE_CODE_NOT_FOUND;
+			}
+			else
+				cities = new();
+			barangays = new();
 			selectedProvince = string.Empty;
 			selectedCity = string.Empty;
 			selectedBarangay = string.Empty;
-
-			citiesFromProvince = new();
-			barangaysFromCity = new();
-
-			var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/provinces/");
-			provincesFromRegion = JsonSerializer.Deserialize<List<ProvinceViewModel>>(json)?
-			.Where(p => p.regionCode.ToString() == selectedRegion)
-			.ToList()
-			?? new();
-			selectedProvince = string.Empty;
-			if (!provincesFromRegion.Any())
-			{
-				selectedProvince = FieldPlaceHolders.PROVINCE_CODE_NOT_FOUND;
-				json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/cities-municipalities/");
-				citiesFromProvince = JsonSerializer.Deserialize<List<CityViewModel>>(json)?
-					.Where(c => c.regionCode.ToString() == selectedRegion)
-					.ToList()
-					?? new();
-				selectedCity = string.Empty;
-			}
-
-			//	Rerender component
+		}
+		catch (ApiException ex)
+		{
+			error = ex.Message;
 		}
 		catch (FieldMissingException ex)
 		{
@@ -713,33 +690,23 @@
 		}
 	}
 
-	private async Task LoadCitiesAsync(ChangeEventArgs? e = null)
+	private async Task OnProvinceChangeAsync()
 	{
 		try
 		{
 			error = string.Empty; // reset previous error
-										//	Get the value of the selection
-			selectedProvince = e?.Value?.ToString() ?? string.Empty;
 
 			if (selectedProvince.Equals(FieldPlaceHolders.PROVINCE_CODE_NOT_FOUND))
 				return;
 
+			cities = await apiLoaderService.GetCitiesMunicipalitiesFromProvinceAsync(selectedProvince);
+			barangays = new();
 			selectedCity = string.Empty;
 			selectedBarangay = string.Empty;
-
-			citiesFromProvince = new();
-			barangaysFromCity = new();
-
-			//	Get the municipalities from the api.
-			var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/cities-municipalities/");
-			citiesFromProvince = JsonSerializer.Deserialize<List<CityViewModel>>(json)?
-			.Where(c => c.provinceCode.ToString() == selectedProvince)
-			.ToList()
-			?? new();
-
-			//	Default the selection to the first option each time provinces are updated.
-			selectedCity = string.Empty; 
-			//	Rerender component
+		}
+		catch (ApiException ex)
+		{
+			error = ex.Message;
 		}
 		catch (FieldMissingException ex)
 		{
@@ -747,25 +714,18 @@
 		}
 	}
 
-	private async Task LoadBarangaysAsync(ChangeEventArgs? e = null)
+	private async Task OnCityChangeAsync()
 	{
 		try
 		{
 			error = string.Empty; // reset previous error
-			selectedCity = e?.Value?.ToString() ?? string.Empty;
 
+			barangays = await apiLoaderService.GetBarangaysFromCityAsync(selectedCity);
 			selectedBarangay = string.Empty;
-			barangaysFromCity = new();
-
-			var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/barangays/");
-			barangaysFromCity = JsonSerializer.Deserialize<List<BarangayViewModel>>(json)?
-			.Where(
-				b => b.municipalityCode.ToString() == selectedCity
-				|| b.cityCode.ToString() == selectedCity)
-			.ToList()
-			?? new();
-			selectedBarangay = string.Empty;
-			//	Rerender component
+		}
+		catch (ApiException ex)
+		{
+			error = ex.Message;
 		}
 		catch (FieldMissingException ex)
 		{
@@ -777,16 +737,18 @@
 	{
 		try
 		{
-			var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/regions/");
-			if (string.IsNullOrWhiteSpace(json))
-			{
-				error = "No regions data found.";
-				return;
-			}
-			birthRegions = JsonSerializer.Deserialize<List<RegionViewModel>>(json) ?? new();
+			birthRegions = await apiLoaderService.GetRegionsAsync();
 			selectedProvince = string.Empty;
 			selectedCity = string.Empty;
 			selectedBarangay = string.Empty;
+		}
+		catch (ApiException ex)
+		{
+			error = ex.Message;
+		}
+		catch (InvalidOperationException ex)
+		{
+			error = ex.Message;
 		}
 		catch (FieldMissingException ex)
 		{
@@ -795,35 +757,26 @@
 	}
 
 	// method to get user birth place
-	private async Task LoadBirthProvincesAsync(ChangeEventArgs? e = null)
+	private async Task OnBirthRegionChangeAsync()
 	{
 		try
 		{
 			error = string.Empty; // reset previous error
-			selectedBirthRegion = e?.Value?.ToString() ?? "";
 
-			selectedBirthProvince = string.Empty;
-
-			birthCities = new();
-			selectedBirthCity = string.Empty;
-
-			var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/provinces/");
-			birthProvinces = JsonSerializer.Deserialize<List<ProvinceViewModel>>(json)?
-			.Where(p => p.regionCode.ToString() == selectedBirthRegion)
-			.ToList()
-			?? new();
-			selectedBirthProvince = string.Empty;
-
+			birthProvinces = await apiLoaderService.GetProvincesFromRegionAsync(selectedBirthRegion);
 			if (!birthProvinces.Any())
 			{
+				birthCities = await apiLoaderService.GetCitiesMunicipalitesFromRegionAsync(selectedBirthRegion);
 				selectedBirthProvince = FieldPlaceHolders.PROVINCE_CODE_NOT_FOUND;
-				json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/cities-municipalities/");
-				birthCities = JsonSerializer.Deserialize<List<CityViewModel>>(json)?
-					.Where(c => c.regionCode.ToString() == selectedRegion)
-					.ToList()
-					?? new();
-				selectedBirthCity = string.Empty;
 			}
+			else
+				birthCities = new();
+			selectedBirthProvince = string.Empty;
+			selectedBirthCity = string.Empty;
+		}
+		catch (ApiException ex)
+		{
+			error = ex.Message;
 		}
 		catch (FieldMissingException ex)
 		{
@@ -831,28 +784,17 @@
 		}
 	}
 
-	private async Task LoadBirthCitiesAsync(ChangeEventArgs? e = null)
+	private async Task OnBirthProvinceChangeAsync()
 	{
 		try
 		{
 			error = string.Empty; // reset previous error
-			selectedBirthProvince = e?.Value?.ToString() ?? "";
+
 			if (selectedBirthProvince.Equals(FieldPlaceHolders.PROVINCE_CODE_NOT_FOUND))
 				return;
 
-			birthCities = new();
+			birthCities = await apiLoaderService.GetCitiesMunicipalitiesFromProvinceAsync(selectedBirthProvince);
 			selectedBirthCity = string.Empty;
-
-			//	Get the municipalities from the api.
-			var json = await HttpClient.GetStringAsync("https://psgc.gitlab.io/api/municipalities/");
-			birthCities = JsonSerializer.Deserialize<List<CityViewModel>>(json)?
-			.Where(c => c.provinceCode.ToString() == selectedBirthProvince)
-			.ToList()
-			?? new();
-
-			//	Default the selection to the first option each time provinces are updated.
-			selectedBirthCity = string.Empty;
-			//	Rerender component
 		}
 		catch (FieldMissingException ex)
 		{
@@ -921,21 +863,6 @@
 			error = "Error uploading profile Picture: " + ex.Message;
 		}
 	}
-
-	private List<string> religionOptions = new List<string>
-	{
-		"Roman Catholic",
-		"Islam",
-		"Iglesia ni Cristo",
-		"Evangelical",
-		"Seventh-day Adventist",
-		"Born Again",
-		"Buddhism",
-		"Hinduism",
-		"Judaism",
-		"Orthodox",
-		"Others"
-	};
 
 	private async Task CheckBeneficiaryAccount()
 	{
@@ -1137,9 +1064,9 @@
 			Console.WriteLine(accountTypeId + " " + accountProductTypeId);
 
 			regionId = await RegistrationService.RegisterRegion(selectedRegion, regions);
-			provinceId = await RegistrationService.RegisterProvince(selectedProvince, regionId, provincesFromRegion);
-			cityId = await RegistrationService.RegisterCity(selectedCity, provinceId, regionId, citiesFromProvince);
-			barangayId = await RegistrationService.RegisterBarangay(selectedBarangay, cityId, barangaysFromCity);
+			provinceId = await RegistrationService.RegisterProvince(selectedProvince, regionId, provinces);
+			cityId = await RegistrationService.RegisterCity(selectedCity, provinceId, regionId, cities);
+			barangayId = await RegistrationService.RegisterBarangay(selectedBarangay, cityId, barangays);
 
 			Console.WriteLine($"PLACE IDS {regionId} {provinceId} {cityId} {barangayId} ");
 

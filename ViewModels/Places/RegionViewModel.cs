@@ -2,7 +2,7 @@
 
 namespace ViewModels.Places
 {
-    public class RegionViewModel
+    public class RegionViewModel : ILocationUnitViewModel
     {
         public JsonElement code { get; set; }
         public JsonElement name { get; set; }

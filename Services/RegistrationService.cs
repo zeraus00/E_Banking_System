@@ -60,7 +60,7 @@ namespace Services
             }
         }
 
-        public async Task<BirthInfo> RegisterBirthInfo(DateTime birthDate, int birthCityId, int? birthProvinceId, int birthRegiodId) 
+        public async Task<BirthInfo> RegisterBirthInfo(DateTime birthDate, int birthCityId, int? birthProvinceId, int birthRegionId) 
         {
             if (birthDate == default) 
             {
@@ -71,7 +71,7 @@ namespace Services
             {
                 throw new FieldMissingException("City is required.");
             }
-            if (birthRegiodId <= 0) 
+            if (birthRegionId <= 0) 
             {
                 throw new FieldMissingException("Region is required.");
             }
@@ -79,7 +79,7 @@ namespace Services
             var birthInfoBuilder = new BirthInfoBuilder()
             .WithBirthDate(birthDate)
             .WithCityId(birthCityId)
-            .WithRegionId(birthRegiodId);
+            .WithRegionId(birthRegionId);
 
             if (birthProvinceId is int id)
                 birthInfoBuilder.WithProvinceId(id);
