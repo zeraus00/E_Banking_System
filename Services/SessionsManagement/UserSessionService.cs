@@ -4,12 +4,13 @@ using Data.Models.Authentication;
 using Data.Models.Finance;
 using Data.Models.User;
 using Exceptions;
+using Services.AuthenticationManagement;
 using Services.DataManagement;
 using System.Security.Claims;
 using ViewModels.RoleControlledSessions;
 using ViewModels.Sessions;
 
-namespace Services
+namespace Services.SessionsManagement
 {
     /// <summary>
     /// Class for handling user session.
@@ -24,7 +25,7 @@ namespace Services
         private readonly UserDataService _dataService;
 
         public UserSessionService(
-            ClaimsHelperService claimsHelper, 
+            ClaimsHelperService claimsHelper,
             DataMaskingService dataMaskingService,
             SessionStorageService sessionStorage,
             UserDataService dataService)
@@ -150,7 +151,7 @@ namespace Services
 
                 /*  CREATE A SESSION    */
                 await _sessionStorage.StoreSessionAsync(SessionSchemes.USER_SESSION, userSession);
-            } 
+            }
             catch (NullReferenceException)
             {
                 //  Handle Exceptions
@@ -222,7 +223,7 @@ namespace Services
         {
             try
             {
-                return (await _sessionStorage.FetchSessionAsync<UserSession>(SessionSchemes.USER_SESSION));
+                return await _sessionStorage.FetchSessionAsync<UserSession>(SessionSchemes.USER_SESSION);
             }
             catch (SessionNotFoundException)
             {
@@ -238,8 +239,8 @@ namespace Services
         {
             try
             {
-                return (await _sessionStorage.FetchSessionAsync<AdminSession>(SessionSchemes.ADMIN_SESSION));
-            } 
+                return await _sessionStorage.FetchSessionAsync<AdminSession>(SessionSchemes.ADMIN_SESSION);
+            }
             catch (SessionNotFoundException)
             {
                 throw;
@@ -247,10 +248,10 @@ namespace Services
         }
 
         public async Task UpdateUserSession(UserSession userSession)
-            => await _sessionStorage.StoreSessionAsync<UserSession>(SessionSchemes.USER_SESSION, userSession);
+            => await _sessionStorage.StoreSessionAsync(SessionSchemes.USER_SESSION, userSession);
 
         public async Task UpdateAdminSession(AdminSession adminSession)
-            => await _sessionStorage.StoreSessionAsync<AdminSession>(SessionSchemes.ADMIN_SESSION, adminSession);
+            => await _sessionStorage.StoreSessionAsync(SessionSchemes.ADMIN_SESSION, adminSession);
 
         /// <summary>
         /// End user session.

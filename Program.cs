@@ -13,6 +13,8 @@ using System.Security.Claims;
 using ViewModels;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.Extensions.Options;
+using Services.SessionsManagement;
+using Services.AuthenticationManagement;
 
 var builder = WebApplication.CreateBuilder(args);
 

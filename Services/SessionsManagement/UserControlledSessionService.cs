@@ -5,7 +5,7 @@ using ViewModels.RoleControlledSessions;
 using ViewModels.Sessions;
 using Services.DataManagement;
 
-namespace Services
+namespace Services.SessionsManagement
 {
     public class UserControlledSessionService
     {
@@ -14,8 +14,8 @@ namespace Services
         private readonly UserSessionService _userSessionService;
 
         public UserControlledSessionService(
-            DataMaskingService dataMaskingService, 
-            UserDataService userDataService, 
+            DataMaskingService dataMaskingService,
+            UserDataService userDataService,
             UserSessionService userSessionService
             )
         {
@@ -35,11 +35,11 @@ namespace Services
             ? (await _userSessionService.GetUserSession()).ActiveAccountSession
             : userSession.ActiveAccountSession;
 
-        public async Task SetActiveAccountSessionAsync(LinkedAccount? activeAccountSession=null, UserSession? userSession = null)
+        public async Task SetActiveAccountSessionAsync(LinkedAccount? activeAccountSession = null, UserSession? userSession = null)
         {
             if (userSession is null)
                 userSession = await _userSessionService.GetUserSession();
-            
+
             if (activeAccountSession is null)
             {
                 //int accountId = userSession.UserAccountIdList[0];

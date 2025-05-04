@@ -3,7 +3,7 @@ using Exceptions;
 using ViewModels.RoleControlledSessions;
 using ViewModels.Sessions;
 
-namespace Services
+namespace Services.SessionsManagement
 {
     public class AdminControlledSessionService
     {
@@ -18,9 +18,9 @@ namespace Services
         {
             if (adminSession is null)
                 adminSession = await _userSessionService.GetAdminSession();
-            return adminSession.PendingAccountSession 
+            return adminSession.PendingAccountSession
                 ?? throw new ControlledSessionNotFound(
-                    SessionSchemes.ADMIN_SESSION, 
+                    SessionSchemes.ADMIN_SESSION,
                     SessionSchemes.PENDING_ACCOUNT_SESSION
                 );
         }

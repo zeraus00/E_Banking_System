@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
 
 
-namespace Services
+namespace Services.AuthenticationManagement
 {
     /// <summary>
     /// Service for handling sign in and authentication.
@@ -46,7 +46,7 @@ namespace Services
 
             //  Sign in the user
             await _httpContext.SignInAsync(_claimsHelperService.cookieScheme, principal, authProperties);
-            
+
             return;
         }
     }

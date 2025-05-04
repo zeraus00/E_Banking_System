@@ -5,9 +5,9 @@ using Data.Repositories.Auth;
 using Data.Repositories.Finance;
 using Data.Repositories.User;
 using Exceptions;
-using Services.DataManagement;
+using Services.SessionsManagement;
 
-namespace Services
+namespace Services.DataManagement
 {
     public class AdminDataService : Service
     {
@@ -17,9 +17,9 @@ namespace Services
         public AdminDataService(
             IDbContextFactory<EBankingContext> contextFactory,
             DataMaskingService dataMaskingService,
-            UserDataService userDataService, 
+            UserDataService userDataService,
             UserSessionService userSessionService
-            ) : base(contextFactory) 
+            ) : base(contextFactory)
         {
             _dataMaskingService = dataMaskingService;
             _userDataService = userDataService;
@@ -70,7 +70,7 @@ namespace Services
                 int pageSize = 10;
                 List<Account> accountList = await queryBuilder
                     .GetQuery()
-                    .Skip((pageNumber -1) * pageSize)
+                    .Skip((pageNumber - 1) * pageSize)
                     .Take(pageSize)
                     .ToListAsync();
 
@@ -97,7 +97,7 @@ namespace Services
                         .Query
                         .IncludeUsersAuth()
                         .GetQuery();
-                    Account account = (await accountRepo.GetAccountByIdAsync(accountId, accountQuery)) ?? throw new AccountNotFoundException(accountId);
+                    Account account = await accountRepo.GetAccountByIdAsync(accountId, accountQuery) ?? throw new AccountNotFoundException(accountId);
                     int userAuthId = account.UsersAuth.FirstOrDefault()?.UserAuthId ?? throw new UserNotFoundException();
                     var userAuthQuery = userAuthRepo.ComposeQuery(includeUserInfo: true);
                     UserInfo userInfo = (await userAuthRepo.GetUserAuthByIdAsync(userAuthId, userAuthQuery))?.UserInfo ?? throw new UserNotFoundException();
@@ -123,7 +123,7 @@ namespace Services
                 Console.WriteLine("COULD NOT FETCH PRIMARY OWNER. " + ex.Message);
                 throw;
             }
-            
+
         }
         public async Task UpdatePendingAccountStatus(int accountId, int newStatus)
         {
@@ -137,7 +137,7 @@ namespace Services
 
                     await accountRepo.SaveChangesAsync();
                 }
-            } 
+            }
             catch (AccountNotFoundException ex)
             {
                 Console.WriteLine($"ACCOUNT_STATUS_UPDATE_FAILED: {ex.Message}");
@@ -187,7 +187,7 @@ namespace Services
                 //  Compose Query
                 var query = transactionRepo.ComposeQuery();
                 query = transactionRepo.FilterQuery(
-                    transactionStartDate: startDate, 
+                    transactionStartDate: startDate,
                     transactionEndDate: endDate
                     );
 

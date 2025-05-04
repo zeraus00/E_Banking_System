@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
 
-namespace Services
+namespace Services.AuthenticationManagement
 {
     public class NexusAuthenticationService
     {

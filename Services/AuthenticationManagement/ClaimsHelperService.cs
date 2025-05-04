@@ -2,7 +2,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
-namespace Services
+namespace Services.AuthenticationManagement
 {
     /// <summary>
     /// Service for handling claims.
@@ -30,13 +30,13 @@ namespace Services
         /// <returns>A claims principal object.</returns>
         public ClaimsPrincipal CreateClaimsPrincipal(UserAuth userAuth, string scheme)
         {
-            var claims = this.ConvertToClaimsList(userAuth);
+            var claims = ConvertToClaimsList(userAuth);
             var identity = new ClaimsIdentity(claims, scheme);
             var principal = new ClaimsPrincipal(identity);
 
             return principal;
         }
-        
+
         /// <summary>
         /// Converts the user authentication information into a list of claims.
         /// </summary>
@@ -63,9 +63,9 @@ namespace Services
         /// <exception cref="NullReferenceException">Thrown if claim is null.</exception>
         public int GetUserAuthId(ClaimsPrincipal user)
         {
-            string? claimValue = this.GetClaimValue(user, CustomClaimTypes.USERAUTH_ID);
-            return claimValue is not null 
-                ? Convert.ToInt32(claimValue) 
+            string? claimValue = GetClaimValue(user, CustomClaimTypes.USERAUTH_ID);
+            return claimValue is not null
+                ? Convert.ToInt32(claimValue)
                 : throw new NullReferenceException($"Claim: {CustomClaimTypes.USERAUTH_ID} is null.");
         }
         /// <summary>
@@ -76,7 +76,7 @@ namespace Services
         /// <exception cref="NullReferenceException">Thrown if claim is null.</exception>
         public int GetRoleId(ClaimsPrincipal user)
         {
-            string? claimValue = this.GetClaimValue(user, CustomClaimTypes.ROLE_ID);
+            string? claimValue = GetClaimValue(user, CustomClaimTypes.ROLE_ID);
             return claimValue is not null
                 ? Convert.ToInt32(claimValue)
                 : throw new NullReferenceException($"Claim: {CustomClaimTypes.ROLE_ID} is null.");
@@ -89,7 +89,7 @@ namespace Services
         /// <exception cref="NullReferenceException">Thrown if claim is null.</exception>
         public int GetUserInfoId(ClaimsPrincipal user)
         {
-            string? claimValue = this.GetClaimValue(user, CustomClaimTypes.USERINFO_ID);
+            string? claimValue = GetClaimValue(user, CustomClaimTypes.USERINFO_ID);
             return claimValue is not null
                 ? Convert.ToInt32(claimValue)
                 : throw new NullReferenceException($"Claim: {CustomClaimTypes.USERINFO_ID} is null.");

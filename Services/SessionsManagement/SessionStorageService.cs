@@ -2,7 +2,7 @@
 using Exceptions;
 using ViewModels.Sessions;
 
-namespace Services
+namespace Services.SessionsManagement
 {
     public class SessionStorageService
     {

@@ -4,7 +4,7 @@ using Data.Repositories.Auth;
 using Data.Enums;
 using Helpers;
 
-namespace Services
+namespace Services.AuthenticationManagement
 {
     public class CredentialValidationService : Service
     {
@@ -35,7 +35,7 @@ namespace Services
                 IQueryable<UserAuth> query = userAuthRepo.QueryIncludeAll();
                 UserAuth? userAuth = await userAuthRepo.GetUserAuthByUserNameOrEmailAsync(trimmedEmail, query);
 
-                if (userAuth == null || !this.IsPasswordValid(userAuth, password))
+                if (userAuth == null || !IsPasswordValid(userAuth, password))
                 {
                     return null;
                 }
@@ -63,7 +63,7 @@ namespace Services
         /// <returns></returns>
         public bool IsAdmin(int roleId)
         {
-            return roleId == (int) RoleTypes.Administrator;
+            return roleId == (int)RoleTypes.Administrator;
         }
 
         /// <summary>
@@ -73,7 +73,7 @@ namespace Services
         /// <returns></returns>
         public bool IsUser(int roleId)
         {
-            return roleId == (int) RoleTypes.User;
+            return roleId == (int)RoleTypes.User;
         }
 
         /// <summary>
@@ -83,7 +83,7 @@ namespace Services
         /// <returns></returns>
         public bool IsEmployee(int roleId)
         {
-            return roleId == (int) RoleTypes.Employee;
+            return roleId == (int)RoleTypes.Employee;
         }
     }
 }

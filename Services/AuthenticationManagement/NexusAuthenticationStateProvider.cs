@@ -1,17 +1,17 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Components.Authorization;
 
-namespace Services
+namespace Services.AuthenticationManagement
 {
     public class NexusAuthenticationStateProvider : AuthenticationStateProvider
     {
         private readonly ClaimsHelperService _claimsHelper;
         private AuthenticationState _authenticationState;
-        public NexusAuthenticationStateProvider (ClaimsHelperService claimsHelper, NexusAuthenticationService authenticationService )
+        public NexusAuthenticationStateProvider(ClaimsHelperService claimsHelper, NexusAuthenticationService authenticationService)
         {
             _claimsHelper = claimsHelper;
 
-            
+
 
             authenticationService.UserChanged += (newUser) =>
             {

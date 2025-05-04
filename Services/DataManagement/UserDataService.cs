@@ -4,10 +4,9 @@ using Data.Repositories.Finance;
 using Data.Repositories.User;
 using Exceptions;
 using Microsoft.Identity.Client;
-using Services.DataManagement;
 
 
-namespace Services
+namespace Services.DataManagement
 {
     /// <summary>
     /// Service for user data retrieval.
@@ -21,7 +20,7 @@ namespace Services
         /// for each method to avoid concurrency.
         /// </summary>
         /// <param name="contextFactory">The IDbContextFactory</param>
-        public UserDataService(IDbContextFactory<EBankingContext> contextFactory, DataMaskingService dataMaskingService) : base(contextFactory) 
+        public UserDataService(IDbContextFactory<EBankingContext> contextFactory, DataMaskingService dataMaskingService) : base(contextFactory)
         {
             _dataMaskingService = dataMaskingService;
         }
@@ -37,16 +36,16 @@ namespace Services
         /// <returns></returns>
         /// <exception cref="UserNotFoundException"></exception>
         public async Task<UserAuth> TryGetUserAuthAsync(
-            int userAuthId, 
+            int userAuthId,
             bool includeRole = false,
-            bool includeAccounts = false, 
+            bool includeAccounts = false,
             bool includeUserInfo = false)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
                 var userAuthRepo = new UserAuthRepository(dbContext);
                 var query = userAuthRepo.ComposeQuery(includeRole, includeAccounts, includeUserInfo);
-                return (await userAuthRepo.GetUserAuthByIdAsync(userAuthId, query)) ?? throw new UserNotFoundException();
+                return await userAuthRepo.GetUserAuthByIdAsync(userAuthId, query) ?? throw new UserNotFoundException();
             }
         }
         /// <summary>
@@ -90,8 +89,8 @@ namespace Services
                     queryBuilder.IncludeUserInfoAccounts();
 
                 var query = queryBuilder.GetQuery();
-                    
-                return (await userInfoRepo.GetUserInfoByIdAsync(userInfoId, query)) ?? throw new UserNotFoundException();
+
+                return await userInfoRepo.GetUserInfoByIdAsync(userInfoId, query) ?? throw new UserNotFoundException();
             }
         }
         public async Task<Address> TryGetAddressAsync(int addressId)
@@ -204,7 +203,7 @@ namespace Services
 
         public async Task<int?> GetFirstAccountAsync(int userAuthId)
         {
-            var accountIdList = await this.GetAccountIdListAsync(userAuthId);
+            var accountIdList = await GetAccountIdListAsync(userAuthId);
             return accountIdList?[0] ?? null;
         }
         /// <summary>
@@ -234,10 +233,10 @@ namespace Services
                 try
                 {
                     //  Throws AccountNotFoundException if account is not found.
-                    Account account = await this.GetAccountAsync(id);
+                    Account account = await GetAccountAsync(id);
                     account.AccountNumber = _dataMaskingService.MaskAccountNumber(account.AccountNumber);
                     accountList.Add(account);
-                } 
+                }
                 catch (AccountNotFoundException)
                 {
                     //  Do not add accounts that are not found to the list.
@@ -260,7 +259,7 @@ namespace Services
         /// A list of <see cref="Transaction"/> objects associated with the given account.
         /// </returns>
         public async Task<List<Transaction>> GetRecentAccountTransactionsAsync(
-            int accountId, 
+            int accountId,
             int transactionTypeId = 0,
             int pageSize = 50,
             int pageNumber = 1,
@@ -281,7 +280,7 @@ namespace Services
 
 
                 //  Return the list of transactions.
-                int skipCount = (pageNumber-1) * pageSize;
+                int skipCount = (pageNumber - 1) * pageSize;
                 int takeCount = pageSize;
                 var transactionList = await transactionRepository.GetRecentTransactionsAsListAsync(accountId, skipCount, takeCount, query);
 
@@ -371,12 +370,12 @@ namespace Services
                         .IncludeLoans(includeLoans)
                         .GetQuery();
 
-                    return (await accountRepo.GetAccountByIdAsync(accountId, query)) ?? throw new AccountNotFoundException(accountId);
+                    return await accountRepo.GetAccountByIdAsync(accountId, query) ?? throw new AccountNotFoundException(accountId);
                 }
 
                 //  Return the result of the query.
                 //  Throws AccountNotFoundException if no account is found.
-                return (await accountRepo.GetAccountByIdAsync(accountId)) ?? throw new AccountNotFoundException(accountId);
+                return await accountRepo.GetAccountByIdAsync(accountId) ?? throw new AccountNotFoundException(accountId);
             }
         }
 
@@ -411,7 +410,7 @@ namespace Services
                 IQueryable<Account>? query = null;
 
                 //  Check if there are no includes.
-                bool hasIncludes = (includeAccountType || includeUsersAuth || includeTransactions || includeLoans);
+                bool hasIncludes = includeAccountType || includeUsersAuth || includeTransactions || includeLoans;
                 if (hasIncludes)
                 {
                     query = accountRepo.Query
@@ -424,7 +423,7 @@ namespace Services
 
                 //  Return the result of the query.
                 //  Throws AccountNotFoundException if no account is found.
-                return (await accountRepo.GetAccountByAccountNumberAsync(accountNumber, query)) ?? throw new AccountNotFoundException(accountNumber);
+                return await accountRepo.GetAccountByAccountNumberAsync(accountNumber, query) ?? throw new AccountNotFoundException(accountNumber);
             }
         }
     }
