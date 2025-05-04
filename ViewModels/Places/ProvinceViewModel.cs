@@ -1,5 +1,7 @@
 ﻿using System.Text.Json;
 
+namespace ViewModels.Places
+{
     public class ProvinceViewModel
     {
         public JsonElement code { get; set; }
@@ -9,3 +11,4 @@
         public JsonElement psgc10DigitCode { get; set; }
     }
 
+}

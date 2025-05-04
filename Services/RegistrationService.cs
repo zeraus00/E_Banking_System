@@ -12,6 +12,7 @@ using Data.Models.Place;
 using Services.DataManagement;
 using System.IO;
 using ViewModels;
+using ViewModels.Places;
 
 
 namespace Services
