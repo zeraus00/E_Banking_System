@@ -484,6 +484,8 @@ namespace Services
                 };
 
                 userInfo!.UserInfoAccounts.Add(link);
+
+                await dbContext.SaveChangesAsync();
             }
         }
 
