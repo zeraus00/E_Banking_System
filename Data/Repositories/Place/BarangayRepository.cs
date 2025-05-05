@@ -21,13 +21,13 @@
     /// </summary>
     public class BarangayBuilder
     {
-        private string _districtCode = string.Empty;
+        private string _barangayCode = string.Empty;
         private string _barangayName = string.Empty;
         private int? _cityId;
 
-        public BarangayBuilder WithDistrictCode(string districtCode)
+        public BarangayBuilder WithBarangayCode(string barangayCode)
         {
-            _districtCode = districtCode.Trim();
+            _barangayCode = barangayCode.Trim();
             return this;
         }
         public BarangayBuilder WithBarangayName(string barangayName)
@@ -50,6 +50,7 @@
         {
             return new Barangay
             {
+                BarangayCode = _barangayCode,
                 BarangayName = _barangayName,
                 CityId = _cityId
             };

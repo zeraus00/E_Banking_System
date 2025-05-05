@@ -54,21 +54,29 @@ namespace Data.Repositories.User
     /// </summary>
     public class UserInfoBuilder
     {
-        private int _userNameId;
-        private int _userAuthId;
+        private int? _userAuthId;
+        private int? _userNameId;
         private byte[]? _profilePicture; //nullable for now
         private int _age;
         private string _sex = string.Empty;
         private int? _birthInfoId;
         private int? _addressId;
-        private int _fatherNameId;
-        private int _motherNameId;
+        private int? _fatherNameId;
+        private int? _motherNameId;
         private string _contactNumber = string.Empty;
         private string _occupation = string.Empty;
         private byte[]? _governmentId; //nullable for now
         private string _taxIdentificationNumber = string.Empty;
         private string _civilStatus = string.Empty;
         private int? _religionId;
+
+        private UserAuth? _userAuth;
+        private Name? _userName;
+        private BirthInfo? _birthInfo;
+        private Address? _address;
+        private Name? _fatherName;
+        private Name? _motherName;
+        private Religion? _religion;
 
         #region Builder Methods
         public UserInfoBuilder WithUserNameId(int userNameId)
@@ -147,9 +155,44 @@ namespace Data.Repositories.User
             _civilStatus = civilStatus.Trim();
             return this;
         }
-        public UserInfoBuilder WithReligion(int religionId)
+        public UserInfoBuilder WithReligionId(int religionId)
         {
             _religionId = religionId;
+            return this;
+        }
+        public UserInfoBuilder WithUserAuth(UserAuth userAuth)
+        {
+            _userAuth = userAuth;
+            return this;
+        }
+        public UserInfoBuilder WithUserName(Name userName)
+        {
+            _userName = userName;
+            return this;
+        }
+        public UserInfoBuilder WithBirthInfo(BirthInfo birthInfo)
+        {
+            _birthInfo = birthInfo;
+            return this;
+        }
+        public UserInfoBuilder WithAddress(Address address)
+        {
+            _address = address;
+            return this;
+        }
+        public UserInfoBuilder WithFatherName(Name fatherName)
+        {
+            _fatherName = fatherName;
+            return this;
+        }
+        public UserInfoBuilder WithMotherName(Name motherName)
+        {
+            _motherName = motherName;
+            return this;
+        }
+        public UserInfoBuilder WithReligion(Religion religion)
+        {
+            _religion = religion;
             return this;
         }
         #endregion Builder Methods
@@ -160,24 +203,54 @@ namespace Data.Repositories.User
         /// <returns></returns>
         public UserInfo Build()
         {
-            return new UserInfo
+            UserInfo userInfo = new UserInfo 
             {
-                UserAuthId = _userAuthId,
-                UserNameId = _userNameId,
                 ProfilePicture = _profilePicture,
                 Age = _age,
                 Sex = _sex,
-                BirthInfoId = _birthInfoId,
-                AddressId = _addressId,
-                FatherNameId = _fatherNameId,
-                MotherNameId = _motherNameId,
                 ContactNumber = _contactNumber,
                 Occupation = _occupation,
                 TaxIdentificationNumber = _taxIdentificationNumber,
                 GovernmentId = _governmentId,
-                CivilStatus = _civilStatus,
-                ReligionId = _religionId
+                CivilStatus = _civilStatus
             };
+
+            if (_userAuthId is int userAuthid)
+                userInfo.UserAuthId = userAuthid;
+            else if (_userAuth is not null)
+                userInfo.UserAuth = _userAuth;
+
+            if (_userNameId is int userNameId)
+                userInfo.UserNameId = userNameId;
+            else if (_userName is not null)
+                userInfo.UserName = _userName;
+
+            if (_birthInfoId is int birthInfoId)
+                userInfo.BirthInfoId = birthInfoId;
+            else if (_birthInfo is not null)
+                userInfo.BirthInfo = _birthInfo;
+
+            if (_addressId is int addressId)
+                userInfo.AddressId = addressId;
+            else if (_address is not null)
+                userInfo.Address = _address;
+
+            if (_fatherNameId is int fatherNameId)
+                userInfo.FatherNameId = fatherNameId;
+            else if (_fatherName is not null)
+                userInfo.FatherName = _fatherName;
+
+            if (_motherNameId is int motherNameId)
+                userInfo.MotherNameId = motherNameId;
+            else if (_motherName is not null)
+                userInfo.MotherName = _motherName;
+
+            if (_religionId is int religiondId)
+                userInfo.ReligionId = religiondId;
+            else if (_religion is not null)
+                userInfo.Religion = _religion;
+
+            return userInfo;
         }
     }
 }

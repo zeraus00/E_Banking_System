@@ -106,9 +106,12 @@ namespace Data.Repositories
                 _query = _query.Where(condition);
                 return (TSelf)this;
             }
-            public IQueryable<TEntity> GetQuery()
+            public IQueryable<TEntity> GetQuery() => _query;
+
+            public TSelf NewQuery(IQueryable<TEntity> newQuery) 
             {
-                return _query;
+                _query = newQuery;
+                return (TSelf)this;
             }
         }
     }
