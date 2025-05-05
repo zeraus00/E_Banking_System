@@ -36,10 +36,10 @@
 
 				<div class="row mt-2">
 					<label class="text-light">Account Type</label>
-					<select class="form-select" placeholder="Account Type" required>
+					<select class="form-select" @bind="accountTypeId" placeholder="Account Type" required>
 						@foreach(var type in accountTypeList)
 						{
-							<option value="@type">@type</option>
+							<option value="(@accountTypeList.IndexOf(type) + 1)">@type</option>
 						}
 					</select>
 				</div>
@@ -80,14 +80,13 @@
 
 @code
 {
+	private UserSession userSession { get; set; } = default!;
 	private List<string> accountTypeList { get; set; } = new();
 	private string accountNumber { get; set; } = string.Empty;
 	private string accountName { get; set; } = string.Empty;
+	private int accountTypeId { get; set; }
 
-	protected override async Task OnInitializedAsync()
-	{
-		accountTypeList = AccountTypeNames.AS_STRING_LIST;
-	}
+	private string error = "";
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
@@ -95,7 +94,9 @@
 		{
 			try
 			{
-				UserSession userSession = await userSessionService.GetUserSession();
+				userSession = await userSessionService.GetUserSession();
+
+				accountTypeList = AccountTypeNames.AS_STRING_LIST;
 			}
 			catch (SessionNotFoundException)
 			{
@@ -109,11 +110,17 @@
 	{
 		try
 		{
+			int accountId = await userDataService.GetAccountIdAsync(accountNumber, accountName, accountTypeId);
+			bool hasUserLinkedAccount = await userDataService.HasUserLinkedAccount(userSession.UserInfoId, accountId);
 
+			if (!hasUserLinkedAccount)
+				error = "There is no such account associated with the user.";
+
+			//	add user account to account list.
 		}
 		catch
 		{
-
+			
 		}
 	}
 }

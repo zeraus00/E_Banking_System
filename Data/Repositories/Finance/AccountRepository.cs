@@ -34,8 +34,6 @@ namespace Data.Repositories.Finance
         /// <returns>The Account entity if found or null if not.</returns>
         public async Task<Account?> GetAccountByAccountNumberAsync(string accountNumber, IQueryable<Account>? query = null) 
             => await Get<Account>(a => a.AccountNumber == accountNumber, query);
-        public async Task<decimal> GetBalanceByAccountIdAsync(int accountId)
-            => await Select<Account, decimal>(a => a.Balance, a => a.AccountId == accountId);
         /// <summary>
         /// Provides a strongly-typed query builder for the <see cref="Account"/> entity,
         /// enabling fluent filtering and inclusion of related navigation properties.
@@ -75,6 +73,10 @@ namespace Data.Repositories.Finance
             public AccountQuery IncludeLoans(bool include = true) => include ? Include(a => a.Loans) : this;
             public AccountQuery OrderByDateOpened() => OrderBy(a => a.DateOpened);
             public AccountQuery OrderByDateOpenedDescending() => OrderByDescending(a => a.DateOpened);
+            //  Returns 0 if no account is found with the query.
+            public async Task<int> SelectId() => await Select<int>(a => a.AccountId);
+            
+            public async Task<decimal> SelectBalance() => await Select<decimal>(a => a.Balance);
         }
 
         #endregion Read Methods
