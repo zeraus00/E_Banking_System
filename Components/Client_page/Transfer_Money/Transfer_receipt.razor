@@ -50,11 +50,6 @@
 
 @code
 {
-    [CascadingParameter]
-    private Task<AuthenticationState> authenticationState { get; set; } = default!;
-
-    private ClaimsPrincipal? user;
-    private Account? Account;
 
     private string accountNumber = string.Empty;
     private string clientName = string.Empty;
@@ -63,31 +58,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        //  Get Authentication State
-        AuthenticationState authState = await authenticationState;
-        user = authState.User;
-
-        //  Retrieve userAuth id from claims.
-        var userAuthId = Convert.ToInt32(_claimsHelper.GetClaimValue(user, CustomClaimTypes.USERAUTH_ID) ?? "0");
-
-        // //  Retrieve account id list from userAuthObject
-        // List<int>? accountIds = await _userDataService.GetAccountIdListAsync(userAuthId);
-
-        // //  Retreive account id from list.
-        // var accountId = accountIds?[0] ?? 5;
-
-        var accountId = await _userDataService.GetFirstAccountAsync(userAuthId) ?? 0;
-
-        //  Retriev account from db.
-        Account = await _userDataService.GetAccountAsync(accountId);
-
-        if (Account is not null)
-        {
-            accountNumber = Account.AccountNumber;
-            clientName = Account.AccountName;
-            currentBalance = Account.Balance;
-            date = DateTime.UtcNow;
-        }
     }
 
 
