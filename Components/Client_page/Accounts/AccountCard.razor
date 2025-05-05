@@ -9,8 +9,8 @@
     {
         <div class="d-flex justify-content-between">
             <div>
-                <h3 class="fw-bold mt-3">@Account.AccountName</h3>
-                <h5 class="fw-lighter m-0">@Account.AccountNumber</h5>
+                <h3 class="fw-bold mt-3">@LinkedAccount.AccountName</h3>
+                <h5 class="fw-lighter m-0">@LinkedAccount.AccountNumber</h5>
             </div>
 
             <!-- Edit Button -->
@@ -38,19 +38,19 @@
         <!-- Available Balance -->
         <div class="d-flex justify-content-between mt-3">
             <p class="w-100">Available Balance:</p>
-            <p class="text-success w-100">@Account.Balance</p>
+            <p class="text-success w-100">_accountBalance</p>
         </div>
 
         <!-- Current Balance -->
         <div class="d-flex justify-content-between">
             <p class="w-100">Current Balance:</p>
-            <p class="text-success w-100">@Account.Balance</p>
+            <p class="text-success w-100">_accountBalance</p>
         </div>
 
         <!-- Contact Number -->
         <div class="custom-card sm mb-0 pb-0">
             <p class="m-1">
-                <strong>Contact No.:</strong> @ContactNumber
+                <strong>Contact No.:</strong> @LinkedAccount.AccountContactNo
             </p>
         </div>
     }
@@ -76,7 +76,7 @@
 
 @code {
     [Parameter]
-    public Account Account { get; set; } = default!;
+    public LinkedAccount LinkedAccount { get; set; } = default!;
 
     [Parameter]
     public string? ContactNumber { get; set; }
@@ -91,7 +91,7 @@
     private void EnterEditMode()
     {
         isEditing = true;
-        editedAccountName = Account.AccountName;
+        editedAccountName = LinkedAccount.AccountName;
     }
 
     private void EnterUpdateMode()
@@ -102,7 +102,7 @@
 
     private void SaveChanges()
     {
-        Account.AccountName = editedAccountName;
+        LinkedAccount.AccountName = editedAccountName;
         isEditing = false;
     }
 

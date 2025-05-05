@@ -15,7 +15,7 @@
             {
                 foreach (var account in Accounts)
                 {
-                    <AccountCard Account="account" ContactNumber="@(account?.AccountContactNo ?? "09123456789")" IsEditable="IsEditable" />
+                    <AccountCard LinkedAccount="account" ContactNumber="@(account?.AccountContactNo ?? "09123456789")" IsEditable="IsEditable" />
                 }
             }
         </div>
@@ -74,7 +74,7 @@
     private int activeIndex = 0;
 
     [Parameter]
-    public List<Account> Accounts { get; set; } = new List<Account>();
+    public List<LinkedAccount> Accounts { get; set; } = new();
 
     [Parameter]
     public UserInfo? UserInfo { get; set; }
