@@ -15,7 +15,6 @@
     /// </summary>
     public class LoanTransactionBuilder
     {
-        private int _accountId;
         private int _loanId;
         private decimal _amountPaid;
         private decimal _remainingLoanBalance;
@@ -87,7 +86,6 @@
         {
             return new LoanTransaction
             {
-                AccountId = _accountId,
                 LoanId = _loanId,
                 AmountPaid = _amountPaid,
                 RemainingLoanBalance = _remainingLoanBalance,
