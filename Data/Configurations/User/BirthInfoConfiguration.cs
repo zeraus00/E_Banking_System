@@ -19,6 +19,7 @@
             //  BirthDate (Required)
             BirthInfos
                 .Property(b => b.BirthDate)
+                .HasColumnType("DATE")
                 .IsRequired();
 
 

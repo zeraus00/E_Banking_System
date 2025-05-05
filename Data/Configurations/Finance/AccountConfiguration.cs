@@ -63,12 +63,14 @@
             //  DateOpened (Required; Default DateTime.UtcNow)
             Accounts
                 .Property(a => a.DateOpened)
+                .HasColumnType("DATE")
                 .IsRequired()
-                .HasDefaultValueSql("GETDATE()");
+                .HasDefaultValueSql("CAST(GETDATE() AS DATE)");
 
             //  DateClosed (Optional)
             Accounts
                 .Property(a => a.DateClosed)
+                .HasColumnType("DATE")
                 .IsRequired(false);
 
             /*

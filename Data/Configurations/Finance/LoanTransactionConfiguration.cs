@@ -41,17 +41,20 @@
             //  DueDate (Required; DateTime)
             LoanTransactions
                 .Property(lt => lt.DueDate)
+                .HasColumnType("DATE")
                 .IsRequired();
 
             //  TransactionDate (Required; DateTime)
             LoanTransactions
                 .Property(lt => lt.TransactionDate)
+                .HasColumnType("DATE")
                 .IsRequired()
-                .HasDefaultValueSql("GETDATE()");
+                .HasDefaultValueSql("CAST(GETDATE() AS DATE)");
 
             //  TransactionTime (Required; TimeSpan)
             LoanTransactions
                 .Property(lt => lt.TransactionTime)
+                .HasColumnType("TIME")
                 .IsRequired()
                 .HasDefaultValueSql("CAST(GETDATE() AS TIME)");
 

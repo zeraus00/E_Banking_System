@@ -75,8 +75,9 @@
             //  ApplicationDate (Required; Default: CURDATE())
             Loans
                 .Property(l => l.ApplicationDate)
+                .HasColumnType("DATE")
                 .IsRequired()
-                .HasDefaultValueSql("GETDATE()");
+                .HasDefaultValueSql("CAST(GETDATE() AS DATE)");
 
             //  LoanStatus (Required; Default: 'Pending')
             Loans
