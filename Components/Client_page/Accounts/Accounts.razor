@@ -47,7 +47,7 @@
 
                 <!-- Carousel Component -->
                 <div class="flex-grow-1 d-flex justify-content-center">
-                    <AccountCarousel Accounts="accounts" UserInfo="userInfo" IsEditable="IsEditable" />
+                    <AccountCarousel Accounts="userAccountList" UserInfo="userInfo" IsEditable="IsEditable" />
                 </div>
 
             </div>
@@ -62,7 +62,6 @@
     private Task<AuthenticationState> authenticationState { get; set; } = default!;
 
     private ClaimsPrincipal? user;
-    private List<Account> accounts = new();
     private List<LinkedAccount> userAccountList = new();
     private UserInfo? userInfo;
     private bool IsEditable { get; set; } = false; // Default to view mode
