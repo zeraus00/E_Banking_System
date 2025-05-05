@@ -251,6 +251,8 @@
 				barangay = address?.Barangay?.BarangayName ?? "";
 				street = address?.Street ?? "";
 				houseNumber = address?.House ?? "";
+
+				StateHasChanged();
 			}
 			catch (SessionNotFoundException)
 			{
