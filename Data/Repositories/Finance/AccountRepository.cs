@@ -264,9 +264,12 @@ namespace Data.Repositories.Finance
                 AccountTypeId = _accountTypeId,
                 AccountProductTypeId = _accountProductTypeId,
                 AccountNumber = _accountNumber,
+                ATMNumber = _atmNumber,
                 AccountName = _accountName,
                 AccountStatusTypeId = _accountStatusTypeId,
+                AccountContactNo = _accountContactNo,
                 Balance = _balance,
+                LinkedBeneficiaryId = _linkedBeneficiaryId,
                 DateOpened = _dateOpened,
                 DateClosed = _dateClosed
             };

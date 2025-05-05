@@ -42,8 +42,6 @@ namespace Services
                         
                         await dbContext.Names.AddRangeAsync(userName, fatherName, motherName);
 
-                        Console.WriteLine("Attempting to register birth info.");
-
                         birthInfo = await TryGetExistingBirthInfo(birthInfo) ?? birthInfo;
 
                         BirthInfo? existingBirthInfo = await TryGetExistingBirthInfo(birthInfo);
@@ -54,9 +52,7 @@ namespace Services
                             birthInfo = existingBirthInfo;
                             dbContext.Attach(birthInfo);
                         }
-                        Console.WriteLine("Birth info registered.");
 
-                        Console.WriteLine("Attempting to register address.");
                         Address? existingAddress = await TryGetExistingAddress(address);
                         if (existingAddress is null)
                             await dbContext.Addresses.AddAsync(address);
@@ -66,7 +62,6 @@ namespace Services
                             dbContext.Attach(address);
                         }
 
-                        Console.WriteLine("Address registered.");
 
                         userAuth.Accounts.Add(account);
 
