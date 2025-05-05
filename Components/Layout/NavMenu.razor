@@ -103,12 +103,7 @@
     //  href routes
     private string clientHomePage = PageRoutes.CLIENT_HOME;
     private string accountsPage = PageRoutes.ACCOUNTS;
-    private string withdrawPage = PageRoutes.WITHDRAW_AMOUNT;
-    private string depositPage = PageRoutes.DEPOSIT_AMOUNT;
     private string transactionsPage = PageRoutes.TRANSACTIONS;
-    private string transferPage = PageRoutes.TRANSFER_AMOUNT;
-    private string applyLoanPage = PageRoutes.APPLY_LOAN;
-    private string loanBalancePage = PageRoutes.LOAN_BALANCE;
 
     private string _fullName = "Loading...";
     private string _email = "Loading...";
@@ -132,11 +127,6 @@
                 userSession = await userSessionService.GetUserSession();
                 activeAccountSession = await userControlledSessionService
                     .GetActiveAccountSessionAsync(userSession);
-                if (activeAccountSession.AccountCanApplyLoan)
-                    applyLoanPage = PageRoutes.APPLY_LOAN;
-
-                if (activeAccountSession.AccountCanPayLoan)
-                    loanBalancePage = PageRoutes.LOAN_BALANCE;
 
 
                 //  Set display data

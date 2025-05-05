@@ -111,6 +111,11 @@
         color: #41C1D8;
     }
 
+    .nav-link.button.error-link {
+        background-color: #ffcccc !important;
+        color: #b30000 !important;
+    }
+
 .btn-link {
     color: #41C1D8;
     text-decoration: none;
