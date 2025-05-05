@@ -63,6 +63,7 @@
 
     private ClaimsPrincipal? user;
     private List<LinkedAccount> userAccountList = new();
+    private Dictionary<int, decimal> balanceDict = new();       // <------  FOR ACCOUNT BALANCE
     private UserInfo? userInfo;
     private bool IsEditable { get; set; } = false; // Default to view mode
 
@@ -92,6 +93,11 @@
                 //  Returns empty list of no accounts are found.
                 //  accounts = await userDataService.GetAccountListAsync(userSession.UserAccountIdList);
                 userAccountList = await userControlledSessionService.GetUserAccountListAsync(userSession);
+
+                foreach (var account in userAccountList)
+                {
+                    balanceDict[account.AccountId] = await userDataService.GetAccountBalanceAsync(account.AccountId);
+                }
 
                 StateHasChanged();
             }
