@@ -20,21 +20,38 @@ namespace Services
         /// </summary>
         /// <param name="contextFactory">The IDbContextFactory</param>
         public TransactionService(IDbContextFactory<EBankingContext> contextFactory) : base(contextFactory) { }
-        
 
         /// <summary>
-        /// Initiates a transaction by validating the account balance, generating a transaction number, 
-        /// and storing transaction details in session storage.
-        /// If the account's balance is insufficient, the transaction is denied.
+        /// This should be called ON the *_amount pages or when the user is initiating the transaction.
+        /// Receives the details of the transaction including the main account's id, the transaction type,
+        /// the amount, the counter account's id (if any), and the external vendor's id (if any).
+        /// Creates and returns a TransactionSession object containing the details of the transaction.
         /// </summary>
-        /// <param name="transactionSessionScheme">The key used to identify the session storage.</param>
-        /// <param name="mainAccountId">The ID of the main account initiating the transaction.</param>
-        /// <param name="transactionTypeId">The ID representing the type of transaction (e.g., withdrawal, transfer).</param>
-        /// <param name="amount">The amount involved in the transaction.</param>
-        /// <param name="counterAccountId">The ID of the counterparty account for transfer transactions (optional).</param>
-        /// <returns>A task that represents the asynchronous operation.</returns>
-        /// <exception cref="AccountNotFoundException">Thrown if the main account cannot be found in the database.</exception>
-        /// <exception cref="InsufficientBalanceException">Thrown if the main account does not have sufficient balance for the transaction.</exception>
+        /// <param name="mainAccountId">
+        /// The <see cref="Account.AccountId"/> of the <see cref="Account"> initiating the transaction. 
+        /// This should ALWAYS have a value.
+        /// </param>
+        /// <param name="transactionTypeId">
+        /// The id of the transaction type. See <see cref="TransactionTypes"/> enum for this and use it for
+        /// calling this method.
+        /// </param>
+        /// <param name="amount">
+        /// The amount of money (in Philippine Peso) involved in the transaction.
+        /// </param>
+        /// <param name="counterAccountId">
+        /// The <see cref="Account.AccountId"/> of the counter <see cref="Account"/> 
+        /// recipient of the transaction. Should only have a value IF the transaction type is
+        /// <see cref="TransactionTypeConstants.OUTGOING_TRANSFER_TYPE"/>.
+        /// </param>
+        /// <param name="externalVendorId">
+        /// The <see cref="ExternalVendor.VendorId"/> of the vendor involved in the transaction. Should
+        /// only have a value IF the transaction type is <see cref="TransactionTypeConstants.DEPOSIT_TYPE"/>
+        /// OR <see cref="TransactionTypeConstants.WITHDRAWAL_TYPE"/>
+        /// </param>
+        /// <returns>
+        /// A <see cref="TransactionSession"/> object containing the details of the transaction which will then be
+        /// stored in the UserSession.
+        /// </returns>
         public async Task<TransactionSession> CreateTransactionAsync(
             int mainAccountId, 
             int transactionTypeId, 
@@ -94,13 +111,17 @@ namespace Services
             }
         }
         /// <summary>
+        /// Called in the *_confirmation pages, when the user is confirming the transaction.
         /// Processes a transaction by validating the session data, checking balances, updating account balances, 
         /// creating transaction records, and saving the results to the database.
         /// If the user's balance is insufficient, the transaction is denied.
         /// </summary>
-        /// <param name="transactionSessionScheme">The key used to retrieve and update the transaction session from storage.</param>
-        /// <returns>A task that represents the asynchronous operation.</returns>
-        /// <exception cref="SessionNotFoundException">Thrown if the transaction session cannot be found in session storage.</exception>
+        /// <param name="transactionSession">
+        /// The <see cref="TransactionSession"/> object containing the transaction's details.
+        /// </param>
+        /// <returns>
+        /// A <see cref="TransactionSession"> object containing the updated transaction's details.
+        /// </returns>
         /// <exception cref="AccountNotFoundException">Thrown if the main or counter account cannot be found in the database.</exception>
         /// <exception cref="InsufficientBalanceException">Thrown if the main account does not have enough balance to complete the transaction.</exception>
         public async Task<TransactionSession> ProcessTransactionAsync(TransactionSession transactionSession)
@@ -235,12 +256,24 @@ namespace Services
             }
         }
 
+        /// <summary>
+        /// Stores a failed transaction (due to cancellation or denial) in the database.
+        /// </summary>
+        /// <param name="transactionSession">
+        /// The <see cref="TransactionSession"/> object containing the transaction's details
+        /// </param>
+        /// <param name="transactionStatus">
+        /// The status of the transaction. Should be either <see cref="TransactionStatus.CANCELLED"/> 
+        /// OR <see cref="TransactionStatus.DENIED"/>
+        /// </param>
+        /// <returns></returns>
         public async Task StoreFailedTransactionAsync(TransactionSession transactionSession, string transactionStatus)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
                 var transactionRepository = new TransactionRepository(dbContext);
 
+                //  Build the failed transaction entity.
                 TransactionBuilder failedTransactionBuilder = new TransactionBuilder()
                     .WithTransactionTypeId(transactionSession.TransactionTypeId)
                     .WithTransactionNumber(transactionSession.TransactionNumber)
@@ -252,14 +285,17 @@ namespace Services
                     .WithTransactionDate(transactionSession.TransactionDate)
                     .WithTransactionTime(transactionSession.TransactionTime);
 
+                //  Add the counter account's id as necessary.
                 if (transactionSession.CounterAccountId is int counterAccountId)
                     failedTransactionBuilder.WithCounterAccountId(counterAccountId);
 
+                //  Add the external vendor's id as necessary.
                 if (transactionSession.ExternalVendorId is int externalVendorId)
                     failedTransactionBuilder.WithExternalVendorId(externalVendorId);
 
                 Transaction failedTransaction = failedTransactionBuilder.Build();
 
+                //  Persist the transaction entity to the database.
                 await transactionRepository.AddAsync(failedTransaction);
                 await transactionRepository.SaveChangesAsync();
             }
