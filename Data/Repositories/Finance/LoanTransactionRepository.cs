@@ -26,11 +26,6 @@
         private string _notes = string.Empty;
 
         #region Builder Methods
-        public LoanTransactionBuilder WithAccountId(int accountId)
-        {
-            _accountId = accountId;
-            return this;
-        }
         public LoanTransactionBuilder WithLoanId(int loanId)
         {
             _loanId = loanId;
