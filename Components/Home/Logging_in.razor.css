@@ -1,0 +1,13 @@
+﻿.loading-container {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background-color: #0E1336;
+}
+
+.spinner-border {
+    width: 4rem;
+    height: 4rem;
+}
