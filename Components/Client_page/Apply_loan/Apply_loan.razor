@@ -1,7 +1,14 @@
-﻿@page "/Apply_loan"
-@inject NavigationManager NavigationManager
-@using Layout
+﻿@using Layout
+
+@page "/Apply_loan"
 @layout MainLayout
+@attribute [Authorize(Roles = "User")]
+@rendermode InteractiveServer
+
+@inject NavigationManager NavigationManager
+@inject PageRedirectService redirectService
+@inject UserDataService userDataService
+@inject UserSessionService userSessionService
 
 <div class="page">
 	<main>
@@ -34,63 +41,63 @@
 					</div>
 					<div class="col-12 col-md-3">
 						<label class="text-light">Suffix</label>
-						<input class="form-control" placeholder="Suffix">
+						<input class="form-control" @bind="suffix" placeholder="Suffix">
 					</div>
 				</div>
 
 				<div class="row g-3 mt-2">
 					<div class="col-12 col-md-4">
 						<label class="text-light">Province</label>
-						<input class="form-control" placeholder="Province" required>
+						<input class="form-control" @bind="province" placeholder="Province" required>
 					</div>
 					<div class="col-12 col-md-4">
 						<label class="text-light">Municipality</label>
-						<input class="form-control" placeholder="Municipality" required>
+						<input class="form-control" @bind="municipality" placeholder="Municipality" required>
 					</div>
 					<div class="col-12 col-md-4">
 						<label class="text-light">Barangay</label>
-						<input class="form-control" placeholder="Barangay" required>
+						<input class="form-control" @bind="barangay" placeholder="Barangay" required>
 					</div>
 				</div>
 
 				<div class="row g-3 mt-2">
 					<div class="col-12 col-md-6">
 						<label class="text-light">Street No.</label>
-						<input class="form-control" placeholder="Street No." required>
+						<input class="form-control" @bind="street" placeholder="Street No." required>
 					</div>
 					<div class="col-12 col-md-6">
 						<label class="text-light">House No.</label>
-						<input class="form-control" placeholder="House No." required>
+						<input class="form-control" @bind="houseNumber" placeholder="House No." required>
 					</div>
 				</div>
 
 				<div class="row g-3 mt-2">
 					<div class="col-6 col-md-2">
 						<label class="text-light">Age</label>
-						<input class="form-control" type="number" placeholder="Age" required>
+						<input class="form-control" type="number" @bind="age" placeholder="Age" required>
 					</div>
 					<div class="col-12 col-md-2">
 						<label class="text-light">Birth Date</label>
-						<input class="form-control" type="date" placeholder="mm/dd/yyyy" required>
+						<input class="form-control" type="date" @bind="birthDate" placeholder="mm/dd/yyyy" required>
 					</div>
 					<div class="col-6 col-md-2">
 						<label class="text-light">Sex</label>
-						<select class="form-select" required>
+						<select class="form-select" @bind="sex" required>
 							<option>Male</option>
 							<option>Female</option>
 						</select>
 					</div>
 					<div class="col-12 col-md-3">
 						<label class="text-light">Contact No.</label>
-						<input class="form-control" @bind="ContactNo" placeholder="Contact No." required>
+						<input class="form-control" @bind="contactNo" placeholder="Contact No." required>
 					</div>
 					<div class="col-12 col-md-3">
 						<label class="text-light">Email</label>
-						<input class="form-control" @bind="Email" placeholder="Sample@gmail.com" required>
+						<input class="form-control" @bind="email" placeholder="Sample@gmail.com" required>
 					</div>
 					<div class="col-12 col-md-3">
 						<label class="text-light">Civil Status</label>
-						<select class="form-select" required>
+						<select class="form-select" @bind="civilStatus" required>
 							<option>Single</option>
 							<option>Married</option>
 							<option>Separated</option>
@@ -99,37 +106,39 @@
 					</div>
 					<div class="col-12 col-md-3">
 						<label class="text-light">Occupation</label>
-						<input class="form-control" @bind="Occupation" placeholder="Occupation" required>
+						<input class="form-control" @bind="occupation" placeholder="Occupation" required>
 					</div>
 					<div class="col-12 col-md-3">
 						<label class="text-light">Gross Annual Income</label>
-						<input class="form-control" @bind="MinAnnualGross" placeholder="Minimum 250,000" required>
+						<input class="form-control" @bind="minAnnualGross" placeholder="Minimum 250,000" required>
 					</div>
 					<div class="col-12 col-md-3">
 						<label class="text-light">Type of Loan</label>
-						<select class="form-select" required>
-							<option>Personal Loan</option>
-							<option>Etc.</option>
+						<select class="form-select" @bind="loanTypeId" required>
+							@foreach(var loanType in LoanTypeNames.AS_STRING_LIST)
+							{
+								<option value="@LoanTypeNames.AS_STRING_LIST.IndexOf(loanType)">@loanType</option>
+							}
 						</select>
 					</div>
 					<div class="col-12 col-md-3">
 						<label class="text-light">Loan Amount</label>
-						<input type="number" class="form-control" placeholder="Loan Amount" required>
+						<input type="number" class="form-control" @bind="loanAmount" placeholder="Loan Amount" required>
 					</div>
 					<div class="col-12 col-md-3">
 						<label class="text-light">Loan Purpose</label>
-						<input class="form-control" placeholder="Home Purchase, Education, Debt Consolidation, etc" required>
+						<input class="form-control" @bind="loanPurpose" placeholder="Home Purchase, Education, Debt Consolidation, etc" required>
 					</div>
 					<div class="col-12 col-md-3">
 						<label class="text-light">Loan Term</label>
-						<input type="number" class="form-control" placeholder="Months to Pay" required>
+						<input type="number" class="form-control" @bind="loanTermInMonths" placeholder="Months to Pay" required>
 					</div>
 					<div class="col-12 col-md-3">
 						<label class="text-light">Preferred Payment Frequency</label>
-						<select class="form-select" required>
-							<option>Monthly</option>
-							<option>Bi-Monthly</option>
-							<option>Quarterly</option>
+						<select class="form-select" @bind="paymentFrequency" required>
+							<option value="12">Monthly</option>
+							<option value="6">Bi-Monthly</option>
+							<option value="3">Quarterly</option>
 						</select>
 					</div>
 				</div>
@@ -171,14 +180,85 @@
 </div>
 
 @code {
+	public string error = "";
+	/*		Personal Information		*/
 	public string firstName = "";
 	public string middleName = "";
 	public string lastName = "";
-	public string error = "";
-	public string ContactNo = "";
-	public string Email = "";
-	public string Occupation = "";
-	public string MinAnnualGross = "";
+	public string suffix = "";
+	public int age;
+	public DateTime birthDate;
+	public string sex = "";
+	public string contactNo = "";
+	public string civilStatus = "";
+	public string occupation = "";
+	public string minAnnualGross = "";
+
+	/*		Address		*/
+	public string province = "";
+	public string municipality = "";
+	public string barangay = "";
+	public string street = "";
+	public string houseNumber = "";
+
+	/*		Authentication		*/
+	public string email = "";
+
+	/*		Loan Details			*/
+	public int loanTypeId;
+	public decimal loanAmount;
+	public string loanPurpose = "";
+	public int loanTermInMonths;
+	public int paymentFrequency;
+
+	UserInfo userInfo = default!;
+	Address address = default!;
+	UserSession userSession = default!;
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			try
+			{
+				//	Get user session details from session storage.
+				//	Throws SessionNotFoundException if session is not found.
+				userSession = await userSessionService.GetUserSession();
+
+				userInfo = await userDataService
+				.TryGetUserInfoAsync(
+					userSession.UserInfoId,
+					includeUserName: true,
+					includeBirthInfo: true
+				);
+
+				if (userInfo.AddressId is int addressId)
+					address = await userDataService.TryGetAddressAsync(addressId);
+
+				firstName = userInfo.UserName.FirstName;
+				middleName = userInfo.UserName.MiddleName ?? "";
+				lastName = userInfo.UserName.LastName;
+				suffix = userInfo.UserName.Suffix ?? "";
+				age = userInfo.Age;
+				birthDate = userInfo.BirthInfo?.BirthDate ?? DateTime.MinValue;
+				sex = userInfo.Sex;
+				contactNo = userInfo.ContactNumber;
+				civilStatus = userInfo.CivilStatus;
+				occupation = userInfo.Occupation;
+
+				province = address?.Province?.ProvinceName ?? "";
+				municipality = address?.City?.CityName ?? "";
+				barangay = address?.Barangay?.BarangayName ?? "";
+				street = address?.Street ?? "";
+				houseNumber = address?.House ?? "";
+			}
+			catch (SessionNotFoundException)
+			{
+				//	Redirect user to CLIENT_HOME if there is no existing session.
+				redirectService.redirectWithNavigationManager(PageRoutes.CLIENT_HOME);
+			}
+		}
+	}
 
 	private void LoginAsync()
 	{
