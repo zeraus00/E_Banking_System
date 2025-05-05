@@ -7,6 +7,7 @@
 @inject NavigationManager NavigationManager
 @inject ClaimsHelperService claimsHelperService
 @inject PageRedirectService redirectService
+@inject TransactionService transactionService
 @inject UserControlledSessionService userControlledSessionService
 @inject UserDataService userDataService
 @inject UserSessionService userSessionService
@@ -58,9 +59,9 @@
                             <label class="text-light">Select Own Account</label>
                             <select class="form-control" @bind="selectedOwnAccount">
                                 <option value="">-- Select Account --</option>
-                                @foreach (var account in ownAccounts)
+                                @foreach (var account in linkedAccounts)
                                 {
-                                    <option value="@account">@account</option>
+                                    <option value="@account.AccountId">@account.AccountName</option>
                                 }
                             </select>
                         </div>
@@ -132,9 +133,7 @@
 
     // New State Variables
     private string transferType = "";
-    private List<string> ownAccounts = new() {
-        "1234567890 - Savings", "0987654321 - Checking"
-    }; // TODO: Replace with dynamic data
+    private List<LinkedAccount> linkedAccounts = new();
     private string selectedOwnAccount = "";
     private string otherAccountName = "";
     private string otherAccountNumber = "";
@@ -157,6 +156,10 @@
                 Account = await userDataService.GetAccountAsync(accountId);
 
                 //  Set display data.
+                linkedAccounts = userSession
+                    .LinkedAccountList
+                    .Where(a => a.AccountId != activeAccountSession.AccountId)
+                    .ToList();
                 accountNumber = activeAccountSession.AccountNumber;
                 clientName = activeAccountSession.AccountName;
                 currentBalance = Account.Balance;
@@ -206,6 +209,21 @@
                 error = "Insufficient balance.";    
             }
             NavigationManager.NavigateTo("/Transfer_confirmation");
+            /*
+             *  IF transaction is for own account:
+             * 1. Get account id from the selection.
+             * 2. a. Initiate a transaction with the current active account as the main account,
+             *      OUT_GOING_TRANSFER as the transaction type, the transfer amount, and
+             *      the selected account as the counter account.
+             *  IF transaction is for other account:
+             * 2. b. Initiate a transaction with the current active account as the main account,
+             *      OUT_GOING TRANSFER as the transaction type, the transfer amount, and the selected
+             *      account as the counter account.
+             * 3. Ensure that you verify first if the recipient account is of status type ACTIVE.
+             *      Only ACTIVE accounts can be part of a transaction. 
+             * 4. Call CreateTransactionAsync to process the transaction and handle exceptions accordingly.
+             * 5. Update UserSession with the new transaction session. 
+             */
         }
         catch (Exception ex)
         {
