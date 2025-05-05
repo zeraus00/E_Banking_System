@@ -609,7 +609,7 @@
 		userLastName = "GODS";
 		userSuffix = "X";
 		userName = "bogartrelapse";
-		password = "bogartrelapse";
+		password = "bogartRelapse123@";
 		email = "bogartrelapse@gmail.com";
 		contactNumber = "09669072782";
 		Occupation = "MACHO DANCER";
@@ -905,7 +905,7 @@
 			}
 
 
-			if (string.IsNullOrWhiteSpace(userName))
+			if (string.IsNullOrWhiteSpace(this.userName))
 			{
 				error = "Username is required.";
 
@@ -1044,12 +1044,12 @@
 			}
 
 			//	File uploads
-			if (profilePicture is null)
+			if (profilePicture is null || !profilePicture.Any())
 			{
 				error = "Please upload a profile picture.";
 			}
 
-			if (governmentId is null)
+			if (governmentId is null || !governmentId.Any())
 			{
 				error = "Please upload a government id picture";
 			}
@@ -1063,53 +1063,38 @@
 			accountProductTypeId = accountProductTypeNames.AccountProductTypeNameList.IndexOf(selectedAccountProductTypeName) + 1;
 			Console.WriteLine(accountTypeId + " " + accountProductTypeId);
 
-			regionId = await RegistrationService.RegisterRegion(selectedRegion, regions);
-			provinceId = await RegistrationService.RegisterProvince(selectedProvince, regionId, provinces);
-			cityId = await RegistrationService.RegisterCity(selectedCity, provinceId, regionId, cities);
-			barangayId = await RegistrationService.RegisterBarangay(selectedBarangay, cityId, barangays);
+			Region addressRegion = await RegistrationService.GetOrRegisterRegion(selectedRegion, regions);
+			Province? addressProvince = await RegistrationService.GetOrRegisterProvince(selectedProvince, addressRegion.RegionId, provinces);
+			City addressCity = await RegistrationService.GetOrRegisterCity(selectedCity, addressProvince?.ProvinceId, addressRegion.RegionId, cities);
+			Barangay addressBarangay = await RegistrationService.GetOrRegisterBarangay(selectedBarangay, addressCity.CityId, barangays);
 
-			Console.WriteLine($"PLACE IDS {regionId} {provinceId} {cityId} {barangayId} ");
+			Region birthRegion = await RegistrationService.GetOrRegisterRegion(selectedBirthRegion, birthRegions);
+			Province? birthProvince = await RegistrationService.GetOrRegisterProvince(selectedBirthProvince, birthRegion.RegionId, birthProvinces);
+			City birthCity = await RegistrationService.GetOrRegisterCity(selectedBirthCity, birthProvince?.ProvinceId, birthRegion.RegionId, birthCities);
 
-			birthRegionId = await RegistrationService.RegisterRegion(selectedBirthRegion, birthRegions);
-			birthProvinceId = await RegistrationService.RegisterProvince(selectedBirthProvince, birthRegionId, birthProvinces);
-			birthCityId = await RegistrationService.RegisterCity(selectedBirthCity, birthProvinceId, birthRegionId, birthCities);
 
-			Console.WriteLine($"BIRTH PLACE IDS {birthRegionId} {birthProvinceId} {birthCityId}");
+			Name userName =  RegistrationService.CreateName(userFirstName, userMiddleName, userLastName, userSuffix);
+			Name fatherName = RegistrationService.CreateName(fatherFirstName, fatherMiddleName, fatherLastName, fatherSuffix);
+			Name motherName = RegistrationService.CreateName(motherFirstName, motherMiddleName, motherLastName, motherSuffix);
+			// Name BeneficiaryName = await RegistrationService.RegisterName(beneficiaryFirstName, benefi
 
-			Name UserName = await RegistrationService.RegisterName(userFirstName, userMiddleName, userLastName, userSuffix);
-			Name FatherName = await RegistrationService.RegisterName(fatherFirstName, fatherMiddleName, fatherLastName, fatherSuffix);
-			Name MotherName = await RegistrationService.RegisterName(motherFirstName, motherMiddleName, motherLastName, motherSuffix);
-			// Name BeneficiaryName = await RegistrationService.RegisterName(beneficiaryFirstName, beneficiaryMiddleName, beneficiaryLastName, beneficiarySuffix);
+			BirthInfo userBirthInfo = RegistrationService.CreateBirthInfo(birthDate, birthCity, birthProvince, birthRegion);
+			Address userAddress = RegistrationService.CreateAddress(houseNo, street, addressBarangay, addressCity, addressProvince, addressRegion, postalCode);
 
-			Console.WriteLine($"NAMES: {UserName.NameId} {FatherName.NameId} {MotherName.NameId}");
-
-			BirthInfo UserBirthInfo = await RegistrationService.RegisterBirthInfo(birthDate, birthCityId, birthProvinceId, birthRegionId);
-			Address UserAddress = await RegistrationService.RegisterAddress(houseNo, street, barangayId, cityId, provinceId, regionId, postalCode);
-
-			Console.WriteLine($"BIRTH INFO AND ADDRESS : {UserBirthInfo.BirthInfoId} {UserAddress.AddressId}");
 
 			string religionToSave = selectedRegion == "others" ? customReligion : selectedReligion;
-			Religion UserReligion = await RegistrationService.RegisterReligion(religionToSave);
-
-			Console.WriteLine($"RELIGION {UserReligion.ReligionId}");
+			Religion userReligion = await RegistrationService.GetOrRegisterReligion(religionToSave);
 
 
-			Account userAccount = await RegistrationService.RegisterAccount(accountTypeId, accountProductTypeId, contactNumber, beneficiaryAccountId);
-			UserAuth userAuth = await RegistrationService.RegisterUserAuth(userName, email, password);
-			await RegistrationService.SyncUserAuthAndAccount(userAuth.UserAuthId, userAccount.AccountId);
-
-			Console.WriteLine($"ACCOUNT AND AUTH: {userAccount.AccountId} {userAuth.UserAuthId}");
-
-			UserInfo userInfo = await RegistrationService.RegisterUserInfo(
-				userAuth.UserAuthId,
-				userAccount.AccountTypeId,
-				userAccount.AccountProductTypeId,
-				UserName.NameId,
-				MotherName.NameId,
-				FatherName.NameId,
-				UserBirthInfo.BirthInfoId,
-				UserAddress.AddressId,
-				UserReligion.ReligionId,
+			Account userAccount = RegistrationService
+			.CreateAccount(
+				accountTypeId, 
+				accountProductTypeId, 
+				contactNumber, 
+				beneficiaryAccountId
+			);
+			UserAuth userAuth = await RegistrationService.CreateUserAuth(this.userName, email, password);
+			UserInfo userInfo = RegistrationService.CreateUserInfo(
 				age,
 				selectedSex,
 				contactNumber,
@@ -1120,9 +1105,17 @@
 				governmentId!
 			);
 
-			await RegistrationService.SyncUserInfoAndAccount(userInfo.UserInfoId, userAccount.AccountId);
-
-			Console.WriteLine($"UserInfo: {userInfo.UserInfoId}");
+			await RegistrationService.InitiateRegistraiton(
+				userName,
+				fatherName,
+				motherName,
+				userBirthInfo,
+				userAddress,
+				userReligion,
+				userAccount,
+				userAuth,
+				userInfo
+			);
 
 			NavigationManager.NavigateTo("/PendingApproval");
 		}
