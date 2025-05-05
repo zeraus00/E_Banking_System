@@ -126,14 +126,6 @@ namespace Services.DataManagement
                 return await query.FirstOrDefaultAsync() ?? throw new NullReferenceException();
             }
         }
-        public async Task<Religion> TryGetReligionAsync(int religionId)
-        {
-            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
-            {
-                var religionRepo = new ReligionRepository(dbContext);
-                return await religionRepo.GetReligionById(religionId) ?? throw new ArgumentNullException();
-            }
-        }
         /// <summary>
         /// Gets the user's full name from the UserInfo object.
         /// If the UserInfo does not include the Name navigation property, queries the database using
@@ -199,52 +191,6 @@ namespace Services.DataManagement
             }
 
             return fullName.Trim();
-        }
-
-        public async Task<int?> GetFirstAccountAsync(int userAuthId)
-        {
-            var accountIdList = await GetAccountIdListAsync(userAuthId);
-            return accountIdList?[0] ?? null;
-        }
-        /// <summary>
-        /// Retrieves a list of accounts associated with the specified user authentication ID.
-        /// </summary>
-        /// <param name="userAuthId">The ID of the user authentication record to retrieve accounts for.</param>
-        /// <returns>
-        /// A list of <see cref="Account"/> objects if found; otherwise, <c>null</c> if the user authentication record does not exist.
-        /// </returns>
-        public async Task<List<Account>?> GetAccountListAsync(int userAuthId)
-        {
-            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
-            {
-                UserAuthRepository userAuthRepo = new UserAuthRepository(dbContext);
-
-                var query = userAuthRepo.ComposeQuery(includeAccounts: true);
-                var userAuth = await userAuthRepo.GetUserAuthByIdAsync(userAuthId, query);
-
-                return userAuth?.Accounts.ToList() ?? null;
-            }
-        }
-        public async Task<List<Account>> GetAccountListAsync(List<int> accountIdList)
-        {
-            List<Account> accountList = new();
-            foreach (var id in accountIdList)
-            {
-                try
-                {
-                    //  Throws AccountNotFoundException if account is not found.
-                    Account account = await GetAccountAsync(id);
-                    account.AccountNumber = _dataMaskingService.MaskAccountNumber(account.AccountNumber);
-                    accountList.Add(account);
-                }
-                catch (AccountNotFoundException)
-                {
-                    //  Do not add accounts that are not found to the list.
-                    continue;
-                }
-            }
-
-            return accountList;
         }
         /// <summary>
         /// Retrieves a list of transactions associated with the specified account ID.
@@ -424,6 +370,16 @@ namespace Services.DataManagement
                 //  Return the result of the query.
                 //  Throws AccountNotFoundException if no account is found.
                 return await accountRepo.GetAccountByAccountNumberAsync(accountNumber, query) ?? throw new AccountNotFoundException(accountNumber);
+            }
+        }
+
+        public async Task<decimal> GetAccountBalanceAsync(int accountId)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                var accountRepo = new AccountRepository(dbContext);
+
+                return await accountRepo.GetBalanceByAccountIdAsync(accountId);
             }
         }
     }

@@ -107,7 +107,7 @@
                 accountNumber = activeAccountSession.AccountNumber;
                 cardDestination = ExternalVendorNames.AS_STRING_LIST[transactionSession.ExternalVendorId!.Value - 1];
                 clientName = activeAccountSession.AccountName;
-                currentBalance = transactionSession.CurrentBalance;
+                currentBalance = await userDataService.GetAccountBalanceAsync(activeAccountSession.AccountId);
                 withdrawAmount = transactionSession.Amount;
                 transactionNumber = transactionSession.TransactionNumber;
                 date = transactionSession.TransactionDate;

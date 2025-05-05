@@ -42,11 +42,11 @@
                     <div class="input-group px-4 mb-4">
                         <span class="input-group-text fs-2">₱</span>
                         <input type="number"
-                               class="form-control form-control-custom form-control-lg fs-2"
-                               placeholder="0.00"
-                               @bind="withdrawAmount"
-                               @onfocus="ClearDefaultValue"
-                               @onblur="SetDefaultValue" />
+                        class="form-control form-control-custom form-control-lg fs-2"
+                        placeholder="0.00"
+                        @bind="withdrawAmount"
+                        @onfocus="ClearDefaultValue"
+                        @onblur="SetDefaultValue" />
                     </div>
                     <h6 class="mx-3 mb-4">
                         <strong>Current Balance: </strong>@FormatHelper.BalanceFormatter(currentBalance)
@@ -115,15 +115,12 @@
                 userSession = await userSessionService.GetUserSession();
                 activeAccountSession = await userControlledSessionService.GetActiveAccountSessionAsync(userSession);
 
-                //  Get Account from database.
-                //  Throws AccountNotFoundException if account is not found.
                 accountId = activeAccountSession.AccountId;
-                Account account = await userDataService.GetAccountAsync(accountId);
 
                 //  Set display data.
                 accountNumber = activeAccountSession.AccountNumber;
                 clientName = activeAccountSession.AccountName;
-                currentBalance = account.Balance;
+                currentBalance = await userDataService.GetAccountBalanceAsync(accountId);
 
                 //  Validate account transaction permissions.
                 accountCanWithdraw = IsAccountCanWithdraw();

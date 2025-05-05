@@ -77,6 +77,16 @@ namespace Data.Repositories
             return await finalQuery.FirstOrDefaultAsync(condition);
         }
 
+        protected async Task<TProjection?> Select<TEntity, TProjection>(
+            Expression<Func<TEntity, TProjection>> projection, 
+            Expression<Func<TEntity, bool>> condition,
+            IQueryable<TEntity>? query = null) where TEntity : class
+        {
+            IQueryable<TEntity> finalquery = query ?? _context.Set<TEntity>().AsQueryable();
+
+            return (TProjection?)await finalquery.Where(condition).Select(projection).FirstOrDefaultAsync();
+        }
+
         public abstract class CustomQuery<TEntity, TSelf> where TEntity : class where TSelf : CustomQuery<TEntity, TSelf>
         {
             protected IQueryable<TEntity> _query;

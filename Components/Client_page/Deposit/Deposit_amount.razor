@@ -43,10 +43,10 @@
                     <div class="input-group px-4 mb-4">
                         <span class="input-group-text fs-2">₱</span>
                         <input type="number"
-                               class="form-control form-control-custom form-control-lg fs-2"
-                               @bind="@depositAmount" placeholder="0.00"
-                               @onfocus="ClearDefaultValue"
-                               @onblur="SetDefaultValue" />
+                        class="form-control form-control-custom form-control-lg fs-2"
+                        @bind="@depositAmount" placeholder="0.00"
+                        @onfocus="ClearDefaultValue"
+                        @onblur="SetDefaultValue" />
                     </div>
                     <h6 class="mx-3 mb-4">
                         <strong>Current Balance: </strong>@FormatHelper.BalanceFormatter(currentBalance)
@@ -110,14 +110,11 @@
 
                 //  Get account id.
                 accountId = activeAccountSession.AccountId;
-                //  Get account from database.
-                //  Throws AccountNotFoundException if account is not found.
-                account = await userDataService.GetAccountAsync(accountId);
 
                 //  Set display data.
                 accountNumber = activeAccountSession.AccountNumber;
                 clientName = activeAccountSession.AccountName;
-                currentBalance = account.Balance;
+                currentBalance = await userDataService.GetAccountBalanceAsync(accountId);
 
                 //  Validate account transaction permissions.
                 accountCanDeposit = IsAccountCanDeposit();
@@ -135,11 +132,6 @@
             {
                 //  Redirect to LOGGING_IN_PAGE page
                 redirectService.redirectWithNavigationManager(PageRoutes.LOGGING_IN_PAGE);
-            }
-            catch (AccountNotFoundException)
-            {
-                currentBalance = 0.00m;
-                error = "Error resolving database. Please try again later.";
             }
         }
     }

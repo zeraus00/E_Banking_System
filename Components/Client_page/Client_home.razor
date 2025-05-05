@@ -258,9 +258,6 @@
                 //  Get account list.
                 LoadAccountList();
 
-                //  Get active account.
-                //  Throws AccountNotFoundException is account is not found.
-                activeAccount = await userDataService.GetAccountAsync(activeAccountSession.AccountId);
 
                 //  Set display data.
                 _accessRole = AccessRoleNames.AS_STRING_LIST[activeAccountSession.UserAccessRoleId - 1];
@@ -268,7 +265,7 @@
                 _accountNumber = activeAccountSession.AccountNumber;
                 _accountStatus = AccountStatusTypeNames.AS_STRING_LIST[activeAccountSession.AccountStatusId-1];
                 _clientPhone = userSession.CurrentUserContact;
-                _currentBalance = activeAccount.Balance;
+                _currentBalance = await userDataService.GetAccountBalanceAsync(activeAccountSession.AccountId);
                 //  Get 3 most recent transactions of the account.
                 recentTransactions = await userDataService
                     .GetRecentAccountTransactionsAsync(

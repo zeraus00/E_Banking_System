@@ -21,7 +21,8 @@ namespace Data.Repositories.Finance
 
         #region Read Methods
         public async Task<Account?> GetAccountByIdAsync(int accountId) => await GetById<Account>(accountId);
-        public async Task<Account?> GetAccountByIdAsync(int accountId, IQueryable<Account> query) => await Get<Account>(a => a.AccountId == accountId, query);
+        public async Task<Account?> GetAccountByIdAsync(int accountId, IQueryable<Account> query) 
+            => await Get<Account>(a => a.AccountId == accountId, query);
         /// <summary>
         /// Retrieves an Account entry asynchronously by its account number.
         /// Optionally accepts a pre-composed IQueryable with desired includes.
@@ -31,8 +32,10 @@ namespace Data.Repositories.Finance
         /// An optional IQueryable with includes already applied.
         /// </param>
         /// <returns>The Account entity if found or null if not.</returns>
-        public async Task<Account?> GetAccountByAccountNumberAsync(string accountNumber, IQueryable<Account>? query = null) => await Get<Account>(a => a.AccountNumber == accountNumber, query);
-
+        public async Task<Account?> GetAccountByAccountNumberAsync(string accountNumber, IQueryable<Account>? query = null) 
+            => await Get<Account>(a => a.AccountNumber == accountNumber, query);
+        public async Task<decimal> GetBalanceByAccountIdAsync(int accountId)
+            => await Select<Account, decimal>(a => a.Balance, a => a.AccountId == accountId);
         /// <summary>
         /// Provides a strongly-typed query builder for the <see cref="Account"/> entity,
         /// enabling fluent filtering and inclusion of related navigation properties.
