@@ -198,6 +198,8 @@
     private bool showNotifications = false;
     private string notificationClass => showNotifications ? "show-popup" : string.Empty;
 
+    private bool hasRestrictions;
+
     private string error = string.Empty;
 
     private void ToggleNotification()
@@ -293,7 +295,7 @@
 
     private void VerifyAccountPermissions()
     {
-        bool hasRestrictions = (
+        hasRestrictions = (
             !activeAccountSession.AccountCanTransact ||
             !activeAccountSession.AccountCanApplyLoan ||
             !activeAccountSession.AccountCanPayLoan

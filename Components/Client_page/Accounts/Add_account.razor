@@ -108,19 +108,12 @@
 
 	private async Task TryAddAccountAsync()
 	{
-		try
-		{
-			int accountId = await userDataService.GetAccountIdAsync(accountNumber, accountName, accountTypeId);
-			bool hasUserLinkedAccount = await userDataService.HasUserLinkedAccount(userSession.UserInfoId, accountId);
+		int accountId = await userDataService.GetAccountIdAsync(accountNumber, accountName, accountTypeId);
+		bool hasUserLinkedAccount = await userDataService.HasUserLinkedAccount(userSession.UserInfoId, accountId);
 
-			if (!hasUserLinkedAccount)
-				error = "There is no such account associated with the user.";
+		if (!hasUserLinkedAccount)
+			error = "There is no such account associated with the user.";
 
-			//	add user account to account list.
-		}
-		catch
-		{
-			
-		}
+		//	add user account to account list.
 	}
 }
