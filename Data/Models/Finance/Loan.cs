@@ -6,6 +6,7 @@
         public int LoanId { get; set; }                         //  Primary key
         public string LoanNumber { get; set; } = string.Empty;  //  Loan reference; Required; Varchar(20)
         public int AccountId { get; set; }                      //  Foreign key to Account
+        public int UserInfoId { get; set; }                     //  Foreign Key to UserInfo
         public int LoanTypeId { get; set; }                     //  Foreign key to LoanType
         public string LoanPurpose { get; set; } = string.Empty; //  Required; Varchar(30)
         public decimal LoanAmount { get; set; }                 //  Required; Decimal(18,2)
@@ -25,6 +26,7 @@
         /*  Navigation Properties   */
 
         public Account Account { get; set; } = null!;
+        public UserInfo UserInfo { get; set; } = null!;
         public LoanType LoanType { get; set; } = null!;     
         public ICollection<LoanTransaction> LoanTransactions { get; set; } = new List<LoanTransaction>();
     }

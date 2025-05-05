@@ -29,6 +29,7 @@
         public BirthInfo? BirthInfo { get; set; } 
         public Address? Address { get; set; }
         public Religion Religion { get; set; } = null!;
+        public ICollection<Loan> Loans { get; set; } = new List<Loan>();
         public ICollection<UserInfoAccount> UserInfoAccounts { get; set; } = new List<UserInfoAccount>();
     }
 }

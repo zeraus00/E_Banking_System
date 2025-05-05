@@ -83,7 +83,6 @@
              *  UsersInfo (many-to-many)
              *  Transactions (one-to-many)
              *  Loans (one-to-many)
-             *  LoanTransactions (one-to-many)
              */
 
             Accounts

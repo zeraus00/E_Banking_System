@@ -4,7 +4,6 @@
     {
         /*  Properties   */
         public int LoanTransactionId { get; private set; }      // primary key
-        public int AccountId { get; set; }                      // foreign key to Account
         public int LoanId { get; set; }                         // foreign key to loans table
         public decimal AmountPaid { get; set; }                 // total amount paid in this transaction
         public decimal RemainingLoanBalance { get; set; } 
@@ -17,7 +16,6 @@
 
 
         /*  Navigation Properties   */
-        public Account Account { get; set; } = null!;
         public Loan Loan { get; set; } = null!;
     }
 }
