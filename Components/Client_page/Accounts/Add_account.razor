@@ -18,7 +18,12 @@
 			</div>
 
 		</header>
-
+		@if (error.Length > 0)
+		{
+			<div class="alert alert-danger alert-dismissible fade show" role="alert">
+				<strong>@error</strong>
+			</div>
+		}
 		<!-- New Account Box -->
 		<div class="card accounts shadow-lg d-flex flex-column my-4 py-3 px-5 justify-content-between">
 
@@ -36,10 +41,11 @@
 
 				<div class="row mt-2">
 					<label class="text-light">Account Type</label>
-					<select class="form-select" @bind="accountTypeId" placeholder="Account Type" required>
-						@foreach(var type in accountTypeList)
+					<select class="form-select" @bind="accountType" required>
+						<option value="" hidden>--Select Account Type--</option>
+						@foreach(var type in AccountTypeNames.AS_STRING_LIST)
 						{
-							<option value="(@accountTypeList.IndexOf(type) + 1)">@type</option>
+							<option value="@type">@type</option>
 						}
 					</select>
 				</div>
@@ -47,7 +53,7 @@
 				<!-- Account Number -->
 				<div class="row mt-2">
 					<label class="text-light">Account Number</label>
-					<input class="form-control" @bind="@accountName" placeholder="Enter Account Number">
+					<input class="form-control" @bind="@accountNumber" placeholder="Enter Account Number">
 				</div>
 
 				<!-- Account Name -->
@@ -81,10 +87,13 @@
 @code
 {
 	private UserSession userSession { get; set; } = default!;
-	private List<string> accountTypeList { get; set; } = new();
 	private string accountNumber { get; set; } = string.Empty;
 	private string accountName { get; set; } = string.Empty;
+	private string accountType { get; set; } = string.Empty;
 	private int accountTypeId { get; set; }
+
+	Account? account { get; set; } = null;
+	private bool IsAccountFound = false;
 
 	private string error = "";
 
@@ -96,7 +105,7 @@
 			{
 				userSession = await userSessionService.GetUserSession();
 
-				accountTypeList = AccountTypeNames.AS_STRING_LIST;
+				StateHasChanged();
 			}
 			catch (SessionNotFoundException)
 			{
@@ -108,12 +117,58 @@
 
 	private async Task TryAddAccountAsync()
 	{
-		int accountId = await userDataService.GetAccountIdAsync(accountNumber, accountName, accountTypeId);
-		bool hasUserLinkedAccount = await userDataService.HasUserLinkedAccount(userSession.UserInfoId, accountId);
+		try
+		{
+			bool hasEmptyField = (string.IsNullOrWhiteSpace(accountNumber)
+				|| string.IsNullOrWhiteSpace(accountType)
+				|| string.IsNullOrWhiteSpace(accountName)
+				);
+			if (hasEmptyField)
+			{
+				error = "Please provide all necessary details.";
+				await RefreshError();
+				return;
+			}
 
-		if (!hasUserLinkedAccount)
+			accountTypeId = AccountTypeNames.AS_STRING_LIST.IndexOf(accountType) + 1;
+			int accountId = await userDataService.GetAccountIdAsync(accountNumber, accountName, accountTypeId);
+			bool hasUserLinkedAccount = await userDataService.HasUserLinkedAccount(userSession.UserInfoId, accountId);
+
+			if (!hasUserLinkedAccount)
+			{
+				error = "There is no such account associated with the user.";
+				await RefreshError();
+				return;
+			}
+			else if (userSession.LinkedAccountList.Where(la => la.AccountId == accountId).Any())
+			{
+				error = "This account is already linked to your online account."; 
+				await RefreshError();
+				return;
+			}
+
+			account = await userDataService.GetAccountAsync(accountId);
+			//	Use this flag for displaying the account.
+			IsAccountFound = true;
+			//	display the account found if it is linked to the user and is not registered for online banking yet.
+			/*
+			*	Use these fields.
+			*	account.AccountNumber
+			*	account.AccountName
+			*	account.Balance
+			*/
+		}
+		catch (NullReferenceException)
+		{
+			//	Throw if the account with the provided details does not exist.
 			error = "There is no such account associated with the user.";
+			await RefreshError();
+		}
+	}
 
-		//	add user account to account list.
+	private async Task RefreshError()
+	{
+		await Task.Delay(3000);
+		error = "";
 	}
 }

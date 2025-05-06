@@ -347,26 +347,21 @@ namespace Services.DataManagement
                 //  Declare repository dependencies.
                 AccountRepository accountRepo = new AccountRepository(dbContext);
 
-                //  Get query.
-                IQueryable<Account>? query = null;
+                //  Get account.
+                Account account = await accountRepo
+                    .Query
+                    .HasAccountId(accountId)
+                    .IncludeAccountType(includeAccountType)
+                    .IncludeUsersInfoAccount(includeUsersInfoAccount)
+                    .IncludeMainTransactions(includeTransactions)
+                    .IncludeLoans(includeLoans)
+                    .GetQuery()
+                    .FirstOrDefaultAsync()
+                    ?? throw new AccountNotFoundException(accountId);
 
-                //  Check if there are no includes.
-                bool noIncludes = !(includeAccountType && includeTransactions && includeLoans);
-                if (!noIncludes)
-                {
-                    query = accountRepo.Query
-                        .IncludeAccountType(includeAccountType)
-                        .IncludeUsersInfoAccount(includeUsersInfoAccount)
-                        .IncludeMainTransactions(includeTransactions)
-                        .IncludeLoans(includeLoans)
-                        .GetQuery();
+                account.AccountNumber = _dataMaskingService.MaskAccountNumber(account.AccountNumber);
 
-                    return await accountRepo.GetAccountByIdAsync(accountId, query) ?? throw new AccountNotFoundException(accountId);
-                }
-
-                //  Return the result of the query.
-                //  Throws AccountNotFoundException if no account is found.
-                return await accountRepo.GetAccountByIdAsync(accountId) ?? throw new AccountNotFoundException(accountId);
+                return account;
             }
         }
 
@@ -433,19 +428,29 @@ namespace Services.DataManagement
         /// <param name="accountName"></param>
         /// <param name="accountTypeId"></param>
         /// <returns>The account id if found. 0 if not.</returns>
+        /// <exception cref="NullReferenceException">
+        /// Thrown if no account with the specified account number, account name, and account type id exists.
+        /// </exception>
         public async Task<int> GetAccountIdAsync(string accountNumber, string accountName, int accountTypeId)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
                 var accountRepo = new AccountRepository(dbContext);
-
-                //  Returns 0 if no account is found.
-                return await accountRepo
-                    .Query
-                    .HasAccountNumber(accountNumber)
-                    .HasAccountName(accountName)
-                    .HasAccountTypeId(accountTypeId)
-                    .SelectId();
+                try
+                {
+                    //  Returns 0 if no account is found.
+                    return await accountRepo
+                        .Query
+                        .HasAccountNumber(accountNumber)
+                        .HasAccountName(accountName)
+                        .HasAccountTypeId(accountTypeId)
+                        .SelectId();
+                }
+                catch (NullReferenceException)
+                {
+                    //  Log error.
+                    throw;
+                }
             }
         }
 
