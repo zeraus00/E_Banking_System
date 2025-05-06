@@ -24,7 +24,24 @@
 .card {
     background-color: white;
     margin-bottom: 0;
-    border-radius: 2px;
+    border: none;
+    border-radius: 1rem;
+    color: black;
+    /*transition: transform 0.2s ease, box-shadow 0.2s ease;*/
+}
+
+/*    .card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }*/
+/*
+.card-body {
+    padding: 1rem;
+}
+
+.card-title {
+    font-weight: 600;
+    font-size: 1rem;
 }
 
 .card-section {
@@ -32,23 +49,63 @@
     margin-bottom: 40px;
     flex-wrap: wrap;
     width: 100%;
-    justify-content: space-between;
+}*/
+
+.dashboard-row {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+}
+
+.left-cards {
+    flex: 3;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    height: 180px;
+}
+
+.key-metrics {
+    flex: 1;
+    padding: 20px;
+    background-color: white;
+    border-radius: 1rem;
+    height: 400px;
+}
+
+.number {
+    font-size: 1.3rem;
+}
+
+.bg-blue {
+    background-color: #e0f0ff;
+}
+
+.bg-green {
+    background-color: #e6f9ed;
+}
+
+.bg-yellow {
+    background-color: #fffbe6;
+}
+
+.bg-red {
+    background-color: #ffe6e6;
+}
+
+.bg-purple {
+    background-color: #f2e6ff;
 }
 
 .data-card {
     background-color: #5cc9d8;
     padding: 20px;
-    max-width: 250px;
+    max-width: 220px;
     min-width: 150px;
     border: 2px solid white;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     color: black;
-}
-
-.number {
-    font-size: 18px;
-    font-weight: normal;
 }
 
 .card-footer {
