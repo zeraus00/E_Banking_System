@@ -7,6 +7,10 @@
 @inject ClaimsHelperService claimsHelperService
 @inject PageRedirectService redirectService
 @inject UserDataService userDataService
+@inject UserSessionService userSessionService
+@inject TransactionService transactionService
+@inject UserControlledSessionService userControlledSessionService
+
 
 <div class="page">
     <main>
@@ -19,7 +23,7 @@
             <section class="d-flex justify-content-end align-items-end mx-5 gap-2">
                 <p class="fs-6 fw-lighter align-text-bottom">Current Balance: </p>
                 <div class="custom-card-clientpage current-balance d-flex align-items-center justify-content-center mx-3 mt-2">
-                    @currentBalance
+                    @FormatHelper.BalanceFormatter(currentBalance)
                 </div>
             </section>
         </header>
@@ -28,35 +32,40 @@
             <section class="card registration shadow-lg d-flex flex-column my-4 p-3">
                 <div class="mx-auto text-center p-4">
                     <h5>Trasfer Amount</h5>
-                    <h1 class="fw-bolder py-3 mb-2">TransferAmount</h1>
+                    <h1 class="fw-bolder py-3 mb-2">@FormatHelper.BalanceFormatter(transferAmount)</h1>
                 </div>
 
                 <div class="d-flex justify-content-between mx-5">
                     <div class="d-flex flex-column text-start text-light mb-0">
-                        <h5 class="mb-1 fw-bold">clientName</h5>
+                        <h5 class="mb-1 fw-bold">@clientName</h5>
                         <p class="m-0">@FormatHelper.AccountNumberFormatter(accountNumber)</p>
-                        <p class="m-0">@date</p>
-                        <p class="m-0">confirmationNumber</p>
+                        <p class="m-0">@date?.ToString("f")</p>
+                        <p class="m-0">@transactionNumber</p>
                     </div>
 
                     <section class="d-flex flex-column form-check d-flex justify-content-end mt-3">
                         <div class="text-end mt-3">
                             <NavLink class="w-25" href="/Transfer_receipt">
-                                <button class="btn btn-primary btn-lg w-100 mb-2">Confirm</button>
+                                <button class="btn btn-primary btn-lg w-100 mb-2" @onclick="ConfirmTransfer" disabled="@(isConfirmed == false)">Confirm</button>
                             </NavLink>
                             <NavLink class="w-25" href="/Transfer_amount">
-                                <button class="btn btn-warning btn-lg w-100 mb-3">Go Back</button>
+                                <button class="btn btn-warning btn-lg w-100 mb-3" @onclick="CancelTransfer">Go Back</button>
                             </NavLink>
                         </div>
 
                         <div class="pb-2">
-                            <input class="form-check-input mx-2" type="checkbox" id="termsAndConditions required">
+                            <input class="form-check-input mx-2" type="checkbox" id="termsAndConditions required" @bind="isConfirmed">
                             <label class="form-check-label text-light mb-2" for="withdrawAmountVerification">
                                 Confirm the details are correct.
                             </label>
                         </div>
 
-
+                        @if (!string.IsNullOrEmpty(error))
+                        {
+                            <div class="alert alert-danger mt-3 mx-5" role="alert">
+                                @error
+                            </div>
+                        }
                     </section>
                 </div>
             </section>
@@ -67,16 +76,71 @@
 
 @code
 {
+    private bool isConfirmed = false;
+    private string error = string.Empty;
+    private UserSession userSession { get; set; } = default!;
+    private LinkedAccount activeAcccountSession { get; set; } = default!;
+    private TransactionSession transactionSession { get; set; } = default!;
     private Account? Account;
 
     private string accountNumber = string.Empty;
     private string clientName = string.Empty;
     private decimal currentBalance = 0.0m;
+    private decimal transferAmount = 0.0m;
+    private string transactionNumber = string.Empty;
     private DateTime? date;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (firstRender)
+        {
+            try
+            {
+                userSession = await userSessionService.GetUserSession();
+                activeAcccountSession = await userControlledSessionService.GetActiveAccountSessionAsync(userSession);
+                transactionSession = await userControlledSessionService.GetTransactionSessionAsync(userSession);
 
+                accountNumber = activeAcccountSession.AccountNumber;
+                clientName = activeAcccountSession.AccountName;
+                currentBalance = await userDataService.GetAccountBalanceAsync(activeAcccountSession.AccountId);
+                transferAmount = transactionSession.Amount;
+                date = transactionSession.TransactionDate;
+                transactionNumber = transactionSession.TransactionNumber;
 
+                StateHasChanged();
+            }
+            catch (ControlledSessionNotFound)
+            {
+                redirectService.redirectWithNavigationManager(PageRoutes.CLIENT_HOME);    
+            }
+        }
+    }
+
+    private async Task ConfirmTransfer()
+    {
+        try
+        {
+            transactionSession = await transactionService.ProcessTransactionAsync(transactionSession);
+
+            await userControlledSessionService.SetTransactionSessionAsync(
+            (int)TransactionTypes.Outgoing_Transfer,
+            transactionSession,
+            userSession
+            );
+
+            redirectService.redirectWithNavigationManager(PageRoutes.TRANSFER_RECEIPT);
+        }
+        catch (AccountNotFoundException)
+        {
+            error = "Error resolving database. Please try again later.";
+        }
+    }
+
+    private async Task CancelTransfer()
+    {
+        await transactionService.StoreFailedTransactionAsync(transactionSession, TransactionStatus.CANCELLED);
+        await userControlledSessionService.ClearTransactionSessionAsync(userSession);
+
+        redirectService.redirectWithNavigationManager(PageRoutes.CLIENT_HOME);
     }
 }

@@ -5,6 +5,8 @@
 @inject ClaimsHelperService _claimsHelper
 @inject PageRedirectService _redirectService
 @inject UserDataService _userDataService
+@inject UserSessionService _userSessionService 
+@inject UserControlledSessionService _userControlledSessionService
 @using Helpers;
 
 <div class="page">
@@ -18,7 +20,7 @@
             <section class="d-flex justify-content-end align-items-end mx-5 gap-2">
                 <p class="fs-6 fw-lighter align-text-bottom">Current Balance: </p>
                 <div class="custom-card-clientpage current-balance d-flex align-items-center justify-content-center mx-3 mt-2">
-                    @currentBalance
+                    @FormatHelper.BalanceFormatter(currentBalance)
                 </div>
             </section>
         </header>
@@ -27,8 +29,12 @@
             <section class="card registration shadow-lg my-5 p-3">
                 <div class="d-flex gap-2 text-start border-bottom w-100 align-items-center p-4">
                     <h4>Total Amount Transfered: </h4>
-                    <h2 class="fw-bolder mx-5">TransferAmount</h2>
+                    <h2 class="fw-bolder mx-5">@FormatHelper.BalanceFormatter(transferAmount)</h2>
                 </div>
+
+                <h6 class="mx-5 my-3">
+                    <strong>Current Balance: </strong>@FormatHelper.BalanceFormatter(currentBalance)
+                </h6>
 
                 <div class="d-flex justify-content-between align-items-end my-3 mx-5">
                     <div class="d-flex flex-column text-start mb-0">
@@ -36,10 +42,10 @@
                         <h5 class="mb-1">@clientName</h5>
                         <p class="mb-0">@FormatHelper.AccountNumberFormatter(accountNumber)</p>
                         <p class="mb-0">@date</p>
-                        <p class="mb-0">confirmationNumber</p>
+                        <p class="mb-0">@confirmationNumber</p>
                     </div>
                     <NavLink class="w-25" href="/Client_home">
-                        <button class="btn btn-primary btn-lg w-100">Go Home</button>
+                        <button class="btn btn-primary btn-lg w-100" @onclick="GoHome">Go Home</button>
                     </NavLink>
                 </div>
             </section>
@@ -51,18 +57,45 @@
 @code
 {
 
-    private string accountNumber = string.Empty;
-    private string clientName = string.Empty;
+    private UserSession userSession { get; set; } = default!;
+    private LinkedAccount activeAccountSession { get; set; } = default!;
+    private TransactionSession transactionSession { get; set; } = default!;
+
+    private string accountNumber = "Loading...";
+    private string clientName = "Loading...";
+    private string confirmationNumber = "Loading...";
+    private decimal transferAmount = 0.0m;
     private decimal currentBalance = 0.0m;
     private DateTime? date;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (firstRender)
+        {
+            try
+            {
+                userSession = await _userSessionService.GetUserSession();
+                activeAccountSession = await _userControlledSessionService.GetActiveAccountSessionAsync(userSession);
+                transactionSession = await _userControlledSessionService.GetTransactionSessionAsync(userSession);
+
+                accountNumber = activeAccountSession.AccountNumber;
+                clientName = activeAccountSession.AccountName;
+                currentBalance = await _userDataService.GetAccountBalanceAsync(activeAccountSession.AccountId);
+                transferAmount = transactionSession.Amount;
+                date = transactionSession.TransactionDate;
+                confirmationNumber = transactionSession.ConfirmationNumber ?? "N/A";
+
+                StateHasChanged();
+            }
+            catch (ControlledSessionNotFound)
+            {
+                _redirectService.redirectWithNavigationManager(PageRoutes.CLIENT_HOME);
+            }
+        }
+    }    
+    private async Task GoHome()
+    {
+        await _userControlledSessionService.ClearTransactionSessionAsync(userSession);
+        _redirectService.redirectWithNavigationManager(PageRoutes.CLIENT_HOME);
     }
-
-
-    // private async Task Transfer()
-    // {
-    //     //  Put transfer logic here.
-    // }
 }

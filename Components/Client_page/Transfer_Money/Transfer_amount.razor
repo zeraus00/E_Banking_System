@@ -1,5 +1,5 @@
 ﻿@using Helpers;
-
+@using E_BankingSystem.Components.Client_page.Method;
 @page "/Transfer_amount"
 @attribute [Authorize(Roles = "User")]
 @rendermode InteractiveServer
@@ -23,7 +23,7 @@
                 </div>
             </div>
             <section class="d-flex justify-content-end align-items-end mx-5 gap-2">
-                <p class="fs-6 fw-lighter align-text-bottom">Current Balance: @currentBalance </p>
+                <p class="fs-6 fw-lighter align-text-bottom">Current Balance: </p>
                 <div class="custom-card-clientpage current-balance d-flex align-items-center justify-content-center mx-3 mt-2">
                     @FormatHelper.BalanceFormatter(currentBalance)
                 </div>
@@ -106,7 +106,7 @@
 
                     <div class="text-end mt-3">
                         <NavLink class="w-25" href="/Transfer_confirmation">
-                            <button class="btn btn-primary btn-lg w-100 mb-2">Continue</button>
+                            <button class="btn btn-primary btn-lg w-100 mb-2" @onclick="HandleContinue">Continue</button>
                         </NavLink>
                         <NavLink class="w-25" href="/Client_home">
                             <button class="btn btn-danger btn-lg w-100">Cancel</button>
@@ -120,8 +120,13 @@
 
 @code
 {
+
     private UserSession userSession { get; set; } = default!;
     private LinkedAccount activeAccountSession { get; set; } = default!;
+    private TransactionService TransactionService { get; set; } = default!;
+    private UserControlledSessionService UserControlledSessionService { get; set; } = default!;
+    private TransactionSession transactionSession { get; set; } = default!;
+    private PageRedirectService pageRedirectService { get; set; } = default!;  
     private Account? Account;
 
     private int accountId;
@@ -137,7 +142,9 @@
     private string selectedOwnAccount = "";
     private string otherAccountName = "";
     private string otherAccountNumber = "";
-    private decimal transferAmount = 0.0m;
+    private decimal? transferAmount = null;
+
+    private bool accountCanTransfer = true;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -179,56 +186,113 @@
             }
         }
     }
-    private void HandleContinue()
+
+    private void ClearDefaultValue()
+    {
+        if (!transferAmount.HasValue)
+        {
+            transferAmount = null;    
+        }    
+    }
+
+    private void setDefaultValue()
+    {
+        if (!transferAmount.HasValue || transferAmount == 0.00m)
+        {
+            transferAmount = null;    
+        }    
+    }
+
+    private bool isAccountCanTranser()
+    {
+        if (activeAccountSession.AccountCanTransact)
+            return true;
+
+        error = "You are not allowed to initiate a transfer transaction.\nRedirecting to Client Home...";
+        return false;
+    }
+
+    private async Task InitiateTransferProcess()
     {
         try
         {
-            error = "";
-            if (string.IsNullOrEmpty(transferType))
+            if (transferAmount is not > 0)
             {
-                error = "Please select transfer type.";
+                throw new ArgumentException();    
             }
-            if (transferType == "Own" && string.IsNullOrEmpty(selectedOwnAccount))
-            {
-                error = "Please select one of your own accounts.";
-            }
-            if (transferType == "Other" && string.IsNullOrWhiteSpace(otherAccountName))
-            {
-                error = "Please enter the recipient's account name.";    
-            }
-            if (transferType == "Other" && string.IsNullOrWhiteSpace(otherAccountNumber))
+
+            transactionSession = await transactionService.CreateTransactionAsync(
+            accountId,
+            (int)TransactionTypes.Outgoing_Transfer,
+            transferAmount.Value,
+            externalVendorId: null
+            );
+
+            await userControlledSessionService.SetTransactionSessionAsync(
+            (int)TransactionTypes.Outgoing_Transfer,
+            transactionSession,
+            userSession
+            );
+
+            redirectService.redirectWithNavigationManager(PageRoutes.TRANSFER_CONFIRMATION);
+        }
+        catch (ArgumentException)
+        {
+            error = "Transfer amount must be greater than 0.";
+        }
+        catch (FieldMissingException)
+        {
+            error = "Please choose a valid transfer method.";
+        }
+        catch (AccountNotFoundException)
+        {
+            error = "Error resolving database. Please try again later.";
+        }
+    }
+
+    private async Task HandleContinue()
+    {
+        error = "";
+
+        if (string.IsNullOrEmpty(transferType))
+        {
+            error = "Please select a transfer type.";
+            return;
+        }
+
+        if (transferType == "Own" && string.IsNullOrEmpty(selectedOwnAccount))
+        {
+            error = "Please select one of your own accounts.";
+            return;
+        }
+
+        if (transferType == "Other")
+        {
+            if (string.IsNullOrWhiteSpace(otherAccountNumber))
             {
                 error = "Please enter the recipient's account number.";
+                return;
             }
-            if (transferAmount <= 0)
+            if (string.IsNullOrWhiteSpace(otherAccountName))
             {
-                error = "Please enter a valid transfer amount.";    
+                error = "Please enter the recipient's account name.";
+                return;
             }
-            if (transferAmount > currentBalance)
-            {
-                error = "Insufficient balance.";    
-            }
-            NavigationManager.NavigateTo("/Transfer_confirmation");
-            /*
-             *  IF transaction is for own account:
-             * 1. Get account id from the selection.
-             * 2. a. Initiate a transaction with the current active account as the main account,
-             *      OUT_GOING_TRANSFER as the transaction type, the transfer amount, and
-             *      the selected account as the counter account.
-             *  IF transaction is for other account:
-             * 2. b. Initiate a transaction with the current active account as the main account,
-             *      OUT_GOING TRANSFER as the transaction type, the transfer amount, and the selected
-             *      account as the counter account.
-             * 3. Ensure that you verify first if the recipient account is of status type ACTIVE.
-             *      Only ACTIVE accounts can be part of a transaction. 
-             * 4. Call CreateTransactionAsync to process the transaction and handle exceptions accordingly.
-             * 5. Update UserSession with the new transaction session. 
-             */
         }
-        catch (Exception ex)
+
+        if (!transferAmount.HasValue || transferAmount <= 0)
         {
-            error = "Transfer money failed: " + ex.Message;                
+            error = "Please enter a valid transfer amount.";
+            return;
         }
-        
+
+        if (transferAmount > currentBalance)
+        {
+            error = "Insufficient balance.";
+            return;
+        }
+
+        await InitiateTransferProcess();
     }
+
 }
