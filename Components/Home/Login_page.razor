@@ -159,8 +159,6 @@
 				//  Handle failed validation
 				//  Redirect to log in page.
 				error = "Invalid Username or Password";
-				redirectUrl = redirectService.GetRedirectToLogInPage();
-				redirectService.redirectWithHttpContext(redirectUrl);
 				return;
 			}
 
@@ -175,10 +173,7 @@
 		catch (Exception ex)
 		{
 			Console.WriteLine("ERRORRRR: " + ex.Message);
-
-			//	Redirect to log in page.
-			var redirectUrl = redirectService.GetRedirectToLogInPage();
-			redirectService.redirectWithHttpContext(redirectUrl);
+			error = "Invalid Username or Password.";
 			return;
 		}
 
