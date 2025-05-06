@@ -23,6 +23,8 @@
                 WhereCondition(uia => uia.AccessRoleId == accessRoleId);
             public UserInfoAccountQuery HasUserInfoId(int userInfoId) =>
                 WhereCondition(uia => uia.UserInfoId == userInfoId);
+            public UserInfoAccountQuery HasLinkToOnlineAccount(bool isLinked = true) =>
+                WhereCondition(uia => uia.IsLinkedToOnlineAccount == isLinked);
             public async Task<int> SelectAccountId() => await Select<int>(uia => uia.AccountId);
             public async Task<int> SelectAccessRoleId() => await Select<int>(uia => uia.AccessRoleId);
             public async Task<int> SelectUserInfoId() => await Select<int>(uia => uia.UserInfoId);

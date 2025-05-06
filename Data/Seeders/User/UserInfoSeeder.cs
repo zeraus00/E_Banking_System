@@ -107,7 +107,8 @@ namespace Data.Seeders.User
                     {
                         UserInfoId = userInfo.UserInfoId,
                         AccessRoleId = (int)AccessRoles.PRIMARY_OWNER,
-                        AccountId = 1
+                        AccountId = 1,
+                        IsLinkedToOnlineAccount = true
                     });
 
                 userInfo.UserInfoAccounts.Add(
@@ -115,7 +116,8 @@ namespace Data.Seeders.User
                     {
                         UserInfoId = userInfo.UserInfoId,
                         AccessRoleId = (int)AccessRoles.SECONDARY_OWNER,
-                        AccountId = 2
+                        AccountId = 2,
+                        IsLinkedToOnlineAccount = false
                     });
 
                 await _userInfoRepository.AddAsync(userInfo);

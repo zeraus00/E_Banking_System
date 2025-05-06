@@ -116,7 +116,7 @@ namespace Services.SessionsManagement
 
                 //  Get UserInfo and Accounts links.
                 List<UserInfoAccount> userAccountLinks = await _dataService
-                    .GetUserAccountLinks(userInfoId, includeAccount: true);
+                    .GetUserAccountLinks(userInfoId, includeAccount: true, isLinkedToOnlineAccount: true);
                 List<LinkedAccount> userAccountList = new();
 
                 /*  GET USER SESSION FIELDS  */

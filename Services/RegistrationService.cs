@@ -83,7 +83,8 @@ namespace Services
                             {
                                 UserInfo = userInfo,
                                 AccessRoleId = (int)AccessRoles.PRIMARY_OWNER,
-                                Account = account
+                                Account = account,
+                                IsLinkedToOnlineAccount = true
                             });
 
                         await dbContext.UsersInfo.AddAsync(userInfo);

@@ -277,7 +277,7 @@ namespace Services.DataManagement
             int userInfoId, 
             bool includeUserInfo = false,
             bool includeAccount = false,
-            bool isAccountLinkedOnline = true)
+            bool isLinkedToOnlineAccount = false)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
@@ -288,6 +288,7 @@ namespace Services.DataManagement
                     return await userInfoAccountRepo
                         .Query
                         .HasUserInfoId(userInfoId)
+                        .HasLinkToOnlineAccount(isLinkedToOnlineAccount)
                         .IncludeUserInfo(includeUserInfo)
                         .IncludeAccount(includeAccount)
                         .GetQuery()
