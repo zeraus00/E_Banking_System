@@ -16,12 +16,18 @@
     public class LoanTypeBuilder
     {
         private string _loanTypeName = string.Empty;
+        private decimal _minimumLoanAmount;
         private decimal _interestRatePerAnnum;
         private int _loanTermInMonths;
 
         public LoanTypeBuilder WithLoanTypeName(string loanTypeName)
         {
             _loanTypeName = loanTypeName.Trim();
+            return this;
+        }
+        public LoanTypeBuilder WithMinimumLoanAmount(decimal minimumLoanAmount)
+        {
+            _minimumLoanAmount = minimumLoanAmount;
             return this;
         }
         public LoanTypeBuilder WithInterestRatePerAnnum(decimal interestRatePerAnnum)
@@ -44,6 +50,7 @@
             return new LoanType
             {
                 LoanTypeName = _loanTypeName,
+                MinimumLoanAmount = _minimumLoanAmount,
                 InterestRatePerAnnum = _interestRatePerAnnum,
                 LoanTermInMonths = _loanTermInMonths
             };
