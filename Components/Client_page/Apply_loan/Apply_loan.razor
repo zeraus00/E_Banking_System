@@ -198,7 +198,7 @@
 	private string lastName = "";
 	private string suffix = "";
 	private int age;
-	private DateTime birthDate = DateTime.MaxValue.AddDays((-365) * 30);
+	private DateTime birthDate;
 	private string sex = "";
 	private string contactNo = "";
 	private string civilStatus = "";
@@ -281,6 +281,7 @@
 			|| string.IsNullOrWhiteSpace(street)
 			|| string.IsNullOrWhiteSpace(houseNumber);
 		bool isAgeMissingOrUnderAge = age < 18;
+		bool isDateInValidOrUnderAge = birthDate > DateTime.UtcNow.Date.AddYears(-18);
 		bool isContactNoMissingOrInvalid = string.IsNullOrWhiteSpace(contactNo) 
 			|| !contactNo.All(char.IsDigit)
 			|| contactNo.Length != 11;
@@ -315,6 +316,8 @@
 			error = "Please enter a valid Email.";
 		if (isContactNoMissingOrInvalid)
 			error = "Please enter a valid Contact No.";
+		if (isDateInValidOrUnderAge)
+			error = "You must be older than 18 to use this account or apply for a loan.";
 		if (isAgeMissingOrUnderAge)
 			error = "Please enter a valid age not less than 18 years old.";
 		if (hasMissingAddress)
