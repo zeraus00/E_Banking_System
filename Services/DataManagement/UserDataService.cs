@@ -26,6 +26,9 @@ namespace Services.DataManagement
         {
             _dataMaskingService = dataMaskingService;
         }
+
+        #region UserAuth Helper Methods
+
         /// <summary>
         /// Get the user email through UserAuthId.
         /// </summary>
@@ -47,6 +50,9 @@ namespace Services.DataManagement
             }
         }
 
+        #endregion
+
+        #region UserInfo Helper Methods
         /// <summary>
         /// Get UserInfo through userInfoId asynchronously with specified includes.
         /// </summary>
@@ -212,6 +218,11 @@ namespace Services.DataManagement
 
             return fullName.Trim();
         }
+
+        #endregion
+
+        #region Transaction Helper Methods
+
         /// <summary>
         /// Retrieves a bulk list of transactions associated with the specified account ID.
         /// Includes parameters for filtering the query.
@@ -292,6 +303,10 @@ namespace Services.DataManagement
             return transactionList.Skip(skipCount).Take(takeCount).ToList();
         }
 
+        #endregion
+
+        #region UserInfoAccount Helper Methods
+
         /// <summary>
         /// Retrieves all accounts associated to the userInfoId with specified includes.
         /// </summary>
@@ -327,6 +342,25 @@ namespace Services.DataManagement
                 }
             }
         }
+        /// <summary>
+        /// Asynchronously verifies if the UserInfo and Account tied to the ids provided are linked.
+        /// </summary>
+        /// <param name="userInfoId">The id (primary key) of the UserInfo.</param>
+        /// <param name="accountId">The id (primary key) of the Account.</param>
+        /// <returns>True if the UserInfo and Account are linked.</returns>
+        public async Task<bool> HasUserLinkedAccount(int userInfoId, int accountId)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                var userInfoAccountRepo = new UserInfoAccountRepository(dbContext);
+
+                return await userInfoAccountRepo.IsUserAccountLinkExists(userInfoId, accountId);
+            }
+        }
+
+        #endregion
+
+        #region Account Helper Methods
 
         /// <summary>
         /// Asynchronously retrieves an account by its account id with the specified includes.
@@ -403,23 +437,6 @@ namespace Services.DataManagement
                 return await queryBuilder.GetQuery().FirstOrDefaultAsync();
             }
         }
-
-        /// <summary>
-        /// Asynchronously verifies if the UserInfo and Account tied to the ids provided are linked.
-        /// </summary>
-        /// <param name="userInfoId">The id (primary key) of the UserInfo.</param>
-        /// <param name="accountId">The id (primary key) of the Account.</param>
-        /// <returns>True if the UserInfo and Account are linked.</returns>
-        public async Task<bool> HasUserLinkedAccount(int userInfoId, int accountId)
-        {
-            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
-            {
-                var userInfoAccountRepo = new UserInfoAccountRepository(dbContext);
-
-                return await userInfoAccountRepo.IsUserAccountLinkExists(userInfoId, accountId);
-            }
-        }
-
         /// <summary>
         /// Asynchronously retrieves an Account from the database that matches a provided account number,
         /// account name, and account type. If there is a match, returns the account id.
@@ -468,5 +485,41 @@ namespace Services.DataManagement
                 return await accountRepo.Query.HasAccountId(accountId).SelectBalance();
             }
         }
+        /// <summary>
+        /// Asynchronously retrieves an account by its id, then updates its AccountName
+        /// property with the given value in newAccountName.
+        /// </summary>
+        /// <param name="accountId">The id (primary key) of the Account.</param>
+        /// <param name="newAccountName">The new account name to replace the existing one.</param>
+        /// <returns></returns>
+        public async Task RenameAccountAsync(int accountId, string newAccountName)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                try
+                {
+                    var accountRepo = new AccountRepository(dbContext);
+
+                    //  Get the Account by its id.
+                    //  Throws AccountNotFoundException if account is not found.
+                    Account account = await accountRepo
+                        .GetAccountByIdAsync(accountId)
+                        ?? throw new AccountNotFoundException(accountId);
+
+                    //  Replace the AccountName by the trimmed newAccountName.
+                    account.AccountName = newAccountName.Trim();
+
+                    //  Save changes to database.
+                    await accountRepo.SaveChangesAsync();
+                }
+                catch (AccountNotFoundException)
+                {
+                    //  Log error here.
+                    throw;
+                }
+            }
+        }
+
+        #endregion
     }
 }
