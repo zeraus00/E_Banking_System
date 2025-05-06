@@ -33,7 +33,8 @@ namespace Data.Repositories.User
         public class UserInfoQuery : CustomQuery<UserInfo, UserInfoQuery>
         {
             public UserInfoQuery(IQueryable<UserInfo> userInfo) : base (userInfo) { }
-            public UserInfoQuery HasUserAuth(int? userAuthId) => WhereCondition(ui => ui.UserAuthId == userAuthId);
+            public UserInfoQuery HasUserAuthId(int? userAuthId) => WhereCondition(ui => ui.UserAuthId == userAuthId);
+            public UserInfoQuery HasUserInfoId(int userInfoId) => WhereCondition(ui => ui.UserInfoId == userInfoId);
             public UserInfoQuery IncludeUserAuth(bool include = true) => include ? Include(ui => ui.UserAuth) : this;
             public UserInfoQuery IncludeUserName(bool include = true) => include ? Include(ui => ui.UserName) : this;
             public UserInfoQuery IncludeBirthInfo(bool include = true) => include ? Include(ui => ui.BirthInfo) : this;

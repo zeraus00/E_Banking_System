@@ -107,41 +107,41 @@ namespace Services.SessionsManagement
                 int userInfoId = _claimsHelper.GetUserInfoId(principal);
 
                 //  Throws a UserNotFoundException if UserAuth is not found.
-                UserAuth userAuth = await _dataService.TryGetUserAuthAsync(userAuthId, includeAccounts: true);
+                //UserAuth userAuth = await _dataService.TryGetUserAuthAsync(userAuthId);
+                string userEmail = await _dataService.TryGetUserAuthEmail(userAuthId);
+                string maskedEmail = _dataMaskingService.MaskEmail(userEmail);
 
                 //  Throws a UserNotFoundException if UserInfo is not found.
-                UserInfo userInfo = await _dataService.TryGetUserInfoAsync(userInfoId, includeUserName: true, includeUserInfoAccounts: true);
+                UserInfo userInfo = await _dataService.TryGetUserInfoAsync(userInfoId, includeUserName: true);
+
+                //  Get UserInfo and Accounts links.
+                List<UserInfoAccount> userAccountLinks = await _dataService
+                    .GetUserAccountLinks(userInfoId, includeAccount: true);
+                List<LinkedAccount> userAccountList = new();
 
                 /*  GET USER SESSION FIELDS  */
                 UserSession userSession = new();
 
-
-                userSession.UserAuthId = userAuth.UserAuthId;
-                userSession.UserInfoId = userInfo.UserInfoId;
+                userSession.UserAuthId = userAuthId;
+                userSession.UserInfoId = userInfoId;
                 //  Get full name.
                 userSession.CurrentUserName = await _dataService.GetUserFullName(userInfo) ?? "NAME_NOT_FOUND.";
-                userSession.CurrentUserEmail = _dataMaskingService.MaskEmail(userAuth.Email);
+                userSession.CurrentUserEmail = maskedEmail;
                 userSession.CurrentUserContact = userInfo.ContactNumber;
                 //  Get account list.
-                List<Account> onlineAccountList = userAuth.Accounts.ToList();
-                List<UserInfoAccount> userAccountLinks = userInfo.UserInfoAccounts.ToList();
-                List<LinkedAccount> userAccountList = new();
 
-                if (onlineAccountList.Any())
+                if (userAccountLinks.Any())
                 {
-                    foreach (var account in onlineAccountList)
+                    foreach (var userAccountLink in userAccountLinks)
                     {
                         LinkedAccount accountSession = new()
                         {
-                            UserAccessRoleId = userAccountLinks
-                                .Where(link => link.AccountId == account.AccountId)
-                                .FirstOrDefault()!
-                                .AccessRoleId,
-                            AccountId = account.AccountId,
-                            AccountName = account.AccountName,
-                            AccountNumber = new DataMaskingService().MaskAccountNumber(account.AccountNumber),
-                            AccountContactNo = account.AccountContactNo,
-                            AccountStatusId = account.AccountStatusTypeId
+                            UserAccessRoleId = userAccountLink.AccessRoleId,
+                            AccountId = userAccountLink.AccountId,
+                            AccountName = userAccountLink.Account.AccountName,
+                            AccountNumber = new DataMaskingService().MaskAccountNumber(userAccountLink.Account.AccountNumber),
+                            AccountContactNo = userAccountLink.Account.AccountContactNo,
+                            AccountStatusId = userAccountLink.Account.AccountStatusTypeId
                         };
                         userAccountList.Add(accountSession);
                     }

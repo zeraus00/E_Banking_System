@@ -3,6 +3,7 @@ using Data.Constants;
 using Data.Enums;
 using Data.Repositories.Auth;
 using Data.Repositories.Finance;
+using Data.Repositories.JointEntity;
 using Data.Repositories.User;
 using Exceptions;
 using Services.SessionsManagement;
@@ -90,27 +91,28 @@ namespace Services.DataManagement
             {
                 await using (var dbContext = await _contextFactory.CreateDbContextAsync())
                 {
-                    var userAuthRepo = new UserAuthRepository(dbContext);
-                    var accountRepo = new AccountRepository(dbContext);
+                    var userInfoAccountRepo = new UserInfoAccountRepository(dbContext);
                     var userInfoRepo = new UserInfoRepository(dbContext);
-                    var accountQuery = accountRepo
-                        .Query
-                        .IncludeUsersAuth()
-                        .GetQuery();
-                    Account account = await accountRepo.GetAccountByIdAsync(accountId, accountQuery) ?? throw new AccountNotFoundException(accountId);
-                    int userAuthId = account.UsersAuth.FirstOrDefault()?.UserAuthId ?? throw new UserNotFoundException();
-                    var userAuthQuery = userAuthRepo.ComposeQuery(includeUserInfo: true);
-                    UserInfo userInfo = (await userAuthRepo.GetUserAuthByIdAsync(userAuthId, userAuthQuery))?.UserInfo ?? throw new UserNotFoundException();
 
+                    //  Get the UserInfoId of the first primary owner linked to the account.
+                    int userInfoId = await userInfoAccountRepo
+                        .Query
+                        .HasAccountId(accountId)
+                        .HasAccessRoleId((int)AccessRoles.PRIMARY_OWNER)
+                        .SelectUserInfoId();
+
+                    //  Prepare a query for the user info table using the UserInfoId.
                     var userInfoQuery = userInfoRepo
                         .Query
+                        .HasUserInfoId(userInfoId)
                         .IncludeUserName()
                         .IncludeFatherName()
                         .IncludeMotherName()
                         .IncludeReligion()
                         .GetQuery();
 
-                    return await userInfoRepo.GetUserInfoByIdAsync(userInfo.UserInfoId, userInfoQuery) ?? throw new UserNotFoundException();
+                    //  Execute the query. Throws UserNotFoundException if UserInfo is not found.
+                    return await userInfoQuery.FirstOrDefaultAsync() ?? throw new UserNotFoundException();
                 }
             }
             catch (AccountNotFoundException ex)

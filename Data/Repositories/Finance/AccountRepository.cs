@@ -66,7 +66,6 @@ namespace Data.Repositories.Finance
             public AccountQuery IncludeAccountStatusType(bool include = true) => include ? Include(a => a.AccountStatusType) : this;
             public AccountQuery IncludeLinkedBeneficiaryAccount(bool include = true) => include ? Include(a => a.LinkedBeneficiaryAccount) : this;
             public AccountQuery IncludeLinkedSourceAccounts(bool include = true) => include ? Include(a => a.LinkedSourceAccounts) : this;
-            public AccountQuery IncludeUsersAuth(bool include = true) => include ? Include(a => a.UsersAuth) : this;
             public AccountQuery IncludeUsersInfoAccount(bool include = true) => include ? Include(a => a.UsersInfoAccount) : this;
             public AccountQuery IncludeMainTransactions(bool include = true) => include ? Include(a => a.MainTransactions) : this;
             public AccountQuery IncludeCounterTransactions(bool include = true) => include ? Include(a => a.CounterTransactions) : this;

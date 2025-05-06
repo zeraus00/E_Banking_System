@@ -7,7 +7,11 @@ namespace Data.Repositories.Auth
     /// </summary>
     public class UserAuthRepository : Repository
     {
-        public UserAuthRepository(EBankingContext context) : base(context) { }
+        public UserAuthQuery Query;
+        public UserAuthRepository(EBankingContext context) : base(context)
+        {
+            Query = new UserAuthQuery(context.UsersAuth.AsQueryable());
+        }
 
         #region Read Methods
 
@@ -113,36 +117,18 @@ namespace Data.Repositories.Auth
             }
             return usersAuth;
         }
-        /// <summary>
-        /// Builds an IQueryable for querying the UsersAuth table that includes all related entities.
-        /// </summary>
-        /// <returns>An IQueryable of UserAuth with all includes.</returns>
-        public IQueryable<UserAuth> QueryIncludeAll()
-        {
-            return this.ComposeQuery(includeRole: true, includeAccounts: true, includeUserInfo: true);
-        }
 
-        /// <summary>
-        /// Builds an IQueryable for querying the UsersAuth table with optional related entities.
-        /// </summary>
-        /// <param name="includeRole">Whether to include the related Role entity.</param>
-        /// <param name="includeAccounts">Whether to include the related Accounts.</param>
-        /// <param name="includeUserInfo">Whether to include the related UserInfo entity.</param>
-        /// <returns>An IQueryable of UserAuth with optional includes.</returns>
-        public IQueryable<UserAuth> ComposeQuery(
-                bool includeRole = false,
-                bool includeAccounts = false,
-                bool includeUserInfo = false
-                )
+        public class UserAuthQuery : CustomQuery<UserAuth, UserAuthQuery>
         {
-            var query = _context
-                .UsersAuth
-                .AsQueryable();
-            if (includeRole) { query = query.Include(ua => ua.Role); }
-            if (includeAccounts) { query = query.Include(ua => ua.Accounts); }
-            if (includeUserInfo) { query = query.Include(ua => ua.UserInfo); }
-
-            return query;
+            public UserAuthQuery(IQueryable<UserAuth> query) : base(query) { }
+            public UserAuthQuery HasUserAuthId(int userAuthId) => WhereCondition(ua => ua.UserAuthId == userAuthId);
+            public UserAuthQuery HasEmail(string email) => WhereCondition(ua => ua.Email == email);
+            public UserAuthQuery HasUserName(string userName) => WhereCondition(ua => ua.UserName == userName);
+            public UserAuthQuery HasEmailOrUserName(string emailOrUserName) =>
+                WhereCondition(ua => ua.Email == emailOrUserName || ua.UserName == emailOrUserName);
+            public UserAuthQuery IncludeRole(bool include = true) => include ? Include(ua => ua.Role) : this;
+            public UserAuthQuery IncludeUserInfo(bool include = true) => include ? Include(ua => ua.UserInfo) : this;
+            public async Task<string?> SelectEmail() => await Select<string>(ua => ua.Email);
         }
 
         #endregion Read Methods

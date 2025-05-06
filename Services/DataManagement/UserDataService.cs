@@ -46,10 +46,30 @@ namespace Services.DataManagement
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
                 var userAuthRepo = new UserAuthRepository(dbContext);
-                var query = userAuthRepo.ComposeQuery(includeRole, includeAccounts, includeUserInfo);
-                return await userAuthRepo.GetUserAuthByIdAsync(userAuthId, query) ?? throw new UserNotFoundException();
+                return await userAuthRepo
+                    .Query
+                    .HasUserAuthId(userAuthId)
+                    .IncludeRole(includeRole)
+                    .IncludeUserInfo(includeUserInfo)
+                    .GetQuery()
+                    .FirstOrDefaultAsync()
+                    ?? throw new UserNotFoundException();
             }
         }
+
+        public async Task<string> TryGetUserAuthEmail(int userAuthId)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                var userAuthRepo = new UserAuthRepository(dbContext);
+                return await userAuthRepo
+                    .Query
+                    .HasUserAuthId(userAuthId)
+                    .SelectEmail()
+                    ?? throw new UserNotFoundException();
+            }
+        }
+
         /// <summary>
         /// Get UserInfo through userInfoId asynchronously with specified includes.
         /// </summary>
@@ -253,32 +273,30 @@ namespace Services.DataManagement
             return transactionList.Skip(skipCount).Take(takeCount).ToList();
         }
 
-        /// <summary>
-        /// Asynchronously retrieves a list of the account ids associated with the user auth id.
-        /// </summary>
-        /// <param name="userAuthId">The id of the user's authentication details.</param>
-        /// <returns>A list of the accounds associated witht the user.</returns>
-        public async Task<List<int>?> GetAccountIdListAsync(int userAuthId)
+        public async Task<List<UserInfoAccount>> GetUserAccountLinks(
+            int userInfoId, 
+            bool includeUserInfo = false,
+            bool includeAccount = false,
+            bool isAccountLinkedOnline = true)
         {
-            List<int> accountIdList = new();
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
-                UserAuthRepository userAuthRepo = new UserAuthRepository(dbContext);
-
-                var query = userAuthRepo.ComposeQuery(includeAccounts: true);
-                var userAuth = await userAuthRepo.GetUserAuthByIdAsync(userAuthId, query);
-
-                if (userAuth is null)
+                try
                 {
-                    return null;
-                }
+                    var userInfoAccountRepo = new UserInfoAccountRepository(dbContext);
 
-                foreach (var account in userAuth.Accounts)
+                    return await userInfoAccountRepo
+                        .Query
+                        .HasUserInfoId(userInfoId)
+                        .IncludeUserInfo(includeUserInfo)
+                        .IncludeAccount(includeAccount)
+                        .GetQuery()
+                        .ToListAsync();
+                }
+                catch
                 {
-                    accountIdList.Add(account.AccountId);
+                    throw;
                 }
-
-                return accountIdList;
             }
         }
 
@@ -291,7 +309,6 @@ namespace Services.DataManagement
         public async Task<Account> GetAccountAsync(
             int accountId,
             bool includeAccountType = false,
-            bool includeUsersAuth = false,
             bool includeUsersInfoAccount = false,
             bool includeTransactions = false,
             bool includeLoans = false
@@ -305,14 +322,12 @@ namespace Services.DataManagement
                 //  Get query.
                 IQueryable<Account>? query = null;
 
-
                 //  Check if there are no includes.
-                bool noIncludes = !(includeAccountType && includeUsersAuth && includeTransactions && includeLoans);
+                bool noIncludes = !(includeAccountType && includeTransactions && includeLoans);
                 if (!noIncludes)
                 {
                     query = accountRepo.Query
                         .IncludeAccountType(includeAccountType)
-                        .IncludeUsersAuth(includeUsersAuth)
                         .IncludeUsersInfoAccount(includeUsersInfoAccount)
                         .IncludeMainTransactions(includeTransactions)
                         .IncludeLoans(includeLoans)
@@ -345,7 +360,6 @@ namespace Services.DataManagement
             string accountNumber,
             string? accountName = null,
             bool includeAccountType = false,
-            bool includeUsersAuth = false,
             bool includeTransactions = false,
             bool includeLoans = false
             )
@@ -357,7 +371,6 @@ namespace Services.DataManagement
 
                 var queryBuilder = accountRepo.Query
                     .IncludeAccountType(includeAccountType)
-                    .IncludeUsersAuth(includeUsersAuth)
                     .IncludeMainTransactions(includeTransactions)
                     .IncludeLoans(includeLoans)
                     .HasAccountNumber(accountNumber);

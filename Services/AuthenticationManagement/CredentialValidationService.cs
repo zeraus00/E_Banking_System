@@ -32,8 +32,13 @@ namespace Services.AuthenticationManagement
             {
                 UserAuthRepository userAuthRepo = new UserAuthRepository(dbContext);
 
-                IQueryable<UserAuth> query = userAuthRepo.QueryIncludeAll();
-                UserAuth? userAuth = await userAuthRepo.GetUserAuthByUserNameOrEmailAsync(trimmedEmail, query);
+                UserAuth? userAuth = await userAuthRepo
+                    .Query
+                    .HasEmailOrUserName(trimmedEmail)
+                    .IncludeUserInfo()
+                    .IncludeRole()
+                    .GetQuery()
+                    .FirstOrDefaultAsync();
 
                 if (userAuth == null || !IsPasswordValid(userAuth, password))
                 {

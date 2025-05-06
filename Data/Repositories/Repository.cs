@@ -92,9 +92,18 @@ namespace Data.Repositories
                 _query = _query.Where(condition);
                 return (TSelf)this;
             }
+            protected IQueryable<TProjection> Selectv2<TProjection>(Expression<Func<TEntity, TProjection>> projection)
+            {
+                return _query.Select(projection);
+            }
             protected async Task<TProjection?> Select<TProjection>(Expression<Func<TEntity, TProjection>> projection)
             {
                 return (TProjection?)await _query.Select(projection).FirstOrDefaultAsync();
+            }
+
+            protected async Task<List<TProjection>> SelectAsList<TProjection>(Expression<Func<TEntity, TProjection>> projection)
+            {
+                return await _query.Select(projection).ToListAsync();
             }
             public IQueryable<TEntity> GetQuery() => _query;
 

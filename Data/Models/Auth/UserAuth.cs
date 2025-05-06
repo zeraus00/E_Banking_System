@@ -14,7 +14,6 @@
 
         /*  Navigation Properties   */
         public Role Role { get; set; } = null!;
-        public UserInfo? UserInfo { get; set; }
-        public ICollection<Account> Accounts { get; set; } = new List<Account>();
+        public UserInfo UserInfo { get; set; } = null!;
     }
 }

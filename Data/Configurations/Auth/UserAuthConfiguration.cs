@@ -58,14 +58,6 @@
                 .WithMany(r => r.UsersAuth)
                 .HasForeignKey(ua => ua.RoleId)
                 .OnDelete(DeleteBehavior.Restrict);
-            UsersAuth
-                .HasMany(ua => ua.Accounts)
-                .WithMany(acc => acc.UsersAuth)
-                .UsingEntity<Dictionary<string, int>>(
-                    "UserAuthAccount",
-                    j => j.HasOne<Account>().WithMany().HasForeignKey("AccountId").OnDelete(DeleteBehavior.Restrict),
-                    j => j.HasOne<UserAuth>().WithMany().HasForeignKey("UserAuthId").OnDelete(DeleteBehavior.Restrict)
-                );
         }
     }
 }

@@ -62,9 +62,6 @@ namespace Services
                             dbContext.Attach(address);
                         }
 
-
-                        userAuth.Accounts.Add(account);
-
                         await dbContext.UsersAuth.AddAsync(userAuth);
 
                         await dbContext.Accounts.AddAsync(account);
@@ -475,49 +472,6 @@ namespace Services
                 .GetQuery();
 
             return await Query.FirstOrDefaultAsync();
-        }
-
-        public async Task SyncUserAuthAndAccount(int userAuthId, int accountId)
-        {
-            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
-            {
-                var userAuthRepo = new UserAuthRepository(dbContext);
-                var accountRepo = new AccountRepository(dbContext);
-
-                var userAuthQuery = userAuthRepo.ComposeQuery(includeAccounts: true);
-                var accountQuery = accountRepo.Query.IncludeUsersAuth().GetQuery();
-
-                UserAuth userAuth = (await userAuthRepo.GetUserAuthByIdAsync(userAuthId, userAuthQuery))!;
-                Account account = (await accountRepo.GetAccountByIdAsync(accountId, accountQuery))!;
-
-                userAuth.Accounts.Add(account);
-                account.UsersAuth.Add(userAuth);
-
-                await dbContext.SaveChangesAsync();
-            }
-        }
-
-        public async Task SyncUserInfoAndAccount(int userInfoId, int accountId)
-        {
-            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
-            {
-                var userInfoRepo = new UserInfoRepository(dbContext);
-
-                var query = userInfoRepo.Query.IncludeUserInfoAccounts().GetQuery();
-
-                var userInfo = await userInfoRepo.GetUserInfoByIdAsync(userInfoId, query);
-
-                UserInfoAccount link = new UserInfoAccount
-                {
-                    UserInfoId = userInfoId,
-                    AccessRoleId = (int)AccessRoles.PRIMARY_OWNER,
-                    AccountId = accountId
-                };
-
-                userInfo!.UserInfoAccounts.Add(link);
-
-                await dbContext.SaveChangesAsync();
-            }
         }
         private async Task<BirthInfo?> TryGetExistingBirthInfo(BirthInfo birthInfo)
         {

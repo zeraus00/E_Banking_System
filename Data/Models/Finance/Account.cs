@@ -25,7 +25,6 @@
         public AccountStatusType AccountStatusType { get; set; } = null!;
         public Account? LinkedBeneficiaryAccount { get; set; }
         public ICollection<Account> LinkedSourceAccounts { get; set; } = new List<Account>();
-        public ICollection<UserAuth> UsersAuth { get; set; } = new List<UserAuth>();
         public ICollection<UserInfoAccount> UsersInfoAccount { get; set; } = new List<UserInfoAccount>();
         public ICollection<Transaction> MainTransactions { get; set; } = new List<Transaction>();
         public ICollection<Transaction> CounterTransactions { get; set; } = new List<Transaction>();
