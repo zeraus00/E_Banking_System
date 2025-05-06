@@ -292,6 +292,14 @@ namespace Services.DataManagement
             return transactionList.Skip(skipCount).Take(takeCount).ToList();
         }
 
+        /// <summary>
+        /// Retrieves all accounts associated to the userInfoId with specified includes.
+        /// </summary>
+        /// <param name="userInfoId">The id of the user in the UsersInfo table.</param>
+        /// <param name="includeUserInfo">Decide whether to include the UserInfo navigation property.</param>
+        /// <param name="includeAccount">Decide whether to include the Account navigation property.</param>
+        /// <param name="isLinkedToOnlineAccount">Decide whether to include only the bank accounts already linked to the online account.</param>
+        /// <returns>A list of UserInfoAccounts</returns>
         public async Task<List<UserInfoAccount>> GetUserAccountLinks(
             int userInfoId, 
             bool includeUserInfo = false,
@@ -400,6 +408,13 @@ namespace Services.DataManagement
                 return await queryBuilder.GetQuery().FirstOrDefaultAsync();
             }
         }
+
+        /// <summary>
+        /// Asynchronously verifies if the UserInfo and Account tied to the ids provided are linked.
+        /// </summary>
+        /// <param name="userInfoId">The id (primary key) of the UserInfo.</param>
+        /// <param name="accountId">The id (primary key) of the Account.</param>
+        /// <returns>True if the UserInfo and Account are linked.</returns>
         public async Task<bool> HasUserLinkedAccount(int userInfoId, int accountId)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
@@ -409,6 +424,15 @@ namespace Services.DataManagement
                 return await userInfoAccountRepo.IsUserAccountLinkExists(userInfoId, accountId);
             }
         }
+
+        /// <summary>
+        /// Asynchronously retrieves an Account from the database that matches a provided account number,
+        /// account name, and account type. If there is a match, returns the account id.
+        /// </summary>
+        /// <param name="accountNumber"></param>
+        /// <param name="accountName"></param>
+        /// <param name="accountTypeId"></param>
+        /// <returns>The account id if found. 0 if not.</returns>
         public async Task<int> GetAccountIdAsync(string accountNumber, string accountName, int accountTypeId)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
@@ -425,6 +449,11 @@ namespace Services.DataManagement
             }
         }
 
+        /// <summary>
+        /// Asynchronously retrieves the balance of an account.
+        /// </summary>
+        /// <param name="accountId"></param>
+        /// <returns></returns>
         public async Task<decimal> GetAccountBalanceAsync(int accountId)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
