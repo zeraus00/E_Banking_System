@@ -83,6 +83,7 @@
 					<div class="col-6 col-md-2">
 						<label class="text-light">Sex</label>
 						<select class="form-select" @bind="sex" required>
+							<option value="" disabled hidden>--Select Sex--</option>
 							<option>Male</option>
 							<option>Female</option>
 						</select>
@@ -98,6 +99,7 @@
 					<div class="col-12 col-md-3">
 						<label class="text-light">Civil Status</label>
 						<select class="form-select" @bind="civilStatus" required>
+							<option value="" disabled hidden>--Select Civil Status--</option>
 							<option>Single</option>
 							<option>Married</option>
 							<option>Separated</option>
@@ -109,12 +111,13 @@
 						<input class="form-control" @bind="occupation" placeholder="Occupation" required>
 					</div>
 					<div class="col-12 col-md-3">
-						<label class="text-light">Gross Annual Income</label>
+						<label class="text-light">Gross Annual Income (>= 250 000.00)</label>
 						<input class="form-control" @bind="minAnnualGross" placeholder="Minimum 250,000" required>
 					</div>
 					<div class="col-12 col-md-3">
 						<label class="text-light">Type of Loan</label>
-						<select class="form-select" @bind="loanTypeId" required>
+						<select class="form-select" @bind="loanTypeId" @bind:after="OnLoanTypeChange" required>
+							<option value="-1" disabled hidden>--Select Loan Type--</option>
 							@foreach(var loanType in LoanTypeNames.AS_STRING_LIST)
 							{
 								<option value="@LoanTypeNames.AS_STRING_LIST.IndexOf(loanType)">@loanType</option>
@@ -122,20 +125,21 @@
 						</select>
 					</div>
 					<div class="col-12 col-md-3">
-						<label class="text-light">Loan Amount</label>
-						<input type="number" class="form-control" @bind="loanAmount" placeholder="Loan Amount" required>
+						<label class="text-light">@loanAmountLabel</label>
+						<input type="number" class="form-control" @bind="loanAmount" placeholder="Loan Amount" min="@minimumLoanAmount" required>
 					</div>
 					<div class="col-12 col-md-3">
 						<label class="text-light">Loan Purpose</label>
 						<input class="form-control" @bind="loanPurpose" placeholder="Home Purchase, Education, Debt Consolidation, etc" required>
 					</div>
 					<div class="col-12 col-md-3">
-						<label class="text-light">Loan Term</label>
-						<input type="number" class="form-control" @bind="loanTermInMonths" placeholder="Months to Pay" required>
+						<label class="text-light">Loan Term In Months</label>
+						<input type="number" class="form-control" @bind="loanTermInMonths" placeholder="Months to Pay" min="@minimumLoanTerm" required>
 					</div>
 					<div class="col-12 col-md-3">
 						<label class="text-light">Preferred Payment Frequency</label>
 						<select class="form-select" @bind="paymentFrequency" required>
+							<option value="-1" disabled hidden>--Select Payment Frequency--</option>
 							<option value="12">Monthly</option>
 							<option value="6">Bi-Monthly</option>
 							<option value="3">Quarterly</option>
@@ -180,40 +184,47 @@
 </div>
 
 @code {
-	public string error = "";
+	private string error = "";
+
+	/*		Display Labels		*/
+	private string loanAmountLabel = "Loan Amount";
+	private string loanTermInMonthsLabel = "Loan Term In Months";
+	private decimal minimumLoanAmount = 0.00m;
+	private int minimumLoanTerm;
+
 	/*		Personal Information		*/
-	public string firstName = "";
-	public string middleName = "";
-	public string lastName = "";
-	public string suffix = "";
-	public int age;
-	public DateTime birthDate;
-	public string sex = "";
-	public string contactNo = "";
-	public string civilStatus = "";
-	public string occupation = "";
-	public string minAnnualGross = "";
+	private string firstName = "";
+	private string middleName = "";
+	private string lastName = "";
+	private string suffix = "";
+	private int age;
+	private DateTime birthDate = DateTime.MaxValue.AddDays((-365) * 30);
+	private string sex = "";
+	private string contactNo = "";
+	private string civilStatus = "";
+	private string occupation = "";
+	private decimal minAnnualGross = 0.00m;
 
 	/*		Address		*/
-	public string province = "";
-	public string municipality = "";
-	public string barangay = "";
-	public string street = "";
-	public string houseNumber = "";
+	private string province = "";
+	private string municipality = "";
+	private string barangay = "";
+	private string street = "";
+	private string houseNumber = "";
 
 	/*		Authentication		*/
-	public string email = "";
+	private string email = "";
 
 	/*		Loan Details			*/
-	public int loanTypeId;
-	public decimal loanAmount;
-	public string loanPurpose = "";
-	public int loanTermInMonths;
-	public int paymentFrequency;
+	private int loanTypeId = -1;
+	private decimal loanAmount;
+	private string loanPurpose = "";
+	private int loanTermInMonths;
+	private int paymentFrequency = -1;
 
-	UserInfo userInfo = default!;
-	Address address = default!;
-	UserSession userSession = default!;
+	private UserInfo userInfo = default!;
+	private Address address = default!;
+	private UserSession userSession = default!;
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
@@ -262,15 +273,74 @@
 		}
 	}
 
-	private void LoginAsync()
+	private async Task LoginAsync()
 	{
-		if (string.IsNullOrEmpty(firstName) || string.IsNullOrEmpty(lastName))
+		bool hasMissingName = string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(lastName);
+		bool hasMissingAddress = string.IsNullOrWhiteSpace(municipality)
+			|| string.IsNullOrWhiteSpace(barangay)
+			|| string.IsNullOrWhiteSpace(street)
+			|| string.IsNullOrWhiteSpace(houseNumber);
+		bool isAgeMissingOrUnderAge = age < 18;
+		bool isContactNoMissingOrInvalid = string.IsNullOrWhiteSpace(contactNo) 
+			|| !contactNo.All(char.IsDigit)
+			|| contactNo.Length != 11;
+
+		string gmailDomain = "@gmail.com";
+		bool isEmailInvalid = string.IsNullOrWhiteSpace(email)
+			|| email.Length < 6
+			|| !email.EndsWith(gmailDomain, StringComparison.OrdinalIgnoreCase);
+		bool isOccupationInvalid = string.IsNullOrWhiteSpace(occupation);
+		bool isAnnualGrossInvalid = minAnnualGross < 250000.0m;
+		bool isLoanAmountInvalid = loanAmount < minimumLoanAmount;
+		bool isLoanTermInvalid = loanTermInMonths < minimumLoanTerm;
+		bool isLoanPurposeInvalid = string.IsNullOrWhiteSpace(loanPurpose);
+		bool isLoanTypeInvalid = loanTypeId == -1;
+		bool isPaymentFrequencyInvalid = paymentFrequency == -1;
+
+		if (isPaymentFrequencyInvalid)
+			error = "Please choose a preferred payment frequency.";
+		if (isLoanTermInvalid)
+			error = $"Please enter a valid loan term not less than {minimumLoanTerm} months.";
+		if (isLoanPurposeInvalid)
+			error = "Please enter a valid loan purpose.";
+		if (isLoanAmountInvalid)
+			error = $"Please enter a valid loan amount not less than {minimumLoanAmount}.";
+		if (isLoanTypeInvalid)
+			error = "Please choose a valid loan type.";
+		if (isAnnualGrossInvalid)
+			error = "Please enter a valid Gross Annual Income not less than 250 000.";
+		if (isOccupationInvalid)
+			error = "Please fill out occupation.";
+		if (isEmailInvalid)
+			error = "Please enter a valid Email.";
+		if (isContactNoMissingOrInvalid)
+			error = "Please enter a valid Contact No.";
+		if (isAgeMissingOrUnderAge)
+			error = "Please enter a valid age not less than 18 years old.";
+		if (hasMissingAddress)
+			error = "Please fill out your address.";
+		if (hasMissingName)
+			error = "Please fill out your name.";
+
+		bool hasError = !string.IsNullOrWhiteSpace(error);
+		if (hasError)
 		{
-			error = "Please fill in both the email and password.";
+			await Task.Delay(3000);
+			error = "";
 			return;
 		}
 
-		error = "";
 		NavigationManager.NavigateTo("/Client_home_page");
+	}
+
+	private void OnLoanTypeChange()
+	{
+		LoanType loanType = LoanTypeNames.AS_LOAN_TYPE_LIST[loanTypeId];
+		loanAmountLabel = "Loan Amount";
+		loanAmountLabel += $" ( >= {loanType.MinimumLoanAmount})";
+		loanAmount = loanType.MinimumLoanAmount;
+		loanTermInMonths = loanType.LoanTermInMonths;
+		minimumLoanAmount = loanType.MinimumLoanAmount;
+		minimumLoanTerm = loanType.LoanTermInMonths;
 	}
 }
