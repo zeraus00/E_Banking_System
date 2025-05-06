@@ -90,6 +90,11 @@
                 .IsRequired()
                 .HasColumnType("DECIMAL(18,2)")
                 .HasDefaultValue(0.0m);
+            //  Remarks (Required, VARCHAR(255))
+            Transactions
+                .Property(t => t.Remarks)
+                .HasColumnType("VARCHAR(255)")
+                .IsRequired();
 
             /*
              *  Configure Relationships

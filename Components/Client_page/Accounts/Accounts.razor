@@ -63,6 +63,7 @@
 
     private ClaimsPrincipal? user;
     private List<LinkedAccount> userAccountList = new();
+    private Dictionary<int, decimal> balanceDict = new();       // <------  FOR ACCOUNT BALANCE
     private UserInfo? userInfo;
     private bool IsEditable { get; set; } = false; // Default to view mode
 
@@ -93,11 +94,16 @@
                 //  accounts = await userDataService.GetAccountListAsync(userSession.UserAccountIdList);
                 userAccountList = await userControlledSessionService.GetUserAccountListAsync(userSession);
 
+                foreach (var account in userAccountList)
+                {
+                    balanceDict[account.AccountId] = await userDataService.GetAccountBalanceAsync(account.AccountId);
+                }
+
                 StateHasChanged();
             }
             catch (SessionNotFoundException)
             {
-                redirectService.redirectWithNavigationManager(PageRoutes.LOGGING_IN_PAGE);
+                redirectService.redirectWithNavigationManager(PageRoutes.CLIENT_HOME);
             }
         }
     }

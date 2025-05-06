@@ -12,46 +12,31 @@ namespace Data.Repositories
     public abstract class Repository
     {
         protected readonly EBankingContext _context;
-        public Repository(EBankingContext context)
-        {
-            _context = context;
-        }
+        public Repository(EBankingContext context) => _context = context;
 
         /// <summary>
         /// Save changes to database synchronously.
         /// </summary>
-        public void SaveChangesSync()
-        {
-            _context.SaveChanges();
-        }
+        public void SaveChangesSync() => _context.SaveChanges();
 
         /// <summary>
         /// Save changes to database asynchronously.
         /// </summary>
-        public async Task SaveChangesAsync()
-        {
-            await _context.SaveChangesAsync();
-        }
+        public async Task SaveChangesAsync() => await _context.SaveChangesAsync();
 
         /// <summary>
         /// Add entity of class T to database.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="entity"></param>
-        public void AddSync<T>(T entity) where T : class
-        {
-            _context.Set<T>().Add(entity);
-        }
+        public void AddSync<T>(T entity) where T : class => _context.Set<T>().Add(entity);
 
         /// <summary>
         /// Add entity of class T to database.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="entity"></param>
-        public async Task AddAsync<T>(T entity) where T : class
-        {
-            await _context.Set<T>().AddAsync(entity);
-        }
+        public async Task AddAsync<T>(T entity) where T : class => await _context.Set<T>().AddAsync(entity);
 
         /// <summary>
         /// Retrieves an entity of class T from database.
@@ -60,9 +45,10 @@ namespace Data.Repositories
         /// <param name="id"></param>
         /// <returns></returns>
         protected async Task<T?> GetById<T>(int id, IQueryable<T>? query = null) where T : class
-        {
-            return await _context.Set<T>().FindAsync(id);
-        }
+            => await _context.Set<T>().FindAsync(id);
+
+        protected async Task<T?> GetByCompositeId<T>(int id1, int id2) where T : class
+            => await _context.Set<T>().FindAsync(id1, id2);
 
         /// <summary>
         /// Retrieves an entity of class T from database.
@@ -106,9 +92,16 @@ namespace Data.Repositories
                 _query = _query.Where(condition);
                 return (TSelf)this;
             }
-            public IQueryable<TEntity> GetQuery()
+            protected async Task<TProjection?> Select<TProjection>(Expression<Func<TEntity, TProjection>> projection)
             {
-                return _query;
+                return (TProjection?)await _query.Select(projection).FirstOrDefaultAsync();
+            }
+            public IQueryable<TEntity> GetQuery() => _query;
+
+            public TSelf NewQuery(IQueryable<TEntity> newQuery) 
+            {
+                _query = newQuery;
+                return (TSelf)this;
             }
         }
     }

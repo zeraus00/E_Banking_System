@@ -7,6 +7,7 @@
 @inject NavigationManager NavigationManager
 @inject ClaimsHelperService claimsHelperService
 @inject PageRedirectService redirectService
+@inject TransactionService transactionService
 @inject UserControlledSessionService userControlledSessionService
 @inject UserDataService userDataService
 @inject UserSessionService userSessionService
@@ -22,7 +23,7 @@
                 </div>
             </div>
             <section class="d-flex justify-content-end align-items-end mx-5 gap-2">
-                <p class="fs-6 fw-lighter align-text-bottom">Current Balance: </p>
+                <p class="fs-6 fw-lighter align-text-bottom">Current Balance: @currentBalance </p>
                 <div class="custom-card-clientpage current-balance d-flex align-items-center justify-content-center mx-3 mt-2">
                     @FormatHelper.BalanceFormatter(currentBalance)
                 </div>
@@ -58,9 +59,9 @@
                             <label class="text-light">Select Own Account</label>
                             <select class="form-control" @bind="selectedOwnAccount">
                                 <option value="">-- Select Account --</option>
-                                @foreach (var account in ownAccounts)
+                                @foreach (var account in linkedAccounts)
                                 {
-                                    <option value="@account">@account</option>
+                                    <option value="@account.AccountId">@account.AccountName</option>
                                 }
                             </select>
                         </div>
@@ -91,7 +92,7 @@
                         <h3 class="mb-3">Enter Transfer Amount</h3>
                         <div class="input-group mb-3">
                             <span class="input-group-text fs-4">₱</span>
-                            <input type="number" class="form-control form-control-custom form-control-lg fs-2" placeholder="000.00" />
+                            <input type="number" class="form-control form-control-custom form-control-lg fs-2"  placeholder="000.00" @bind="transferAmount"/>
                         </div>
                     </div>
                 </div>
@@ -132,12 +133,11 @@
 
     // New State Variables
     private string transferType = "";
-    private List<string> ownAccounts = new() {
-        "1234567890 - Savings", "0987654321 - Checking"
-    }; // TODO: Replace with dynamic data
+    private List<LinkedAccount> linkedAccounts = new();
     private string selectedOwnAccount = "";
     private string otherAccountName = "";
     private string otherAccountNumber = "";
+    private decimal transferAmount = 0.0m;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -156,6 +156,10 @@
                 Account = await userDataService.GetAccountAsync(accountId);
 
                 //  Set display data.
+                linkedAccounts = userSession
+                    .LinkedAccountList
+                    .Where(a => a.AccountId != activeAccountSession.AccountId)
+                    .ToList();
                 accountNumber = activeAccountSession.AccountNumber;
                 clientName = activeAccountSession.AccountName;
                 currentBalance = Account.Balance;
@@ -174,5 +178,57 @@
                 error = "Error resolving database. Please try again later.";
             }
         }
+    }
+    private void HandleContinue()
+    {
+        try
+        {
+            error = "";
+            if (string.IsNullOrEmpty(transferType))
+            {
+                error = "Please select transfer type.";
+            }
+            if (transferType == "Own" && string.IsNullOrEmpty(selectedOwnAccount))
+            {
+                error = "Please select one of your own accounts.";
+            }
+            if (transferType == "Other" && string.IsNullOrWhiteSpace(otherAccountName))
+            {
+                error = "Please enter the recipient's account name.";    
+            }
+            if (transferType == "Other" && string.IsNullOrWhiteSpace(otherAccountNumber))
+            {
+                error = "Please enter the recipient's account number.";
+            }
+            if (transferAmount <= 0)
+            {
+                error = "Please enter a valid transfer amount.";    
+            }
+            if (transferAmount > currentBalance)
+            {
+                error = "Insufficient balance.";    
+            }
+            NavigationManager.NavigateTo("/Transfer_confirmation");
+            /*
+             *  IF transaction is for own account:
+             * 1. Get account id from the selection.
+             * 2. a. Initiate a transaction with the current active account as the main account,
+             *      OUT_GOING_TRANSFER as the transaction type, the transfer amount, and
+             *      the selected account as the counter account.
+             *  IF transaction is for other account:
+             * 2. b. Initiate a transaction with the current active account as the main account,
+             *      OUT_GOING TRANSFER as the transaction type, the transfer amount, and the selected
+             *      account as the counter account.
+             * 3. Ensure that you verify first if the recipient account is of status type ACTIVE.
+             *      Only ACTIVE accounts can be part of a transaction. 
+             * 4. Call CreateTransactionAsync to process the transaction and handle exceptions accordingly.
+             * 5. Update UserSession with the new transaction session. 
+             */
+        }
+        catch (Exception ex)
+        {
+            error = "Transfer money failed: " + ex.Message;                
+        }
+        
     }
 }

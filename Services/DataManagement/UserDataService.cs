@@ -1,6 +1,8 @@
 ﻿using Data;
+using Data.Models.User;
 using Data.Repositories.Auth;
 using Data.Repositories.Finance;
+using Data.Repositories.JointEntity;
 using Data.Repositories.User;
 using Exceptions;
 using Microsoft.Identity.Client;
@@ -126,14 +128,6 @@ namespace Services.DataManagement
                 return await query.FirstOrDefaultAsync() ?? throw new NullReferenceException();
             }
         }
-        public async Task<Religion> TryGetReligionAsync(int religionId)
-        {
-            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
-            {
-                var religionRepo = new ReligionRepository(dbContext);
-                return await religionRepo.GetReligionById(religionId) ?? throw new ArgumentNullException();
-            }
-        }
         /// <summary>
         /// Gets the user's full name from the UserInfo object.
         /// If the UserInfo does not include the Name navigation property, queries the database using
@@ -199,52 +193,6 @@ namespace Services.DataManagement
             }
 
             return fullName.Trim();
-        }
-
-        public async Task<int?> GetFirstAccountAsync(int userAuthId)
-        {
-            var accountIdList = await GetAccountIdListAsync(userAuthId);
-            return accountIdList?[0] ?? null;
-        }
-        /// <summary>
-        /// Retrieves a list of accounts associated with the specified user authentication ID.
-        /// </summary>
-        /// <param name="userAuthId">The ID of the user authentication record to retrieve accounts for.</param>
-        /// <returns>
-        /// A list of <see cref="Account"/> objects if found; otherwise, <c>null</c> if the user authentication record does not exist.
-        /// </returns>
-        public async Task<List<Account>?> GetAccountListAsync(int userAuthId)
-        {
-            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
-            {
-                UserAuthRepository userAuthRepo = new UserAuthRepository(dbContext);
-
-                var query = userAuthRepo.ComposeQuery(includeAccounts: true);
-                var userAuth = await userAuthRepo.GetUserAuthByIdAsync(userAuthId, query);
-
-                return userAuth?.Accounts.ToList() ?? null;
-            }
-        }
-        public async Task<List<Account>> GetAccountListAsync(List<int> accountIdList)
-        {
-            List<Account> accountList = new();
-            foreach (var id in accountIdList)
-            {
-                try
-                {
-                    //  Throws AccountNotFoundException if account is not found.
-                    Account account = await GetAccountAsync(id);
-                    account.AccountNumber = _dataMaskingService.MaskAccountNumber(account.AccountNumber);
-                    accountList.Add(account);
-                }
-                catch (AccountNotFoundException)
-                {
-                    //  Do not add accounts that are not found to the list.
-                    continue;
-                }
-            }
-
-            return accountList;
         }
         /// <summary>
         /// Retrieves a list of transactions associated with the specified account ID.
@@ -395,6 +343,7 @@ namespace Services.DataManagement
         /// </exception>
         public async Task<Account?> GetAccountAsync(
             string accountNumber,
+            string? accountName = null,
             bool includeAccountType = false,
             bool includeUsersAuth = false,
             bool includeTransactions = false,
@@ -406,24 +355,51 @@ namespace Services.DataManagement
                 //  Declare repository dependencies.
                 AccountRepository accountRepo = new AccountRepository(dbContext);
 
-                //  Get query.
-                IQueryable<Account>? query = null;
+                var queryBuilder = accountRepo.Query
+                    .IncludeAccountType(includeAccountType)
+                    .IncludeUsersAuth(includeUsersAuth)
+                    .IncludeMainTransactions(includeTransactions)
+                    .IncludeLoans(includeLoans)
+                    .HasAccountNumber(accountNumber);
 
-                //  Check if there are no includes.
-                bool hasIncludes = includeAccountType || includeUsersAuth || includeTransactions || includeLoans;
-                if (hasIncludes)
-                {
-                    query = accountRepo.Query
-                        .IncludeAccountType(includeAccountType)
-                        .IncludeUsersAuth(includeUsersAuth)
-                        .IncludeMainTransactions(includeTransactions)
-                        .IncludeLoans(includeLoans)
-                        .GetQuery();
-                }
+                if (accountName is not null)
+                    queryBuilder.HasAccountName(accountName);
 
-                //  Return the result of the query.
-                //  Throws AccountNotFoundException if no account is found.
-                return await accountRepo.GetAccountByAccountNumberAsync(accountNumber, query) ?? throw new AccountNotFoundException(accountNumber);
+                return await queryBuilder.GetQuery().FirstOrDefaultAsync();
+            }
+        }
+        public async Task<bool> HasUserLinkedAccount(int userInfoId, int accountId)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                var userInfoAccountRepo = new UserInfoAccountRepository(dbContext);
+
+                return await userInfoAccountRepo.IsUserAccountLinkExists(userInfoId, accountId);
+            }
+        }
+        public async Task<int> GetAccountIdAsync(string accountNumber, string accountName, int accountTypeId)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                var accountRepo = new AccountRepository(dbContext);
+
+                //  Returns 0 if no account is found.
+                return await accountRepo
+                    .Query
+                    .HasAccountNumber(accountNumber)
+                    .HasAccountName(accountName)
+                    .HasAccountTypeId(accountTypeId)
+                    .SelectId();
+            }
+        }
+
+        public async Task<decimal> GetAccountBalanceAsync(int accountId)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                var accountRepo = new AccountRepository(dbContext);
+
+                return await accountRepo.Query.HasAccountId(accountId).SelectBalance();
             }
         }
     }

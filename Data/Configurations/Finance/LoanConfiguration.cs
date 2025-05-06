@@ -27,6 +27,11 @@
                 .Property(l => l.AccountId)
                 .IsRequired();
 
+            //  UserInfoId (Foreign Key; Required)
+            Loans
+                .Property(l => l.UserInfoId)
+                .IsRequired();
+
             //  LoanTypeId (Foreign Key; Required)
             Loans
                 .Property(l => l.LoanTypeId)
@@ -113,6 +118,7 @@
 
             /*  Configure Relationships  
              *  Accounts (many-to-one)
+             *  UserInfo (many-to-one)
              *  LoanTypes (many-to-one)
              *  LoanTransactions (one-to-many)
              */
@@ -121,6 +127,11 @@
                 .HasOne(l => l.Account)
                 .WithMany(a => a.Loans)
                 .HasForeignKey(l => l.AccountId)
+                .OnDelete(DeleteBehavior.Restrict);
+            Loans
+                .HasOne(l => l.UserInfo)
+                .WithMany(ui => ui.Loans)
+                .HasForeignKey(l => l.UserInfoId)
                 .OnDelete(DeleteBehavior.Restrict);
             Loans
                 .HasOne(l => l.LoanType)

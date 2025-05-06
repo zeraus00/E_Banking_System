@@ -4,6 +4,7 @@ using Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EBankingSystem.Migrations
 {
     [DbContext(typeof(EBankingContext))]
-    partial class EBankingContextModelSnapshot : ModelSnapshot
+    [Migration("20250505120301_AddRemarksColumnToTransactions")]
+    partial class AddRemarksColumnToTransactions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -324,16 +327,11 @@ namespace EBankingSystem.Migrations
                     b.Property<DateTime>("UpdateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("UserInfoId")
-                        .HasColumnType("int");
-
                     b.HasKey("LoanId");
 
                     b.HasIndex("AccountId");
 
                     b.HasIndex("LoanTypeId");
-
-                    b.HasIndex("UserInfoId");
 
                     b.ToTable("Loans", "FinanceSchema");
                 });
@@ -345,6 +343,9 @@ namespace EBankingSystem.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LoanTransactionId"));
+
+                    b.Property<int>("AccountId")
+                        .HasColumnType("int");
 
                     b.Property<decimal>("AmountPaid")
                         .HasColumnType("DECIMAL (18, 2)");
@@ -359,8 +360,8 @@ namespace EBankingSystem.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Notes")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<decimal>("PrincipalAmount")
                         .HasColumnType("DECIMAL (18, 2)");
@@ -379,6 +380,8 @@ namespace EBankingSystem.Migrations
                         .HasDefaultValueSql("CAST(GETDATE() AS TIME)");
 
                     b.HasKey("LoanTransactionId");
+
+                    b.HasIndex("AccountId");
 
                     b.HasIndex("LoanId");
 
@@ -919,26 +922,26 @@ namespace EBankingSystem.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Data.Models.User.UserInfo", "UserInfo")
-                        .WithMany("Loans")
-                        .HasForeignKey("UserInfoId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.Navigation("Account");
 
                     b.Navigation("LoanType");
-
-                    b.Navigation("UserInfo");
                 });
 
             modelBuilder.Entity("Data.Models.Finance.LoanTransaction", b =>
                 {
+                    b.HasOne("Data.Models.Finance.Account", "Account")
+                        .WithMany("LoanTransactions")
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("Data.Models.Finance.Loan", "Loan")
                         .WithMany("LoanTransactions")
                         .HasForeignKey("LoanId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("Account");
 
                     b.Navigation("Loan");
                 });
@@ -1185,6 +1188,8 @@ namespace EBankingSystem.Migrations
 
                     b.Navigation("LinkedSourceAccounts");
 
+                    b.Navigation("LoanTransactions");
+
                     b.Navigation("Loans");
 
                     b.Navigation("MainTransactions");
@@ -1287,8 +1292,6 @@ namespace EBankingSystem.Migrations
 
             modelBuilder.Entity("Data.Models.User.UserInfo", b =>
                 {
-                    b.Navigation("Loans");
-
                     b.Navigation("UserInfoAccounts");
                 });
 #pragma warning restore 612, 618

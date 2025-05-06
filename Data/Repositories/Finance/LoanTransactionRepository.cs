@@ -15,7 +15,6 @@
     /// </summary>
     public class LoanTransactionBuilder
     {
-        private int _accountId;
         private int _loanId;
         private decimal _amountPaid;
         private decimal _remainingLoanBalance;
@@ -27,11 +26,6 @@
         private string _notes = string.Empty;
 
         #region Builder Methods
-        public LoanTransactionBuilder WithAccountId(int accountId)
-        {
-            _accountId = accountId;
-            return this;
-        }
         public LoanTransactionBuilder WithLoanId(int loanId)
         {
             _loanId = loanId;
@@ -87,7 +81,6 @@
         {
             return new LoanTransaction
             {
-                AccountId = _accountId,
                 LoanId = _loanId,
                 AmountPaid = _amountPaid,
                 RemainingLoanBalance = _remainingLoanBalance,

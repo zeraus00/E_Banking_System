@@ -21,7 +21,8 @@ namespace Data.Repositories.Finance
 
         #region Read Methods
         public async Task<Account?> GetAccountByIdAsync(int accountId) => await GetById<Account>(accountId);
-        public async Task<Account?> GetAccountByIdAsync(int accountId, IQueryable<Account> query) => await Get<Account>(a => a.AccountId == accountId, query);
+        public async Task<Account?> GetAccountByIdAsync(int accountId, IQueryable<Account> query) 
+            => await Get<Account>(a => a.AccountId == accountId, query);
         /// <summary>
         /// Retrieves an Account entry asynchronously by its account number.
         /// Optionally accepts a pre-composed IQueryable with desired includes.
@@ -31,8 +32,8 @@ namespace Data.Repositories.Finance
         /// An optional IQueryable with includes already applied.
         /// </param>
         /// <returns>The Account entity if found or null if not.</returns>
-        public async Task<Account?> GetAccountByAccountNumberAsync(string accountNumber, IQueryable<Account>? query = null) => await Get<Account>(a => a.AccountNumber == accountNumber, query);
-
+        public async Task<Account?> GetAccountByAccountNumberAsync(string accountNumber, IQueryable<Account>? query = null) 
+            => await Get<Account>(a => a.AccountNumber == accountNumber, query);
         /// <summary>
         /// Provides a strongly-typed query builder for the <see cref="Account"/> entity,
         /// enabling fluent filtering and inclusion of related navigation properties.
@@ -72,6 +73,10 @@ namespace Data.Repositories.Finance
             public AccountQuery IncludeLoans(bool include = true) => include ? Include(a => a.Loans) : this;
             public AccountQuery OrderByDateOpened() => OrderBy(a => a.DateOpened);
             public AccountQuery OrderByDateOpenedDescending() => OrderByDescending(a => a.DateOpened);
+            //  Returns 0 if no account is found with the query.
+            public async Task<int> SelectId() => await Select<int>(a => a.AccountId);
+            
+            public async Task<decimal> SelectBalance() => await Select<decimal>(a => a.Balance);
         }
 
         #endregion Read Methods
@@ -261,9 +266,12 @@ namespace Data.Repositories.Finance
                 AccountTypeId = _accountTypeId,
                 AccountProductTypeId = _accountProductTypeId,
                 AccountNumber = _accountNumber,
+                ATMNumber = _atmNumber,
                 AccountName = _accountName,
                 AccountStatusTypeId = _accountStatusTypeId,
+                AccountContactNo = _accountContactNo,
                 Balance = _balance,
+                LinkedBeneficiaryId = _linkedBeneficiaryId,
                 DateOpened = _dateOpened,
                 DateClosed = _dateClosed
             };

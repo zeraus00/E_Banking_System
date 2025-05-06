@@ -21,7 +21,91 @@ namespace Services
     {
         public RegistrationService(IDbContextFactory<EBankingContext> contextFactory) : base(contextFactory) { }
 
-        public async Task<Name> RegisterName(string userFirstName, string? userMiddleName, string userLastName, string? userSuffix)
+        /*      Main Registration       */
+        public async Task InitiateRegistraiton(
+            Name userName, 
+            Name fatherName, 
+            Name motherName,
+            BirthInfo birthInfo,
+            Address address,
+            Religion religion,
+            Account account,
+            UserAuth userAuth,
+            UserInfo userInfo)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                await using (var transaction = await dbContext.Database.BeginTransactionAsync())
+                {
+                    try
+                    {
+                        
+                        await dbContext.Names.AddRangeAsync(userName, fatherName, motherName);
+
+                        birthInfo = await TryGetExistingBirthInfo(birthInfo) ?? birthInfo;
+
+                        BirthInfo? existingBirthInfo = await TryGetExistingBirthInfo(birthInfo);
+                        if (existingBirthInfo is null)
+                            await dbContext.BirthInfos.AddAsync(birthInfo);
+                        else
+                        {
+                            birthInfo = existingBirthInfo;
+                            dbContext.Attach(birthInfo);
+                        }
+
+                        Address? existingAddress = await TryGetExistingAddress(address);
+                        if (existingAddress is null)
+                            await dbContext.Addresses.AddAsync(address);
+                        else
+                        {
+                            address = existingAddress;
+                            dbContext.Attach(address);
+                        }
+
+
+                        userAuth.Accounts.Add(account);
+
+                        await dbContext.UsersAuth.AddAsync(userAuth);
+
+                        await dbContext.Accounts.AddAsync(account);
+
+                        await dbContext.SaveChangesAsync();
+
+                        userInfo.UserAuth = userAuth;
+                        userInfo.UserName = userName;
+                        userInfo.FatherName = fatherName;
+                        userInfo.MotherName = motherName;
+                        userInfo.BirthInfo = birthInfo;
+                        userInfo.Address = address;
+
+                        dbContext.Attach(religion);
+
+                        userInfo.Religion = religion;
+                        userInfo.UserInfoAccounts.Add(
+                            new UserInfoAccount
+                            {
+                                UserInfo = userInfo,
+                                AccessRoleId = (int)AccessRoles.PRIMARY_OWNER,
+                                Account = account
+                            });
+
+                        await dbContext.UsersInfo.AddAsync(userInfo);
+                        await dbContext.SaveChangesAsync();
+
+                        await transaction.CommitAsync();
+                    }
+                    catch(Exception)
+                    {
+                        //  Log error
+                        await transaction.RollbackAsync();
+                        throw;
+                    }
+                }
+            }
+        }
+        /*      Name Registration       */
+
+        public Name CreateName(string userFirstName, string? userMiddleName, string userLastName, string? userSuffix)
         {
 
             if (string.IsNullOrWhiteSpace(userFirstName)) 
@@ -49,53 +133,35 @@ namespace Services
                 nameBuilder.WithSuffix(userSuffix);
             }
 
-            Name UserName = nameBuilder.Build();
-
-            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
-            {
-                NameRepository nameRepo = new NameRepository(dbContext);
-                await nameRepo.AddAsync(UserName);
-                await nameRepo.SaveChangesAsync();
-                return UserName;
-            }
+            return nameBuilder.Build();
         }
 
-        public async Task<BirthInfo> RegisterBirthInfo(DateTime birthDate, int birthCityId, int? birthProvinceId, int birthRegionId) 
+        /*      BirthInfo Registration      */
+
+        public BirthInfo CreateBirthInfo(DateTime birthDate, City birthCity, Province? birthProvince, Region birthRegion) 
         {
             if (birthDate == default) 
             {
                 throw new FieldMissingException($"Birth Date is required.");
             }
 
-            if (birthCityId <= 0) 
-            {
-                throw new FieldMissingException("City is required.");
-            }
-            if (birthRegionId <= 0) 
-            {
-                throw new FieldMissingException("Region is required.");
-            }
-
             var birthInfoBuilder = new BirthInfoBuilder()
             .WithBirthDate(birthDate)
-            .WithCityId(birthCityId)
-            .WithRegionId(birthRegionId);
+            .WithCityId(birthCity.CityId)
+            .WithRegionId(birthRegion.RegionId);
 
-            if (birthProvinceId is int id)
-                birthInfoBuilder.WithProvinceId(id);
+            if (birthProvince is not null)
+                birthInfoBuilder.WithProvinceId(birthProvince.ProvinceId);
 
-            BirthInfo UserBirthInfo = birthInfoBuilder.Build();
+            BirthInfo userBirthInfo = birthInfoBuilder.Build();
 
-            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
-            {
-                BirthInfoRepository birthInfoRepo = new BirthInfoRepository(dbContext);
-                await birthInfoRepo.AddAsync(UserBirthInfo);
-                await birthInfoRepo.SaveChangesAsync();
-                return UserBirthInfo;
-            }
+            return userBirthInfo;
+
         }
+        
 
-        public async Task<Address> RegisterAddress(string houseNo, string street, int barangayId, int cityId, int? provinceId, int regionId, int postalCode) 
+        /*      Address Registration        */
+        public Address CreateAddress(string houseNo, string street, Barangay barangay, City city, Province? province, Region region, int postalCode) 
         {
             if (string.IsNullOrWhiteSpace(houseNo)) 
             {
@@ -106,20 +172,6 @@ namespace Services
             {
                 throw new FieldMissingException("Street is required.");
             }
-
-            if (barangayId <= 0) 
-            {
-                throw new FieldMissingException("Barangay is required.");
-            }
-
-            if (cityId <= 0) 
-            {
-                throw new FieldMissingException("City is required.");
-            }
-            if (regionId <= 0) 
-            {
-                throw new FieldMissingException("Region is required.");
-            }
             if (postalCode <= 0) 
             {
                 throw new FieldMissingException("Postal code is required.");
@@ -129,25 +181,21 @@ namespace Services
             AddressBuilder
                 .WithHouse(houseNo)
                 .WithStreet(street)
-                .WithBarangayId(barangayId)
-                .WithCityId(cityId)
-                .WithRegionId(regionId)
-                .WithPostalCode(postalCode);
-            if (provinceId is int id)
-                AddressBuilder.WithProvinceId(id);
+                .WithBarangayId(barangay.BarangayId)
+                .WithCityId(city.CityId)
+                .WithRegionId(region.RegionId);
+            if (province is not null)
+                AddressBuilder.WithProvinceId(province.ProvinceId);
 
 
-            Address UserAddress = AddressBuilder.Build();
+            Address userAddress = AddressBuilder.Build();
 
-            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
-            {
-                AddressRepository addressRepo = new AddressRepository(dbContext);
-                await addressRepo.AddAsync(UserAddress);
-                await addressRepo.SaveChangesAsync();
-                return UserAddress;
-            }
+            return userAddress;
         }
-        public async Task<int> RegisterRegion(string selectedCode, List<RegionViewModel> regionList)
+
+        
+
+        public async Task<Region> GetOrRegisterRegion(string selectedCode, List<RegionViewModel> regionList)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
@@ -168,10 +216,10 @@ namespace Services
                     await regionRepo.SaveChangesAsync();
                 }
 
-                return region.RegionId;
+                return region;
             }
         }
-        public async Task<int?> RegisterProvince(string selectedCode, int regionId, List<ProvinceViewModel> provinceList)
+        public async Task<Province?> GetOrRegisterProvince(string selectedCode, int regionId, List<ProvinceViewModel> provinceList)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
@@ -196,11 +244,11 @@ namespace Services
                     await provinceRepo.SaveChangesAsync();
                 }
 
-                return province.ProvinceId;
+                return province;
             }
         }
 
-        public async Task<int> RegisterCity(string selectedCode, int? provinceId, int? regionId, List<CityViewModel> cityList)
+        public async Task<City> GetOrRegisterCity(string selectedCode, int? provinceId, int? regionId, List<CityViewModel> cityList)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
@@ -227,11 +275,11 @@ namespace Services
                     await cityRepo.SaveChangesAsync();
                 }
 
-                return city.CityId;
+                return city;
             }
         }
 
-        public async Task<int> RegisterBarangay(string selectedCode, int cityId, List<BarangayViewModel> barangayList)
+        public async Task<Barangay> GetOrRegisterBarangay(string selectedCode, int cityId, List<BarangayViewModel> barangayList)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
@@ -252,33 +300,42 @@ namespace Services
                     await barangayRepo.SaveChangesAsync();
                 }
 
-                return barangay.BarangayId;
+                return barangay;
             }
         }
 
-        public async Task<Religion> RegisterReligion(string religionName) 
+        /*      Religion Registration       */
+
+        public async Task<Religion> GetOrRegisterReligion(string religionName) 
         {
             if (string.IsNullOrWhiteSpace(religionName)) 
             {
                 throw new FieldMissingException("Religion is required.");
             }
 
-            var ReligionBuilder = new ReligionBuilder();
-            ReligionBuilder
-                .WithReligionName(religionName);
-
-            Religion UserReligion = ReligionBuilder.Build();
-
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
                 ReligionRepository religionRepo = new ReligionRepository(dbContext);
-                await religionRepo.AddAsync(UserReligion);
-                await religionRepo.SaveChangesAsync();
-                return UserReligion;
+                Religion? religion = await religionRepo.GetReligionByName(religionName);
+
+                if (religion is null)
+                {
+                    religion = new ReligionBuilder()
+                        .WithReligionName(religionName)
+                        .Build();
+
+                    await religionRepo.AddAsync(religion);
+                    await religionRepo.SaveChangesAsync();
+                }
+
+                return religion;
             }
         }
 
-        public async Task<UserAuth> RegisterUserAuth(string username, string email, string password)
+
+        /*      UserAuth Registration       */
+
+        public async Task<UserAuth> CreateUserAuth(string username, string email, string password)
         {
             if (string.IsNullOrWhiteSpace(username))
             {
@@ -309,31 +366,19 @@ namespace Services
 
 
                 //  check for existing userauth
-                var existingUserEmail = await userAuthRepo.GetUserAuthByUserNameOrEmailAsync(email);
-                var existingUserUserName = await userAuthRepo.GetUserAuthByUserNameOrEmailAsync(username);
+                var existingUserEmail = (await userAuthRepo.GetUserAuthByUserNameOrEmailAsync(email))?.Email;
+                var existingUserUserName = (await userAuthRepo.GetUserAuthByUserNameOrEmailAsync(username))?.UserName;
 
                 if (existingUserEmail is not null || existingUserUserName is not null)
                 {
                     throw new EmailAlreadyExistException(email ?? username);
                 }
 
-
-                await userAuthRepo.AddAsync(userAuth);
-                await userAuthRepo.SaveChangesAsync();
                 return userAuth;
             }
         }
 
-        public async Task<UserInfo> RegisterUserInfo(
-            int userAuthId,
-            int userAccType,
-            int userAccProductType,
-            int userNameId,
-            int motherNameId,
-            int fatherNameId,
-            int birthInfoId,
-            int addressId,
-            int religionId,
+        public UserInfo CreateUserInfo(
             int age,
             string sex,
             string contactNumber,
@@ -366,13 +411,6 @@ namespace Services
 
             var UserInfoBuilder = new UserInfoBuilder();
             UserInfoBuilder
-                .WithUserAuthId(userAuthId)
-                .WithUserNameId(userNameId)
-                .WithMotherNameId(motherNameId)
-                .WithFatherNameId(fatherNameId)
-                .WithBirthInfoId(birthInfoId)
-                .WithAddressId(addressId)
-                .WithReligion(religionId)
                 .WithAge(age)
                 .WithSex(sex)
                 .WithContactNumber(contactNumber)
@@ -382,19 +420,12 @@ namespace Services
                 .WithProfilePicture(profilePicture)
                 .WithGovernmentId(governmentId);
 
-            UserInfo UserInfo = UserInfoBuilder.Build();
+            UserInfo userInfo = UserInfoBuilder.Build();
 
-            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
-            {
-                UserInfoRepository userInfoRepo = new UserInfoRepository(dbContext);
-
-                await userInfoRepo.AddAsync(UserInfo);
-                await userInfoRepo.SaveChangesAsync();
-                return UserInfo;
-            }
+            return userInfo;
         }
 
-        public async Task<Account> RegisterAccount(int accountTypeId,int accountProductTypeId, string contactNumber, int? linkedBeneficiaryId = null) 
+        public Account CreateAccount(int accountTypeId,int accountProductTypeId, string contactNumber, int? linkedBeneficiaryId = null) 
         {
             if (accountTypeId <= 0) 
             {
@@ -427,13 +458,7 @@ namespace Services
 
             Account userAccount = accountBuilder.Build();
 
-            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
-            {
-                AccountRepository accountRepo = new AccountRepository(dbContext);
-                await accountRepo.AddAsync(userAccount);
-                await accountRepo.SaveChangesAsync(); 
-                return userAccount;
-            }
+            return userAccount;
         }
 
         public async Task<Account?> GetExistingBeneficiaryAccountAsycn(string accountName, string accountNumber) 
@@ -494,6 +519,38 @@ namespace Services
                 await dbContext.SaveChangesAsync();
             }
         }
-
+        private async Task<BirthInfo?> TryGetExistingBirthInfo(BirthInfo birthInfo)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                BirthInfoRepository birthInfoRepo = new BirthInfoRepository(dbContext);
+                return await birthInfoRepo
+                    .Query
+                    .HasBirthDate(birthInfo.BirthDate)
+                    .HasRegionId(birthInfo.RegionId)
+                    .HasProvinceId(birthInfo.ProvinceId)
+                    .HasCityId(birthInfo.CityId)
+                    .GetQuery()
+                    .FirstOrDefaultAsync();
+            }
+        }
+        private async Task<Address?> TryGetExistingAddress(Address address)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                AddressRepository addressRepo = new AddressRepository(dbContext);
+                return await addressRepo
+                    .Query
+                    .HasRegionId(address.RegionId)
+                    .HasProvinceId(address.ProvinceId)
+                    .HasCityId(address.CityId)
+                    .HasBarangayId(address.BarangayId)
+                    .HasStreet(address.Street)
+                    .HasHouse(address.House)
+                    .HasPostalCode(address.PostalCode)
+                    .GetQuery()
+                    .FirstOrDefaultAsync();
+            }
+        }
     }
 }

@@ -247,9 +247,19 @@ namespace Services.SessionsManagement
             }
         }
 
+        /// <summary>
+        /// Updates the user session. Used after making changes to user controlled sessions.
+        /// </summary>
+        /// <param name="userSession"></param>
+        /// <returns></returns>
         public async Task UpdateUserSession(UserSession userSession)
             => await _sessionStorage.StoreSessionAsync(SessionSchemes.USER_SESSION, userSession);
 
+        /// <summary>
+        /// Updates the admin's session. Used after making changes to admin controlled sessions.
+        /// </summary>
+        /// <param name="adminSession"></param>
+        /// <returns></returns>
         public async Task UpdateAdminSession(AdminSession adminSession)
             => await _sessionStorage.StoreSessionAsync(SessionSchemes.ADMIN_SESSION, adminSession);
 

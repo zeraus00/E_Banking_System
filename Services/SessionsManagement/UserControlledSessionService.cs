@@ -24,17 +24,38 @@ namespace Services.SessionsManagement
             _userSessionService = userSessionService;
         }
         /*      User Account List       */
+        /// <summary>
+        /// Get the linked accounts of the user inside the user session as a 
+        /// list of <see cref="LinkedAccount"/> objects.
+        /// </summary>
+        /// <param name="userSession">
+        /// The user session containing the linked accounts.
+        /// </param>
+        /// <returns></returns>
         public async Task<List<LinkedAccount>> GetUserAccountListAsync(UserSession? userSession = null)
         => userSession is null
             ? (await _userSessionService.GetUserSession()).LinkedAccountList
             : userSession.LinkedAccountList;
 
         /*      Active Account Session      */
+
+        /// <summary>
+        /// Retrieves the current active session inside the user session as a
+        /// <see cref="LinkedAccount"/> object.
+        /// </summary>
+        /// <param name="userSession"></param>
+        /// <returns></returns>
         public async Task<LinkedAccount> GetActiveAccountSessionAsync(UserSession? userSession = null)
         => userSession is null
             ? (await _userSessionService.GetUserSession()).ActiveAccountSession
             : userSession.ActiveAccountSession;
 
+        /// <summary>
+        /// Replaces the active account session in the user session and updates the user session.
+        /// </summary>
+        /// <param name="activeAccountSession"></param>
+        /// <param name="userSession"></param>
+        /// <returns></returns>
         public async Task SetActiveAccountSessionAsync(LinkedAccount? activeAccountSession = null, UserSession? userSession = null)
         {
             if (userSession is null)
@@ -50,6 +71,12 @@ namespace Services.SessionsManagement
             userSession.ActiveAccountSession = SetAccountPermissions(activeAccountSession);
             await _userSessionService.UpdateUserSession(userSession);
         }
+        /// <summary>
+        /// Used when logging in.
+        /// Creates a new active account session.
+        /// </summary>
+        /// <param name="account"></param>
+        /// <returns></returns>
         public LinkedAccount CreateAccountSession(Account account)
         {
             LinkedAccount activeAccountSession = new LinkedAccount
@@ -65,6 +92,18 @@ namespace Services.SessionsManagement
         }
 
         /*      Transaction Session     */
+
+        /// <summary>
+        /// Used if you have not previously called <see cref="UserSessionService.GetUserSession"/>.
+        /// Gets the <<see cref="TransactionSession"/>> object from the <see cref="UserSession"> object.
+        /// </summary>
+        /// <param name="userSession">
+        /// The <see cref="UserSession"/> object.
+        /// </param>
+        /// <returns></returns>
+        /// <exception cref="ControlledSessionNotFound">
+        /// Thrown when there is no existing transaction session. 
+        /// </exception>
         public async Task<TransactionSession> GetTransactionSessionAsync(UserSession? userSession = null)
         {
             if (userSession is null)
@@ -72,9 +111,25 @@ namespace Services.SessionsManagement
             return userSession.TransactionSession ?? throw new ControlledSessionNotFound(SessionSchemes.USER_SESSION, userSession.TransactionSessionScheme);
         }
 
+        /// <summary>
+        /// Clears the current transaction session.
+        /// </summary>
+        /// <param name="userSession"
+        /// The <see cref="UserSession"/> object.
+        /// ></param>
+        /// <returns></returns>
         public async Task ClearTransactionSessionAsync(UserSession? userSession = null)
             => await SetTransactionSessionAsync(0, transactionSession: null, userSession);
 
+        /// <summary>
+        /// Sets a new <see cref="TransactionSession"/> inside the current
+        /// <see cref="UserSession"/> and updates the <see cref="UserSession"/> in
+        /// ProtectedSessionStorage.
+        /// </summary>
+        /// <param name="transactionTypeId"></param>
+        /// <param name="transactionSession"></param>
+        /// <param name="userSession"></param>
+        /// <returns></returns>
         public async Task SetTransactionSessionAsync(int transactionTypeId, TransactionSession? transactionSession, UserSession? userSession = null)
         {
             if (userSession is null)

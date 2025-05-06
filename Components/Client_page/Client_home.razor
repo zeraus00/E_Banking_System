@@ -111,34 +111,38 @@
 
                         <!-- Withdraw -->
                         <div class="col-6">
-                            <a href="/Withdraw_amount" class="nav-link button d-flex justify-content-between align-items-center shadow-sm h-100">
+                            <button class="nav-link button d-flex justify-content-between align-items-center shadow-sm h-100 @(hasWithdrawError ? "error-link" : "")"
+                                @onclick ="TryRedirectToWithdrawPage">
                                 Withdraw
                                 <img src="/bootstrap/Utilities/withdraw.png" alt="Withdraw Icon" style="width: 30px; height: 30px; " />
-                            </a>
+                            </button>
                         </div>
 
                         <!-- Transfer -->
                         <div class="col-6">
-                            <a href="/Transfer_amount" class="nav-link button d-flex justify-content-between align-items-center shadow-sm h-100">
+                            <button class="nav-link button d-flex justify-content-between align-items-center shadow-sm h-100 @(hasTransferError ? "error-link" : "")" 
+                                @onclick="TryRedirectToTransferPage">
                                 Transfer
                                 <img src="/bootstrap/Utilities/transfer.png" alt="Transfer Icon" style="width: 20px; height: 20px; " />
-                            </a>
+                            </button>
                         </div>
 
                         <!-- Deposit -->
                         <div class="col-6">
-                            <a href="/Deposit_amount" class="nav-link button d-flex justify-content-between align-items-center shadow-sm h-100">
+                            <button class="nav-link button d-flex justify-content-between align-items-center shadow-sm h-100 @(hasDepositError ? "error-link" : "")" 
+                                @onclick="TryRedirectToDepositPage">
                                 Deposit
                                 <img src="/bootstrap/Utilities/deposit.png" alt="Deposit Icon" style="width: 30px; height: 30px; " />
-                            </a>
+                            </button>
                         </div>
 
                         <!-- Loan -->
                         <div class="col-6">
-                            <a href="/Apply_loan" class="nav-link button d-flex justify-content-between align-items-center shadow-sm h-100">
+                            <button class="nav-link button d-flex justify-content-between align-items-center shadow-sm h-100 @(hasApplyLoanError ? "error-link" : "")" 
+                                @onclick="TryRedirectToApplyLoan">
                                 Apply Loan
                                 <img src="/bootstrap/Utilities/loan.png" alt="Loan Icon" style="width: 23px; height: 23px;" />
-                            </a>
+                            </button>
                         </div>
 
                     </div>
@@ -188,16 +192,26 @@
     // Mock data for demonstration — replace with real data from your backend
     private List<LinkedAccount> userAccountList = new();
     private int selectedAccountId { get; set; }
-    private Account? activeAccount;
     private List<Transaction> recentTransactions = new();
-    private string _accessRole = "Loading...";
-    private string _clientName = "Loading...";
-    private string _accountNumber = "Loading...";
-    private string _accountStatus = "Loading...";
+    // private string _accessRole = "Loading...";
+    // private string _clientName = "Loading...";
+    // private string _accountNumber = "Loading...";
+    // private string _accountStatus = "Loading...";
+    // private string _clientPhone = "Loading...";
+    private string _accessRole = "";
+    private string _clientName = "";
+    private string _accountNumber = "";
+    private string _accountStatus = "";
+    private string _clientPhone = "";
     private decimal? _currentBalance = 0.00m;
-    private string _clientPhone = "Loading...";
     private bool showNotifications = false;
     private string notificationClass => showNotifications ? "show-popup" : string.Empty;
+
+    private bool hasRestrictions;
+    private bool hasWithdrawError = false;
+    private bool hasDepositError = false;
+    private bool hasTransferError = false;
+    private bool hasApplyLoanError = false;
 
     private string error = string.Empty;
 
@@ -258,9 +272,6 @@
                 //  Get account list.
                 LoadAccountList();
 
-                //  Get active account.
-                //  Throws AccountNotFoundException is account is not found.
-                activeAccount = await userDataService.GetAccountAsync(activeAccountSession.AccountId);
 
                 //  Set display data.
                 _accessRole = AccessRoleNames.AS_STRING_LIST[activeAccountSession.UserAccessRoleId - 1];
@@ -268,7 +279,7 @@
                 _accountNumber = activeAccountSession.AccountNumber;
                 _accountStatus = AccountStatusTypeNames.AS_STRING_LIST[activeAccountSession.AccountStatusId-1];
                 _clientPhone = userSession.CurrentUserContact;
-                _currentBalance = activeAccount.Balance;
+                _currentBalance = await userDataService.GetAccountBalanceAsync(activeAccountSession.AccountId);
                 //  Get 3 most recent transactions of the account.
                 recentTransactions = await userDataService
                     .GetRecentAccountTransactionsAsync(
@@ -297,7 +308,7 @@
 
     private void VerifyAccountPermissions()
     {
-        bool hasRestrictions = (
+        hasRestrictions = (
             !activeAccountSession.AccountCanTransact ||
             !activeAccountSession.AccountCanApplyLoan ||
             !activeAccountSession.AccountCanPayLoan
@@ -309,5 +320,65 @@
     private void LoadAccountList()
     {
         userAccountList = userSession.LinkedAccountList;
+    }
+
+    private async Task TryRedirectToWithdrawPage()
+    {
+        if (activeAccountSession.AccountCanTransact)
+        {
+            redirectService.redirectWithNavigationManager(PageRoutes.WITHDRAW_AMOUNT);
+            return;
+        }
+
+        hasWithdrawError = true;
+        StateHasChanged();
+        await Task.Delay(3000);
+        hasWithdrawError = false;
+        StateHasChanged();
+    }
+
+    private async Task TryRedirectToDepositPage()
+    {
+        if (activeAccountSession.AccountCanTransact)
+        {
+            redirectService.redirectWithNavigationManager(PageRoutes.DEPOSIT_AMOUNT);
+            return;
+        }
+
+        hasDepositError = true;
+        StateHasChanged();
+        await Task.Delay(3000);
+        hasDepositError = false;
+        StateHasChanged();
+    }
+
+    private async Task TryRedirectToTransferPage()
+    {
+        if (activeAccountSession.AccountCanTransact)
+        {
+            redirectService.redirectWithNavigationManager(PageRoutes.TRANSFER_AMOUNT);
+            return;
+        }
+
+        hasTransferError = true;
+        StateHasChanged();
+        await Task.Delay(3000);
+        hasTransferError = false;
+        StateHasChanged();
+    }
+
+    private async Task TryRedirectToApplyLoan()
+    {
+        if (activeAccountSession.AccountCanApplyLoan)
+        {
+            redirectService.redirectWithNavigationManager(PageRoutes.APPLY_LOAN);
+            return;
+        }
+
+        hasApplyLoanError = true;
+        StateHasChanged();
+        await Task.Delay(3000);
+        hasApplyLoanError = false;
+        StateHasChanged();
     }
 }

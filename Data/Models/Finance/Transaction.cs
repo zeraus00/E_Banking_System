@@ -18,6 +18,7 @@
         public DateTime TransactionDate { get; set; }                   // Required; Date of transaction
         public TimeSpan TransactionTime { get; set; }                   // Required; Default DateTime.UtcNow
         public decimal TransactionFee { get; set; }                     // Required; Default 0.0
+        public string Remarks { get; set; } = string.Empty;             
 
         /*  Navigation Properties   */
         public TransactionType TransactionType { get; set; } = null!;
