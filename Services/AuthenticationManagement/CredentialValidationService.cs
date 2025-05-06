@@ -56,39 +56,7 @@ namespace Services.AuthenticationManagement
         /// <param name="email"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        public bool IsPasswordValid(UserAuth userAuth, string password)
-        {
-            return BcryptHelper.VerifyPassword(password, userAuth.Password);
-        }
-
-        /// <summary>
-        /// Returns true if the RoleId corresponds to administrator.
-        /// </summary>
-        /// <param name="roleId"></param>
-        /// <returns></returns>
-        public bool IsAdmin(int roleId)
-        {
-            return roleId == (int)RoleTypes.Administrator;
-        }
-
-        /// <summary>
-        /// Returns true if the RoleId corresponds to user.
-        /// </summary>
-        /// <param name="roleId"></param>
-        /// <returns></returns>
-        public bool IsUser(int roleId)
-        {
-            return roleId == (int)RoleTypes.User;
-        }
-
-        /// <summary>
-        /// Returns true if the RoleId corresponds to employee.
-        /// </summary>
-        /// <param name="roleId"></param>
-        /// <returns></returns>
-        public bool IsEmployee(int roleId)
-        {
-            return roleId == (int)RoleTypes.Employee;
-        }
+        public bool IsPasswordValid(UserAuth userAuth, string password) => 
+            BcryptHelper.VerifyPassword(password, userAuth.Password);
     }
 }

@@ -26,37 +26,14 @@ namespace Services.DataManagement
         {
             _dataMaskingService = dataMaskingService;
         }
-
         /// <summary>
-        /// Attempts to retrieve a UserAuth from the database with specified includes.
-        /// Throws an error if no userauth is found.
+        /// Get the user email through UserAuthId.
         /// </summary>
-        /// <param name="userAuthId">The primary key of the UserAuth.</param>
-        /// <param name="includeRole">Decide wheter to include the Role.</param>
-        /// <param name="includeAccounts">Decide wheter to include the Accounts.</param>
-        /// <param name="includeUserInfo">Decide wheter to include the UserInfo.</param>
-        /// <returns></returns>
-        /// <exception cref="UserNotFoundException"></exception>
-        public async Task<UserAuth> TryGetUserAuthAsync(
-            int userAuthId,
-            bool includeRole = false,
-            bool includeAccounts = false,
-            bool includeUserInfo = false)
-        {
-            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
-            {
-                var userAuthRepo = new UserAuthRepository(dbContext);
-                return await userAuthRepo
-                    .Query
-                    .HasUserAuthId(userAuthId)
-                    .IncludeRole(includeRole)
-                    .IncludeUserInfo(includeUserInfo)
-                    .GetQuery()
-                    .FirstOrDefaultAsync()
-                    ?? throw new UserNotFoundException();
-            }
-        }
-
+        /// <param name="userAuthId">The id from the UsersAuth table.</param>
+        /// <returns> A string containing the user's email </returns>
+        /// <exception cref="UserNotFoundException">
+        /// Thrown when no UserAuth with the specified userAuthId is found.
+        /// </exception>
         public async Task<string> TryGetUserAuthEmail(int userAuthId)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
@@ -74,7 +51,16 @@ namespace Services.DataManagement
         /// Get UserInfo through userInfoId asynchronously with specified includes.
         /// </summary>
         /// <param name="userInfoId">The primary key of the UserInfo.</param>
+        /// <param name="includeUserAuth">Decides whether UserAuth is included.</param>
+        /// <param name="includeUserName">Decides whether UserName is included.</param>
+        /// <param name="includeBirthInfo">Decides whether BirthInfo is incldued.</param>
+        /// <param name="includeAddress">Decides whether Address is included</param>
+        /// <param name="includeFatherName">Decides whether FatherName is included.</param>
+        /// <param name="includeMotherName">Decides whether MotherName is included.</param>
+        /// <param name="includeReligion">Decides whether Religion is included.</param>
+        /// <param name="includeUserInfoAccounts">Decides whether UserInfoAccounts is included.</param>
         /// <returns>The UserInfo if found. Null otherwise.</returns>
+        /// <exception cref="UserNotFoundException"></exception>
         public async Task<UserInfo> TryGetUserInfoAsync(
             int userInfoId,
             bool includeUserAuth = false,
@@ -91,61 +77,73 @@ namespace Services.DataManagement
             {
                 UserInfoRepository userInfoRepo = new UserInfoRepository(dbContext);
 
-                var queryBuilder = userInfoRepo.Query;
-
-                if (includeUserAuth)
-                    queryBuilder.IncludeUserAuth();
-                if (includeUserName)
-                    queryBuilder.IncludeUserName();
-                if (includeBirthInfo)
-                    queryBuilder.IncludeBirthInfo();
-                if (includeAddress)
-                    queryBuilder.IncludeAddress();
-                if (includeFatherName)
-                    queryBuilder.IncludeFatherName();
-                if (includeMotherName)
-                    queryBuilder.IncludeMotherName();
-                if (includeReligion)
-                    queryBuilder.IncludeReligion();
-                if (includeUserInfoAccounts)
-                    queryBuilder.IncludeUserInfoAccounts();
+                //  Build a query with the specified conditions.
+                var queryBuilder = userInfoRepo
+                    .Query
+                    .IncludeUserAuth(includeUserAuth)
+                    .IncludeUserName(includeUserName)
+                    .IncludeBirthInfo(includeBirthInfo)
+                    .IncludeAddress(includeAddress)
+                    .IncludeFatherName(includeFatherName)
+                    .IncludeMotherName(includeMotherName)
+                    .IncludeReligion(includeReligion)
+                    .IncludeUserInfoAccounts(includeUserInfoAccounts);
 
                 var query = queryBuilder.GetQuery();
 
                 return await userInfoRepo.GetUserInfoByIdAsync(userInfoId, query) ?? throw new UserNotFoundException();
             }
         }
+
+        /// <summary>
+        /// Get Address with the specified addressId.
+        /// Includes navigation properties of the Regions, Provinces, Cities, and Barangays tables.
+        /// </summary>
+        /// <param name="addressId">The id of the address in the addresses table.</param>
+        /// <returns>The Address found through the query.</returns>
+        /// <exception cref="NullReferenceException">
+        /// Thrown when no address with the specified id is found.
+        /// </exception>
         public async Task<Address> TryGetAddressAsync(int addressId)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
                 var addressRepo = new AddressRepository(dbContext);
 
-                var query = addressRepo.Query
+                return await addressRepo.Query
                     .HasAddressId(addressId)
                     .IncludeRegion()
                     .IncludeProvince()
                     .IncludeCity()
                     .IncludeBarangay()
-                    .GetQuery();
-
-                return await query.FirstOrDefaultAsync() ?? throw new NullReferenceException("NO SUCH ADDRESS");
+                    .GetQuery()
+                    .FirstOrDefaultAsync()
+                    ?? throw new NullReferenceException("NO SUCH ADDRESS");
             }
         }
+        /// <summary>
+        /// Get BirthInfo with the specified birthInfoId.
+        /// Includes navigation properties of the Regions, Provinces, and Cities tables.
+        /// </summary>
+        /// <param name="birthInfoId">The id of the BirthInfo in the BirthsInfo table.</param>
+        /// <returns>The BirthInfo found through the query.</returns>
+        /// <exception cref="NullReferenceException">
+        /// Throw when no BirthInfo with the specified id is found.
+        /// </exception>
         public async Task<BirthInfo> TryGetBirthInfoAsync(int birthInfoId)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
                 var birthInfoRepo = new BirthInfoRepository(dbContext);
-                var query = birthInfoRepo
+                return await birthInfoRepo
                     .Query
                     .HasBirthInfoId(birthInfoId)
                     .IncludeRegion()
                     .IncludeProvince()
                     .IncludeCity()
-                    .GetQuery();
-
-                return await query.FirstOrDefaultAsync() ?? throw new NullReferenceException();
+                    .GetQuery()
+                    .FirstOrDefaultAsync()
+                    ?? throw new NullReferenceException();
             }
         }
         /// <summary>
@@ -215,12 +213,13 @@ namespace Services.DataManagement
             return fullName.Trim();
         }
         /// <summary>
-        /// Retrieves a list of transactions associated with the specified account ID.
+        /// Retrieves a bulk list of transactions associated with the specified account ID.
         /// Includes parameters for filtering the query.
         /// </summary>
         /// <param name="accountId">The ID of the account whose transactions are to be retrieved.</param>
-        /// <param name="transactionCount">The number of entries to be taken from the list.</param>
         /// <param name="transactionTypeId">The ID of the type of transactions to be retrieved.</param>
+        /// <param name="pageSize">The number of transactions to retrieve per page. Used for pagination.</param>
+        /// <param name="pageNumber">The page number of the transaction results to retrieve. Starts at 1.</param>
         /// <param name="transactionStartDate">The earliest date of transactions to be retrieved.</param>
         /// <param name="transactionEndDate">The latest date of the transactions to be retrieved.</param>
         /// <returns>
@@ -240,17 +239,25 @@ namespace Services.DataManagement
                 //  Define repository requirements
                 var transactionRepository = new TransactionRepository(dbContext);
 
-                //  Include TransactionType navigation property in query.
-                var query = transactionRepository
-                    .ComposeQuery(includeTransactionType: true, includeMainAccount: true, includeCounterAccount: true, includeExternalVendor: true);
-                query = transactionRepository
-                    .FilterQuery(query, transactionTypeId, transactionStartDate, transactionEndDate);
-
-
                 //  Return the list of transactions.
                 int skipCount = (pageNumber - 1) * pageSize;
                 int takeCount = pageSize;
-                var transactionList = await transactionRepository.GetRecentTransactionsAsListAsync(accountId, skipCount, takeCount, query);
+
+                var queryBuilder = transactionRepository
+                    .Query
+                    .HasMainAccountId(accountId)
+                    .SkipBy(skipCount)
+                    .TakeWithCount(takeCount);
+
+                if (transactionTypeId > 0)
+                    queryBuilder.HasTransactionTypeId(transactionTypeId);
+                if (transactionStartDate is DateTime startDate)
+                    queryBuilder.HasStartDate(startDate);
+                if (transactionEndDate is DateTime endDate)
+                    queryBuilder.HasEndDate(endDate);
+
+
+                var transactionList = await queryBuilder.GetQuery().ToListAsync();
 
                 if (transactionList.Any())
                 {
@@ -266,6 +273,18 @@ namespace Services.DataManagement
             }
         }
 
+        /// <summary>
+        /// Used in conjunction with <see cref="GetRecentAccountTransactionsAsync(int, int, int, int, DateTime?, DateTime?)"/>
+        /// Further divides the bulk list into pages to be shown in Transactions Page.
+        /// Retrieves a page (or sublist) of transactions from the main bulk list to be displayed in
+        /// smaller pages.
+        /// </summary>
+        /// <param name="transactionList">The full list of transactions retrieved from the database.</param>
+        /// <param name="pageNumber">The page number to retrieve from the full list. Starts at 1.</param>
+        /// <param name="pageSize">The number of transactions per page. Defaults to 10.</param>
+        /// <returns>
+        /// A sublist of <see cref="Transaction"/> objects representing a single page of transactions from the bulk list.
+        /// </returns>
         public List<Transaction> GetTransactionListPage(List<Transaction> transactionList, int pageNumber, int pageSize = 10)
         {
             int skipCount = (pageNumber - 1) * pageSize;
@@ -348,7 +367,6 @@ namespace Services.DataManagement
         /// </summary>
         /// <param name="accountNumber">The account number to search for.</param>
         /// <param name="includeAccountType">Specifies whether to include the associated AccountType. Default is false.</param>
-        /// <param name="includeUsersAuth">Specifies whether to include the associated UsersAuth. Default is false.</param>
         /// <param name="includeTransactions">Specifies whether to include the associated transactions. Default is false.</param>
         /// <param name="includeLoans">Specifies whether to include the associated loans. Default is false.</param>
         /// <returns>

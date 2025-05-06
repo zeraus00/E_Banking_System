@@ -71,7 +71,23 @@ namespace Data.Repositories
             {
                 _query = query;
             }
+            public IQueryable<TEntity> GetQuery() => _query;
 
+            public TSelf NewQuery(IQueryable<TEntity> newQuery)
+            {
+                _query = newQuery;
+                return (TSelf)this;
+            }
+            public TSelf SkipBy(int skipCount)
+            {
+                _query = _query.Skip(skipCount);
+                return (TSelf)this;
+            }
+            public TSelf TakeWithCount(int takeCount)
+            {
+                _query = _query.Take(takeCount);
+                return (TSelf)this;
+            }
             protected TSelf Include(Expression<Func<TEntity, object?>> navigationProperty) 
             {
                 _query = _query.Include(navigationProperty);
@@ -105,13 +121,7 @@ namespace Data.Repositories
             {
                 return await _query.Select(projection).ToListAsync();
             }
-            public IQueryable<TEntity> GetQuery() => _query;
 
-            public TSelf NewQuery(IQueryable<TEntity> newQuery) 
-            {
-                _query = newQuery;
-                return (TSelf)this;
-            }
         }
     }
 }

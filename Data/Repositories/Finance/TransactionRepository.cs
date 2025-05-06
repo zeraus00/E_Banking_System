@@ -7,7 +7,11 @@
     /// <param name="context"></param>
     public class TransactionRepository : Repository
     {
-        public TransactionRepository(EBankingContext context) : base(context) { }
+        public TransactionQuery Query;
+        public TransactionRepository(EBankingContext context) : base(context) 
+        {
+            Query = new TransactionQuery(context.Transactions.AsQueryable());
+        }
 
         public async Task<List<Transaction>> GetRecentTransactionsAsListAsync(int mainAccountId, int skipCount, int takeCount, IQueryable<Transaction>? query = null)
         {
@@ -35,48 +39,37 @@
 
             return transactionsList;
         }
-
-        public IQueryable<Transaction> QueryIncludeAll()
+        public class TransactionQuery : CustomQuery<Transaction, TransactionQuery>
         {
-            return this.ComposeQuery(true, true, true);
-        }
+            public TransactionQuery(IQueryable<Transaction> query) : base(query) { }
+            public TransactionQuery HasTransactionTypeId(int transactionTypeId) => 
+                WhereCondition(t => t.TransactionTypeId == transactionTypeId);
+            public TransactionQuery HasMainAccountId(int accountId) =>
+                WhereCondition(t => t.MainAccountId == accountId);
+            public TransactionQuery HasCounterAccountId(int accountId) =>
+                WhereCondition(t => t.CounterAccountId == accountId);
+            public TransactionQuery HasStartDate(DateTime startDate) =>
+                WhereCondition(t => t.TransactionDate >= startDate.Date);
+            public TransactionQuery HasEndDate(DateTime endDate) =>
+                WhereCondition(t => t.TransactionDate <= endDate.Date);
+            public TransactionQuery IncludeTransactionType(bool include = true) => 
+                include ? Include(t => t.TransactionType) : this;
+            public TransactionQuery IncludeMainAccount(bool include = true) => 
+                include ? Include(t => t.MainAccount) : this;
+            public TransactionQuery IncludeCounterAccount(bool include = true) => 
+                include ? Include(t => t.CounterAccount) : this;
+            public TransactionQuery IncludeExternalVendor(bool include = true) => 
+                include ? Include(t => t.ExternalVendor) : this;
 
-        public IQueryable<Transaction> ComposeQuery(
-            bool includeTransactionType = false,
-            bool includeMainAccount = false,
-            bool includeCounterAccount = false,
-            bool includeExternalVendor = false
-            )
-        {
-            IQueryable<Transaction> query = _context.Transactions.AsQueryable();
-            if (includeTransactionType) 
-                query = query.Include(t => t.TransactionType);
-            if (includeMainAccount)
-                query = query.Include(t => t.MainAccount);
-            if (includeCounterAccount)
-                query = query.Include(t => t.CounterAccount);
-            if (includeExternalVendor)
-                query = query.Include(t => t.ExternalVendor);
-            return query;
-        }
+            public TransactionQuery OrderByDateAndTimeDescending(bool isOrdered = true)
+            {
+                if (isOrdered)
+                    _query = _query
+                        .OrderByDescending(t => t.TransactionDate)
+                        .ThenByDescending(t => t.TransactionTime);
+                return this;
+            }
 
-        public IQueryable<Transaction> FilterQuery(
-            IQueryable<Transaction>? query = null,
-            int transactionTypeId = 0,
-            DateTime? transactionStartDate = null,
-            DateTime? transactionEndDate = null
-            )
-        {
-            if (query is null)
-                query = _context.Transactions.AsQueryable();
-            if (transactionTypeId is not 0)
-                query = query.Where(t => t.TransactionTypeId == transactionTypeId);
-            if (transactionStartDate.HasValue)
-                query = query.Where(t => t.TransactionDate >= transactionStartDate);
-            if (transactionEndDate.HasValue)
-                query = query.Where(t => t.TransactionDate <= transactionEndDate);
-
-            return query;
         }
     }
 

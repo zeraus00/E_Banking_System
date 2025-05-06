@@ -173,13 +173,13 @@ namespace Services.DataManagement
         /// <summary>
         /// Retrieves a list of transactions filtered by an optional start and end date.
         /// </summary>
-        /// <param name="startDate">The start date for filtering transactions. If null, no lower bound is applied.</param>
-        /// <param name="endDate">The end date for filtering transactions. If null, no upper bound is applied.</param>
+        /// <param name="transactionStartDate">The start date for filtering transactions. If null, no lower bound is applied.</param>
+        /// <param name="transactionEndDate">The end date for filtering transactions. If null, no upper bound is applied.</param>
         /// <returns>A reversed list of <see cref="Transaction"/> entities matching the specified date range.</returns>
         /// <remarks>
         /// Transactions are ordered such that the most recent ones appear first.
         /// </remarks>
-        public async Task<List<Transaction>> GetTransactionListAsync(DateTime? startDate = null, DateTime? endDate = null)
+        public async Task<List<Transaction>> GetTransactionListAsync(DateTime? transactionStartDate = null, DateTime? transactionEndDate = null)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
@@ -187,19 +187,16 @@ namespace Services.DataManagement
                 var transactionRepo = new TransactionRepository(dbContext);
 
                 //  Compose Query
-                var query = transactionRepo.ComposeQuery();
-                query = transactionRepo.FilterQuery(
-                    transactionStartDate: startDate,
-                    transactionEndDate: endDate
-                    );
+                var queryBuilder = transactionRepo
+                    .Query
+                    .OrderByDateAndTimeDescending();
 
-                //  Get query as list.
-                List<Transaction> transactionList = await query.ToListAsync();
+                if (transactionStartDate is DateTime startDate)
+                    queryBuilder.HasStartDate(startDate);
+                if (transactionEndDate is DateTime endDate)
+                    queryBuilder.HasEndDate(endDate);
 
-                //  Reverse the list.
-                transactionList.Reverse();
-
-                return transactionList;
+                return await queryBuilder.GetQuery().ToListAsync();
             }
         }
     }
