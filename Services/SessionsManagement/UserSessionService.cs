@@ -114,22 +114,11 @@ namespace Services.SessionsManagement
                 //  Throws a UserNotFoundException if UserInfo is not found.
                 UserInfo userInfo = await _dataService.TryGetUserInfoAsync(userInfoId, includeUserName: true);
 
-                //  Get UserInfo and Accounts links.
+                //  Get Accounts linked to the online account of the user.
                 List<UserInfoAccount> userAccountLinks = await _dataService
                     .GetUserAccountLinks(userInfoId, includeAccount: true, isLinkedToOnlineAccount: true);
                 List<LinkedAccount> userAccountList = new();
-
-                /*  GET USER SESSION FIELDS  */
-                UserSession userSession = new();
-
-                userSession.UserAuthId = userAuthId;
-                userSession.UserInfoId = userInfoId;
-                //  Get full name.
-                userSession.CurrentUserName = await _dataService.GetUserFullName(userInfo) ?? "NAME_NOT_FOUND.";
-                userSession.CurrentUserEmail = maskedEmail;
-                userSession.CurrentUserContact = userInfo.ContactNumber;
-                //  Get account list.
-
+                //  Get LinkedAccount list.
                 if (userAccountLinks.Any())
                 {
                     foreach (var userAccountLink in userAccountLinks)
@@ -147,7 +136,16 @@ namespace Services.SessionsManagement
                     }
                 }
 
-                userSession.LinkedAccountList = userAccountList;
+                //  Create UserSession.
+                UserSession userSession = new()
+                {
+                    UserAuthId = userAuthId,
+                    UserInfoId = userInfoId,
+                    CurrentUserName = await _dataService.GetUserFullName(userInfo) ?? "NAME_NOT_FOUND.",
+                    CurrentUserEmail = maskedEmail,
+                    CurrentUserContact = userInfo.ContactNumber,
+                    LinkedAccountList = userAccountList
+                };
 
                 /*  CREATE A SESSION    */
                 await _sessionStorage.StoreSessionAsync(SessionSchemes.USER_SESSION, userSession);
@@ -183,21 +181,20 @@ namespace Services.SessionsManagement
                 int userAuthId = _claimsHelper.GetUserAuthId(principal);
                 int userInfoId = _claimsHelper.GetUserInfoId(principal);
 
-                //  Throws UserNotFoundException if UserAuth is not found.
-                UserAuth userAuth = await _dataService.TryGetUserAuthAsync(userAuthId);
 
                 //  Throws UserNotFoundException if UserAuth is not found.
                 UserInfo userInfo = await _dataService.TryGetUserInfoAsync(userInfoId, includeUserName: true);
 
                 /*  GET ADMIN SESSION FIELDS */
-                string email = _dataMaskingService.MaskEmail(userAuth.Email);
+                string email = await _dataService.TryGetUserAuthEmail(userAuthId);
+                string maskedEmail = _dataMaskingService.MaskEmail(email);
                 string fullname = await _dataService.GetUserFullName(userInfo) ?? "NAME_NOT_FOUND";
 
                 /*  ASSIGN ADMIN SESSION FIELDS */
                 AdminSession adminSession = new AdminSession()
                 {
                     FullName = fullname,
-                    Email = email
+                    Email = maskedEmail
                 };
 
                 //  Create a session.
@@ -220,32 +217,14 @@ namespace Services.SessionsManagement
         /// <returns>The UserSession object containing the session details.</returns>
         /// <exception cref="SessionNotFoundException">Thrown if no session is found.</exception>
         public async Task<UserSession> GetUserSession()
-        {
-            try
-            {
-                return await _sessionStorage.FetchSessionAsync<UserSession>(SessionSchemes.USER_SESSION);
-            }
-            catch (SessionNotFoundException)
-            {
-                throw;
-            }
-        }
+            => await _sessionStorage.FetchSessionAsync<UserSession>(SessionSchemes.USER_SESSION);
         /// <summary>
         /// Get current admin session.
         /// </summary>
         /// <returns>The AdminSession object containing the session details.</returns>
         /// <exception cref="SessionNotFoundException">Thrown if no session is found.</exception>
         public async Task<AdminSession> GetAdminSession()
-        {
-            try
-            {
-                return await _sessionStorage.FetchSessionAsync<AdminSession>(SessionSchemes.ADMIN_SESSION);
-            }
-            catch (SessionNotFoundException)
-            {
-                throw;
-            }
-        }
+            => await _sessionStorage.FetchSessionAsync<AdminSession>(SessionSchemes.ADMIN_SESSION);
 
         /// <summary>
         /// Updates the user session. Used after making changes to user controlled sessions.

@@ -43,6 +43,7 @@ namespace Data.Repositories.User
             public UserInfoQuery IncludeMotherName(bool include = true) => include ? Include(ui => ui.MotherName) : this;
             public UserInfoQuery IncludeReligion(bool include = true) => include ? Include(ui => ui.Religion) : this;
             public UserInfoQuery IncludeUserInfoAccounts(bool include = true) => include ? Include(ui => ui.UserInfoAccounts) : this;
+            public async Task<Name?> SelectUserName() => await Select<Name>(ui => ui.UserName);
         }
 
         #endregion Read Methods
