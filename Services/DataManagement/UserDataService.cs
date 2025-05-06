@@ -258,7 +258,8 @@ namespace Services.DataManagement
                     .Query
                     .HasMainAccountId(accountId)
                     .SkipBy(skipCount)
-                    .TakeWithCount(takeCount);
+                    .TakeWithCount(takeCount)
+                    .OrderByDateAndTimeDescending();
 
                 if (transactionTypeId > 0)
                     queryBuilder.HasTransactionTypeId(transactionTypeId);
