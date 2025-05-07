@@ -26,7 +26,7 @@ namespace Data.Configurations.Finance
             //  MinimumLoanAmount (Required; Decimal(9, 2))
             LoanTypes
                 .Property(lt => lt.MinimumLoanAmount)
-                .HasColumnType("Decimal(9, 2)")
+                .HasColumnType("Decimal(18, 2)")
                 .IsRequired();
 
             //  InterestRatePerAnnum (Required; Decimal(5, 2))

@@ -1,4 +1,6 @@
-﻿namespace Data.Configurations.Finance
+﻿using Microsoft.Extensions.Options;
+
+namespace Data.Configurations.Finance
 {
     public class LoanConfiguration : IEntityTypeConfiguration<Loan>
     {
@@ -104,25 +106,25 @@
                 .IsRequired()
                 .HasDefaultValue("Pending");
 
-            //  StartDate (Required; DateTime)
+            //  StartDate (Optional; DateTime)
             Loans
                 .Property(l => l.StartDate)
-                .IsRequired();
+                .IsRequired(false);
 
-            //  DueDate (Required; DateTime)
+            //  DueDate (Optional; DateTime)
             Loans
                 .Property(l => l.DueDate)
-                .IsRequired();
+                .IsRequired(false);
 
-            //  UpdateDate (Required; DateTime)
+            //  UpdateDate (Optional; DateTime)
             Loans
-                .Property(l => l.UpdateDate)
-                .IsRequired();
+            .Property(l => l.UpdateDate)
+                .IsRequired(false);
 
-            //  EndDate (Required; DateTime)
+            //  EndDate (Optional; DateTime)
             Loans
                 .Property(l => l.EndDate)
-                .IsRequired();
+                .IsRequired(false);
 
             //  Remarks (Optional; MaxLength: 50
             Loans

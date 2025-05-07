@@ -30,10 +30,10 @@
         private decimal _remainingLoanBalance;
         private DateTime _applicationDate;
         private string _loanStatus = string.Empty;
-        private DateTime _startDate;
-        private DateTime _dueDate;
-        private DateTime _updateDate;
-        private DateTime _endDate;
+        private DateTime? _startDate = null;
+        private DateTime? _dueDate = null;
+        private DateTime? _updateDate = null;
+        private DateTime? _endDate = null;
         private string _remarks = string.Empty;
 
         #region Builder Methods

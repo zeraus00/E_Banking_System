@@ -14,15 +14,15 @@
         public decimal LoanAmount { get; set; }                 //  Required; Decimal(18,2)
         public decimal InterestRate { get; set; }               //  Required; Decimal(5,2)
         public int LoanTermMonths { get; set; }                 //  Required; 3, 6, or 12 months
-        public int PaymentFrequency { get; set; }              //  Required; In one year; Monthly: 12; Bi-monthly: 6; Quarterly: 3;
+        public int PaymentFrequency { get; set; }               //  Required; In one year; Monthly: 12; Bi-monthly: 6; Quarterly: 3;
         public decimal PaymentAmount { get; set; }              //  Required; Decimal(18,2)
         public decimal RemainingLoanBalance { get; set; }       //  Required; Decimal(18,2)
         public DateTime ApplicationDate { get; set; }           //  Required; Default: CURDATE()
         public string LoanStatus { get; set; } = string.Empty;  //  Required; Default: 'Pending'
-        public DateTime StartDate { get; set; }                 //  Required: Loan start date
-        public DateTime DueDate { get; set; }                   //  Required: Loan due date
-        public DateTime UpdateDate { get; set; }                //  Required: Loan payment update date
-        public DateTime EndDate { get; set; }                   //  Required: Loan end date
+        public DateTime? StartDate { get; set; } = null;        //  Optional: Loan start date
+        public DateTime? DueDate { get; set; } = null;          //  Optional: Loan due date
+        public DateTime? UpdateDate { get; set; } = null;       //  Optional: Loan payment update date
+        public DateTime? EndDate { get; set; } = null;          //  Optional: Loan end date
         public string Remarks { get; set; } = string.Empty;     //  Optional
 
         /*  Navigation Properties   */
