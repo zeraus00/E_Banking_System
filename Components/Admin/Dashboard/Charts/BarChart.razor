@@ -1,15 +1,16 @@
 ﻿@using E_BankingSystem.Components.Admin.Dashboard.Charts
 
 @inject IJSRuntime JSRuntime
+@rendermode InteractiveServer
 
-<canvas id="lineChart" width="1000" height="400"></canvas>
+<canvas id="barChart" width="1000" height="400"></canvas>
 
 @code {
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            await JSRuntime.InvokeVoidAsync("drawLineChart");
+            await JSRuntime.InvokeVoidAsync("drawBarChart");
             StateHasChanged();
         }
     }

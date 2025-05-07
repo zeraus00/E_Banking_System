@@ -81,24 +81,26 @@
 
                 <!-- Simple Table -->
                 <div class="mt-4">
-                    <label class="text-muted fw-bold">Top 5 Largest Transactions</label>
-                    <table class="table table-bordered table-info text-dark">
-                        <thead>
+                    <label class="text-light text-center fw-bold">Transaction Breakdown</label>
+                    <table class="table table-bordered text-light">
+                        <thead class="table-info text-dark">
                             <tr>
-                                <th>Account No</th>
-                                <th>Amount</th>
                                 <th>Type</th>
-                                <th>Timestamp</th>
+                                <th>Count</th>
+                                <th>Total</th>
+                                <th>Average</th>
+                                <th>Notes</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var t in mockTransactions)
+                            @foreach (var t in mockTransactionsBreakdown)
                             {
                                 <tr>
-                                    <td>@t.AccountNo</td>
-                                    <td>@t.Amount</td>
-                                    <td>@t.Type</td>
-                                    <td>@t.Date</td>
+                                    <td class="fw-bold">@t.TransactionType</td>
+                                    <td>@t.Count</td>
+                                    <td>@t.Total</td>
+                                    <td>@t.Average</td>
+                                    <td>@t.Notes</td>
                                 </tr>
                             }
                         </tbody>
@@ -110,19 +112,19 @@
             <div class="key-metrics card">
                 <p class="text-muted border-bottom">Key Metrics</p>
                 <div class="row">
-                    <i class="bi bi-cash-stack">Total Volume</i>
+                    <i class="bi bi-cash-stack"> Total Volume</i>
                     <p class="text-end number">0</p>
                 </div>
                 <div class="row">
-                    <i class="bi bi-graph-up-arrow">Net Movement</i>
+                    <i class="bi bi-graph-up-arrow"> Net Movement</i>
                     <p class="text-end number">0</p>
                 </div>
                 <div class="row">
-                    <i class="bi bi-person-plus">New Accounts</i>
+                    <i class="bi bi-person-plus"> New Accounts</i>
                     <p class="text-end number">0</p>
                 </div>
                 <div class="row">
-                    <i class="bi bi-person-dash">Closed Accounts</i>
+                    <i class="bi bi-person-dash"> Closed Accounts</i>
                     <p class="text-end number">0</p>
                 </div>
             </div>
@@ -130,17 +132,58 @@
 
 
 
-        <!-- Line Chart Section -->
-        <div class="chart-section">
-            <h3>Line Chart</h3>
-
-            <!-- LineChart Component -->
-            <div class="chart-placeholder">
-                <E_BankingSystem.Components.Admin.Dashboard.Charts.LineChart />
+        <div class="chart-section my-5">
+            <!-- Left: Pie Chart -->
+            <div class="main-chart pie-chart">
+                <label>Transaction Types Chart</label>
+                <E_BankingSystem.Components.Admin.Dashboard.Charts.PieChart />
             </div>
 
+            <!-- Right: Line + Bar Chart stacked vertically -->
+            <div class="right-charts">
+                <div class="main-chart small-chart">
+                    <label>Transaction Volume</label>
+                    <E_BankingSystem.Components.Admin.Dashboard.Charts.LineChart />
+                </div>
+                <div class="main-chart small-chart">
+                    <label class="fs-6">Activities</label>
+                    <select id="barChartFilter" class="form-select-sm" onchange="drawBarChart()">
+                        <option value="hourly">Hour</option>
+                        <option value="daily">Day</option>
+                        <option value="weekly">Week</option>
+                    </select>
+
+                    <E_BankingSystem.Components.Admin.Dashboard.Charts.BarChart />
+                </div>
+            </div>
         </div>
 
+
+
+        <div class="mt-4">
+            <label class="text-light text-center fw-bold">Top 5 Largest Transactions</label>
+            <table class="table table-bordered text-light">
+                <thead class="table-info text-dark">
+                    <tr>
+                        <th>Account No</th>
+                        <th>Amount</th>
+                        <th>Type</th>
+                        <th>Timestamp</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var t in mockTransactions)
+                    {
+                        <tr>
+                            <td>@t.AccountNo</td>
+                            <td>@t.Amount</td>
+                            <td>@t.Type</td>
+                            <td>@t.Date</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
@@ -191,8 +234,16 @@
     new MockTransaction { Date = DateTime.Today, Type = "Deposit", Amount = 5000, AccountNo = 981738 },
     new MockTransaction { Date = DateTime.Today.AddDays(-1), Type = "Withdrawal", Amount = 1500, AccountNo = 897937 },
     new MockTransaction { Date = DateTime.Today.AddDays(-2), Type = "Transfer", Amount = 2000, AccountNo = 727371 },
-    new MockTransaction { Date = DateTime.Today.AddDays(-3), Type = "Loan", Amount = 10000, AccountNo = 913837 },
+    new MockTransaction { Date = DateTime.Today.AddDays(-3), Type = "Loan", Amount = 10000, AccountNo = 913837 }
 };
+
+    private List<MockTransactionBreakdown> mockTransactionsBreakdown = new()
+    {
+        new MockTransactionBreakdown { TransactionType = "Withrawals", Count = 120, Total = 12000000, Average = 10000, Notes = "-" },
+        new MockTransactionBreakdown { TransactionType = "Deposits", Count = 80, Total = 900000, Average = 11500, Notes = "-" },
+        new MockTransactionBreakdown { TransactionType = "Transfers", Count = 45, Total = 600000, Average = 13333, Notes = "3 flagged" },
+        new MockTransactionBreakdown { TransactionType = "Loans Paid", Count = 25, Total = 350000, Average = 14000, Notes = "-" }
+    };
 
     private class MockTransaction
     {
@@ -202,4 +253,12 @@
         public int AccountNo { get; set; }
     }
 
+    private class MockTransactionBreakdown
+    {
+        public string TransactionType { get; set; } = "";
+        public int Count { get; set; }
+        public decimal Total { get; set; }
+        public decimal Average { get; set; }
+        public string Notes { get; set; } = "";
+    }
 }

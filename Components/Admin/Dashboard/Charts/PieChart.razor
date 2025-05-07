@@ -2,14 +2,14 @@
 
 @inject IJSRuntime JSRuntime
 
-<canvas id="lineChart" width="1000" height="400"></canvas>
+<canvas id="pieChart" width="1000" height="400"></canvas>
 
 @code {
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            await JSRuntime.InvokeVoidAsync("drawLineChart");
+            await JSRuntime.InvokeVoidAsync("drawPieChart");
             StateHasChanged();
         }
     }
