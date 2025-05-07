@@ -29,64 +29,79 @@
 				<div class="row g-3">
 					<div class="col-12 col-md-3">
 						<label class="text-light">First Name</label>
-						<input class="form-control" @bind="firstName" placeholder="First Name" required>
+						@* <input class="form-control" @bind="firstName" placeholder="First Name" required> *@
+						<div class="form-control">@firstName</div>
 					</div>
 					<div class="col-12 col-md-3">
-						<label class="text-light">Middle Name</label>
-						<input class="form-control" @bind="middleName" placeholder="Middle Name">
+						<label class="text-light">Middle Name</label>@* 
+						<input class="form-control" @bind="middleName" placeholder="Middle Name"> *@
+						<div class="form-control">@middleName</div>
 					</div>
 					<div class="col-12 col-md-3">
-						<label class="text-light">Last Name</label>
-						<input class="form-control" @bind="lastName" placeholder="Last Name" required>
+						<label class="text-light">Last Name</label>@* 
+						<input class="form-control" @bind="lastName" placeholder="Last Name" required> *@
+						<div class="form-control">@lastName</div>
 					</div>
 					<div class="col-12 col-md-3">
-						<label class="text-light">Suffix</label>
-						<input class="form-control" @bind="suffix" placeholder="Suffix">
+						<label class="text-light">Suffix</label>@* 
+						<input class="form-control" @bind="suffix" placeholder="Suffix"> *@
+						<div class="form-control">@suffix</div>
 					</div>
 				</div>
 
+				<!-- Row 2 -->
 				<div class="row g-3 mt-2">
 					<div class="col-12 col-md-4">
-						<label class="text-light">Province</label>
-						<input class="form-control" @bind="province" placeholder="Province" required>
+						<label class="text-light">Province</label>@* 
+						<input class="form-control" @bind="province" placeholder="Province" required> *@
+						<div class="form-control">@province</div>
 					</div>
 					<div class="col-12 col-md-4">
-						<label class="text-light">Municipality</label>
-						<input class="form-control" @bind="municipality" placeholder="Municipality" required>
+						<label class="text-light">Municipality</label>@* 
+						<input class="form-control" @bind="municipality" placeholder="Municipality" required> *@
+						<div class="form-control">@municipality</div>
 					</div>
 					<div class="col-12 col-md-4">
-						<label class="text-light">Barangay</label>
-						<input class="form-control" @bind="barangay" placeholder="Barangay" required>
+						<label class="text-light">Barangay</label>@* 
+						<input class="form-control" @bind="barangay" placeholder="Barangay" required> *@
+						<div class="form-control">@barangay</div>
 					</div>
 				</div>
 
+				<!-- Row 3 -->
 				<div class="row g-3 mt-2">
 					<div class="col-12 col-md-6">
-						<label class="text-light">Street No.</label>
-						<input class="form-control" @bind="street" placeholder="Street No." required>
+						<label class="text-light">Street No.</label>@* 
+						<input class="form-control" @bind="street" placeholder="Street No." required> *@
+						<div class="form-control">@street</div>
 					</div>
 					<div class="col-12 col-md-6">
-						<label class="text-light">House No.</label>
-						<input class="form-control" @bind="houseNumber" placeholder="House No." required>
+						<label class="text-light">House No.</label>@* 
+						<input class="form-control" @bind="houseNumber" placeholder="House No." required> *@
+						<div class="form-control">@houseNumber</div>
 					</div>
 				</div>
 
 				<div class="row g-3 mt-2">
+					<!-- Row 4-->
 					<div class="col-6 col-md-2">
 						<label class="text-light">Age</label>
-						<input class="form-control" type="number" @bind="age" placeholder="Age" required>
+						@* <input class="form-control" type="number" @bind="age" placeholder="Age" required>> *@
+						<div class="form-control">@age</div>
 					</div>
 					<div class="col-12 col-md-2">
 						<label class="text-light">Birth Date</label>
-						<input class="form-control" type="date" @bind="birthDate" placeholder="mm/dd/yyyy" required>
+						@* <input class="form-control" type="date" @bind="birthDate" placeholder="mm/dd/yyyy" required> *@
+						<div class="form-control">@birthDate.ToShortDateString()</div>
 					</div>
 					<div class="col-6 col-md-2">
 						<label class="text-light">Sex</label>
-						<select class="form-select" @bind="sex" required>
+						@* <select class="form-select" @bind="sex" required>
 							<option value="" disabled hidden>--Select Sex--</option>
 							<option>Male</option>
 							<option>Female</option>
-						</select>
+						</select> *@
+						<div class="form-control">@sex</div>
 					</div>
 					<div class="col-12 col-md-3">
 						<label class="text-light">Contact No.</label>
@@ -96,19 +111,23 @@
 						<label class="text-light">Email</label>
 						<input class="form-control" @bind="email" placeholder="Sample@gmail.com" required>
 					</div>
+
+					<!-- Row 5 -->
 					<div class="col-12 col-md-3">
-						<label class="text-light">Civil Status</label>
+						<label class="text-light">Civil Status</label>@* 
 						<select class="form-select" @bind="civilStatus" required>
 							<option value="" disabled hidden>--Select Civil Status--</option>
 							<option>Single</option>
 							<option>Married</option>
 							<option>Separated</option>
 							<option>Widowed</option>
-						</select>
+						</select> *@
+						<div class="form-control">@civilStatus</div>
 					</div>
 					<div class="col-12 col-md-3">
-						<label class="text-light">Occupation</label>
-						<input class="form-control" @bind="occupation" placeholder="Occupation" required>
+						<label class="text-light">Occupation</label>@* 
+						<input class="form-control" @bind="occupation" placeholder="Occupation" required> *@
+						<div class="form-control">@occupation</div>
 					</div>
 					<div class="col-12 col-md-3">
 						<label class="text-light">Gross Annual Income (>= 250 000.00)</label>
@@ -124,6 +143,8 @@
 							}
 						</select>
 					</div>
+
+					<!-- Row 6 -->
 					<div class="col-12 col-md-3">
 						<label class="text-light">@loanAmountLabel</label>
 						<input type="number" class="form-control" @bind="loanAmount" placeholder="Loan Amount" min="@minimumLoanAmount" required>
@@ -282,6 +303,7 @@
 			|| string.IsNullOrWhiteSpace(houseNumber);
 		bool isAgeMissingOrUnderAge = age < 18;
 		bool isDateInValidOrUnderAge = birthDate > DateTime.UtcNow.Date.AddYears(-18);
+		bool isSexInvalid = string.IsNullOrWhiteSpace(sex);
 		bool isContactNoMissingOrInvalid = string.IsNullOrWhiteSpace(contactNo) 
 			|| !contactNo.All(char.IsDigit)
 			|| contactNo.Length != 11;
@@ -310,20 +332,22 @@
 			error = "Please choose a valid loan type.";
 		if (isAnnualGrossInvalid)
 			error = "Please enter a valid Gross Annual Income not less than 250 000.";
-		if (isOccupationInvalid)
-			error = "Please fill out occupation.";
+		// if (isOccupationInvalid)
+		// 	error = "Please fill out occupation.";
 		if (isEmailInvalid)
 			error = "Please enter a valid Email.";
 		if (isContactNoMissingOrInvalid)
 			error = "Please enter a valid Contact No.";
-		if (isDateInValidOrUnderAge)
-			error = "You must be older than 18 to use this account or apply for a loan.";
-		if (isAgeMissingOrUnderAge)
-			error = "Please enter a valid age not less than 18 years old.";
-		if (hasMissingAddress)
-			error = "Please fill out your address.";
-		if (hasMissingName)
-			error = "Please fill out your name.";
+		// if (isSexInvalid)
+		// 	error = "Plase choose a valid sex.";
+		// if (isDateInValidOrUnderAge)
+		// 	error = "You must be older than 18 to use this account or apply for a loan.";
+		// if (isAgeMissingOrUnderAge)
+		// 	error = "Please enter a valid age not less than 18 years old.";
+		// if (hasMissingAddress)
+		// 	error = "Please fill out your address.";
+		// if (hasMissingName)
+		// 	error = "Please fill out your name.";
 
 		bool hasError = !string.IsNullOrWhiteSpace(error);
 		if (hasError)
