@@ -1,4 +1,6 @@
-﻿namespace Data.Repositories.Finance
+﻿
+
+namespace Data.Repositories.Finance
 {
     /// <summary>
     /// CRUD operations handler for Loans table.
@@ -7,7 +9,22 @@
     /// <param name="context"></param>
     public class LoanRepository : Repository
     {
-        public LoanRepository(EBankingContext context) : base(context) { }
+        public LoanQuery Query;
+        public LoanRepository(EBankingContext context) : base(context) 
+        {
+            Query = new LoanQuery(context.Loans.AsQueryable());
+        }
+
+        public class LoanQuery : CustomQuery<Loan, LoanQuery>
+        {
+            public LoanQuery(IQueryable<Loan> query) : base(query) { }
+            public LoanQuery HasStartDateFilter(DateTime startDate) => 
+                WhereCondition(l => l.ApplicationDate >= startDate.Date);
+            public LoanQuery HasEndDateFilter(DateTime endDate) =>
+                WhereCondition(l => l.ApplicationDate <= endDate.Date);
+            public LoanQuery OrderByDateDescending(bool isOrdered = true)
+                => OrderByDescending(l => l.ApplicationDate);
+        }
     }
 
     /// <summary>

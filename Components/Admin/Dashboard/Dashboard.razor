@@ -64,7 +64,7 @@
 
                     <div class="data-card col">
                         <h5>Transfers</h5>
-                        <p class="number">_transferCount</p>
+                        <p class="number">@transferCount</p>
                         <div class="card-footer mt-2">
                             <p class="m-0">0</p>
                         </div>
@@ -72,7 +72,7 @@
 
                     <div class="data-card col">
                         <h5>Loans</h5>
-                        <p class="number">_loanCount</p>
+                        <p class="number">@loanCount</p>
                         <div class="card-footer mt-2">
                             <p class="m-0">0</p>
                         </div>
@@ -145,27 +145,30 @@
 </div>
 
 @code {
-    private DateTime? startDate = null;
-    private DateTime? endDate = null;
+    private DateTime? startDate = DateTime.Now.AddDays(-DateTime.Now.Day + 1);
+    private DateTime? endDate = DateTime.Now;
 
     private List<Transaction> transactionList { get; set; } = new();
+    private List<Transaction> largestTransactions { get; set; } = new();
     private Dictionary<int, int> transactionCounts { get; set; } = new();
 
     private int withdrawalCount;
     private int depositCount;
+    private int transferCount;
+    private int loanCount;
 
     protected override async Task OnInitializedAsync()
     {
         //  Get transaction list.
         transactionList = await adminDataService.GetTransactionListAsync();
-        this.GetTransactionCounts();
+        await this.GetTransactionCounts();
     }
 
     private async Task FilterAsync()
     {
         Console.WriteLine($"Filtering accounts from {startDate} to {endDate}");
         transactionList = await adminDataService.GetTransactionListAsync(startDate, endDate);
-        this.GetTransactionCounts();
+        await this.GetTransactionCounts();
     }
 
     private async Task ClearFilterAsync()
@@ -173,33 +176,53 @@
         startDate = null;
         endDate = null;
         transactionList = await adminDataService.GetTransactionListAsync();
-        this.GetTransactionCounts();
+        await this.GetTransactionCounts();
         Console.WriteLine("Filter cleared");
     }
 
-    private void GetTransactionCounts()
+    private async Task GetTransactionCounts()
     {
         //  Get transaction counts.
+        largestTransactions = adminDataService.GetLargestTransactions(transactionList, 5);
+
+        if (largestTransactions.Any())
+        {
+            mockTransactions = new();
+            foreach(var transaction in largestTransactions)
+            {
+                mockTransactions.Add(
+                    new MockTransaction{
+                        Date = transaction.TransactionDate.Date,
+                        Type = TransactionTypeConstants.AS_STRING_LIST[transaction.TransactionTypeId - 1],
+                        Amount = transaction.Amount,
+                        AccountNo = transaction.MainAccount.AccountNumber
+                    }
+                );
+            }
+        }
+
         transactionCounts = adminDataService.GetTransactionCounts(transactionList);
         withdrawalCount = transactionCounts[(int)TransactionTypes.Withdrawal];
         depositCount = transactionCounts[(int)TransactionTypes.Deposit];
+        transferCount = transactionCounts[(int)TransactionTypes.Outgoing_Transfer];
+        loanCount = await adminDataService.GetLoanCountAsync(DateTime.Now.AddMonths(-1), DateTime.Now);
     }
 
     //mockup data for table
     private List<MockTransaction> mockTransactions = new()
-{
-    new MockTransaction { Date = DateTime.Today, Type = "Deposit", Amount = 5000, AccountNo = 981738 },
-    new MockTransaction { Date = DateTime.Today.AddDays(-1), Type = "Withdrawal", Amount = 1500, AccountNo = 897937 },
-    new MockTransaction { Date = DateTime.Today.AddDays(-2), Type = "Transfer", Amount = 2000, AccountNo = 727371 },
-    new MockTransaction { Date = DateTime.Today.AddDays(-3), Type = "Loan", Amount = 10000, AccountNo = 913837 },
-};
+    {
+        new MockTransaction { Date = DateTime.Today, Type = "Deposit", Amount = 5000, AccountNo = "981738" },
+        new MockTransaction { Date = DateTime.Today.AddDays(-1), Type = "Withdrawal", Amount = 1500, AccountNo = "897937" },
+        new MockTransaction { Date = DateTime.Today.AddDays(-2), Type = "Transfer", Amount = 2000, AccountNo = "727371"},
+        new MockTransaction { Date = DateTime.Today.AddDays(-3), Type = "Loan", Amount = 10000, AccountNo = "913837"},
+    };
 
     private class MockTransaction
     {
         public DateTime Date { get; set; }
         public string Type { get; set; } = "";
         public decimal Amount { get; set; }
-        public int AccountNo { get; set; }
+        public string AccountNo { get; set; } = string.Empty;
     }
 
 }

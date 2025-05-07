@@ -161,6 +161,9 @@ namespace Services.DataManagement
             //  Convert the TransactionTypes enum to an IEnumerable.
             foreach (var typeId in Enum.GetValues<TransactionTypes>())
             {
+                //  If you need to exclude incoming transfers.
+                //if (typeId == TransactionTypes.Incoming_Transfer)
+                //    continue;
                 //  Get the count of elmeents matching the transaction type in the list
                 //  and assign it to the new dictionary key.
                 int count = transactionList.Count(t => t.TransactionTypeId == (int)typeId);
@@ -169,6 +172,9 @@ namespace Services.DataManagement
 
             return transactionCounts;
         }
+
+        public List<Transaction> GetLargestTransactions(List<Transaction> transactionList, int count) =>
+            transactionList.Where(t => t.TransactionTypeId != (int)TransactionTypes.Incoming_Transfer).Take(count).ToList();
 
         /// <summary>
         /// Retrieves a list of transactions filtered by an optional start and end date.
@@ -189,6 +195,7 @@ namespace Services.DataManagement
                 //  Compose Query
                 var queryBuilder = transactionRepo
                     .Query
+                    .IncludeMainAccount()
                     .OrderByDateAndTimeDescending();
 
                 if (transactionStartDate is DateTime startDate)
@@ -196,7 +203,33 @@ namespace Services.DataManagement
                 if (transactionEndDate is DateTime endDate)
                     queryBuilder.HasEndDate(endDate);
 
-                return await queryBuilder.GetQuery().ToListAsync();
+                List<Transaction> transactions = await queryBuilder.GetQuery().ToListAsync();
+                foreach (var transaction in transactions)
+                {
+                    string accountNumber = transaction.MainAccount.AccountNumber;
+                    transaction.MainAccount.AccountNumber = _dataMaskingService.MaskAccountNumber(accountNumber);
+                }
+
+                return transactions;
+            }
+        }
+
+        public async Task<int> GetLoanCountAsync(DateTime? startDate = null, DateTime? endDate = null)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                var loanRepo = new LoanRepository(dbContext);
+
+                var queryBuilder = loanRepo
+                    .Query
+                    .OrderByDateDescending();
+
+                if (startDate is DateTime sDate)
+                    queryBuilder.HasStartDateFilter(sDate);
+                if (endDate is DateTime eDate)
+                    queryBuilder.HasEndDateFilter(eDate);
+
+                return await queryBuilder.GetCountAsync();
             }
         }
     }

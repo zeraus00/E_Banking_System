@@ -88,6 +88,10 @@ namespace Data.Repositories
                 _query = _query.Take(takeCount);
                 return (TSelf)this;
             }
+            public async Task<int> GetCountAsync()
+            {
+                return await _query.CountAsync();
+            }
             protected TSelf Include(Expression<Func<TEntity, object?>> navigationProperty) 
             {
                 _query = _query.Include(navigationProperty);

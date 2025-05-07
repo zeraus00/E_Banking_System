@@ -256,6 +256,10 @@ namespace Services.DataManagement
 
                 var queryBuilder = transactionRepository
                     .Query
+                    .IncludeMainAccount()
+                    .IncludeCounterAccount()
+                    .IncludeTransactionType()
+                    .IncludeExternalVendor()
                     .HasMainAccountId(accountId)
                     .SkipBy(skipCount)
                     .TakeWithCount(takeCount)

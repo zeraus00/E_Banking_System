@@ -44,6 +44,8 @@
             public TransactionQuery(IQueryable<Transaction> query) : base(query) { }
             public TransactionQuery HasTransactionTypeId(int transactionTypeId) => 
                 WhereCondition(t => t.TransactionTypeId == transactionTypeId);
+            public TransactionQuery ExceptTransactionTypeId(int transactionTypeId) =>
+                WhereCondition(t => t.TransactionTypeId != transactionTypeId);
             public TransactionQuery HasMainAccountId(int accountId) =>
                 WhereCondition(t => t.MainAccountId == accountId);
             public TransactionQuery HasCounterAccountId(int accountId) =>
