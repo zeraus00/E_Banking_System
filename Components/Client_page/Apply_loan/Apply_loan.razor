@@ -1,10 +1,12 @@
 ﻿@using Layout
+@using Microsoft.AspNetCore.Components.Routing
 
 @page "/Apply_loan"
 @layout MainLayout
 @attribute [Authorize(Roles = "User")]
 @rendermode InteractiveServer
 
+@inject LoanService loanService
 @inject NavigationManager NavigationManager
 @inject PageRedirectService redirectService
 @inject UserDataService userDataService
@@ -154,7 +156,7 @@
 						<input class="form-control" @bind="loanPurpose" placeholder="Home Purchase, Education, Debt Consolidation, etc" required>
 					</div>
 					<div class="col-12 col-md-3">
-						<label class="text-light">Loan Term In Months</label>
+						<label class="text-light">@loanTermInMonthsLabel</label>
 						<input type="number" class="form-control" @bind="loanTermInMonths" placeholder="Months to Pay" min="@minimumLoanTerm" required>
 					</div>
 					<div class="col-12 col-md-3">
@@ -196,8 +198,13 @@
 
 				<!-- Submit -->
 				<div class="text-end mt-3">
-					<button class="btn btn-danger btn-lg" @onclick="LoginAsync">Cancel</button>
-					<button class="btn btn-primary btn-lg" @onclick="LoginAsync">Register</button>
+					<NavLink href="@PageRoutes.CLIENT_HOME">
+						<button class="btn btn-danger btn-lg">Cancel</button>
+					</NavLink>
+					<button class="btn btn-primary btn-lg" @onclick="RegisterLoanAsync">Register</button>
+				</div>
+				<div class="form-check d-flex justify-content-end mt-3">
+					<label class="text-light">@loanSubmittedMessage</label>
 				</div>
 			</div>
 		</div>
@@ -206,6 +213,7 @@
 
 @code {
 	private string error = "";
+	private string loanSubmittedMessage = "";
 
 	/*		Display Labels		*/
 	private string loanAmountLabel = "Loan Amount";
@@ -294,16 +302,16 @@
 		}
 	}
 
-	private async Task LoginAsync()
+	private async Task RegisterLoanAsync()
 	{
-		bool hasMissingName = string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(lastName);
-		bool hasMissingAddress = string.IsNullOrWhiteSpace(municipality)
-			|| string.IsNullOrWhiteSpace(barangay)
-			|| string.IsNullOrWhiteSpace(street)
-			|| string.IsNullOrWhiteSpace(houseNumber);
-		bool isAgeMissingOrUnderAge = age < 18;
-		bool isDateInValidOrUnderAge = birthDate > DateTime.UtcNow.Date.AddYears(-18);
-		bool isSexInvalid = string.IsNullOrWhiteSpace(sex);
+		// bool hasMissingName = string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(lastName);
+		// bool hasMissingAddress = string.IsNullOrWhiteSpace(municipality)
+		// 	|| string.IsNullOrWhiteSpace(barangay)
+		// 	|| string.IsNullOrWhiteSpace(street)
+		// 	|| string.IsNullOrWhiteSpace(houseNumber);
+		// bool isAgeMissingOrUnderAge = age < 18;
+		// bool isDateInValidOrUnderAge = birthDate > DateTime.UtcNow.Date.AddYears(-18);
+		// bool isSexInvalid = string.IsNullOrWhiteSpace(sex);
 		bool isContactNoMissingOrInvalid = string.IsNullOrWhiteSpace(contactNo) 
 			|| !contactNo.All(char.IsDigit)
 			|| contactNo.Length != 11;
@@ -312,24 +320,9 @@
 		bool isEmailInvalid = string.IsNullOrWhiteSpace(email)
 			|| email.Length < 6
 			|| !email.EndsWith(gmailDomain, StringComparison.OrdinalIgnoreCase);
-		bool isOccupationInvalid = string.IsNullOrWhiteSpace(occupation);
+		// bool isOccupationInvalid = string.IsNullOrWhiteSpace(occupation);
 		bool isAnnualGrossInvalid = minAnnualGross < 250000.0m;
-		bool isLoanAmountInvalid = loanAmount < minimumLoanAmount;
-		bool isLoanTermInvalid = loanTermInMonths < minimumLoanTerm;
-		bool isLoanPurposeInvalid = string.IsNullOrWhiteSpace(loanPurpose);
-		bool isLoanTypeInvalid = loanTypeId == -1;
-		bool isPaymentFrequencyInvalid = paymentFrequency == -1;
 
-		if (isPaymentFrequencyInvalid)
-			error = "Please choose a preferred payment frequency.";
-		if (isLoanTermInvalid)
-			error = $"Please enter a valid loan term not less than {minimumLoanTerm} months.";
-		if (isLoanPurposeInvalid)
-			error = "Please enter a valid loan purpose.";
-		if (isLoanAmountInvalid)
-			error = $"Please enter a valid loan amount not less than {minimumLoanAmount}.";
-		if (isLoanTypeInvalid)
-			error = "Please choose a valid loan type.";
 		if (isAnnualGrossInvalid)
 			error = "Please enter a valid Gross Annual Income not less than 250 000.";
 		// if (isOccupationInvalid)
@@ -348,6 +341,22 @@
 		// 	error = "Please fill out your address.";
 		// if (hasMissingName)
 		// 	error = "Please fill out your name.";
+		Loan newLoan = new Loan
+		{
+			AccountId = userSession.ActiveAccountSession.AccountId,
+			UserInfoId = userSession.UserInfoId,
+			ContactNo = contactNo,
+			Email = email,
+			LoanTypeId = loanTypeId + 1,
+			LoanPurpose = loanPurpose,
+			LoanAmount = loanAmount,
+			LoanTermMonths = loanTermInMonths,
+			PaymentFrequency = paymentFrequency,
+			ApplicationDate = DateTime.Now.Date
+		};
+
+		if (loanService.IsLoanInvalid(newLoan, minimumLoanAmount, minimumLoanTerm))
+			error = "Please enter valid values that comply with the chosen loan type's terms.";
 
 		bool hasError = !string.IsNullOrWhiteSpace(error);
 		if (hasError)
@@ -357,17 +366,33 @@
 			return;
 		}
 
-		NavigationManager.NavigateTo("/Client_home_page");
+		await loanService.RegisterLoanApplication(newLoan);
+
+		await NavigateToClientHome();
 	}
 
 	private void OnLoanTypeChange()
 	{
 		LoanType loanType = LoanTypeNames.AS_LOAN_TYPE_LIST[loanTypeId];
 		loanAmountLabel = "Loan Amount";
+		loanTermInMonthsLabel = "Loan Term in Months";
 		loanAmountLabel += $" ( >= {loanType.MinimumLoanAmount})";
 		loanAmount = loanType.MinimumLoanAmount;
 		loanTermInMonths = loanType.LoanTermInMonths;
+		loanTermInMonthsLabel += $" ( >= {minimumLoanTerm})";
 		minimumLoanAmount = loanType.MinimumLoanAmount;
 		minimumLoanTerm = loanType.LoanTermInMonths;
+	}
+
+	private async Task NavigateToClientHome()
+	{
+		int countDownSeconds = 3;
+		while(countDownSeconds > 0)
+		{
+			loanSubmittedMessage = $"Loan Application Submitted. Redirecting to client home in {countDownSeconds}...";
+			await Task.Delay(1000 * countDownSeconds);
+		}
+		loanSubmittedMessage = "";
+		NavigationManager.NavigateTo(PageRoutes.CLIENT_HOME);
 	}
 }
