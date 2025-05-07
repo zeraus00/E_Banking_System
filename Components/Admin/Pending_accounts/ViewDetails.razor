@@ -7,6 +7,8 @@
 @inject PageRedirectService redirectService
 @inject UserDataService userDataService
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <div class="card registration mt-3 p-4 shadow-lg">
     <main>
         <h3 class="fw-bold text-light">Confirmation of Details</h3>
@@ -198,9 +200,9 @@
         <div class="row g-3 mt-3">
             <!-- Upload Government ID -->
             <div class="col-md-4">
-                <label class="text-light">Upload Government Valid ID (Front & Back)</label>
+                <label class="text-light">Uploaded Government Valid ID (Front & Back)</label>
                 <div class="d-flex gap-2">
-                    <button class="btn btn-outline-light w-75">View</button>
+                    <button class="btn btn-outline-light w-75" data-bs-toggle="modal" data-bs-target="#govIdModal">View</button>
                 </div>
             </div>
 
@@ -208,7 +210,50 @@
             <div class="col-md-4">
                 <label class="text-light">Upload 1x1 Picture</label>
                 <div class="d-flex gap-2">
-                    <button class="btn btn-outline-light w-75">View</button>
+                    <button class="btn btn-outline-light w-75" data-bs-toggle="modal" data-bs-target="#picModal">View</button>
+                </div>
+            </div>
+
+            <!--View government Id-->
+            <div class="modal fade" id="govIdModal" tabindex="-1" aria-labelledby="govIdModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content bg-dark text-white">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="govIdModalLabel">Government Valid ID</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body text-center">
+                            @if (!string.IsNullOrWhiteSpace(GovernmentId))
+                            {
+                                <img src="@GovernmentId" class="img-fluid rounded shadow" alt="Government ID" />
+                            }
+                            else
+                            {
+                                <p>No Government ID uploaded.</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--View Profile Picture-->
+            <div class="modal fade" id="picModal" tabindex="-1" aria-labelledby="picModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content bg-dark text-white">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="picModalLabel">Profile Picture</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body text-center">
+                            @if (!string.IsNullOrWhiteSpace(ProfilePicture))
+                            {
+                                <img src="@ProfilePicture" class="img-fluid rounded shadow" alt="Profile Picture" />
+                            }
+                            else
+                            {
+                                <p>No profile picture uploaded.</p>
+                            }
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -258,6 +303,14 @@
     private BirthInfo? birthInfo { get; set; }
 
     private string error { get; set; } = string.Empty;
+
+    private string? GovernmentId => userInfo?.GovernmentId != null
+    ? $"data:image/jpeg;base64,{Convert.ToBase64String(userInfo.GovernmentId)}"
+    : null;
+
+    private string? ProfilePicture => userInfo?.ProfilePicture != null
+        ? $"data:image/jpeg;base64,{Convert.ToBase64String(userInfo.ProfilePicture)}"
+        : null;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
