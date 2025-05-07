@@ -7,6 +7,8 @@
         public string LoanNumber { get; set; } = string.Empty;  //  Loan reference; Required; Varchar(20)
         public int AccountId { get; set; }                      //  Foreign key to Account
         public int UserInfoId { get; set; }                     //  Foreign Key to UserInfo
+        public string ContactNo { get; set; } = string.Empty;   //  Required
+        public string Email { get; set; } = string.Empty;       //  Required
         public int LoanTypeId { get; set; }                     //  Foreign key to LoanType
         public string LoanPurpose { get; set; } = string.Empty; //  Required; Varchar(30)
         public decimal LoanAmount { get; set; }                 //  Required; Decimal(18,2)

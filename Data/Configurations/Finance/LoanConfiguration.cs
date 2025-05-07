@@ -32,6 +32,20 @@
                 .Property(l => l.UserInfoId)
                 .IsRequired();
 
+            //  ContactNo (Required; VARCHAR(11); FixedLnegth)
+            Loans
+                .Property(l => l.ContactNo)
+                .HasColumnType("VARCHAR(11)")
+                .IsFixedLength()
+                .IsRequired();
+
+            //  Email (Required; VARCHAR(50); MinLength=16)
+            Loans
+                .Property(l => l.Email)
+                .HasColumnType("VARCHAR(50)")
+                .IsRequired();
+
+
             //  LoanTypeId (Foreign Key; Required)
             Loans
                 .Property(l => l.LoanTypeId)

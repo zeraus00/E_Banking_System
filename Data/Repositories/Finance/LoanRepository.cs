@@ -17,6 +17,9 @@
     {
         private string _loanNumber = string.Empty;
         private int _accountId;
+        private int _userInfoId;
+        private string _contactNo = string.Empty;
+        private string _email = string.Empty;
         private int _loanTypeId;
         private string _loanPurpose = string.Empty;
         private decimal _loanAmount;
@@ -42,6 +45,21 @@
         public LoanBuilder WithAccountId(int accountId)
         {
             _accountId = accountId;
+            return this;
+        }
+        public LoanBuilder WithUserInfoId(int userInfoId)
+        {
+            _userInfoId = userInfoId;
+            return this;
+        }
+        public LoanBuilder WithContactNo(string contactNo)
+        {
+            _contactNo = contactNo;
+            return this;
+        }
+        public LoanBuilder WithEmail(string email)
+        {
+            _email = email;
             return this;
         }
         public LoanBuilder WithLoanTypeId(int loanTypeId)
@@ -129,6 +147,9 @@
             {
                 LoanNumber = _loanNumber,
                 AccountId = _accountId,
+                UserInfoId = _userInfoId,
+                ContactNo = _contactNo,
+                Email = _email,
                 LoanTypeId = _loanTypeId,
                 LoanPurpose = _loanPurpose,
                 LoanAmount = _loanAmount,
