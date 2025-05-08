@@ -1,0 +1,53 @@
+﻿@using Helpers;
+@page "/Loan_receipt"
+
+<div class="page">
+    <main>
+        <header class="custom-card-clientpage clientheader py-4 align-items-start">
+            <div class="px-5">
+                <div class="d-flex align-items-center my-4">
+                    <h2>Registration for Loan</h2>
+                </div>
+            </div>
+        </header>
+
+        <div class="container">
+            <section class="card registration shadow-lg my-5 p-3">
+                <div class="d-flex gap-2 text-start border-bottom w-100 align-items-center p-4">
+                    <h3>_accountName </h3>
+                </div>
+
+                <div class="d-flex">
+                    <h5 class="mx-5 my-3">
+                        <p class="mt-2"><strong>Account Number: </strong>_accountNumber</p>
+                        <p class="mt-2"><strong>Loan Purpose: </strong>_loanPurpose</p>
+                        <p class="mt-2"><strong>Loan Amount: </strong>_loanAmount</p>
+                        <p class="mt-2"><strong>Loan Term: </strong>_loanTerm</p>
+                        <p class="mt-2"><strong>Payment Frequency: </strong>_paymentFrequency</p>
+                    </h5>
+                </div>
+                
+                <!-- Terms and Conditions -->
+                <div class="form-check d-flex justify-content-end mt-3">
+                    <input class="form-check-input mx-2" type="checkbox" id="termsAndConditions" required>
+                    <label class="form-check-label text-light" for="termsAndConditions">
+                        I accept the terms and conditions
+                    </label>
+                </div>
+
+                <!-- Submit -->
+                <div class="text-end mt-3">
+                    <NavLink href="@PageRoutes.CLIENT_HOME">
+                        <button class="btn btn-danger">Cancel</button>
+                    </NavLink>
+                    <a href="/Loan_receipt" class="btn btn-primary">Register</a>
+                </div>
+            </section>
+        </div>
+    </main>
+</div>
+
+@code
+{
+
+}
