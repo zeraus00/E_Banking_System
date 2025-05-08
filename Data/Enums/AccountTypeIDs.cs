@@ -1,6 +1,6 @@
 ﻿namespace Data.Enums
 {
-    public enum AccountTypes
+    public enum AccountTypeIDs
     {
         PersonalAccount = 1,
         JointAccount = 2,

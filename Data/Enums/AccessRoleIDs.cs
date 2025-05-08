@@ -1,6 +1,6 @@
 ﻿namespace Data.Enums
 {
-    public enum AccessRoles
+    public enum AccessRoleIDs
     {
         PRIMARY_OWNER = 1,
 

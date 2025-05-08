@@ -144,9 +144,9 @@
 						<label class="text-light">Type of Loan</label>
 						<select class="form-select" @bind="loanTypeId" @bind:after="OnLoanTypeChange" required>
 							<option value="-1" disabled hidden>--Select Loan Type--</option>
-							@foreach(var loanType in LoanTypeNames.AS_STRING_LIST)
+							@foreach(var loanType in LoanTypes.AS_STRING_LIST)
 							{
-								<option value="@LoanTypeNames.AS_STRING_LIST.IndexOf(loanType)">@loanType</option>
+								<option value="@LoanTypes.AS_STRING_LIST.IndexOf(loanType)">@loanType</option>
 							}
 						</select>
 					</div>
@@ -381,7 +381,7 @@
 
 	private void OnLoanTypeChange()
 	{
-		LoanType loanType = LoanTypeNames.AS_LOAN_TYPE_LIST[loanTypeId];
+		LoanType loanType = LoanTypes.AS_LOAN_TYPE_LIST[loanTypeId];
 		loanAmountLabel = "Loan Amount";
 		loanTermInMonthsLabel = "Loan Term in Months";
 		loanAmountLabel += $" ( >= {loanType.MinimumLoanAmount})";

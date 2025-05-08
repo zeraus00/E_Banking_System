@@ -1,6 +1,6 @@
 ﻿namespace Data.Constants
 {
-    public class LoanTypeNames
+    public class LoanTypes
     {
         public const string PERSONAL_LOAN = "Personal Loan";
         public const string HOME_LOAN = "Home loan";

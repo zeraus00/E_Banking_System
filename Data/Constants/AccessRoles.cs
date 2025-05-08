@@ -2,7 +2,7 @@
 
 namespace Data.Constants
 {
-    public class AccessRoleNames
+    public class AccessRoles
     {
         public const string PRIMARY_OWNER = "PRIMARY OWNER";
         public const string SECONDARY_OWNER = "SECONDARY OWNER";

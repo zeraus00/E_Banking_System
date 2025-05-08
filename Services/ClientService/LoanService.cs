@@ -34,13 +34,13 @@ namespace Services.ClientService
 
         public async Task RegisterLoanApplication(Loan newLoan)
         {
-            LoanType loanType = LoanTypeNames.AS_LOAN_TYPE_LIST[newLoan.LoanTypeId - 1];
+            LoanType loanType = LoanTypes.AS_LOAN_TYPE_LIST[newLoan.LoanTypeId - 1];
 
             newLoan.LoanNumber = "";
             newLoan.InterestRate = loanType.InterestRatePerAnnum;
             newLoan.PaymentAmount = 0.0m;
             newLoan.RemainingLoanBalance = newLoan.PaymentAmount;
-            newLoan.LoanStatus = LoanStatusTypeNames.SUBMITTED;
+            newLoan.LoanStatus = LoanStatusTypes.SUBMITTED;
             
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {

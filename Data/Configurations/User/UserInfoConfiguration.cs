@@ -27,7 +27,7 @@ namespace Data.Configurations.User
             UsersInfo
                 .Property(a => a.ProfilePicture)
                 .HasColumnType("VARBINARY(MAX)")  
-                .HasMaxLength(ImageSize.ONE_MEGA_BYTE);
+                .HasMaxLength(ImageSizes.ONE_MEGA_BYTE);
 
             //  Age (Required)
             UsersInfo
@@ -67,7 +67,7 @@ namespace Data.Configurations.User
             UsersInfo
                 .Property(a => a.GovernmentId)
                 .HasColumnType("VARBINARY(MAX)")
-                .HasMaxLength(ImageSize.ONE_MEGA_BYTE);
+                .HasMaxLength(ImageSizes.ONE_MEGA_BYTE);
 
             //  TaxIdentificationNumber (Required; MaxLength=12)
             UsersInfo

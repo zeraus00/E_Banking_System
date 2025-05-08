@@ -185,14 +185,14 @@
             transactionSession = await transactionService
                 .CreateTransactionAsync(
                     accountId,
-                    (int)TransactionTypes.Withdrawal,
+                    (int)TransactionTypeIDs.Withdrawal,
                     withdrawAmount.Value,
                     externalVendorId: methodRef!.selectedCardId
                 );
 
             //  Save transaction session to sesion storage.
             await userControlledSessionService.SetTransactionSessionAsync(
-                (int)TransactionTypes.Withdrawal,
+                (int)TransactionTypeIDs.Withdrawal,
                 transactionSession,
                 userSession
             );

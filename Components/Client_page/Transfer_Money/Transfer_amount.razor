@@ -223,13 +223,13 @@
 
             transactionSession = await transactionService.CreateTransactionAsync(
             accountId,
-            (int)TransactionTypes.Outgoing_Transfer,
+            (int)TransactionTypeIDs.Outgoing_Transfer,
             transferAmount.Value,
             externalVendorId: null
             );
 
             await userControlledSessionService.SetTransactionSessionAsync(
-            (int)TransactionTypes.Outgoing_Transfer,
+            (int)TransactionTypeIDs.Outgoing_Transfer,
             transactionSession,
             userSession
             );

@@ -1,6 +1,6 @@
 ﻿namespace Data.Constants
 {
-    public class LoanStatusTypeNames
+    public class LoanStatusTypes
     {
         public const string SUBMITTED = "Submitted";
         public const string UNDER_REVIEW = "Under Review";

@@ -32,7 +32,7 @@ namespace Services
         /// This should ALWAYS have a value.
         /// </param>
         /// <param name="transactionTypeId">
-        /// The id of the transaction type. See <see cref="TransactionTypes"/> enum for this and use it for
+        /// The id of the transaction type. See <see cref="TransactionTypeIDs"/> enum for this and use it for
         /// calling this method.
         /// </param>
         /// <param name="amount">
@@ -198,7 +198,7 @@ namespace Services
                 /*  For Outgoing Transfer Transaction Types    */
                 //  Retrieve counterAccount as needed.
                 int? counterAccountId = transactionSession.CounterAccountId;
-                bool isOutgoingTransfer = transactionTypeId is (int) TransactionTypes.Outgoing_Transfer;
+                bool isOutgoingTransfer = transactionTypeId is (int) TransactionTypeIDs.Outgoing_Transfer;
 
                 if (counterAccountId is int counterId && isOutgoingTransfer)
                 {
@@ -214,7 +214,7 @@ namespace Services
 
                     /*  Build the incoming transfer counter transaction */
                     Transaction counterTransaction = new TransactionBuilder()
-                        .WithTransactionTypeId((int)TransactionTypes.Incoming_Transfer)
+                        .WithTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer)
                         .WithTransactionNumber(transactionNumber)
                         .WithStatus(TransactionStatus.CONFIRMED)
                         .WithConfirmationNumber(confirmationNumber)
@@ -310,8 +310,8 @@ namespace Services
         }
         private void EnsureSufficientBalance(int transactionTypeId, decimal balance, decimal deductionAmount)
         {
-            bool isDeducting = transactionTypeId is (int)TransactionTypes.Withdrawal
-                    or (int)TransactionTypes.Outgoing_Transfer;
+            bool isDeducting = transactionTypeId is (int)TransactionTypeIDs.Withdrawal
+                    or (int)TransactionTypeIDs.Outgoing_Transfer;
 
             if (isDeducting && balance < deductionAmount)
             {
@@ -326,10 +326,10 @@ namespace Services
         {
             return transactionTypeId switch
             {
-                (int)TransactionTypes.Withdrawal => balance - amount,
-                (int)TransactionTypes.Deposit => balance + amount,
-                (int)TransactionTypes.Incoming_Transfer => balance + amount,
-                (int)TransactionTypes.Outgoing_Transfer => balance - amount,
+                (int)TransactionTypeIDs.Withdrawal => balance - amount,
+                (int)TransactionTypeIDs.Deposit => balance + amount,
+                (int)TransactionTypeIDs.Incoming_Transfer => balance + amount,
+                (int)TransactionTypeIDs.Outgoing_Transfer => balance - amount,
                 _ => throw new ArgumentException("INVALID TRANSACTION TYPE ID.")
             };
         }
