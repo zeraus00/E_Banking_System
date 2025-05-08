@@ -35,11 +35,12 @@ namespace Services.DataManagement
         /// <param name="endDate">Optional end date to filter accounts opened on or before this date. If null, this filter is ignored.</param>
         /// <param name="accountTypeId">Optional account type ID to filter by. Only applies if greater than zero.</param>
         /// <returns>A list of accounts matching the specified filters.</returns>
-        public async Task<List<Account>> FilterPendingAccountsAsync(
+        public async Task<List<Account>> FilterAccountsAsync(
             string accountNumber = "",
             DateTime? startDate = null,
             DateTime? endDate = null,
-            int accountTypeId = 0
+            int accountTypeId = 0,
+            int accountStatusTypeId = 0
             )
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
@@ -62,9 +63,9 @@ namespace Services.DataManagement
                 if (endDate is not null)
                     queryBuilder.HasOpenedOnOrBefore(endDate);
                 if (accountTypeId > 0)
-                {
                     queryBuilder.HasAccountTypeId(accountTypeId);
-                }
+                if (accountStatusTypeId > 0)
+                    queryBuilder.HasAccountStatusTypeId(accountStatusTypeId);
 
                 //  Pagination
                 int pageNumber = 1;
