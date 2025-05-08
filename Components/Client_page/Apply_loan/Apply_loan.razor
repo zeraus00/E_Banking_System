@@ -363,43 +363,28 @@
 
 	private async Task RegisterLoanAsync()
 	{
-		// bool hasMissingName = string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(lastName);
-		// bool hasMissingAddress = string.IsNullOrWhiteSpace(municipality)
-		// 	|| string.IsNullOrWhiteSpace(barangay)
-		// 	|| string.IsNullOrWhiteSpace(street)
-		// 	|| string.IsNullOrWhiteSpace(houseNumber);
-		// bool isAgeMissingOrUnderAge = age < 18;
-		// bool isDateInValidOrUnderAge = birthDate > DateTime.UtcNow.Date.AddYears(-18);
-		// bool isSexInvalid = string.IsNullOrWhiteSpace(sex);
-		bool isContactNoMissingOrInvalid = string.IsNullOrWhiteSpace(contactNo) 
-			|| !contactNo.All(char.IsDigit)
-			|| contactNo.Length != 11;
 
 		string gmailDomain = "@gmail.com";
+		bool isAnnualGrossInvalid = minAnnualGross < 250000.0m;
 		bool isEmailInvalid = string.IsNullOrWhiteSpace(email)
 			|| email.Length < 6
 			|| !email.EndsWith(gmailDomain, StringComparison.OrdinalIgnoreCase);
-		// bool isOccupationInvalid = string.IsNullOrWhiteSpace(occupation);
-		bool isAnnualGrossInvalid = minAnnualGross < 250000.0m;
+		bool isContactNoMissingOrInvalid = string.IsNullOrWhiteSpace(contactNo)
+			|| !contactNo.All(char.IsDigit)
+			|| contactNo.Length != 11;
+		bool isGovernmentIdInvalid = governmentId is null;
+		bool isPayslipPicInvalid = payslipPic is null;
 
 		if (isAnnualGrossInvalid)
 			error = "Please enter a valid Gross Annual Income not less than 250 000.";
-		// if (isOccupationInvalid)
-		// 	error = "Please fill out occupation.";
 		if (isEmailInvalid)
 			error = "Please enter a valid Email.";
 		if (isContactNoMissingOrInvalid)
 			error = "Please enter a valid Contact No.";
-		// if (isSexInvalid)
-		// 	error = "Plase choose a valid sex.";
-		// if (isDateInValidOrUnderAge)
-		// 	error = "You must be older than 18 to use this account or apply for a loan.";
-		// if (isAgeMissingOrUnderAge)
-		// 	error = "Please enter a valid age not less than 18 years old.";
-		// if (hasMissingAddress)
-		// 	error = "Please fill out your address.";
-		// if (hasMissingName)
-		// 	error = "Please fill out your name.";
+		if (isGovernmentIdInvalid)
+			error = "Please upload a valid Government Id photo.";
+		if (isPayslipPicInvalid)
+			error = "Please upload a valid Payslip photo.";
 		Loan newLoan = new Loan
 		{
 			AccountId = userSession.ActiveAccountSession.AccountId,
