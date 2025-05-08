@@ -1,0 +1,85 @@
+﻿@using Layout
+@using Microsoft.AspNetCore.Components.Routing
+@page "/Check_Loan_Balance"
+
+@layout MainLayout
+@attribute [Authorize(Roles = "User")]
+@rendermode InteractiveServer
+
+
+<div class="page">
+	<main>
+        <header class="custom-card-clientpage clientheader py-4 align-items-start">
+            <div class="px-5">
+                <div class="d-flex align-items-center my-4">
+                    <h2>Loan Balance Status</h2>
+                </div>
+            </div>
+        </header>
+
+        <section class="container py-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="row border-bottom pb-3 mb-3">
+                        <!-- Account Info -->
+                        <div class="col-md-6">
+                            <h5 class="fw-bold">Account Information</h5>
+                            <table class="table table-sm table-borderless text-white">
+                                <tr><td>Account Number:</td><td>1231-21313</td></tr>
+                                <tr><td>Account Name:</td><td>Sample Name</td></tr>
+                                <tr><td>Statement Date:</td><td>06/21/2020</td></tr>
+                                <tr><td>Loan Amount:</td><td>20,000</td></tr>
+                                <tr><td>Loan Term:</td><td>6 Months</td></tr>
+                                <tr><td>Interest Rate:</td><td>8%</td></tr>
+                                <tr><td>Loan Status:</td><td>Active</td></tr>
+                            </table>
+                        </div>
+
+                        <!-- Payment Overview -->
+                        <div class="col-md-6">
+                            <h5 class="fw-bold">Payment Overview</h5>
+                            <table class="table table-sm table-borderless text-white">
+                                <tr><td>Monthly Payment:</td><td>6,699</td></tr>
+                                <tr><td>Interest:</td><td>1,000</td></tr>
+                            </table>
+                            <h6 class="fw-semibold">Regular Monthly Payment</h6>
+                            <table class="table table-sm table-borderless text-white">
+                                <tr><td>Fees:</td><td>0.00</td></tr>
+                                <tr><td>Overdue Payments:</td><td>0.00</td></tr>
+                            </table>
+                            <h6 class="fw-semibold">Total due July 1, 2020</h6>
+                            <p><strong>₱7,699</strong></p>
+                            <p><small>Next payment date: 08/01/2020</small></p>
+                        </div>
+                    </div>
+
+                    <!-- Activity Log -->
+                    <div>
+                        <h5 class="fw-bold">Activity since last statement</h5>
+                        <table class="table table-bordered table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Transaction</th>
+                                    <th>Charge</th>
+                                    <th>Payment</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>07/01/2020</td>
+                                    <td>Payment Received</td>
+                                    <td></td>
+                                    <td>7,699</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+	</main>
+</div>
+
+@code {
+}
