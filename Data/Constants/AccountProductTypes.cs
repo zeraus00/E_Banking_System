@@ -1,6 +1,6 @@
 ﻿namespace Data.Constants
 {
-    public class AccountProductTypeNames
+    public class AccountProductTypes
     {
         public const string SAVINGS = "SAVINGS";
         public const string CHECKING = "CHECKING";

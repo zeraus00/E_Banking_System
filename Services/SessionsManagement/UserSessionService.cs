@@ -56,13 +56,13 @@ namespace Services.SessionsManagement
                 int roleId = _claimsHelper.GetRoleId(principal);
                 switch (roleId)
                 {
-                    case (int)RoleTypes.Administrator:
+                    case (int)RoleTypeIDs.Administrator:
                         await StartAdminSession(principal);
                         break;
-                    case (int)RoleTypes.User:
+                    case (int)RoleTypeIDs.User:
                         await StartUserSession(principal);
                         break;
-                    case (int)RoleTypes.Employee:
+                    case (int)RoleTypeIDs.Employee:
                         //  start employee session
                         break;
                     default:

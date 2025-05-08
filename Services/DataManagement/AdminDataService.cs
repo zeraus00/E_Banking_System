@@ -98,7 +98,7 @@ namespace Services.DataManagement
                     int userInfoId = await userInfoAccountRepo
                         .Query
                         .HasAccountId(accountId)
-                        .HasAccessRoleId((int)AccessRoles.PRIMARY_OWNER)
+                        .HasAccessRoleId((int)AccessRoleIDs.PRIMARY_OWNER)
                         .SelectUserInfoId();
 
                     //  Prepare a query for the user info table using the UserInfoId.
@@ -170,7 +170,7 @@ namespace Services.DataManagement
                     var transactionType 
                     in TransactionTypeConstants
                         .AS_TRANSACTION_TYPE_LIST
-                        .Where(t => t.TransactionTypeId != (int) TransactionTypes.Incoming_Transfer)
+                        .Where(t => t.TransactionTypeId != (int) TransactionTypeIDs.Incoming_Transfer)
                     )
                 {
                     List<Transaction> transactionSublist = transactionList
@@ -194,7 +194,7 @@ namespace Services.DataManagement
         }
         public List<Transaction> GetLargestTransactions(List<Transaction> transactionList, int count) =>
             transactionList
-                .Where(t => t.TransactionTypeId != (int)TransactionTypes.Incoming_Transfer)
+                .Where(t => t.TransactionTypeId != (int)TransactionTypeIDs.Incoming_Transfer)
                 .OrderByDescending(t => t.Amount)
                 .Take(count)
                 .ToList();

@@ -1,6 +1,6 @@
 ﻿namespace Data.Enums
 {
-    public enum TransactionTypes
+    public enum TransactionTypeIDs
     {
         Deposit = 1,
         Withdrawal = 2,

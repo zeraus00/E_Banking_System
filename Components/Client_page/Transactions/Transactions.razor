@@ -78,22 +78,22 @@
                             <td>@transaction.Status</td>
                             <td>@FormatHelper.BalanceFormatter(transaction.Amount)</td>
                             @* Set Receiver and Sender *@ 
-                            @if (@transaction.TransactionType.TransactionTypeId == (int)@TransactionTypes.Outgoing_Transfer)
+                            @if (@transaction.TransactionType.TransactionTypeId == (int)TransactionTypeIDs.Outgoing_Transfer)
                             {
                                 <td>@transaction.CounterAccount.AccountName</td>
                                 <td>@transaction.MainAccount.AccountName</td>
                             }
-                            else if (@transaction.TransactionType.TransactionTypeId == (int)@TransactionTypes.Incoming_Transfer)
+                            else if (@transaction.TransactionType.TransactionTypeId == (int)TransactionTypeIDs.Incoming_Transfer)
                             {
                                 <td>@transaction.MainAccount.AccountName</td>
                                 <td>@transaction.CounterAccount.AccountName</td>
                             }
-                            else if (transaction.TransactionType.TransactionTypeId == (int)TransactionTypes.Withdrawal)
+                            else if (transaction.TransactionType.TransactionTypeId == (int)TransactionTypeIDs.Withdrawal)
                             {
                                 <td>@transaction.ExternalVendor.VendorName</td>
                                 <td>--</td>
                             }
-                            else if (transaction.TransactionType.TransactionTypeId == (int)TransactionTypes.Deposit)
+                            else if (transaction.TransactionType.TransactionTypeId == (int)TransactionTypeIDs.Deposit)
                             {
                                 <td>--</td>
                                 <td>@transaction.ExternalVendor.VendorName</td>
@@ -143,7 +143,7 @@
 
 @code {
     private UserSession userSession { get; set; } = default!;
-    private LinkedAccount activeAccountSession { get; set; } = default;
+    private LinkedAccount activeAccountSession { get; set; } = default!;
     private string error = "";
 
     private DateTime? startDate = DateTime.Now.Date.AddDays(-DateTime.Now.Date.Day + 1);

@@ -11,9 +11,10 @@
         public const string DASHBOARD = "/Dashboard";
         public const string PENDING_ACCOUNTS = "/PendingAccounts";
         public const string VIEW_DETAILS = "/ViewDetails";
+        public const string VIEW_ACCOUNT = "/View_account";
 
         public const string APPLY_LOAN = "/Apply_loan";
-        public const string LOAN_BALANCE = "/Loan_balance";
+        public const string LOAN_BALANCE = "/Check_Loan_Balance";
 
         public const string ACCOUNTS = "/Accounts";
         public const string ADD_ACCOUNT = "/Add_account";

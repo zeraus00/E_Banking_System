@@ -23,11 +23,11 @@ namespace Data.Configurations.User
                 .Property(ui => ui.UserNameId)
                 .IsRequired();
 
-            //  ProfilePicture (Required but nullable for now; MaxSize:1MB)
+            //  ProfilePicture (Required but nullable for now;
+            //  MaxSize:10MB but set to max due to SQL syntax limitations)
             UsersInfo
                 .Property(a => a.ProfilePicture)
-                .HasColumnType("VARBINARY(MAX)")  
-                .HasMaxLength(ImageSize.ONE_MEGA_BYTE);
+                .HasColumnType("VARBINARY(MAX)");
 
             //  Age (Required)
             UsersInfo
@@ -63,11 +63,17 @@ namespace Data.Configurations.User
                 .IsRequired()
                 .HasMaxLength(50);
 
-            //  GovernmentId (Required but nullable for now; MaxSize:1MB)
+            //  GovernmentId (Required but nullable for now;
+            //  MaxSize:10MB but set to MAX due to SQL syntax limitations.)
             UsersInfo
-                .Property(a => a.GovernmentId)
-                .HasColumnType("VARBINARY(MAX)")
-                .HasMaxLength(ImageSize.ONE_MEGA_BYTE);
+                .Property(ui => ui.GovernmentId)
+                .HasColumnType("VARBINARY(MAX)");
+
+            //  PayslipPicture (Optional (to be uploaded on loan application);
+            //  MaxSize:10MB but set to MAX due to SQL syntax limitations.)
+            UsersInfo
+                .Property(ui => ui.PayslipPicture)
+                .HasColumnType("VARBINARY(MAX)");
 
             //  TaxIdentificationNumber (Required; MaxLength=12)
             UsersInfo

@@ -8,8 +8,8 @@ namespace Services.DataManagement
         public const string bankBranchNumber = "1";
         public static string GenerateAccountName(int accountTypeId, int accountProductTypeId)
         {
-            var firstPart = AccountTypeNames.AS_STRING_LIST[accountTypeId-1][..3];
-            var secondPart = AccountProductTypeNames.AS_STRING_LIST[accountProductTypeId-1][..3];
+            var firstPart = AccountTypes.AS_STRING_LIST[accountTypeId-1][..3];
+            var secondPart = AccountProductTypes.AS_STRING_LIST[accountProductTypeId-1][..3];
             return $"{firstPart}-{secondPart}-{Guid.NewGuid().ToString().Substring(0, 6).ToUpper()}";
         }
         public static string GenerateAccountNumber(DateTime creationDate, int accountTypeId, int accountProductTypeId)

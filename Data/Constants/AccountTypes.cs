@@ -1,6 +1,6 @@
 ﻿namespace Data.Constants
 {
-    public class AccountTypeNames
+    public class AccountTypes
     {
         public const string PERSONAL_ACCOUNT = "PERSONAL ACCOUNT";
         public const string JOINT_ACCOUNT = "JOINT ACCOUNT";

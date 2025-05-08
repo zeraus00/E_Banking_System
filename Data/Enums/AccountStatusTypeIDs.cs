@@ -1,6 +1,6 @@
 ﻿namespace Data.Enums
 {
-    public enum AccountStatusTypes
+    public enum AccountStatusTypeIDs
     {
         Active = 1,
         Pending = 2,

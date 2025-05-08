@@ -144,9 +144,9 @@
 						<label class="text-light">Type of Loan</label>
 						<select class="form-select" @bind="loanTypeId" @bind:after="OnLoanTypeChange" required>
 							<option value="-1" disabled hidden>--Select Loan Type--</option>
-							@foreach(var loanType in LoanTypeNames.AS_STRING_LIST)
+							@foreach(var loanType in LoanTypes.AS_STRING_LIST)
 							{
-								<option value="@LoanTypeNames.AS_STRING_LIST.IndexOf(loanType)">@loanType</option>
+								<option value="@LoanTypes.AS_STRING_LIST.IndexOf(loanType)">@loanType</option>
 							}
 						</select>
 					</div>
@@ -180,14 +180,14 @@
 					<div class="col-12 col-md-6">
 						<label class="text-light">Upload Government Valid ID (Front & Back)</label>
 						<div class="d-flex flex-wrap gap-2">
-							<input type="file" class="btn btn-light" required>
+							<InputFile OnChange="UploadGovernmentId" class="btn btn-light btn-sm w-75" required />
 							<button class="btn btn-outline-light">View Attachment</button>
 						</div>
 					</div>
 					<div class="col-12 col-md-6">
 						<label class="text-light">Upload Latest Complete 1 Month Payslip</label>
 						<div class="d-flex flex-wrap gap-2">
-							<input type="file" class="btn btn-light" required>
+							<InputFile OnChange="UploadPayslip" class="btn btn-light btn-sm w-75" required />
 							<button class="btn btn-outline-light">View Attachment</button>
 						</div>
 					</div>
@@ -263,6 +263,57 @@
 	private Address address = default!;
 	private UserSession userSession = default!;
 
+	private byte[]? governmentId;
+	private byte[]? payslipPicture;
+
+	private async Task UploadGovernmentId(InputFileChangeEventArgs e)
+	{
+		try
+		{
+			var file = e.File;
+			if (file == null)
+			{
+				error = "Please upload a government Id.";
+			}
+			if (file != null)
+			{
+				using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); // allow up to 10 MB
+				using var ms = new MemoryStream();
+				await stream.CopyToAsync(ms);
+				governmentId = ms.ToArray();
+				error = "";
+			}
+		}
+		catch (FieldMissingException ex)
+		{
+			error = "Error uploading Government ID:" + ex.Message;
+		}
+	}
+
+	private async Task UploadPayslip(InputFileChangeEventArgs e)
+	{
+		try
+		{
+			var file = e.File;
+			if (file == null)
+			{
+				error = "Please upload a payslip picture.";
+			}
+			if (file != null)
+			{
+				using var stream = file.OpenReadStream(maxAllowedSize: 10 * ImageSizes.ONE_MEGA_BYTE); // allow up to 10 MB
+				using var ms = new MemoryStream();
+				await stream.CopyToAsync(ms);
+				payslipPicture = ms.ToArray();
+				error = "";
+			}
+		}
+		catch (FieldMissingException ex)
+		{
+			error = "Error uploading Government ID:" + ex.Message;
+		}
+	}
+
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
 		if (firstRender)
@@ -312,43 +363,28 @@
 
 	private async Task RegisterLoanAsync()
 	{
-		// bool hasMissingName = string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(lastName);
-		// bool hasMissingAddress = string.IsNullOrWhiteSpace(municipality)
-		// 	|| string.IsNullOrWhiteSpace(barangay)
-		// 	|| string.IsNullOrWhiteSpace(street)
-		// 	|| string.IsNullOrWhiteSpace(houseNumber);
-		// bool isAgeMissingOrUnderAge = age < 18;
-		// bool isDateInValidOrUnderAge = birthDate > DateTime.UtcNow.Date.AddYears(-18);
-		// bool isSexInvalid = string.IsNullOrWhiteSpace(sex);
-		bool isContactNoMissingOrInvalid = string.IsNullOrWhiteSpace(contactNo) 
-			|| !contactNo.All(char.IsDigit)
-			|| contactNo.Length != 11;
 
 		string gmailDomain = "@gmail.com";
+		bool isAnnualGrossInvalid = minAnnualGross < 250000.0m;
 		bool isEmailInvalid = string.IsNullOrWhiteSpace(email)
 			|| email.Length < 6
 			|| !email.EndsWith(gmailDomain, StringComparison.OrdinalIgnoreCase);
-		// bool isOccupationInvalid = string.IsNullOrWhiteSpace(occupation);
-		bool isAnnualGrossInvalid = minAnnualGross < 250000.0m;
+		bool isContactNoMissingOrInvalid = string.IsNullOrWhiteSpace(contactNo)
+			|| !contactNo.All(char.IsDigit)
+			|| contactNo.Length != 11;
+		bool isGovernmentIdInvalid = governmentId is null;
+		bool isPayslipPicInvalid = payslipPicture is null;
 
 		if (isAnnualGrossInvalid)
 			error = "Please enter a valid Gross Annual Income not less than 250 000.";
-		// if (isOccupationInvalid)
-		// 	error = "Please fill out occupation.";
 		if (isEmailInvalid)
 			error = "Please enter a valid Email.";
 		if (isContactNoMissingOrInvalid)
 			error = "Please enter a valid Contact No.";
-		// if (isSexInvalid)
-		// 	error = "Plase choose a valid sex.";
-		// if (isDateInValidOrUnderAge)
-		// 	error = "You must be older than 18 to use this account or apply for a loan.";
-		// if (isAgeMissingOrUnderAge)
-		// 	error = "Please enter a valid age not less than 18 years old.";
-		// if (hasMissingAddress)
-		// 	error = "Please fill out your address.";
-		// if (hasMissingName)
-		// 	error = "Please fill out your name.";
+		if (isGovernmentIdInvalid)
+			error = "Please upload a valid Government Id photo.";
+		if (isPayslipPicInvalid)
+			error = "Please upload a valid Payslip photo.";
 		Loan newLoan = new Loan
 		{
 			AccountId = userSession.ActiveAccountSession.AccountId,
@@ -374,14 +410,16 @@
 			return;
 		}
 
-		await loanService.RegisterLoanApplication(newLoan);
+		//	Register loan and update UserInfo employment information.
+		if (governmentId is byte[] govId && payslipPicture is byte[] payslipPic)
+			await loanService.RegisterLoanApplication(newLoan, userSession.UserInfoId, govId, payslipPic);
 
 		await NavigateToClientHome();
 	}
 
 	private void OnLoanTypeChange()
 	{
-		LoanType loanType = LoanTypeNames.AS_LOAN_TYPE_LIST[loanTypeId];
+		LoanType loanType = LoanTypes.AS_LOAN_TYPE_LIST[loanTypeId];
 		loanAmountLabel = "Loan Amount";
 		loanTermInMonthsLabel = "Loan Term in Months";
 		loanAmountLabel += $" ( >= {loanType.MinimumLoanAmount})";

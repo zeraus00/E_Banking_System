@@ -64,7 +64,7 @@ namespace Data.Seeders.Finance
             if (!await _context.AccountStatusTypes.AnyAsync())
             {
                 var accountStatusTypeBuilder = new AccountStatusTypeBuilder();
-                var statusTypeList = AccountStatusTypeNames.AS_STRING_LIST;
+                var statusTypeList = AccountStatusTypes.AS_STRING_LIST;
 
                 foreach(var typeName in statusTypeList)
                 {

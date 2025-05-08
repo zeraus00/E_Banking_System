@@ -106,7 +106,7 @@ namespace Data.Seeders.User
                     new UserInfoAccount
                     {
                         UserInfoId = userInfo.UserInfoId,
-                        AccessRoleId = (int)AccessRoles.PRIMARY_OWNER,
+                        AccessRoleId = (int)AccessRoleIDs.PRIMARY_OWNER,
                         AccountId = 1,
                         IsLinkedToOnlineAccount = true
                     });
@@ -115,7 +115,7 @@ namespace Data.Seeders.User
                     new UserInfoAccount
                     {
                         UserInfoId = userInfo.UserInfoId,
-                        AccessRoleId = (int)AccessRoles.SECONDARY_OWNER,
+                        AccessRoleId = (int)AccessRoleIDs.SECONDARY_OWNER,
                         AccountId = 2,
                         IsLinkedToOnlineAccount = false
                     });

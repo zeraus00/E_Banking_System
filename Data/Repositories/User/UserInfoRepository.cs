@@ -68,6 +68,7 @@ namespace Data.Repositories.User
         private string _contactNumber = string.Empty;
         private string _occupation = string.Empty;
         private byte[]? _governmentId; //nullable for now
+        private byte[]? _payslipPicture;
         private string _taxIdentificationNumber = string.Empty;
         private string _civilStatus = string.Empty;
         private int? _religionId;
@@ -93,8 +94,8 @@ namespace Data.Repositories.User
         }
         public UserInfoBuilder WithProfilePicture(byte[] profilePicture)
         {
-            if (profilePicture.Length > ImageSize.ONE_MEGA_BYTE)
-                throw new ArgumentException($"Image exceeded maximum size {ImageSize.ONE_MEGA_BYTE}");
+            if (profilePicture.Length > ImageSizes.ONE_MEGA_BYTE)
+                throw new ArgumentException($"Image exceeded maximum size {ImageSizes.ONE_MEGA_BYTE}");
 
             _profilePicture = profilePicture;
             return this;
@@ -141,10 +142,15 @@ namespace Data.Repositories.User
         }
         public UserInfoBuilder WithGovernmentId(byte[] governmentid)
         {
-            if (governmentid.Length > ImageSize.ONE_MEGA_BYTE)
-                throw new ArgumentException($"Image exceeded maximum size {ImageSize.ONE_MEGA_BYTE}");
+            if (governmentid.Length > ImageSizes.ONE_MEGA_BYTE)
+                throw new ArgumentException($"Image exceeded maximum size {ImageSizes.ONE_MEGA_BYTE}");
 
             _governmentId = governmentid;
+            return this;
+        }
+        public UserInfoBuilder WithPayslipPicture(byte[] payslipPicture)
+        {
+            _payslipPicture = payslipPicture;
             return this;
         }
         public UserInfoBuilder WithTaxIdentificationNumber(string taxIdentificationNumber)
@@ -214,6 +220,7 @@ namespace Data.Repositories.User
                 Occupation = _occupation,
                 TaxIdentificationNumber = _taxIdentificationNumber,
                 GovernmentId = _governmentId,
+                PayslipPicture = _payslipPicture,
                 CivilStatus = _civilStatus
             };
 
