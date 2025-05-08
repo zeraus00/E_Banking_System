@@ -112,8 +112,8 @@
 
     private List<string> accountTypeList = AccountTypeNames.AS_STRING_LIST;
 
-    private DateTime? startDate;
-    private DateTime? endDate;
+    private DateTime? startDate = DateTime.Now.AddDays(-DateTime.Now.Day + 1);
+    private DateTime? endDate = DateTime.Now;
     private string selectedType = "";
     private string searchAccount = "";
 
