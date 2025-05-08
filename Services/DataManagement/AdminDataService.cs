@@ -160,7 +160,10 @@ namespace Services.DataManagement
         public Dictionary<string, TransactionBreakdown> GetTransactionBreakDown(List<Transaction> transactionList)
         {
             Dictionary<string, TransactionBreakdown> transactionBreakdownDict = new();
-
+            transactionBreakdownDict[TransactionTypeConstants.WITHDRAWAL] = new();
+            transactionBreakdownDict[TransactionTypeConstants.DEPOSIT] = new();
+            transactionBreakdownDict[TransactionTypeConstants.OUTGOING_TRANSFER] = new();
+            //  TO DO: ADD LOAN TRANSACTIONS
             if (transactionList.Any())
             {
                 foreach (
