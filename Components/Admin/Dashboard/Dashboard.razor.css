@@ -71,6 +71,7 @@
     background-color: white;
     border-radius: 1rem;
     height: 410px;
+    line-height: 10px;
 }
 
 .number {
@@ -103,9 +104,15 @@
     min-width: 200px;
     border: 2px solid white;
     border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     color: black;
+    flex: 1 1 calc(25% - 1rem);
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    transition: transform 0.2s;
 }
+
+    .data-card:hover {
+        transform: translateY(-3px);
+    }
 
 .card-footer {
     display: flex;
@@ -209,5 +216,17 @@
 @media (max-width: 600px) {
     .card-section {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 992px) {
+    .data-card {
+        flex: 1 1 calc(50% - 1rem); /* 2 per row */
+    }
+}
+
+@media (max-width: 576px) {
+    .data-card {
+        flex: 1 1 100%; /* Stack vertically */
     }
 }

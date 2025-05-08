@@ -32,7 +32,6 @@ window.drawPieChart = () => {
         data: {
             labels: ['Withdrawals', 'Deposits', 'Transfers', 'Loans'],
             datasets: [{
-                label: 'Transaction Type Distribution',
                 data: [25, 40, 25, 10],
                 backgroundColor: [
                     'rgba(75, 192, 192, 0.6)',
@@ -49,8 +48,20 @@ window.drawPieChart = () => {
                 borderWidth: 1
             }]
         },
+
         options: {
-            responsive: true
+            responsive: true,
+            maintainAspectRatio: false,
+            padding: {
+                top: 20,
+                bottom: 20
+            },
+
+            plugins: {
+                legend: {
+                    position: 'right'
+                }
+            }
         }
     });
 };
