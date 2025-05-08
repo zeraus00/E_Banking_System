@@ -58,11 +58,11 @@
 }
 
 .left-cards {
-    flex: 3;
+    flex: 5;
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
-    height: 180px;
+    height: 160px;
 }
 
 .key-metrics {
@@ -70,7 +70,7 @@
     padding: 20px;
     background-color: white;
     border-radius: 1rem;
-    height: 400px;
+    height: 410px;
 }
 
 .number {
@@ -100,8 +100,7 @@
 .data-card {
     background-color: #5cc9d8;
     padding: 20px;
-    max-width: 220px;
-    min-width: 150px;
+    min-width: 200px;
     border: 2px solid white;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
@@ -126,19 +125,86 @@
 }
 
 .chart-section {
-    text-align: center;
+    display: flex;
+    gap: 20px;
+    justify-content: space-between;
+    align-items: stretch;
+    flex-wrap: wrap; 
 }
 
-.chart-placeholder {
-    margin-top: 20px;
+.pie-chart {
+    flex: 1 1 60%;
+    min-width: 300px;
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.right-charts {
+    flex: 1 1 35%;
+    min-width: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.main-chart {
     background-color: #f5f5f5;
+    border-radius: 8px;
+    color: black;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.small-chart {
+    height: 190px;
+}
+
+@media (max-width: 768px) {
+    .chart-section {
+        flex-direction: column;
+    }
+
+    .pie-chart, .right-charts {
+        width: 100%;
+    }
+
+    .pie-chart {
+        height: 300px;
+    }
+
+    .small-chart {
+        height: 160px;
+    }
+}
+
+
+/*
+.sub-chart {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    align-items: start;
+    flex-wrap: wrap;
+}
+
+.pie-chart,
+.bar-chart {
+    flex: 1 1 45%;
+    max-width: 45%;
+    min-width: 300px;
     height: 300px;
+    background-color: #f5f5f5;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 8px;
     color: black;
-}
+}*/
 
 @media (max-width: 600px) {
     .card-section {
