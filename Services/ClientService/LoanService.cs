@@ -2,6 +2,8 @@
 using Data.Constants;
 using Data.Models.Finance;
 using Data.Repositories.Finance;
+using Data.Repositories.User;
+using Exceptions;
 
 namespace Services.ClientService
 {
@@ -32,10 +34,16 @@ namespace Services.ClientService
             return hasInvalidParameter;
         }
 
-        public async Task RegisterLoanApplication(Loan newLoan)
+        public async Task RegisterLoanApplication(
+            Loan newLoan,
+            int userInfoId, 
+            byte[] governmentIdPicture, 
+            byte[] payslipPicture)
         {
+            //  Get loan type details.
             LoanType loanType = LoanTypes.AS_LOAN_TYPE_LIST[newLoan.LoanTypeId - 1];
 
+            //  Set loan details.
             newLoan.LoanNumber = "";
             newLoan.InterestRate = loanType.InterestRatePerAnnum;
             newLoan.PaymentAmount = 0.0m;
@@ -44,10 +52,37 @@ namespace Services.ClientService
             
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
-                var loanRepo = new LoanRepository(dbContext);
+                await using (var transaction = await dbContext.Database.BeginTransactionAsync())
+                {
+                    try
+                    {
+                        var loanRepo = new LoanRepository(dbContext);
+                        var userInfoRepo = new UserInfoRepository(dbContext);
 
-                await loanRepo.AddAsync(newLoan);
-                await loanRepo.SaveChangesAsync();
+                        //  Retrieve UserInfo from database.
+                        //  Throws UserNotFoundException if UserInfo is not found.
+                        UserInfo userInfo = await userInfoRepo
+                            .GetUserInfoByIdAsync(userInfoId)
+                            ?? throw new UserNotFoundException();
+
+                        //  Update photos.
+                        userInfo.GovernmentId = governmentIdPicture;
+                        userInfo.PayslipPicture = payslipPicture;
+
+                        //  Add Loan to database.
+                        await loanRepo.AddAsync(newLoan);
+
+                        //  Save changes to database.
+                        await transaction.CommitAsync();
+                    }
+                    catch
+                    {
+                        //  Log exception.
+                        //  Rollback transaction.
+                        await transaction.RollbackAsync();
+                        throw;
+                    }
+                }
             }
         }
     }

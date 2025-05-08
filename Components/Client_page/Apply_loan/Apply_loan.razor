@@ -264,7 +264,7 @@
 	private UserSession userSession = default!;
 
 	private byte[]? governmentId;
-	private byte[]? payslipPic;
+	private byte[]? payslipPicture;
 
 	private async Task UploadGovernmentId(InputFileChangeEventArgs e)
 	{
@@ -301,10 +301,10 @@
 			}
 			if (file != null)
 			{
-				using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); // allow up to 10 MB
+				using var stream = file.OpenReadStream(maxAllowedSize: 10 * ImageSizes.ONE_MEGA_BYTE); // allow up to 10 MB
 				using var ms = new MemoryStream();
 				await stream.CopyToAsync(ms);
-				payslipPic = ms.ToArray();
+				payslipPicture = ms.ToArray();
 				error = "";
 			}
 		}
@@ -373,7 +373,7 @@
 			|| !contactNo.All(char.IsDigit)
 			|| contactNo.Length != 11;
 		bool isGovernmentIdInvalid = governmentId is null;
-		bool isPayslipPicInvalid = payslipPic is null;
+		bool isPayslipPicInvalid = payslipPicture is null;
 
 		if (isAnnualGrossInvalid)
 			error = "Please enter a valid Gross Annual Income not less than 250 000.";
@@ -410,7 +410,9 @@
 			return;
 		}
 
-		await loanService.RegisterLoanApplication(newLoan);
+		//	Register loan and update UserInfo employment information.
+		if (governmentId is byte[] govId && payslipPicture is byte[] payslipPic)
+			await loanService.RegisterLoanApplication(newLoan, userSession.UserInfoId, govId, payslipPic);
 
 		await NavigateToClientHome();
 	}
