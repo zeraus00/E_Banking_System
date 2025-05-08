@@ -41,12 +41,12 @@ namespace Services
         /// <param name="counterAccountId">
         /// The <see cref="Account.AccountId"/> of the counter <see cref="Account"/> 
         /// recipient of the transaction. Should only have a value IF the transaction type is
-        /// <see cref="TransactionTypeConstants.OUTGOING_TRANSFER_TYPE"/>.
+        /// <see cref="TransactionTypes.OUTGOING_TRANSFER_TYPE"/>.
         /// </param>
         /// <param name="externalVendorId">
         /// The <see cref="ExternalVendor.VendorId"/> of the vendor involved in the transaction. Should
-        /// only have a value IF the transaction type is <see cref="TransactionTypeConstants.DEPOSIT_TYPE"/>
-        /// OR <see cref="TransactionTypeConstants.WITHDRAWAL_TYPE"/>
+        /// only have a value IF the transaction type is <see cref="TransactionTypes.DEPOSIT_TYPE"/>
+        /// OR <see cref="TransactionTypes.WITHDRAWAL_TYPE"/>
         /// </param>
         /// <returns>
         /// A <see cref="TransactionSession"/> object containing the details of the transaction which will then be

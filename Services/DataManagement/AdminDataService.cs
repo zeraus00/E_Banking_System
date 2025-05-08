@@ -29,13 +29,13 @@ namespace Services.DataManagement
         }
 
         /// <summary>
-        /// Asynchronously filters and retrieves a list of pending accounts based on optional criteria.
+        /// Asynchronously filters and retrieves a list of pending <see cref="Account"/> based on optional criteria.
         /// </summary>
         /// <param name="accountNumber">Optional account number to filter by. If empty or null, this filter is ignored.</param>
         /// <param name="startDate">Optional start date to filter accounts opened on or after this date. If null, this filter is ignored.</param>
         /// <param name="endDate">Optional end date to filter accounts opened on or before this date. If null, this filter is ignored.</param>
         /// <param name="accountTypeId">Optional account type ID to filter by. Only applies if greater than zero.</param>
-        /// <returns>A list of accounts matching the specified filters.</returns>
+        /// <returns>A list of <see cref="Account"> objects matching the specified filters.</returns>
         public async Task<List<Account>> FilterAccountsAsync(
             string accountNumber = "",
             DateTime? startDate = null,
@@ -85,6 +85,12 @@ namespace Services.DataManagement
                 return accountList;
             }
         }
+        /// <summary>
+        /// Retrieves the <see cref="UserInfo"> of the first primary owner of the <see cref="Account"> 
+        /// with the specified <see cref="UserInfo.UserInfoId">. Mainly used for tracking the owner 
+        /// that registered an <see cref="Account">.
+        /// </summary>
+        /// <param name="accountId">The <see cref="Account.AccountId"/> of the primary owner.</returns>
         public async Task<UserInfo> GetAccountPrimaryOwner(int accountId)
         {
             try
@@ -130,9 +136,10 @@ namespace Services.DataManagement
             }
 
         }
-
         /// <summary>
-        /// Updates the status of an account.
+        /// Updates the <see cref="Account.AccountStatusType"> of an <see cref="Account"/> with a
+        /// specified <see cref="Account.AccountId"/> and a <see cref="Account.AccountStatusTypeId"/>
+        /// of <see cref="AccountStatusTypeIDs.Pending"/>.
         /// </summary>
         /// <param name="accountId"></param>
         /// <param name="newStatus"></param>
@@ -156,19 +163,101 @@ namespace Services.DataManagement
                 throw;
             }
         }
+        /// <summary>
+        /// Calculates the net movement of currency in the bank through a main <see cref="List{Transaction}">.
+        /// </summary>
+        /// <param name="transactionList">The main <see cref="List{Transaction}">.</param>
+        /// <returns>The calculated <see cref="decimal"/> net movement based on the provided <see cref="List{Transaction}">.
+        /// </returns>
+        public decimal GetNetMovement(List<Transaction> transactionList)
+        {
+            decimal inflow = transactionList
+                .Where(t => t.TransactionTypeId == (int)TransactionTypeIDs.Deposit)
+                .Sum(t => t.Amount);
+            decimal outflow = transactionList
+                .Where(t => t.TransactionTypeId == (int)TransactionTypeIDs.Withdrawal)
+                .Sum(t => t.Amount);
 
+            return inflow - outflow;
+        }
+        /// <summary>
+        /// Retrieves the count of newly opened <see cref="Account"> in a specified time frame or
+        /// a default time frame starting from the start of the month until the most recent day.
+        /// </summary>
+        /// <param name="dateOpenedStart">Specifies the earliest <see cref="Account.DateOpened"> value.</param>
+        /// <param name="dateOpenedEnd">Specifies the latest <see cref="Account.DateOpened"> value.</param>
+        /// <returns>The <see cref="int"/> count of newly opened <see cref="Account"/>.</returns>
+        public async Task<int> GetNewAccountsCount(DateTime? dateOpenedStart = null, DateTime? dateOpenedEnd = null) =>
+            await GetAccountCountByFilterAsync((int)AccountStatusTypeIDs.New, dateOpenedStart, dateOpenedEnd);
+        /// <summary>
+        /// Retrieves the count of closed <see cref="Account"/> in a specified time frame or
+        /// a default time frame starting from the start of the month until the most recent day.
+        /// </summary>
+        /// <param name="dateClosedStart">Specifies the earliest <see cref="Account.DateClosed"> value.</param>
+        /// <param name="dateClosedEnd">Specifies the latest <see cref="Account.DateClosed"> value.</param>
+        /// <returns>The <see cref="int"/> count of closed <see cref="Account"/>.</returns>
+        public async Task<int> GetClosedAccountsCount(DateTime? dateClosedStart = null, DateTime? dateClosedEnd = null) =>
+            await GetAccountCountByFilterAsync((int)AccountStatusTypeIDs.Closed, dateClosedStart, dateClosedEnd);
+        /// <summary>
+        /// Retrieves the count of <see cref="Account"/> with the specified <see cref="Account.AccountStatusTypeId"> 
+        /// and time frame or a default time frame starting from the start of the month until the most recent day.
+        /// </summary>
+        /// <param name="statusTypeId">The <see cref="Account.AccountStatusTypeId"/> of the accounts specified through
+        /// <see cref="AccountStatusTypeIDs"/>Specifies the <<see cref="Account.AccountStatusTypeId"/>>of the accounts 
+        /// being queried.</param>
+        /// <param name="startDate">Specifies the earliest date for the query.</param>
+        /// <param name="endDate">Specifies the latest date for the query.</param>
+        /// <returns></returns>
+        public async Task<int> GetAccountCountByFilterAsync(int statusTypeId, DateTime? startDate = null, DateTime? endDate = null)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                //  Set timestamps.
+                var now = DateTime.Now;
+                startDate = startDate ?? now.AddDays(-now.Day + 1);
+                endDate = endDate ?? now;
+
+                var accountRepo = new AccountRepository(dbContext);
+                var queryBuilder = accountRepo.Query;
+
+                bool IsStatusNew = statusTypeId == (int)AccountStatusTypeIDs.New;
+                bool IsStatusClosed = statusTypeId == (int)AccountStatusTypeIDs.Closed;
+                //  Set time stamps based on status.
+                if (IsStatusNew)
+                    queryBuilder
+                        .HasOpenedOnOrAfter(startDate)
+                        .HasOpenedOnOrBefore(endDate);
+                else if (IsStatusClosed)
+                    queryBuilder
+                        .HasClosedOnOrAfter(startDate)
+                        .HasClosedOnOrBefore(endDate);
+
+                //  Get count.
+                return await queryBuilder.GetCountAsync();
+            }
+        }
+        /// <summary>
+        /// Creates a <see cref="Dictionary{String, TransactionBreakdown}"> of <see cref="TransactionBreakdown"/> from a provided 
+        /// <see cref="List{Transaction}">with a <see cref="string"> specifying the <see cref="Account.AccountStatusType"> 
+        /// as key and a <see cref="TransactionBreakdown"/> object as the value. Each <see cref="TransactionBreakdown"/> object 
+        /// contains details including the count of the transaction types, the total amount involved in all transactions 
+        /// of the said type, and the average amount involved in transactions of the said type.
+        /// </summary>
+        /// <param name="transactionList">The main list of <see cref="Transaction"/>.</param>
+        /// <returns>A <see cref="Dictionary{String, TransactionBreakdown}"> containing the details of
+        /// the transaction breakdowns.</returns>
         public Dictionary<string, TransactionBreakdown> GetTransactionBreakDown(List<Transaction> transactionList)
         {
             Dictionary<string, TransactionBreakdown> transactionBreakdownDict = new();
-            transactionBreakdownDict[TransactionTypeConstants.WITHDRAWAL] = new();
-            transactionBreakdownDict[TransactionTypeConstants.DEPOSIT] = new();
-            transactionBreakdownDict[TransactionTypeConstants.OUTGOING_TRANSFER] = new();
+            transactionBreakdownDict[TransactionTypes.WITHDRAWAL] = new();
+            transactionBreakdownDict[TransactionTypes.DEPOSIT] = new();
+            transactionBreakdownDict[TransactionTypes.OUTGOING_TRANSFER] = new();
             //  TO DO: ADD LOAN TRANSACTIONS
             if (transactionList.Any())
             {
                 foreach (
                     var transactionType 
-                    in TransactionTypeConstants
+                    in TransactionTypes
                         .AS_TRANSACTION_TYPE_LIST
                         .Where(t => t.TransactionTypeId != (int) TransactionTypeIDs.Incoming_Transfer)
                     )
@@ -192,6 +281,15 @@ namespace Services.DataManagement
 
             return transactionBreakdownDict;
         }
+        /// <summary>
+        /// Retrieves a <see cref="List{Transaction}"/> with specified <see cref="int"/> count of 
+        /// "/><see cref="Transaction"/> objects from a main list of <see cref="Transaction"/> that 
+        /// have the largest amount of money involved.
+        /// </summary>
+        /// <param name="transactionList">The main <see cref="List{Transaction}">.</param>
+        /// <param name="count"></param>
+        /// <returns>A <see cref="List{Transaction}"/> containing the largest transactions of
+        /// <see cref="int"/> count.</returns>
         public List<Transaction> GetLargestTransactions(List<Transaction> transactionList, int count) =>
             transactionList
                 .Where(t => t.TransactionTypeId != (int)TransactionTypeIDs.Incoming_Transfer)
@@ -200,11 +298,14 @@ namespace Services.DataManagement
                 .ToList();
 
         /// <summary>
-        /// Retrieves a list of transactions filtered by an optional start and end date.
+        /// Retrieves a <see cref="List{Transaction}"/> filtered by an optional start and end date.
         /// </summary>
-        /// <param name="transactionStartDate">The start date for filtering transactions. If null, no lower bound is applied.</param>
-        /// <param name="transactionEndDate">The end date for filtering transactions. If null, no upper bound is applied.</param>
-        /// <returns>A reversed list of <see cref="Transaction"/> entities matching the specified date range.</returns>
+        /// <param name="transactionStartDate">The start date for filtering transactions. If null, 
+        /// no lower bound is applied.</param>
+        /// <param name="transactionEndDate">The end date for filtering transactions. If null, no 
+        /// upper bound is applied.</param>
+        /// <returns>A reversed <see cref="List{Transaction}"/> with <see cref="Transaction"/> entities 
+        /// matching the specified date range.</returns>
         /// <remarks>
         /// Transactions are ordered such that the most recent ones appear first.
         /// </remarks>
@@ -238,10 +339,10 @@ namespace Services.DataManagement
             }
         }
         /// <summary>
-        /// Gets the total number of loans between a given timeframe.
+        /// Gets the total count of <see cref="Loan"/> entities in the databse. between a given timeframe.
         /// </summary>
-        /// <param name="startDate"></param>
-        /// <param name="endDate"></param>
+        /// <param name="startDate">The earliest <see cref="Loan.ApplicationDate"/> value.</param>
+        /// <param name="endDate">The latest. <see cref="Loan.ApplicationDate"/> value.</param>
         /// <returns></returns>
         public async Task<int> GetLoanCountAsync(DateTime? startDate = null, DateTime? endDate = null)
         {

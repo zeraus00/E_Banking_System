@@ -136,7 +136,7 @@
                         <i class="bi bi-cash-stack me-2"></i>
                         <span>Total Volume</span>
                     </div>
-                    <p class="text-end number mb-0">0</p>
+                    <p class="text-end number mb-0">@transactionVolume</p>
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center mt-4">
@@ -144,7 +144,7 @@
                         <i class="bi bi-graph-up-arrow me-2"></i>
                         <span class="fst-italic">Net Movement</span>
                     </div>
-                    <p class="text-end number mb-0">0</p>
+                    <p class="text-end number mb-0">@netMovement</p>
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center mt-4">
@@ -152,7 +152,7 @@
                         <i class="bi bi-person-plus me-2"></i>
                         <span class="fst-italic">New Accounts</span>
                     </div>
-                    <p class="text-end number mb-0">0</p>
+                    <p class="text-end number mb-0">@newAccounts</p>
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center mt-4">
@@ -160,7 +160,7 @@
                         <i class="bi bi-person-dash me-2"></i>
                         <span class="fst-italic">Closed Accounts</span>
                     </div>
-                    <p class="text-end number mb-0">0</p>
+                    <p class="text-end number mb-0">@closedAccounts</p>
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center mt-4">
@@ -190,10 +190,10 @@
 
 
         <div class="chart-section my-5">
-            <!-- Left: Pie Chart -->
+            <!-- Left: Bar Chart -->
             <div class="main-chart pie-chart">
                 <label class="fs-6">Activities</label>
-                <select id="barChartFilter" class="form-select-sm" onchange="drawBarChart()">
+                <select id="barChartFilter" class="form-select-sm" onchange="drawBarChart">
                     <option value="hourly">Hour</option>
                     <option value="daily">Day</option>
                     <option value="weekly">Week</option>
@@ -201,7 +201,7 @@
                 <E_BankingSystem.Components.Admin.Dashboard.Charts.BarChart />
             </div>
 
-            <!-- Right: Line + Bar Chart stacked vertically -->
+            <!-- Right: Line + Pie Chart stacked vertically -->
             <div class="right-charts">
                 <div class="main-chart small-chart">
                     <label>Transaction Volume</label>
@@ -282,18 +282,25 @@
     private decimal totalTransfers;
     private decimal totalLoans;
 
+    //  For key metrics.
+    private int transactionVolume;
+    private decimal netMovement;
+    private int newAccounts;
+    private int closedAccounts;
+
     protected override async Task OnInitializedAsync()
     {
         // Load transactions.
         transactionList = await adminDataService.GetTransactionListAsync(startDate, endDate);
-        // Load data for dashboard view.
-        await this.LoadTransactionData();
+        //  Load data for dashboard view.
+        await this.LoadDisplayData();
     }
 
     private async Task FilterAsync()
     {
+        //  Load transactions.
         transactionList = await adminDataService.GetTransactionListAsync(startDate, endDate);
-        await this.LoadTransactionData();
+        await this.LoadDisplayData();
     }
 
     private async Task ClearFilterAsync()
@@ -301,51 +308,34 @@
         startDate = null;
         endDate = null;
         transactionList = await adminDataService.GetTransactionListAsync();
-        await this.LoadTransactionData();
+        await this.LoadDisplayData();
     }
 
-    //Load data for dashboard view.
-    private async Task LoadTransactionData()
+    //  Load data for dashboard view.
+    private async Task LoadDisplayData()
     {
         // Get largest transactions with count 5.
         largestTransactions = adminDataService.GetLargestTransactions(transactionList, 5);
 
         // Get transaction breakdown.
         transactionBreakdown = adminDataService.GetTransactionBreakDown(transactionList);
-
-        // Withdrawals count and total.
-        if (transactionBreakdown.TryGetValue(TransactionTypeConstants.WITHDRAWAL, out var withdrawalData))
-        {
-            withdrawalCount = withdrawalData.Count;
-            totalWithdrawals = withdrawalData.Total;
-        }
-        else
-        {
-            withdrawalCount = 0;
-            totalWithdrawals = 0;
-        }
-
-        // Deposits count and total.
-        if (transactionBreakdown.TryGetValue(TransactionTypeConstants.DEPOSIT, out var depositData))
-        {
-            depositCount = depositData.Count;
-            totalDeposits = depositData.Total;
-        }
-        else
-        {
-            depositCount = 0;
-            totalDeposits = 0;
-        }
-
-        // Transfers count and total.
-        if (transactionBreakdown.TryGetValue(TransactionTypeConstants.OUTGOING_TRANSFER, out var transferData))
-        {
-            transferCount = transferData.Count;
-            totalTransfers = transferData.Total;
-        }
-
-        // Loans count.
-        loanCount = await adminDataService.GetLoanCountAsync(DateTime.Now.AddMonths(-1), DateTime.Now);
+        //  Withdrawals count and total amount.
+        withdrawalCount = transactionBreakdown[TransactionTypes.WITHDRAWAL].Count;
+        totalWithdrawals = transactionBreakdown[TransactionTypes.WITHDRAWAL].Total;
+        //  Deposits count and total amount.
+        depositCount = transactionBreakdown[TransactionTypes.DEPOSIT].Count;
+        totalDeposits = transactionBreakdown[TransactionTypes.DEPOSIT].Total;
+        //  Transfers count and total amount.
+        transferCount = transactionBreakdown[TransactionTypes.OUTGOING_TRANSFER].Count;
+        totalTransfers = transactionBreakdown[TransactionTypes.OUTGOING_TRANSFER].Total;
+        //  Loans count and total amount.
+        loanCount = await adminDataService.GetLoanCountAsync(startDate, endDate);
+        totalLoans = 0;
+        //  Load Key Metrics.
+        transactionVolume = transactionList.Count;
+        netMovement = adminDataService.GetNetMovement(transactionList);
+        newAccounts = await adminDataService.GetNewAccountsCount(startDate, endDate);
+        closedAccounts = await adminDataService.GetClosedAccountsCount(startDate, endDate);
     }
 
     //mockup data for table
