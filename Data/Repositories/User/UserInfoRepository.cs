@@ -68,6 +68,7 @@ namespace Data.Repositories.User
         private string _contactNumber = string.Empty;
         private string _occupation = string.Empty;
         private byte[]? _governmentId; //nullable for now
+        private byte[]? _payslipPicture;
         private string _taxIdentificationNumber = string.Empty;
         private string _civilStatus = string.Empty;
         private int? _religionId;
@@ -147,6 +148,11 @@ namespace Data.Repositories.User
             _governmentId = governmentid;
             return this;
         }
+        public UserInfoBuilder WithPayslipPicture(byte[] payslipPicture)
+        {
+            _payslipPicture = payslipPicture;
+            return this;
+        }
         public UserInfoBuilder WithTaxIdentificationNumber(string taxIdentificationNumber)
         {
             _taxIdentificationNumber = taxIdentificationNumber.Trim();
@@ -214,6 +220,7 @@ namespace Data.Repositories.User
                 Occupation = _occupation,
                 TaxIdentificationNumber = _taxIdentificationNumber,
                 GovernmentId = _governmentId,
+                PayslipPicture = _payslipPicture,
                 CivilStatus = _civilStatus
             };
 

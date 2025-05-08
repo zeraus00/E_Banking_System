@@ -6,7 +6,7 @@
         public int UserInfoId { get; set; }                                 // Primary Key
         public int UserAuthId { get; set; }                                 // Foreign Key to UserAuth
         public int UserNameId { get; set; }                                 // Foreign Key to Names
-        public byte[]? ProfilePicture { get; set; }                         // User image
+        public byte[]? ProfilePicture { get; set; }                         // User image; SizeLimit: 10mb
         public int Age { get; set; }                                        // Required
         public string Sex { get; set; } = string.Empty;                     // Required; Max Length : 10
         public int? BirthInfoId { get; set; }                               // Foreign Key to BirthInfo
@@ -15,7 +15,8 @@
         public int MotherNameId { get; set; }                               // Foreign Key to Names
         public string ContactNumber { get; set; } = string.Empty;           // Required; Field Length : 11
         public string Occupation { get; set; } = string.Empty;              // Required; Field Length: 50
-        public byte[]? GovernmentId { get; set; }                           // GovermentId Image
+        public byte[]? GovernmentId { get; set; }                           // GovermentId Image; SizeLimit: 10mb
+        public byte[]? PayslipPicture { get; set; }                         // Payslip Picture. To be uploaded on loan application; SizeLimit: 10 mb
         public string TaxIdentificationNumber { get; set; } = string.Empty; // Required; Max Length : 12
         public string CivilStatus { get; set; } = string.Empty;             // Required; Max Length : 20
         public int? ReligionId { get; set; }                                // Foreign Key to Religions
