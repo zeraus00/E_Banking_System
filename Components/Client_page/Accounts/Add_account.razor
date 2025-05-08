@@ -45,7 +45,7 @@
 					<label class="text-light">Account Type</label>
 					<select class="form-select" @bind="accountType" required>
 						<option value="" hidden>--Select Account Type--</option>
-						@foAccountTypesn AccountTypeNames.AS_STRING_LIST)
+						@foreach(var type in AccountTypes.AS_STRING_LIST)
 						{
 							<option value="@type">@type</option>
 						}
@@ -124,7 +124,7 @@
 		{
 			try
 			{
-	AccountTypes await userSessionService.GetUserSession();
+				userSession = await userSessionService.GetUserSession();
 
 				StateHasChanged();
 			}
@@ -151,7 +151,7 @@
 				return;
 			}
 
-			accountTypeId = AccountTypeNames.AS_STRING_LIST.IndexOf(accountType) + 1;
+			accountTypeId = AccountTypes.AS_STRING_LIST.IndexOf(accountType) + 1;
 			int accountId = await userDataService.GetAccountIdAsync(accountNumber, accountName, accountTypeId);
 			bool hasUserLinkedAccount = await userDataService.HasUserLinkedAccount(userSession.UserInfoId, accountId);
 
