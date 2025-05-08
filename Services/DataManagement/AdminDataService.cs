@@ -7,6 +7,7 @@ using Data.Repositories.JointEntity;
 using Data.Repositories.User;
 using Exceptions;
 using Services.SessionsManagement;
+using ViewModels.AdminDashboard;
 
 namespace Services.DataManagement
 {
@@ -112,6 +113,8 @@ namespace Services.DataManagement
                         .GetQuery();
 
                     //  Execute the query. Throws UserNotFoundException if UserInfo is not found.
+                    //  FirstOrDefaultAsync is used to retrieve the first user associated with the account, 
+                    //  the same user that registers it.
                     return await userInfoQuery.FirstOrDefaultAsync() ?? throw new UserNotFoundException();
                 }
             }
@@ -127,6 +130,13 @@ namespace Services.DataManagement
             }
 
         }
+
+        /// <summary>
+        /// Updates the status of an account.
+        /// </summary>
+        /// <param name="accountId"></param>
+        /// <param name="newStatus"></param>
+        /// <returns></returns>
         public async Task UpdatePendingAccountStatus(int accountId, int newStatus)
         {
             try
@@ -147,34 +157,44 @@ namespace Services.DataManagement
             }
         }
 
-        /// <summary>
-        /// Counts the number of transactions for each transaction type.
-        /// </summary>
-        /// <param name="transactionList">The list of <see cref="Transaction"/> objects to analyze.</param>
-        /// <returns>
-        /// A dictionary where the key is the transaction type ID and the value is the count of transactions of that type.
-        /// </returns>
-        public Dictionary<int, int> GetTransactionCounts(List<Transaction> transactionList)
+        public Dictionary<string, TransactionBreakdown> GetTransactionBreakDown(List<Transaction> transactionList)
         {
-            Dictionary<int, int> transactionCounts = new();
+            Dictionary<string, TransactionBreakdown> transactionBreakdownDict = new();
 
-            //  Convert the TransactionTypes enum to an IEnumerable.
-            foreach (var typeId in Enum.GetValues<TransactionTypes>())
+            if (transactionList.Any())
             {
-                //  If you need to exclude incoming transfers.
-                //if (typeId == TransactionTypes.Incoming_Transfer)
-                //    continue;
-                //  Get the count of elmeents matching the transaction type in the list
-                //  and assign it to the new dictionary key.
-                int count = transactionList.Count(t => t.TransactionTypeId == (int)typeId);
-                transactionCounts[(int)typeId] = count;
+                foreach (
+                    var transactionType 
+                    in TransactionTypeConstants
+                        .AS_TRANSACTION_TYPE_LIST
+                        .Where(t => t.TransactionTypeId != (int) TransactionTypes.Incoming_Transfer)
+                    )
+                {
+                    List<Transaction> transactionSublist = transactionList
+                        .Where(t => t.TransactionTypeId == transactionType.TransactionTypeId)
+                        .ToList();
+                    TransactionBreakdown transactionBreakdown = new();
+
+                    if (transactionSublist.Any())
+                    {
+                        transactionBreakdown.Count = transactionSublist.Count();
+                        transactionBreakdown.Total = transactionSublist.Sum(t => t.Amount);
+                        transactionBreakdown.Average = transactionSublist.Average(t => t.Amount);
+                    }
+
+                    transactionBreakdownDict[transactionType.TransactionTypeName] = transactionBreakdown;
+                }
             }
+            //  TO DO: ADD LOAN TRANSACTIONS
 
-            return transactionCounts;
+            return transactionBreakdownDict;
         }
-
         public List<Transaction> GetLargestTransactions(List<Transaction> transactionList, int count) =>
-            transactionList.Where(t => t.TransactionTypeId != (int)TransactionTypes.Incoming_Transfer).Take(count).ToList();
+            transactionList
+                .Where(t => t.TransactionTypeId != (int)TransactionTypes.Incoming_Transfer)
+                .OrderByDescending(t => t.Amount)
+                .Take(count)
+                .ToList();
 
         /// <summary>
         /// Retrieves a list of transactions filtered by an optional start and end date.
@@ -196,6 +216,7 @@ namespace Services.DataManagement
                 var queryBuilder = transactionRepo
                     .Query
                     .IncludeMainAccount()
+                    .IncludeTransactionType()
                     .OrderByDateAndTimeDescending();
 
                 if (transactionStartDate is DateTime startDate)
@@ -213,7 +234,12 @@ namespace Services.DataManagement
                 return transactions;
             }
         }
-
+        /// <summary>
+        /// Gets the total number of loans between a given timeframe.
+        /// </summary>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <returns></returns>
         public async Task<int> GetLoanCountAsync(DateTime? startDate = null, DateTime? endDate = null)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())

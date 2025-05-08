@@ -1,4 +1,5 @@
 ﻿@using Layout
+@using ViewModels.AdminDashboard
 
 @page "/Dashboard"
 @rendermode InteractiveServer
@@ -93,15 +94,32 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var t in mockTransactionsBreakdown)
+                            @if (transactionBreakdown.Any())
                             {
-                                <tr>
-                                    <td class="fw-bold">@t.TransactionType</td>
-                                    <td>@t.Count</td>
-                                    <td>@t.Total</td>
-                                    <td>@t.Average</td>
-                                    <td>@t.Notes</td>
-                                </tr>
+                                foreach (var keyValuePair in transactionBreakdown)
+                                {
+                                    <tr>
+                                        <td class="fw-bold">@keyValuePair.Key</td>
+                                        <td>@keyValuePair.Value.Count</td>
+                                        <td>@keyValuePair.Value.Total</td>
+                                        <td>@keyValuePair.Value.Average</td>
+                                        <td>@keyValuePair.Value.Notes</td>
+                                    </tr>
+                                }
+                            } 
+                            //  Load mock data if database is empty (for testing purposes.)
+                            else
+                            {
+                                @foreach (var t in mockTransactionsBreakdown)
+                                {
+                                    <tr>
+                                        <td class="fw-bold">@t.TransactionType</td>
+                                        <td>@t.Count</td>
+                                        <td>@t.Total</td>
+                                        <td>@t.Average</td>
+                                        <td>@t.Notes</td>
+                                    </tr>
+                                }
                             }
                         </tbody>
                     </table>
@@ -172,14 +190,30 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var t in mockTransactions)
+                    @if(largestTransactions.Any())
                     {
-                        <tr>
-                            <td>@t.AccountNo</td>
-                            <td>@t.Amount</td>
-                            <td>@t.Type</td>
-                            <td>@t.Date</td>
-                        </tr>
+                        foreach(var transaction in largestTransactions)
+                        {
+                            <tr>
+                                <td>@transaction.MainAccount.AccountNumber</td>
+                                <td>@transaction.Amount</td>
+                                <td>@transaction.TransactionType.TransactionTypeName</td>
+                                <td>@transaction.TransactionDate</td>
+                            </tr>
+                        }
+                    }
+                    //  Load mock data if database is empty (for testing purposes.)
+                    else 
+                    {
+                        @foreach (var t in mockTransactions)
+                        {
+                            <tr>
+                                <td>@t.AccountNo</td>
+                                <td>@t.Amount</td>
+                                <td>@t.Type</td>
+                                <td>@t.Date</td>
+                            </tr>
+                        }
                     }
                 </tbody>
             </table>
@@ -191,10 +225,14 @@
     private DateTime? startDate = DateTime.Now.AddDays(-DateTime.Now.Day + 1);
     private DateTime? endDate = DateTime.Now;
 
+    //  Main data source.
     private List<Transaction> transactionList { get; set; } = new();
+    //  For largest transaction panel.
     private List<Transaction> largestTransactions { get; set; } = new();
-    private Dictionary<int, int> transactionCounts { get; set; } = new();
-
+    //  For transaction breakdown panel.
+    private Dictionary<string, TransactionBreakdown> transactionBreakdown { get; set; } = new();
+    
+    //  For transaction counts.
     private int withdrawalCount;
     private int depositCount;
     private int transferCount;
@@ -202,16 +240,16 @@
 
     protected override async Task OnInitializedAsync()
     {
-        //  Get transaction list.
-        transactionList = await adminDataService.GetTransactionListAsync();
-        await this.GetTransactionCounts();
+        //  Load transactions.
+        transactionList = await adminDataService.GetTransactionListAsync(startDate, endDate);
+        //  Load data for dashboard view.
+        await this.LoadTransactionData();
     }
 
     private async Task FilterAsync()
     {
-        Console.WriteLine($"Filtering accounts from {startDate} to {endDate}");
         transactionList = await adminDataService.GetTransactionListAsync(startDate, endDate);
-        await this.GetTransactionCounts();
+        await this.LoadTransactionData();
     }
 
     private async Task ClearFilterAsync()
@@ -219,46 +257,34 @@
         startDate = null;
         endDate = null;
         transactionList = await adminDataService.GetTransactionListAsync();
-        await this.GetTransactionCounts();
-        Console.WriteLine("Filter cleared");
+        await this.LoadTransactionData();
     }
 
-    private async Task GetTransactionCounts()
+    //  Load data for dashboard view.
+    private async Task LoadTransactionData()
     {
-        //  Get transaction counts.
+        //  Get largest transactions with count 5.
         largestTransactions = adminDataService.GetLargestTransactions(transactionList, 5);
-
-        if (largestTransactions.Any())
-        {
-            mockTransactions = new();
-            foreach(var transaction in largestTransactions)
-            {
-                mockTransactions.Add(
-                    new MockTransaction{
-                        Date = transaction.TransactionDate.Date,
-                        Type = TransactionTypeConstants.AS_STRING_LIST[transaction.TransactionTypeId - 1],
-                        Amount = transaction.Amount,
-                        AccountNo = transaction.MainAccount.AccountNumber
-                    }
-                );
-            }
-        }
-
-        transactionCounts = adminDataService.GetTransactionCounts(transactionList);
-        withdrawalCount = transactionCounts[(int)TransactionTypes.Withdrawal];
-        depositCount = transactionCounts[(int)TransactionTypes.Deposit];
-        transferCount = transactionCounts[(int)TransactionTypes.Outgoing_Transfer];
+        //  Get transaction breakdown.
+        transactionBreakdown = adminDataService.GetTransactionBreakDown(transactionList);
+        //  Withdrawals count.
+        withdrawalCount = transactionBreakdown[TransactionTypeConstants.WITHDRAWAL].Count;
+        //  Deposits count.
+        depositCount = transactionBreakdown[TransactionTypeConstants.DEPOSIT].Count;
+        //  Transfers count.
+        transferCount = transactionBreakdown[TransactionTypeConstants.OUTGOING_TRANSFER].Count;
+        //  Loans count.
         loanCount = await adminDataService.GetLoanCountAsync(DateTime.Now.AddMonths(-1), DateTime.Now);
     }
 
     //mockup data for table
     private List<MockTransaction> mockTransactions = new()
-{
-    new MockTransaction { Date = DateTime.Today, Type = "Deposit", Amount = 5000, AccountNo = "981738" },
-    new MockTransaction { Date = DateTime.Today.AddDays(-1), Type = "Withdrawal", Amount = 1500, AccountNo = "897937" },
-    new MockTransaction { Date = DateTime.Today.AddDays(-2), Type = "Transfer", Amount = 2000, AccountNo = "727371" },
-    new MockTransaction { Date = DateTime.Today.AddDays(-3), Type = "Loan", Amount = 10000, AccountNo = "913837" }
-};
+    {
+        new MockTransaction { Date = DateTime.Today, Type = "Deposit", Amount = 5000, AccountNo = "981738" },
+        new MockTransaction { Date = DateTime.Today.AddDays(-1), Type = "Withdrawal", Amount = 1500, AccountNo = "897937" },
+        new MockTransaction { Date = DateTime.Today.AddDays(-2), Type = "Transfer", Amount = 2000, AccountNo = "727371" },
+        new MockTransaction { Date = DateTime.Today.AddDays(-3), Type = "Loan", Amount = 10000, AccountNo = "913837" }
+    };
 
     private List<MockTransactionBreakdown> mockTransactionsBreakdown = new()
     {
