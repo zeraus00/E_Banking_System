@@ -180,14 +180,14 @@
 					<div class="col-12 col-md-6">
 						<label class="text-light">Upload Government Valid ID (Front & Back)</label>
 						<div class="d-flex flex-wrap gap-2">
-							<input type="file" class="btn btn-light" required>
+							<InputFile OnChange="UploadGovernmentId" class="btn btn-light btn-sm w-75" required />
 							<button class="btn btn-outline-light">View Attachment</button>
 						</div>
 					</div>
 					<div class="col-12 col-md-6">
 						<label class="text-light">Upload Latest Complete 1 Month Payslip</label>
 						<div class="d-flex flex-wrap gap-2">
-							<input type="file" class="btn btn-light" required>
+							<InputFile OnChange="UploadPayslip" class="btn btn-light btn-sm w-75" required />
 							<button class="btn btn-outline-light">View Attachment</button>
 						</div>
 					</div>
@@ -262,6 +262,57 @@
 	private UserInfo userInfo = default!;
 	private Address address = default!;
 	private UserSession userSession = default!;
+
+	private byte[]? governmentId;
+	private byte[]? payslipPic;
+
+	private async Task UploadGovernmentId(InputFileChangeEventArgs e)
+	{
+		try
+		{
+			var file = e.File;
+			if (file == null)
+			{
+				error = "Please upload a government Id.";
+			}
+			if (file != null)
+			{
+				using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); // allow up to 10 MB
+				using var ms = new MemoryStream();
+				await stream.CopyToAsync(ms);
+				governmentId = ms.ToArray();
+				error = "";
+			}
+		}
+		catch (FieldMissingException ex)
+		{
+			error = "Error uploading Government ID:" + ex.Message;
+		}
+	}
+
+	private async Task UploadPayslip(InputFileChangeEventArgs e)
+	{
+		try
+		{
+			var file = e.File;
+			if (file == null)
+			{
+				error = "Please upload a payslip picture.";
+			}
+			if (file != null)
+			{
+				using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); // allow up to 10 MB
+				using var ms = new MemoryStream();
+				await stream.CopyToAsync(ms);
+				payslipPic = ms.ToArray();
+				error = "";
+			}
+		}
+		catch (FieldMissingException ex)
+		{
+			error = "Error uploading Government ID:" + ex.Message;
+		}
+	}
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
