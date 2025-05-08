@@ -37,22 +37,22 @@
 					<div class="col-12 col-md-3">
 						<label class="text-light">First Name</label>
 						@* <input class="form-control" @bind="firstName" placeholder="First Name" required> *@
-						<div class="form-control">@firstName</div>
+						<div class="form-control form-control-sm">@firstName</div>
 					</div>
 					<div class="col-12 col-md-3">
 						<label class="text-light">Middle Name</label>@* 
 						<input class="form-control" @bind="middleName" placeholder="Middle Name"> *@
-						<div class="form-control">@middleName</div>
+						<div class="form-control form-control-sm">@middleName</div>
 					</div>
 					<div class="col-12 col-md-3">
 						<label class="text-light">Last Name</label>@* 
 						<input class="form-control" @bind="lastName" placeholder="Last Name" required> *@
-						<div class="form-control">@lastName</div>
+						<div class="form-control form-control-sm">@lastName</div>
 					</div>
 					<div class="col-12 col-md-3">
 						<label class="text-light">Suffix</label>@* 
 						<input class="form-control" @bind="suffix" placeholder="Suffix"> *@
-						<div class="form-control">@suffix</div>
+						<div class="form-control form-control-sm">@suffix</div>
 					</div>
 				</div>
 
@@ -61,17 +61,17 @@
 					<div class="col-12 col-md-4">
 						<label class="text-light">Province</label>@* 
 						<input class="form-control" @bind="province" placeholder="Province" required> *@
-						<div class="form-control">@province</div>
+						<div class="form-control form-control-sm">@province</div>
 					</div>
 					<div class="col-12 col-md-4">
 						<label class="text-light">Municipality</label>@* 
 						<input class="form-control" @bind="municipality" placeholder="Municipality" required> *@
-						<div class="form-control">@municipality</div>
+						<div class="form-control form-control-sm">@municipality</div>
 					</div>
 					<div class="col-12 col-md-4">
 						<label class="text-light">Barangay</label>@* 
 						<input class="form-control" @bind="barangay" placeholder="Barangay" required> *@
-						<div class="form-control">@barangay</div>
+						<div class="form-control form-control-sm">@barangay</div>
 					</div>
 				</div>
 
@@ -80,12 +80,12 @@
 					<div class="col-12 col-md-6">
 						<label class="text-light">Street No.</label>@* 
 						<input class="form-control" @bind="street" placeholder="Street No." required> *@
-						<div class="form-control">@street</div>
+						<div class="form-control form-control-sm">@street</div>
 					</div>
 					<div class="col-12 col-md-6">
 						<label class="text-light">House No.</label>@* 
 						<input class="form-control" @bind="houseNumber" placeholder="House No." required> *@
-						<div class="form-control">@houseNumber</div>
+						<div class="form-control form-control-sm">@houseNumber</div>
 					</div>
 				</div>
 
@@ -94,12 +94,12 @@
 					<div class="col-6 col-md-2">
 						<label class="text-light">Age</label>
 						@* <input class="form-control" type="number" @bind="age" placeholder="Age" required>> *@
-						<div class="form-control">@age</div>
+						<div class="form-control form-control-sm">@age</div>
 					</div>
 					<div class="col-12 col-md-2">
 						<label class="text-light">Birth Date</label>
 						@* <input class="form-control" type="date" @bind="birthDate" placeholder="mm/dd/yyyy" required> *@
-						<div class="form-control">@birthDate.ToShortDateString()</div>
+						<div class="form-control form-control-sm">@birthDate.ToShortDateString()</div>
 					</div>
 					<div class="col-6 col-md-2">
 						<label class="text-light">Sex</label>
@@ -108,15 +108,15 @@
 							<option>Male</option>
 							<option>Female</option>
 						</select> *@
-						<div class="form-control">@sex</div>
+						<div class="form-control form-control-sm">@sex</div>
 					</div>
 					<div class="col-12 col-md-3">
 						<label class="text-light">Contact No.</label>
-						<input class="form-control" @bind="contactNo" placeholder="Contact No." required>
+						<input class="form-control form-control-sm" @bind="contactNo" placeholder="Contact No." required>
 					</div>
 					<div class="col-12 col-md-3">
 						<label class="text-light">Email</label>
-						<input class="form-control" @bind="email" placeholder="Sample@gmail.com" required>
+						<input class="form-control form-control-sm" @bind="email" placeholder="Sample@gmail.com" required>
 					</div>
 
 					<!-- Row 5 -->
@@ -129,20 +129,20 @@
 							<option>Separated</option>
 							<option>Widowed</option>
 						</select> *@
-						<div class="form-control">@civilStatus</div>
+						<div class="form-control form-control-sm">@civilStatus</div>
 					</div>
 					<div class="col-12 col-md-3">
 						<label class="text-light">Occupation</label>@* 
 						<input class="form-control" @bind="occupation" placeholder="Occupation" required> *@
-						<div class="form-control">@occupation</div>
+						<div class="form-control form-control-sm">@occupation</div>
 					</div>
 					<div class="col-12 col-md-3">
 						<label class="text-light">Gross Annual Income (>= 250 000.00)</label>
-						<input class="form-control" @bind="minAnnualGross" placeholder="Minimum 250,000" required>
+						<input class="form-control form-control-sm" @bind="minAnnualGross" placeholder="Minimum 250,000" required>
 					</div>
 					<div class="col-12 col-md-3">
 						<label class="text-light">Type of Loan</label>
-						<select class="form-select" @bind="loanTypeId" @bind:after="OnLoanTypeChange" required>
+						<select class="form-select form-select-sm" @bind="loanTypeId" @bind:after="OnLoanTypeChange" required>
 							<option value="-1" disabled hidden>--Select Loan Type--</option>
 							@foreach(var loanType in LoanTypes.AS_STRING_LIST)
 							{
@@ -154,19 +154,19 @@
 					<!-- Row 6 -->
 					<div class="col-12 col-md-3">
 						<label class="text-light">@loanAmountLabel</label>
-						<input type="number" step="1" class="form-control" @bind="loanAmount" placeholder="Loan Amount" min="@minimumLoanAmount" required>
+						<input type="number" step="1" class="form-control form-control-sm" @bind="loanAmount" placeholder="Loan Amount" min="@minimumLoanAmount" required>
 					</div>
 					<div class="col-12 col-md-3">
 						<label class="text-light">Loan Purpose</label>
-						<input class="form-control" @bind="loanPurpose" placeholder="Home Purchase, Education, Debt Consolidation, etc" required>
+						<input class="form-control form-control-sm" @bind="loanPurpose" placeholder="Home Purchase, Education, Debt Consolidation, etc" required>
 					</div>
 					<div class="col-12 col-md-3">
 						<label class="text-light">@loanTermInMonthsLabel</label>
-						<input type="number" class="form-control" @bind="loanTermInMonths" placeholder="Months to Pay" min="@minimumLoanTerm" required>
+						<input type="number" class="form-control form-control-sm" @bind="loanTermInMonths" placeholder="Months to Pay" min="@minimumLoanTerm" required>
 					</div>
 					<div class="col-12 col-md-3">
 						<label class="text-light">Preferred Payment Frequency</label>
-						<select class="form-select" @bind="paymentFrequency" required>
+						<select class="form-select form-select-sm" @bind="paymentFrequency" required>
 							<option value="-1" disabled hidden>--Select Payment Frequency--</option>
 							<option value="12">Monthly</option>
 							<option value="6">Bi-Monthly</option>
@@ -181,14 +181,14 @@
 						<label class="text-light">Upload Government Valid ID (Front & Back)</label>
 						<div class="d-flex flex-wrap gap-2">
 							<InputFile OnChange="UploadGovernmentId" class="btn btn-light btn-sm w-75" required />
-							<button class="btn btn-outline-light">View Attachment</button>
+							<button class="btn btn-outline-light btn-sm">View Attachment</button>
 						</div>
 					</div>
 					<div class="col-12 col-md-6">
 						<label class="text-light">Upload Latest Complete 1 Month Payslip</label>
 						<div class="d-flex flex-wrap gap-2">
 							<InputFile OnChange="UploadPayslip" class="btn btn-light btn-sm w-75" required />
-							<button class="btn btn-outline-light">View Attachment</button>
+							<button class="btn btn-outline-light btn-sm">View Attachment</button>
 						</div>
 					</div>
 				</div>
@@ -204,9 +204,9 @@
 				<!-- Submit -->
 				<div class="text-end mt-3">
 					<NavLink href="@PageRoutes.CLIENT_HOME">
-						<button class="btn btn-danger btn-lg">Cancel</button>
+						<button class="btn btn-danger">Cancel</button>
 					</NavLink>
-					<button class="btn btn-primary btn-lg" @onclick="RegisterLoanAsync">Register</button>
+					<button class="btn btn-primary" @onclick="RegisterLoanAsync">Register</button>
 				</div>
 				@if (loanSubmittedMessage.Length > 0)
 				{
