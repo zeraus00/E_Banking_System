@@ -105,6 +105,7 @@ namespace Services.DataManagement
                     var userInfoQuery = userInfoRepo
                         .Query
                         .HasUserInfoId(userInfoId)
+                        .IncludeUserAuth()
                         .IncludeUserName()
                         .IncludeFatherName()
                         .IncludeMotherName()

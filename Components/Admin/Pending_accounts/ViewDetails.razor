@@ -62,10 +62,6 @@
                 <div class="form-control form-control-sm">@(userInfo?.ContactNumber ?? string.Empty)</div>
             </div>
 
-            <div class="col">
-                <label class="text-light">Email Address</label>
-                <div class="form-control form-control-sm">@(userInfo?.UserAuth?.Email ?? string.Empty)</div>
-            </div>
         </div>
 
         <!-- Row 4 -->
@@ -275,13 +271,12 @@
         <!-- Credentials Inputs -->
         <div class="row g-2 mb-3">
             <div class="col-3">
+                <label class="text-light">Email Address</label>
+                <div class="form-control form-control-sm">@(userInfo?.UserAuth?.Email ?? string.Empty)</div>
+            </div>
+            <div class="col-3">
                 <label class="text-light">Username</label>
                 <div class="form-control form-control-sm">@(userInfo?.UserAuth?.UserName ?? string.Empty)</div>
-            </div>
-
-            <div class="col-3">
-                <label class="text-light">Password</label>
-                <div class="form-control form-control-sm">[Password here]</div>
             </div>
         </div>
 
