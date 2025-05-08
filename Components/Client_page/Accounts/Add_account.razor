@@ -6,6 +6,8 @@
 @inject UserDataService userDataService
 @inject UserSessionService userSessionService
 
+@using Helpers
+
 <div class="page">
 	<main>
 
@@ -71,11 +73,30 @@
 				</div>
 
 				<!-- Submit -->
-				<div class="text-end mt-3">
-					<NavLink href="/Accounts">
-						<button class="btn btn-danger">Cancel</button>
-					</NavLink>
-					<button class="btn btn-primary" @onclick="TryAddAccountAsync">Add Account</button>
+				<div class="d-flex justify-content-between">
+
+					@if (IsAccountFound && account != null)
+					{
+						<div class="text-start">
+							<p class="text-success">Account match found: </p>
+							<div class="card custom-card text-dark px-4 mt-3 shadow">
+								<h3 class="border-bottom pt-3 pb-2"><strong>@account.AccountName</strong></h3>
+								<p>Account Number: @FormatHelper.AccountNumberFormatter(account.AccountNumber)</p>
+								<p>Balance: @FormatHelper.BalanceFormatter(account.Balance)</p>
+							</div>
+						</div>
+					}
+					else
+					{
+						<p class="text-danger">No account match found</p>
+					}
+
+					<div class="text-end mt-3">
+						<NavLink href="/Accounts">
+							<button class="btn btn-danger">Cancel</button>
+						</NavLink>
+						<button class="btn btn-primary" @onclick="TryAddAccountAsync">Add Account</button>
+					</div>
 				</div>
 
 			</div>
@@ -148,15 +169,27 @@
 			}
 
 			account = await userDataService.GetAccountAsync(accountId);
+
+			//mockup data
+			// if (accountNumber == "123456789" && accountName == "Bogart" && accountType == "PERSONAL ACCOUNT") 
+			// {
+			// 	account = new Account
+			// 		{
+			// 			AccountNumber = "123456789",
+			// 			AccountName = "Bogart",
+			// 			Balance = 12345.67m
+			// 		};
+			// }
+			// else
+			// {
+			// 	error = "There is no such account associated with the user.";
+			// 	await RefreshError();
+			// 	IsAccountFound = false;
+			// 	account = null;
+			// }
+
 			//	Use this flag for displaying the account.
 			IsAccountFound = true;
-			//	display the account found if it is linked to the user and is not registered for online banking yet.
-			/*
-			*	Use these fields.
-			*	account.AccountNumber
-			*	account.AccountName
-			*	account.Balance
-			*/
 		}
 		catch (NullReferenceException)
 		{
