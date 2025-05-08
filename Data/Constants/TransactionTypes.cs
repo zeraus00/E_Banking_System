@@ -1,6 +1,6 @@
 ﻿namespace Data.Constants
 {
-    public class TransactionTypeConstants
+    public class TransactionTypes
     {
         public const string DEPOSIT = "DEPOSIT";
         public const string WITHDRAWAL = "WITHDRAWAL";

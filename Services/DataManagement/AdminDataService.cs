@@ -249,15 +249,15 @@ namespace Services.DataManagement
         public Dictionary<string, TransactionBreakdown> GetTransactionBreakDown(List<Transaction> transactionList)
         {
             Dictionary<string, TransactionBreakdown> transactionBreakdownDict = new();
-            transactionBreakdownDict[TransactionTypeConstants.WITHDRAWAL] = new();
-            transactionBreakdownDict[TransactionTypeConstants.DEPOSIT] = new();
-            transactionBreakdownDict[TransactionTypeConstants.OUTGOING_TRANSFER] = new();
+            transactionBreakdownDict[TransactionTypes.WITHDRAWAL] = new();
+            transactionBreakdownDict[TransactionTypes.DEPOSIT] = new();
+            transactionBreakdownDict[TransactionTypes.OUTGOING_TRANSFER] = new();
             //  TO DO: ADD LOAN TRANSACTIONS
             if (transactionList.Any())
             {
                 foreach (
                     var transactionType 
-                    in TransactionTypeConstants
+                    in TransactionTypes
                         .AS_TRANSACTION_TYPE_LIST
                         .Where(t => t.TransactionTypeId != (int) TransactionTypeIDs.Incoming_Transfer)
                     )
