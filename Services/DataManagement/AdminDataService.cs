@@ -50,8 +50,6 @@ namespace Services.DataManagement
 
                 //  Filter the accounts.
                 var queryBuilder = accountRepo.Query;
-                //  Get only the pending accounts.
-                queryBuilder.HasAccountStatusTypeId((int)AccountStatusTypes.Pending);
                 queryBuilder.IncludeAccountType();
                 queryBuilder.IncludeAccountStatusType();
                 queryBuilder.OrderByDateOpenedDescending();
