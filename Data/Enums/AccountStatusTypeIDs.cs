@@ -2,6 +2,7 @@
 {
     public enum AccountStatusTypeIDs
     {
+        New = 0,
         Active = 1,
         Pending = 2,
         Inactive = 3,

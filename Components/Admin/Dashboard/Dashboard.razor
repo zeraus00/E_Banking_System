@@ -131,19 +131,19 @@
                 <p class="text-muted border-bottom">Key Metrics</p>
                 <div class="row">
                     <i class="bi bi-cash-stack"> Total Volume</i>
-                    <p class="text-end number">0</p>
+                    <p class="text-end number">@transactionVolume</p>
                 </div>
                 <div class="row">
                     <i class="bi bi-graph-up-arrow"> Net Movement</i>
-                    <p class="text-end number">0</p>
+                    <p class="text-end number">@netMovement</p>
                 </div>
                 <div class="row">
                     <i class="bi bi-person-plus"> New Accounts</i>
-                    <p class="text-end number">0</p>
+                    <p class="text-end number">@newAccounts</p>
                 </div>
                 <div class="row">
                     <i class="bi bi-person-dash"> Closed Accounts</i>
-                    <p class="text-end number">0</p>
+                    <p class="text-end number">@closedAccounts</p>
                 </div>
             </div>
         </div>
@@ -231,25 +231,32 @@
     private List<Transaction> largestTransactions { get; set; } = new();
     //  For transaction breakdown panel.
     private Dictionary<string, TransactionBreakdown> transactionBreakdown { get; set; } = new();
-    
+
     //  For transaction counts.
     private int withdrawalCount;
     private int depositCount;
     private int transferCount;
     private int loanCount;
 
+    //  For key metrics.
+    private int transactionVolume;
+    private decimal netMovement;
+    private int newAccounts;
+    private int closedAccounts;
+
     protected override async Task OnInitializedAsync()
     {
         //  Load transactions.
         transactionList = await adminDataService.GetTransactionListAsync(startDate, endDate);
         //  Load data for dashboard view.
-        await this.LoadTransactionData();
+        await this.LoadDisplayData();
     }
 
     private async Task FilterAsync()
     {
+        //  Load transactions.
         transactionList = await adminDataService.GetTransactionListAsync(startDate, endDate);
-        await this.LoadTransactionData();
+        await this.LoadDisplayData();
     }
 
     private async Task ClearFilterAsync()
@@ -257,11 +264,11 @@
         startDate = null;
         endDate = null;
         transactionList = await adminDataService.GetTransactionListAsync();
-        await this.LoadTransactionData();
+        await this.LoadDisplayData();
     }
 
     //  Load data for dashboard view.
-    private async Task LoadTransactionData()
+    private async Task LoadDisplayData()
     {
         //  Get largest transactions with count 5.
         largestTransactions = adminDataService.GetLargestTransactions(transactionList, 5);
@@ -275,7 +282,14 @@
         transferCount = transactionBreakdown[TransactionTypeConstants.OUTGOING_TRANSFER].Count;
         //  Loans count.
         loanCount = await adminDataService.GetLoanCountAsync(DateTime.Now.AddMonths(-1), DateTime.Now);
+
+        //  Load Key Metrics.
+        transactionVolume = transactionList.Count;
+        netMovement = adminDataService.GetNetMovement(transactionList);
+        newAccounts = await adminDataService.GetNewAccountsCount(startDate, endDate);
+        closedAccounts = await adminDataService.GetClosedAccountsCount(startDate, endDate);
     }
+
 
     //mockup data for table
     private List<MockTransaction> mockTransactions = new()
