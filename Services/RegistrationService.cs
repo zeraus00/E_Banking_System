@@ -82,7 +82,7 @@ namespace Services
                             new UserInfoAccount
                             {
                                 UserInfo = userInfo,
-                                AccessRoleId = (int)AccessRoles.PRIMARY_OWNER,
+                                AccessRoleId = (int)AccessRoleIDs.PRIMARY_OWNER,
                                 Account = account,
                                 IsLinkedToOnlineAccount = true
                             });
@@ -351,7 +351,7 @@ namespace Services
             string hashedPassword = Helpers.BcryptHelper.HashPassword(password);
 
             var UserAuthBuilder = new UserAuthBuilder()
-               .WithRoleId((int)RoleTypes.User)
+               .WithRoleId((int)RoleTypeIDs.User)
                .WithUserName(username)
                .WithEmail(email)
                .WithPassword(hashedPassword);
@@ -447,7 +447,7 @@ namespace Services
                 .WithAccountNumber(accountNumber)
                 .WithATMNumber(atmNumber)
                 .WithAccountName(accountName)
-                .WithAccountStatus((int)AccountStatusTypes.Pending)
+                .WithAccountStatus((int)AccountStatusTypeIDs.Pending)
                 .WithBalance(0)
                 .WithAccountContactNo(contactNumber);
 

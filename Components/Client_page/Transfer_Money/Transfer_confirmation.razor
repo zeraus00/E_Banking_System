@@ -123,7 +123,7 @@
             transactionSession = await transactionService.ProcessTransactionAsync(transactionSession);
 
             await userControlledSessionService.SetTransactionSessionAsync(
-            (int)TransactionTypes.Outgoing_Transfer,
+            (int)TransactionTypeIDs.Outgoing_Transfer,
             transactionSession,
             userSession
             );

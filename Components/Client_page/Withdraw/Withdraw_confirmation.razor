@@ -105,7 +105,7 @@
 
                 //  Set display data.
                 accountNumber = activeAccountSession.AccountNumber;
-                cardDestination = ExternalVendorNames.AS_STRING_LIST[transactionSession.ExternalVendorId!.Value - 1];
+                cardDestination = ExternalVendors.AS_STRING_LIST[transactionSession.ExternalVendorId!.Value - 1];
                 clientName = activeAccountSession.AccountName;
                 currentBalance = await userDataService.GetAccountBalanceAsync(activeAccountSession.AccountId);
                 withdrawAmount = transactionSession.Amount;
@@ -132,7 +132,7 @@
 
             //  Store updated transactionSession to session storage
             await userControlledSessionService.SetTransactionSessionAsync(
-                (int)TransactionTypes.Withdrawal,
+                (int)TransactionTypeIDs.Withdrawal,
                 transactionSession,
                 userSession
             );

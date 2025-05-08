@@ -274,10 +274,10 @@
 
 
                 //  Set display data.
-                _accessRole = AccessRoleNames.AS_STRING_LIST[activeAccountSession.UserAccessRoleId - 1];
+                _accessRole = AccessRoles.AS_STRING_LIST[activeAccountSession.UserAccessRoleId - 1];
                 _clientName = activeAccountSession.AccountName;
                 _accountNumber = activeAccountSession.AccountNumber;
-                _accountStatus = AccountStatusTypeNames.AS_STRING_LIST[activeAccountSession.AccountStatusId-1];
+                _accountStatus = AccountStatusTypes.AS_STRING_LIST[activeAccountSession.AccountStatusId-1];
                 _clientPhone = userSession.CurrentUserContact;
                 _currentBalance = await userDataService.GetAccountBalanceAsync(activeAccountSession.AccountId);
                 //  Get 3 most recent transactions of the account.

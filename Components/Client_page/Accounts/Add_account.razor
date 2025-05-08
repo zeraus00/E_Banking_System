@@ -45,7 +45,7 @@
 					<label class="text-light">Account Type</label>
 					<select class="form-select" @bind="accountType" required>
 						<option value="" hidden>--Select Account Type--</option>
-						@foreach(var type in AccountTypeNames.AS_STRING_LIST)
+						@foAccountTypesn AccountTypeNames.AS_STRING_LIST)
 						{
 							<option value="@type">@type</option>
 						}
@@ -124,7 +124,7 @@
 		{
 			try
 			{
-				userSession = await userSessionService.GetUserSession();
+	AccountTypes await userSessionService.GetUserSession();
 
 				StateHasChanged();
 			}

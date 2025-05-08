@@ -19,55 +19,55 @@ namespace Data.Seeders.Finance
                 var accountNumber = CredentialFactory
                     .GenerateAccountNumber(
                         DateTime.Now.Date,
-                        (int)AccountTypes.PersonalAccount,
-                        (int)AccountProductTypes.Checking
+                        (int)AccountTypeIDs.PersonalAccount,
+                        (int)AccountProductTypeIDs.Checking
                     );
                 var atmNumber = CredentialFactory
                     .GenerateAtmNumber(
                         DateTime.Now.Date,
-                        (int)AccountTypes.PersonalAccount,
-                        (int)AccountProductTypes.Checking
+                        (int)AccountTypeIDs.PersonalAccount,
+                        (int)AccountProductTypeIDs.Checking
                     );
                 var accountName = CredentialFactory
                     .GenerateAccountName(
-                        (int)AccountTypes.PersonalAccount,
-                        (int)AccountProductTypes.Checking
+                        (int)AccountTypeIDs.PersonalAccount,
+                        (int)AccountProductTypeIDs.Checking
                     );
                 var account = new AccountBuilder()
-                    .WithAccountType((int)AccountTypes.PersonalAccount)
-                    .WithAccountProductTypeId((int)AccountProductTypes.Checking)
+                    .WithAccountType((int)AccountTypeIDs.PersonalAccount)
+                    .WithAccountProductTypeId((int)AccountProductTypeIDs.Checking)
                     .WithAccountNumber(accountNumber)
                     .WithATMNumber(atmNumber)
                     .WithAccountName(accountName)
                     .WithAccountContactNo("11122233344")
-                    .WithAccountStatus((int)AccountStatusTypes.Active)
+                    .WithAccountStatus((int)AccountStatusTypeIDs.Active)
                     .WithBalance(696969)
                     .Build();
                 var accountNumber2 = CredentialFactory
                     .GenerateAccountNumber(
                         DateTime.Now.Date,
-                        (int)AccountTypes.JointAccount,
-                        (int)AccountProductTypes.Savings
+                        (int)AccountTypeIDs.JointAccount,
+                        (int)AccountProductTypeIDs.Savings
                     );
                 var atmNumber2 = CredentialFactory
                     .GenerateAtmNumber(
                         DateTime.Now.Date,
-                        (int)AccountTypes.JointAccount,
-                        (int)AccountProductTypes.Savings
+                        (int)AccountTypeIDs.JointAccount,
+                        (int)AccountProductTypeIDs.Savings
                     );
                 var accountName2 = CredentialFactory
                     .GenerateAccountName(
-                        (int)AccountTypes.JointAccount,
-                        (int)AccountProductTypes.Savings
+                        (int)AccountTypeIDs.JointAccount,
+                        (int)AccountProductTypeIDs.Savings
                     );
                 var account2 = new AccountBuilder()
-                    .WithAccountType((int)AccountTypes.JointAccount)
-                    .WithAccountProductTypeId((int)AccountProductTypes.Savings)
+                    .WithAccountType((int)AccountTypeIDs.JointAccount)
+                    .WithAccountProductTypeId((int)AccountProductTypeIDs.Savings)
                     .WithAccountNumber(accountNumber2)
                     .WithATMNumber(atmNumber2)
                     .WithAccountContactNo("55566677788")
                     .WithAccountName(accountName2)
-                    .WithAccountStatus((int)AccountStatusTypes.Active)
+                    .WithAccountStatus((int)AccountStatusTypeIDs.Active)
                     .WithBalance(100000)
                     .Build();
 

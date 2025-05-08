@@ -110,7 +110,7 @@
 
 @code {
 
-    private List<string> accountTypeList = AccountTypeNames.AS_STRING_LIST;
+    private List<string> accountTypeList = AccountTypes.AS_STRING_LIST;
 
     private DateTime? startDate = DateTime.Now.AddDays(-DateTime.Now.Day + 1);
     private DateTime? endDate = DateTime.Now;
@@ -146,7 +146,7 @@
         //     }
         // };
         // accounts = allAccounts.ToList();
-        accountList = await adminDataService.FilterAccountsAsync(accountStatusTypeId: (int)AccountStatusTypes.Pending);
+        accountList = await adminDataService.FilterAccountsAsync(accountStatusTypeId: (int)AccountStatusTypeIDs.Pending);
     }
 
     private async Task FilterAsync()
@@ -163,8 +163,8 @@
             searchAccount,
             startDate,
             endDate,
-            (int)AccountTypes.PersonalAccount,
-            (int)AccountStatusTypes.Pending
+            (int)AccountTypeIDs.PersonalAccount,
+            (int)AccountStatusTypeIDs.Pending
         );
     }
 
@@ -175,7 +175,7 @@
         selectedType = "";
         searchAccount = "";
         // accounts = allAccounts.ToList();
-        accountList = await adminDataService.FilterAccountsAsync(accountStatusTypeId: (int)AccountStatusTypes.Pending);
+        accountList = await adminDataService.FilterAccountsAsync(accountStatusTypeId: (int)AccountStatusTypeIDs.Pending);
     }
 
     private async Task ViewDetails(Account account)

@@ -39,7 +39,7 @@
 
 					//	If a user started a session, set the active account 
 					//	to the first account in their accounts list by default.
-					if (claimsHelperService.GetRoleId(user) == (int)RoleTypes.User)
+					if (claimsHelperService.GetRoleId(user) == (int)RoleTypeIDs.User)
 						await userControlledSessionService.SetActiveAccountSessionAsync();
 					// NOTE:
 					// StartSessionBasedOnRole uses ProtectedSessionStorage,

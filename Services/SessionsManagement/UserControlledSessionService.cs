@@ -145,10 +145,10 @@ namespace Services.SessionsManagement
 
         private string GetTransactionSessionScheme(int transactionTypeId) => transactionTypeId switch
         {
-            (int)TransactionTypes.Deposit => SessionSchemes.DEPOSIT_SESSION,
-            (int)TransactionTypes.Withdrawal => SessionSchemes.WITHDRAW_SESSION,
-            (int)TransactionTypes.Incoming_Transfer => "",   // incomingtransfer session
-            (int)TransactionTypes.Outgoing_Transfer => "",      // outgoing transfer session
+            (int)TransactionTypeIDs.Deposit => SessionSchemes.DEPOSIT_SESSION,
+            (int)TransactionTypeIDs.Withdrawal => SessionSchemes.WITHDRAW_SESSION,
+            (int)TransactionTypeIDs.Incoming_Transfer => "",   // incomingtransfer session
+            (int)TransactionTypeIDs.Outgoing_Transfer => "",      // outgoing transfer session
             _ => string.Empty
         };
 
@@ -156,22 +156,22 @@ namespace Services.SessionsManagement
         {
             activeAccountSession.AccountCanTransact = activeAccountSession.AccountStatusId switch
             {
-                (int)AccountStatusTypes.Active => true,
-                (int)AccountStatusTypes.Restricted => true,
+                (int)AccountStatusTypeIDs.Active => true,
+                (int)AccountStatusTypeIDs.Restricted => true,
                 _ => false
             };
 
             activeAccountSession.AccountCanApplyLoan = activeAccountSession.AccountStatusId switch
             {
-                (int)AccountStatusTypes.Active => true,
+                (int)AccountStatusTypeIDs.Active => true,
                 _ => false
             };
 
             activeAccountSession.AccountCanPayLoan = activeAccountSession.AccountStatusId switch
             {
-                (int)AccountStatusTypes.Pending => false,
-                (int)AccountStatusTypes.Closed => false,
-                (int)AccountStatusTypes.Denied => false,
+                (int)AccountStatusTypeIDs.Pending => false,
+                (int)AccountStatusTypeIDs.Closed => false,
+                (int)AccountStatusTypeIDs.Denied => false,
                 _ => true
             };
 

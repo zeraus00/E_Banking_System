@@ -1,6 +1,6 @@
 ﻿namespace Data.Constants
 {
-    public class ExternalVendorNames
+    public class ExternalVendors
     {
         public const string GCASH = "GCash";
         public const string PAYMAYA = "PayMaya";

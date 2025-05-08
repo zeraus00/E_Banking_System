@@ -1,6 +1,6 @@
 ﻿namespace Data.Constants
 {
-    public class AccountStatusTypeNames
+    public class AccountStatusTypes
     {
         public const string ACTIVE = "ACTIVE";
         public const string PENDING = "PENDING";
