@@ -1,4 +1,5 @@
 ﻿@using E_BankingSystem.Components.Client_page.Accounts
+@using Helpers
 @inject NavigationManager Navigation
 @inject UserDataService userDataService
 
@@ -11,7 +12,7 @@
         <div class="d-flex justify-content-between">
             <div>
                 <h3 class="fw-bold mt-3">@LinkedAccount.AccountName</h3>
-                <h5 class="fw-lighter m-0">@LinkedAccount.AccountNumber</h5>
+                <h5 class="fw-lighter m-0">@FormatHelper.AccountNumberFormatter(LinkedAccount.AccountNumber)</h5>
             </div>
 
             <!-- Edit Button -->
@@ -39,19 +40,19 @@
         <!-- Available Balance -->
         <div class="d-flex justify-content-between mt-3">
             <p class="w-100">Available Balance:</p>
-            <p class="text-success w-100">@_accountBalance</p>
+            <p class="text-success w-100">@FormatHelper.BalanceFormatter(_accountBalance)</p>
         </div>
 
         <!-- Current Balance -->
         <div class="d-flex justify-content-between">
             <p class="w-100">Current Balance:</p>
-            <p class="text-success w-100">@_accountBalance</p>
+            <p class="text-success w-100">@FormatHelper.BalanceFormatter(_accountBalance)</p>
         </div>
 
         <!-- Contact Number -->
         <div class="custom-card sm mb-0 pb-0">
             <p class="m-1">
-                <strong>Contact No.:</strong> @LinkedAccount.AccountContactNo
+                <strong>Contact No.:</strong> @FormatHelper.PhoneNumberFormatter(LinkedAccount.AccountContactNo)
             </p>
         </div>
     }
