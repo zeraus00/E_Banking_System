@@ -4,6 +4,7 @@
 @rendermode InteractiveServer
 
 @inject NavigationManager Navigation
+@inject AdminDataService adminDataService
 
 <div class="main">
     <div class="dashboard-container">
@@ -32,9 +33,9 @@
             <div class="d-flex align-items-center gap-3">
                 <label class="text-light mb-0" style="white-space: nowrap;">Account Type</label>
                 <select class="form-select form-select-sm" @bind="selectedType">
-                    <option value="">All</option>
-                    <option value="Personal Account">Personal Account</option>
-                    <option value="Joint Account">Joint Account</option>
+                    <option value="0">All</option>
+                    <option value="1">Personal Account</option>
+                    <option value="2">Joint Account</option>
                 </select>
             </div>
 
@@ -49,7 +50,6 @@
                 <thead class="table-info">
                     <tr>
                         <th>Date of<br />Registration</th>
-                        <th>Time of<br />Registration</th>
                         <th>Account No.</th>
                         <th>Name</th>
                         <th>Account Type</th>
@@ -58,21 +58,20 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @if (accounts != null && accounts.Any())
+                    @if (accountList != null && accountList.Any())
                     {
-                        @foreach (var a in accounts)
+                        @foreach (var a in accountList)
                         {
                             <tr class="bg-light">
-                                <td>@a.Date.ToString("MM/dd/yyyy")</td>
-                                <td>@a.Time.ToString(@"hh\:mm\:ss")</td>
+                                <td>@a.DateOpened.ToString("MM/dd/yyyy")</td>
                                 <td>@a.AccountNumber</td>
-                                <td>@a.Name</td>
-                                <td>@a.AccountType</td>
+                                <td>@a.AccountName</td>
+                                <td>@a.AccountType.AccountTypeName</td>
                                 <td>
                                     <a href="/View_account" class="btn btn-info btn-secondary btn-sm rounded text-dark shadow-sm" style="border: 2px solid cyan">View</a>
                                     <button class="btn btn-danger btn-secondary btn-sm rounded text-light shadow-sm" style="border: 2px solid red" @onclick="() => DeleteAccount(a)">Delete</button>
                                 </td>
-                                <td class="text-secondary">@a.Status</td>
+                                <td class="text-secondary">@a.AccountStatusType.AccountStatusTypeName</td>
                             </tr>
                         }
                     }
@@ -89,78 +88,66 @@
 </div>
 
 @code {
-    private DateTime? startDate;
+    private DateTime? startDate ;
     private DateTime? endDate;
-    private string selectedType = "";
+    private int selectedType = 0;
     private string searchAccount = "";
 
-    private List<AccountRecord> allAccounts = new();
-    private List<AccountRecord> accounts = new();
+    private List<Account> accountList = new();
+    private List<Account> mockAccounts = new();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        allAccounts = new List<AccountRecord>
+        mockAccounts = new List<Account>
         {
-            new AccountRecord
+            new Account
             {
                 AccountNumber = "1234-5678",
-                Name = "Sample Name 1",
-                AccountType = "Personal Account",
-                Status = "Active",
-                Date = DateTime.Today.AddDays(-1),
-                Time = DateTime.Now.TimeOfDay,
+                AccountName = "Sample Name 1",
+                AccountType = new AccountType(){AccountTypeName="Personal Account"},
+                AccountStatusType = new AccountStatusType() {AccountStatusTypeName = "Active"},
+                DateOpened = DateTime.Today.AddDays(-1)
             },
-            new AccountRecord
+            new Account
             {
                 AccountNumber = "0987-6543",
-                Name = "Sample Name 2",
-                AccountType = "Joint Account",
-                Status = "Deactivated",
-                Date = DateTime.Today.AddDays(-1),
-                Time = DateTime.Now.TimeOfDay,
+                AccountName = "Sample Name 2",
+                AccountType = new AccountType(){AccountTypeName="Joint Account"},
+                AccountStatusType = new AccountStatusType() {AccountStatusTypeName = "Deactivated"},
+                DateOpened = DateTime.Today.AddDays(-1)
             }
         };
-        accounts = allAccounts.ToList();
+        accountList = await adminDataService.FilterAccountsAsync();
+        if (!accountList.Any())
+            accountList = mockAccounts;
     }
 
-    private void Filter()
+    private async Task Filter()
     {
-        accounts = allAccounts
-            .Where(t =>
-                (string.IsNullOrWhiteSpace(searchAccount) || t.Name.Contains(searchAccount, StringComparison.OrdinalIgnoreCase)) &&
-                (!startDate.HasValue || t.Date >= startDate.Value.Date) &&
-                (!endDate.HasValue || t.Date <= endDate.Value.Date) &&
-                (string.IsNullOrWhiteSpace(selectedType) || t.AccountType == selectedType)
-            ).ToList();
+        accountList = await adminDataService
+            .FilterAccountsAsync(
+                searchAccount,
+                startDate,
+                endDate,
+                selectedType
+            );
     }
 
-    private void ClearFilter()
+    private async Task ClearFilter()
     {
         startDate = null;
         endDate = null;
-        selectedType = "";
+        selectedType = 0;
         searchAccount = "";
-        accounts = allAccounts.ToList();
+        accountList = await adminDataService.FilterAccountsAsync();
     }
 
-    private void ViewAccount(AccountRecord account)
+    private void ViewAccount(Account account)
     {
         Navigation.NavigateTo($"/View_account");
     }
 
-    private void DeleteAccount(AccountRecord account)
+    private void DeleteAccount(Account account)
     {
-        allAccounts.Remove(account);
-        accounts.Remove(account);
-    }
-
-    public class AccountRecord
-    {
-        public DateTime Date { get; set; }
-        public TimeSpan Time { get; set; }
-        public string Name { get; set; }
-        public string AccountType { get; set; }
-        public string Status { get; set; }
-        public string AccountNumber { get; set; }
     }
 }
