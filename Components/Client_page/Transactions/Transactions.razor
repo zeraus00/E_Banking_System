@@ -146,8 +146,8 @@
     private LinkedAccount activeAccountSession { get; set; } = default;
     private string error = "";
 
-    private DateTime? startDate;
-    private DateTime? endDate;
+    private DateTime? startDate = DateTime.Now.Date.AddDays(-DateTime.Now.Date.Day + 1);
+    private DateTime? endDate = DateTime.Now.Date;
 
     private List<string> transactionTypes { get; set; } = new();
     private string selectedTransactionType = "0";

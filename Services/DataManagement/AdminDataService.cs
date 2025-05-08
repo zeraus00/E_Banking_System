@@ -7,6 +7,7 @@ using Data.Repositories.JointEntity;
 using Data.Repositories.User;
 using Exceptions;
 using Services.SessionsManagement;
+using ViewModels.AdminDashboard;
 
 namespace Services.DataManagement
 {
@@ -35,11 +36,12 @@ namespace Services.DataManagement
         /// <param name="endDate">Optional end date to filter accounts opened on or before this date. If null, this filter is ignored.</param>
         /// <param name="accountTypeId">Optional account type ID to filter by. Only applies if greater than zero.</param>
         /// <returns>A list of accounts matching the specified filters.</returns>
-        public async Task<List<Account>> FilterPendingAccountsAsync(
+        public async Task<List<Account>> FilterAccountsAsync(
             string accountNumber = "",
             DateTime? startDate = null,
             DateTime? endDate = null,
-            int accountTypeId = 0
+            int accountTypeId = 0,
+            int accountStatusTypeId = 0
             )
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
@@ -49,8 +51,6 @@ namespace Services.DataManagement
 
                 //  Filter the accounts.
                 var queryBuilder = accountRepo.Query;
-                //  Get only the pending accounts.
-                queryBuilder.HasAccountStatusTypeId((int)AccountStatusTypes.Pending);
                 queryBuilder.IncludeAccountType();
                 queryBuilder.IncludeAccountStatusType();
                 queryBuilder.OrderByDateOpenedDescending();
@@ -62,9 +62,9 @@ namespace Services.DataManagement
                 if (endDate is not null)
                     queryBuilder.HasOpenedOnOrBefore(endDate);
                 if (accountTypeId > 0)
-                {
                     queryBuilder.HasAccountTypeId(accountTypeId);
-                }
+                if (accountStatusTypeId > 0)
+                    queryBuilder.HasAccountStatusTypeId(accountStatusTypeId);
 
                 //  Pagination
                 int pageNumber = 1;
@@ -105,6 +105,7 @@ namespace Services.DataManagement
                     var userInfoQuery = userInfoRepo
                         .Query
                         .HasUserInfoId(userInfoId)
+                        .IncludeUserAuth()
                         .IncludeUserName()
                         .IncludeFatherName()
                         .IncludeMotherName()
@@ -112,6 +113,8 @@ namespace Services.DataManagement
                         .GetQuery();
 
                     //  Execute the query. Throws UserNotFoundException if UserInfo is not found.
+                    //  FirstOrDefaultAsync is used to retrieve the first user associated with the account, 
+                    //  the same user that registers it.
                     return await userInfoQuery.FirstOrDefaultAsync() ?? throw new UserNotFoundException();
                 }
             }
@@ -127,6 +130,13 @@ namespace Services.DataManagement
             }
 
         }
+
+        /// <summary>
+        /// Updates the status of an account.
+        /// </summary>
+        /// <param name="accountId"></param>
+        /// <param name="newStatus"></param>
+        /// <returns></returns>
         public async Task UpdatePendingAccountStatus(int accountId, int newStatus)
         {
             try
@@ -147,28 +157,44 @@ namespace Services.DataManagement
             }
         }
 
-        /// <summary>
-        /// Counts the number of transactions for each transaction type.
-        /// </summary>
-        /// <param name="transactionList">The list of <see cref="Transaction"/> objects to analyze.</param>
-        /// <returns>
-        /// A dictionary where the key is the transaction type ID and the value is the count of transactions of that type.
-        /// </returns>
-        public Dictionary<int, int> GetTransactionCounts(List<Transaction> transactionList)
+        public Dictionary<string, TransactionBreakdown> GetTransactionBreakDown(List<Transaction> transactionList)
         {
-            Dictionary<int, int> transactionCounts = new();
+            Dictionary<string, TransactionBreakdown> transactionBreakdownDict = new();
 
-            //  Convert the TransactionTypes enum to an IEnumerable.
-            foreach (var typeId in Enum.GetValues<TransactionTypes>())
+            if (transactionList.Any())
             {
-                //  Get the count of elmeents matching the transaction type in the list
-                //  and assign it to the new dictionary key.
-                int count = transactionList.Count(t => t.TransactionTypeId == (int)typeId);
-                transactionCounts[(int)typeId] = count;
-            }
+                foreach (
+                    var transactionType 
+                    in TransactionTypeConstants
+                        .AS_TRANSACTION_TYPE_LIST
+                        .Where(t => t.TransactionTypeId != (int) TransactionTypes.Incoming_Transfer)
+                    )
+                {
+                    List<Transaction> transactionSublist = transactionList
+                        .Where(t => t.TransactionTypeId == transactionType.TransactionTypeId)
+                        .ToList();
+                    TransactionBreakdown transactionBreakdown = new();
 
-            return transactionCounts;
+                    if (transactionSublist.Any())
+                    {
+                        transactionBreakdown.Count = transactionSublist.Count();
+                        transactionBreakdown.Total = transactionSublist.Sum(t => t.Amount);
+                        transactionBreakdown.Average = transactionSublist.Average(t => t.Amount);
+                    }
+
+                    transactionBreakdownDict[transactionType.TransactionTypeName] = transactionBreakdown;
+                }
+            }
+            //  TO DO: ADD LOAN TRANSACTIONS
+
+            return transactionBreakdownDict;
         }
+        public List<Transaction> GetLargestTransactions(List<Transaction> transactionList, int count) =>
+            transactionList
+                .Where(t => t.TransactionTypeId != (int)TransactionTypes.Incoming_Transfer)
+                .OrderByDescending(t => t.Amount)
+                .Take(count)
+                .ToList();
 
         /// <summary>
         /// Retrieves a list of transactions filtered by an optional start and end date.
@@ -189,6 +215,8 @@ namespace Services.DataManagement
                 //  Compose Query
                 var queryBuilder = transactionRepo
                     .Query
+                    .IncludeMainAccount()
+                    .IncludeTransactionType()
                     .OrderByDateAndTimeDescending();
 
                 if (transactionStartDate is DateTime startDate)
@@ -196,7 +224,38 @@ namespace Services.DataManagement
                 if (transactionEndDate is DateTime endDate)
                     queryBuilder.HasEndDate(endDate);
 
-                return await queryBuilder.GetQuery().ToListAsync();
+                List<Transaction> transactions = await queryBuilder.GetQuery().ToListAsync();
+                foreach (var transaction in transactions)
+                {
+                    string accountNumber = transaction.MainAccount.AccountNumber;
+                    transaction.MainAccount.AccountNumber = _dataMaskingService.MaskAccountNumber(accountNumber);
+                }
+
+                return transactions;
+            }
+        }
+        /// <summary>
+        /// Gets the total number of loans between a given timeframe.
+        /// </summary>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <returns></returns>
+        public async Task<int> GetLoanCountAsync(DateTime? startDate = null, DateTime? endDate = null)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                var loanRepo = new LoanRepository(dbContext);
+
+                var queryBuilder = loanRepo
+                    .Query
+                    .OrderByDateDescending();
+
+                if (startDate is DateTime sDate)
+                    queryBuilder.HasStartDateFilter(sDate);
+                if (endDate is DateTime eDate)
+                    queryBuilder.HasEndDateFilter(eDate);
+
+                return await queryBuilder.GetCountAsync();
             }
         }
     }
