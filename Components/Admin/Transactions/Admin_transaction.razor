@@ -1,0 +1,190 @@
+﻿@page "/Admin_transaction"
+@using Helpers;
+@using Layout
+
+@attribute [Authorize(Roles = "Administrator")]
+@rendermode InteractiveServer
+
+@inject AdminDataService adminDataService
+@inject PageRedirectService redirectService
+@inject AdminControlledSessionService adminControlledSessionService
+@inject UserSessionService userSessionService
+@inject UserDataService userDataService
+@inject AuthenticationStateProvider AuthStateProvider
+
+
+
+<div class="page">
+    <header class="custom-card-clientpage clientheader py-4 align-items-start">
+        <div class="px-5">
+            <div class="d-flex align-items-center my-4">
+                <h2>Admin - Transactions</h2>
+            </div>
+        </div>
+    </header>
+
+    <div class="d-flex align-items-center gap-3 m-3 flex-wrap">
+        <div class="d-flex align-items-center gap-3">
+            <label class="text-light mb-0" style="white-space: nowrap;">Start Date</label>
+            <InputDate class="form-control" @bind-Value="startDate" />
+        </div>
+
+        <div class="d-flex align-items-center gap-3">
+            <label class="text-light mb-0" style="white-space: nowrap;">End Date</label>
+            <InputDate class="form-control" @bind-Value="endDate" />
+        </div>
+
+        <div class="d-flex align-items-center gap-3">
+            <label class="text-light mb-0" style="white-space: nowrap;">Transaction Type</label>
+            <select class="form-select" @bind="selectedTransactionTypeId">
+                <option value="">All</option>
+                @foreach (var (typeName, index) in transactionTypes.Select((name, i) => (name, i + 1)))
+                {
+                    <option value="@index">@typeName</option>
+                }
+            </select>
+        </div>
+
+        <button class="btn btn-primary shadow-sm" @onclick="FilterTransactionsAsync">Filter</button>
+        <button class="btn btn-danger shadow-sm" @onclick="ClearFilterAsync">Clear Filter</button>
+    </div>
+
+    <hr class="m-3" style="border: 1px solid white; opacity: 100%;" />
+
+    <div class="table-responsive m-4 rounded">
+        <table class="table table-bordered text-center">
+            <thead class="table-info">
+                <tr>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Transaction Type</th>
+                    <th>Status</th>
+                    <th>Amount</th>
+                    <th>Receiver ID</th>
+                    <th>Sender ID</th>
+                    <th>Previous Balance</th>
+                    <th>New Balance</th>
+                    <th>Transaction Fee</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (transactionList.Any())
+                {
+                    @foreach (var transaction in transactionList)
+                    {
+                        <tr class="bg-light">
+                            <td>@transaction.TransactionDate.ToString("MM/dd/yyyy")</td>
+                            <td>@transaction.TransactionTime.ToString(@"hh\:mm\:ss")</td>
+                            <td>@transaction.TransactionType.TransactionTypeName</td>
+                            <td>@transaction.Status</td>
+                            <td>@FormatHelper.BalanceFormatter(transaction.Amount)</td>
+                            @if (transaction.TransactionType.TransactionTypeId == (int)TransactionTypeIDs.Outgoing_Transfer)
+                            {
+                                <td>@transaction.CounterAccount.AccountName</td>
+                                <td>@transaction.MainAccount.AccountName</td>
+                            }
+                            else if (transaction.TransactionType.TransactionTypeId == (int)TransactionTypeIDs.Incoming_Transfer)
+                            {
+                                <td>@transaction.MainAccount.AccountName</td>
+                                <td>@transaction.CounterAccount.AccountName</td>
+                            }
+                            else if (transaction.TransactionType.TransactionTypeId == (int)TransactionTypeIDs.Withdrawal)
+                            {
+                                <td>@transaction.ExternalVendor.VendorName</td>
+                                <td>--</td>
+                            }
+                            else if (transaction.TransactionType.TransactionTypeId == (int)TransactionTypeIDs.Deposit)
+                            {
+                                <td>--</td>
+                                <td>@transaction.ExternalVendor.VendorName</td>
+                            }
+                            else
+                            {
+                                <td>--</td>
+                                <td>--</td>
+                            }
+                            <td>@FormatHelper.BalanceFormatter(transaction.PreviousBalance)</td>
+                            <td>@FormatHelper.BalanceFormatter(transaction.NewBalance)</td>
+                            <td>@FormatHelper.BalanceFormatter(transaction.TransactionFee)</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="10">No transactions found.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    private AdminSession? adminSession;
+    private List<string> transactionTypes = TransactionTypes.AS_STRING_LIST;
+    private int? selectedTransactionTypeId = null;
+
+    private DateTime? startDate = DateTime.Now.Date.AddDays(-DateTime.Now.Day + 1);
+    private DateTime? endDate = DateTime.Now.Date;
+
+    private List<Transaction> transactionList = new();
+    private bool _initialized = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            adminSession = await userSessionService.GetAdminSession();
+        }
+        catch (SessionNotFoundException)
+        {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            await userSessionService.StartAdminSession(user);
+            adminSession = await userSessionService.GetAdminSession();
+        }
+
+        await FilterTransactionsAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_initialized)
+        {
+            try
+            {
+                adminSession = await userSessionService.GetAdminSession();
+                await LoadTransactionsAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine("Session error: " + ex.Message);
+            }
+
+            _initialized = true;
+            StateHasChanged(); // Re-render after loading session & transactions
+        }
+    }
+
+    private async Task FilterTransactionsAsync()
+    {
+        await LoadTransactionsAsync();
+    }
+
+    private async Task ClearFilterAsync()
+    {
+        startDate = null;
+        endDate = null;
+        selectedTransactionTypeId = null;
+        await LoadTransactionsAsync();
+    }
+
+    private async Task LoadTransactionsAsync()
+    {
+        transactionList = await adminDataService.GetTransactionListAsync(
+            transactionStartDate: startDate,
+            transactionEndDate: endDate);
+    }
+}
