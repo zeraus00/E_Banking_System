@@ -67,7 +67,7 @@
                 if (isOrdered)
                     _query = _query
                         .OrderBy(t => t.TransactionDate)
-                        .ThenBy(t => t.TransactionTime)
+                        .ThenBy(t => t.TransactionTime);
                 return this;
             }
             public TransactionQuery OrderByDateAndTimeDescending(bool isOrdered = true)
