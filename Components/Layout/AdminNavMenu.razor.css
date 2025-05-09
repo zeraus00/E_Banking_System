@@ -5,6 +5,7 @@
     background: #212B5E;
     position: sticky;
     top: 0;
+    transition: width 0.3s ease;
 }
 
     .sidebar::-webkit-scrollbar {
@@ -22,6 +23,37 @@
         background-clip: content-box;
     }
 
+    .sidebar.collapsed {
+        width: 80px;
+    }
+
+        .sidebar.collapsed .top-row,
+        .sidebar.collapsed .middle-row,
+        .sidebar.collapsed .bottom-row,
+        .sidebar.collapsed .profile-picture_container,
+        .sidebar.collapsed p,
+        .sidebar.collapsed nav {
+            transition: ease, visibility 0.3s ease;
+        }
+
+        .sidebar.collapsed .top-row,
+        .sidebar.collapsed .middle-row,
+        .sidebar.collapsed .bottom-row,
+        .sidebar.collapsed .profile-picture_container,
+        .sidebar.collapsed p,
+        .sidebar.collapsed nav {
+            opacity: 0;
+            visibility: hidden;
+            height: 0;
+            overflow: hidden;
+        }
+
+    .sidebar .btn-toggle-sidebar {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 10;
+    }
 .profile-picture-container {
     position: relative;
     width: 150px;

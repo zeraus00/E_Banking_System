@@ -9,7 +9,11 @@
     <Authorized>
 
         <!-- Side NavBar Layout -->
-        <nav class="sidebar">
+        <nav class="sidebar @(isSidebarVisible ? "" : "collapsed")">
+            <button class="btn btn-toggle-sidebar text-white" @onclick="ToggleSidebar">
+                <span class="d-flex fs-3">☰</span>
+            </button>
+
             <!-- Top Row -->
             <div class="top-row border-bottom">
 
@@ -113,6 +117,13 @@
     private bool hasTransferError = false;
     private bool hasApplyLoanError = false;
     private bool hasLoanBalanceError = false;
+
+    private bool isSidebarVisible = true;
+
+    private void ToggleSidebar()
+    {
+        isSidebarVisible = !isSidebarVisible;
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

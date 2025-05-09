@@ -6,7 +6,11 @@
 <AuthorizeView Roles="Administrator">
     <Authorized>
         <!-- Side NavBar Layout -->
-        <nav class="sidebar">
+        <nav class="sidebar @(isSidebarVisible ? "" : "collapsed")">
+            <button class="btn btn-toggle-sidebar text-white" @onclick="ToggleSidebar">
+                <span class="d-flex fs-3">☰</span>
+            </button>
+
             <!-- Top Row -->
             <div class="top-row border-bottom">
 
@@ -71,6 +75,13 @@
 
     private string fullName { get; set; } = "Loading...";
     private string email { get; set; } = "Loading...";
+
+    private bool isSidebarVisible = true;
+
+    private void ToggleSidebar()
+    {
+        isSidebarVisible = !isSidebarVisible;
+    }
 
     public async Task LogOutAsync()
     {
