@@ -1,17 +1,21 @@
 ﻿@using E_BankingSystem.Components.Admin.Dashboard.Charts
 
 @inject IJSRuntime JSRuntime
-@rendermode InteractiveServer
 
-<canvas id="barChart" width="1000" height="400"></canvas>
+<canvas id="barChart"></canvas>
 
 @code {
+    [Parameter]
+    public List<string> Labels { get; set; } = new();
+
+    [Parameter]
+    public List<int> Data { get; set; } = new();
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
+        if (Labels.Count > 0 && Data.Count > 0)
         {
-            await JSRuntime.InvokeVoidAsync("drawBarChart");
-            StateHasChanged();
+            await JSRuntime.InvokeVoidAsync("drawBarChart", Labels, Data);
         }
     }
 }
