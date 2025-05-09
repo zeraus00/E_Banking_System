@@ -363,6 +363,27 @@ namespace Services.DataManagement
             }
         }
 
+        public async Task UpdateUserAccountLink(int userInfoId, int accountId)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                try
+                {
+                    var userInfoAccountRepo = new UserInfoAccountRepository(dbContext);
+
+                    UserInfoAccount userAccountLink = await userInfoAccountRepo.
+                        GetUserInfoAccountAsync(userInfoId, accountId)
+                        ??  throw new NullReferenceException();
+
+                    userAccountLink.IsLinkedToOnlineAccount = true;
+                    await userInfoAccountRepo.SaveChangesAsync();
+                }
+                catch (NullReferenceException)
+                {
+                    return;
+                }
+            }    
+        }
         #endregion
 
         #region Account Helper Methods
