@@ -158,6 +158,7 @@
     protected override async Task OnInitializedAsync()
     {
         transactionTypes = TransactionTypes.AS_STRING_LIST;
+        await base.OnInitializedAsync();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
