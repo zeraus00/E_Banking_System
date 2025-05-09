@@ -315,6 +315,7 @@ namespace Services.DataManagement
         public async Task<List<Transaction>> GetTransactionListAsync(
             DateTime? transactionStartDate = null, 
             DateTime? transactionEndDate = null,
+            int transactionTypeId = 0,
             int pageSize = 0,
             int pageNumber = 0)
         {
@@ -334,6 +335,8 @@ namespace Services.DataManagement
                     queryBuilder.HasStartDate(startDate);
                 if (transactionEndDate is DateTime endDate)
                     queryBuilder.HasEndDate(endDate);
+                if (transactionTypeId > 0)
+                    queryBuilder.HasTransactionTypeId(transactionTypeId);
                 
                 if (pageSize > 0 && pageNumber > 0)
                 {
