@@ -26,17 +26,17 @@
     <div class="d-flex align-items-center gap-3 m-3 flex-wrap">
         <div class="d-flex align-items-center gap-3">
             <label class="text-light mb-0" style="white-space: nowrap;">Start Date</label>
-            <InputDate class="form-control" @bind-Value="startDate" />
+            <InputDate class="form-control form-control-sm" @bind-Value="startDate" />
         </div>
 
         <div class="d-flex align-items-center gap-3">
             <label class="text-light mb-0" style="white-space: nowrap;">End Date</label>
-            <InputDate class="form-control" @bind-Value="endDate" />
+            <InputDate class="form-control form-control-sm" @bind-Value="endDate" />
         </div>
 
         <div class="d-flex align-items-center gap-3">
             <label class="text-light mb-0" style="white-space: nowrap;">Transaction Type</label>
-            <select class="form-select" @bind="selectedTransactionTypeId">
+            <select class="form-select form-select-sm" @bind="selectedTransactionTypeId">
                 <option value="">All</option>
                 @foreach (var (typeName, index) in transactionTypes.Select((name, i) => (name, i + 1)))
                 {
@@ -45,8 +45,8 @@
             </select>
         </div>
 
-        <button class="btn btn-primary shadow-sm" @onclick="FilterTransactionsAsync">Filter</button>
-        <button class="btn btn-danger shadow-sm" @onclick="ClearFilterAsync">Clear Filter</button>
+        <button class="btn btn-primary btn-sm shadow-sm" @onclick="FilterTransactionsAsync">Filter</button>
+        <button class="btn btn-danger btn-sm shadow-sm" @onclick="ClearFilterAsync">Clear Filter</button>
     </div>
 
     <hr class="m-3" style="border: 1px solid white; opacity: 100%;" />
