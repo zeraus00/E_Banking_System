@@ -86,7 +86,7 @@ namespace Services.SessionsManagement
 
                 AccountId = account.AccountId,
                 AccountName = account.AccountName,
-                AccountNumber = _dataMaskingService.MaskAccountNumber(account.AccountNumber),
+                AccountNumber = account.AccountNumber,
                 AccountStatusId = account.AccountStatusTypeId
             };
 

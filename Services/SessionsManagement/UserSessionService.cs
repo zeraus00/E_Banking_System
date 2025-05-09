@@ -128,7 +128,7 @@ namespace Services.SessionsManagement
                             UserAccessRoleId = userAccountLink.AccessRoleId,
                             AccountId = userAccountLink.AccountId,
                             AccountName = userAccountLink.Account.AccountName,
-                            AccountNumber = new DataMaskingService().MaskAccountNumber(userAccountLink.Account.AccountNumber),
+                            AccountNumber = userAccountLink.Account.AccountNumber,
                             AccountContactNo = userAccountLink.Account.AccountContactNo,
                             AccountStatusId = userAccountLink.Account.AccountStatusTypeId
                         };

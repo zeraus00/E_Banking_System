@@ -261,9 +261,9 @@ namespace Services.DataManagement
                     .IncludeTransactionType()
                     .IncludeExternalVendor()
                     .HasMainAccountId(accountId)
+                    .OrderByDateAndTimeDescending()
                     .SkipBy(skipCount)
-                    .TakeWithCount(takeCount)
-                    .OrderByDateAndTimeDescending();
+                    .TakeWithCount(takeCount);
 
                 if (transactionTypeId > 0)
                     queryBuilder.HasTransactionTypeId(transactionTypeId);
@@ -279,7 +279,6 @@ namespace Services.DataManagement
                 {
                     foreach (var transaction in transactionList)
                     {
-                        transaction.MainAccount.AccountNumber = _dataMaskingService.MaskAccountNumber(transaction.MainAccount.AccountNumber);
                         if (transaction.CounterAccount is not null)
                             transaction.CounterAccount.AccountNumber = _dataMaskingService.MaskAccountNumber(transaction.CounterAccount.AccountNumber);
                     }
@@ -418,9 +417,6 @@ namespace Services.DataManagement
                     .GetQuery()
                     .FirstOrDefaultAsync()
                     ?? throw new AccountNotFoundException(accountId);
-
-                account.AccountNumber = _dataMaskingService.MaskAccountNumber(account.AccountNumber);
-
                 return account;
             }
         }
