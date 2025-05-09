@@ -39,7 +39,7 @@
                     <div class="d-flex flex-column text-start text-light mb-0">
                         <h5 class="mb-1 fw-bold">@clientName</h5>
                         <p class="m-0">@FormatHelper.AccountNumberFormatter(accountNumber)</p>
-                        <p class="m-0">@date?.ToString("f")</p>
+                        <p class="m-0">@date?.ToString("f") @time</p>
                         <p class="m-0">@transactionNumber</p>
                     </div>
 
@@ -89,6 +89,7 @@
     private decimal transferAmount = 0.0m;
     private string transactionNumber = string.Empty;
     private DateTime? date;
+    private TimeSpan? time;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -104,7 +105,8 @@
                 clientName = activeAcccountSession.AccountName;
                 currentBalance = await userDataService.GetAccountBalanceAsync(activeAcccountSession.AccountId);
                 transferAmount = transactionSession.Amount;
-                date = transactionSession.TransactionDate;
+                date = transactionSession.TransactionDate.Date;
+                time = transactionSession.TransactionTime;
                 transactionNumber = transactionSession.TransactionNumber;
 
                 StateHasChanged();

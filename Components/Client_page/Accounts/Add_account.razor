@@ -20,10 +20,10 @@
 			</div>
 
 		</header>
-		@if (error.Length > 0)
+		@if (message.Length > 0)
 		{
 			<div class="alert alert-danger alert-dismissible fade show" role="alert">
-				<strong>@error</strong>
+				<strong>@message</strong>
 			</div>
 		}
 		<!-- New Account Box -->
@@ -95,7 +95,11 @@
 						<NavLink href="/Accounts">
 							<button class="btn btn-danger">Cancel</button>
 						</NavLink>
-						<button class="btn btn-primary" @onclick="TryAddAccountAsync">Add Account</button>
+						<button class="btn btn-primary" @onclick="TryFindAccountAsync">Find Account</button>
+						@if (IsAccountFound && account != null)
+						{
+							<button class="btn btn-primary" @onclick="AddAccountAsync">Add Account</button>
+						}
 					</div>
 				</div>
 
@@ -108,15 +112,17 @@
 @code
 {
 	private UserSession userSession { get; set; } = default!;
+	private int accountId { get; set; }
 	private string accountNumber { get; set; } = string.Empty;
 	private string accountName { get; set; } = string.Empty;
 	private string accountType { get; set; } = string.Empty;
 	private int accountTypeId { get; set; }
 
+	UserInfoAccount userAccountLink { get; set; } = default!;
 	Account? account { get; set; } = null;
 	private bool IsAccountFound = false;
 
-	private string error = "";
+	private string message = "";
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
@@ -136,7 +142,16 @@
 		}
 	}
 
-	private async Task TryAddAccountAsync()
+	private async Task AddAccountAsync()
+	{
+		await userDataService.UpdateUserAccountLink(userSession.UserInfoId, accountId);
+		message = "Account Added. Please wait...";
+		StateHasChanged();
+		await RefreshMessage();
+		redirectService.redirectWithNavigationManager(PageRoutes.LOGGING_IN_PAGE);
+	}
+
+	private async Task TryFindAccountAsync()
 	{
 		try
 		{
@@ -146,25 +161,31 @@
 				);
 			if (hasEmptyField)
 			{
-				error = "Please provide all necessary details.";
-				await RefreshError();
+				message = "Please provide all necessary details.";
+				IsAccountFound = false;
+				StateHasChanged();
+				await RefreshMessage();
 				return;
 			}
 
 			accountTypeId = AccountTypes.AS_STRING_LIST.IndexOf(accountType) + 1;
-			int accountId = await userDataService.GetAccountIdAsync(accountNumber, accountName, accountTypeId);
+			accountId = await userDataService.GetAccountIdAsync(accountNumber, accountName, accountTypeId);
 			bool hasUserLinkedAccount = await userDataService.HasUserLinkedAccount(userSession.UserInfoId, accountId);
 
 			if (!hasUserLinkedAccount)
 			{
-				error = "There is no such account associated with the user.";
-				await RefreshError();
+				message = "There is no such account associated with the user.";
+				IsAccountFound = false;
+				StateHasChanged();
+				await RefreshMessage();
 				return;
 			}
 			else if (userSession.LinkedAccountList.Where(la => la.AccountId == accountId).Any())
 			{
-				error = "This account is already linked to your online account."; 
-				await RefreshError();
+				message = "This account is already linked to your online account."; 
+				IsAccountFound = false;
+				StateHasChanged();
+				await RefreshMessage();
 				return;
 			}
 
@@ -190,18 +211,20 @@
 
 			//	Use this flag for displaying the account.
 			IsAccountFound = true;
+			StateHasChanged();
 		}
 		catch (NullReferenceException)
 		{
 			//	Throw if the account with the provided details does not exist.
-			error = "There is no such account associated with the user.";
-			await RefreshError();
+			message = "There is no such account associated with the user.";
+			await RefreshMessage();
 		}
 	}
 
-	private async Task RefreshError()
+	private async Task RefreshMessage()
 	{
 		await Task.Delay(3000);
-		error = "";
+		message = "";
+		StateHasChanged();
 	}
 }

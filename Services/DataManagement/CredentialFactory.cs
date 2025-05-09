@@ -20,5 +20,9 @@ namespace Services.DataManagement
         {
             return $"{bankNumber}{accountTypeId}{creationDate:yyMM}{Random.Shared.Next(1000, 10000)}{Random.Shared.Next(1000, 10000)}";
         }
+        public static string GenerateLoanNumber(DateTime creationDate, string accountNumber)
+        {
+            return $"{bankNumber}{bankBranchNumber}{creationDate:yyMMdd}{accountNumber[^3..]}{Random.Shared.Next(1000000, 10000000)}";
+        }
     }
 }

@@ -7,8 +7,11 @@
         {
             Query = new UserInfoAccountQuery(context.UsersInfoAccounts.AsQueryable());
         }
-        public async Task<bool> IsUserAccountLinkExists(int userInfoId, int accountId)
-            => (await GetByCompositeId<UserInfoAccount>(userInfoId, accountId)) is not null ? true : false;
+
+        public async Task<UserInfoAccount?> GetUserInfoAccountAsync(int userInfoId, int accountId) =>
+            await GetByCompositeId<UserInfoAccount>(userInfoId, accountId);
+        public async Task<bool> IsUserAccountLinkExists(int userInfoId, int accountId) =>
+            (await GetByCompositeId<UserInfoAccount>(userInfoId, accountId)) is not null ? true : false;
 
         public class UserInfoAccountQuery : CustomQuery<UserInfoAccount, UserInfoAccountQuery>
         {

@@ -48,7 +48,7 @@
                         <h5 class="mb-1 fw-bold">@clientName</h5>
                         <p class="m-0"><strong>Account No.:</strong> @FormatHelper.AccountNumberFormatter(accountNumber)</p>
                         <p class="m-0"><strong>Payment Method:</strong> @cardPayment</p>
-                        <p class="m-0"><strong>Date:</strong> @date</p>
+                        <p class="m-0"><strong>Date:</strong> @date @time</p>
                         <p class="m-0"><strong>Transaction No.:</strong> @transactionNumber</p>
                     </div>
 
@@ -91,6 +91,7 @@
     private decimal depositAmount = 0.00m;
     private string transactionNumber = "Loading...";
     private DateTime? date;
+    private TimeSpan? time;
 
     private string error = string.Empty;
 
@@ -112,7 +113,8 @@
                 clientName = activeAccountSession.AccountName;
                 currentBalance = await userDataService.GetAccountBalanceAsync(activeAccountSession.AccountId);
                 depositAmount = transactionSession.Amount;
-                date = transactionSession.TransactionDate;
+                date = transactionSession.TransactionDate.Date;
+                time = transactionSession.TransactionTime;
                 transactionNumber = transactionSession.TransactionNumber;
 
                 //  Reload component.

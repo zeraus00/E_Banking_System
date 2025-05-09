@@ -23,5 +23,8 @@ namespace ViewModels.Sessions
         //  For transaction session.
         public string TransactionSessionScheme { get; set; } = string.Empty;
         public TransactionSession? TransactionSession { get; set; } = null;
+
+        //  For loan application session.
+        public LoanApplication? LoanApplication { get; set; } = null;
     }
 }

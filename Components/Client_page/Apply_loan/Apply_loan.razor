@@ -11,6 +11,7 @@
 @inject PageRedirectService redirectService
 @inject UserDataService userDataService
 @inject UserSessionService userSessionService
+@inject UserControlledSessionService userControlledSessionService
 
 <div class="page">
 	<main>
@@ -170,7 +171,7 @@
 							<option value="-1" disabled hidden>--Select Payment Frequency--</option>
 							<option value="12">Monthly</option>
 							<option value="6">Bi-Monthly</option>
-							<option value="3">Quarterly</option>
+							<option value="4">Quarterly</option>
 						</select>
 					</div>
 				</div>
@@ -206,7 +207,7 @@
 					<NavLink href="@PageRoutes.CLIENT_HOME">
 						<button class="btn btn-danger">Cancel</button>
 					</NavLink>
-					<a href="/Loan_receipt" class="btn btn-primary">Register</a>
+					<button class="btn btn-primary" @onclick="RegisterLoanAsync">Register</button>
 				</div>
 				@if (loanSubmittedMessage.Length > 0)
 				{
@@ -259,12 +260,15 @@
 	private int loanTermInMonths;
 	private int paymentFrequency = -1;
 
-	private UserInfo userInfo = default!;
-	private Address address = default!;
-	private UserSession userSession = default!;
+	private UserInfo userInfo { get; set; } = default!;
+	private Address address { get; set; } = default!;
+	private UserSession userSession { get; set; } = default!;
+	private LinkedAccount activeAccountSession { get; set; } = default!;
 
 	private byte[]? governmentId;
 	private byte[]? payslipPicture;
+
+	private bool isSubmitting { get; set; } = false;
 
 	private async Task UploadGovernmentId(InputFileChangeEventArgs e)
 	{
@@ -323,6 +327,7 @@
 				//	Get user session details from session storage.
 				//	Throws SessionNotFoundException if session is not found.
 				userSession = await userSessionService.GetUserSession();
+				activeAccountSession = userSession.ActiveAccountSession;
 
 				userInfo = await userDataService
 				.TryGetUserInfoAsync(
@@ -363,58 +368,89 @@
 
 	private async Task RegisterLoanAsync()
 	{
-
-		string gmailDomain = "@gmail.com";
-		bool isAnnualGrossInvalid = minAnnualGross < 250000.0m;
-		bool isEmailInvalid = string.IsNullOrWhiteSpace(email)
-			|| email.Length < 6
-			|| !email.EndsWith(gmailDomain, StringComparison.OrdinalIgnoreCase);
-		bool isContactNoMissingOrInvalid = string.IsNullOrWhiteSpace(contactNo)
-			|| !contactNo.All(char.IsDigit)
-			|| contactNo.Length != 11;
-		bool isGovernmentIdInvalid = governmentId is null;
-		bool isPayslipPicInvalid = payslipPicture is null;
-
-		if (isAnnualGrossInvalid)
-			error = "Please enter a valid Gross Annual Income not less than 250 000.";
-		if (isEmailInvalid)
-			error = "Please enter a valid Email.";
-		if (isContactNoMissingOrInvalid)
-			error = "Please enter a valid Contact No.";
-		if (isGovernmentIdInvalid)
-			error = "Please upload a valid Government Id photo.";
-		if (isPayslipPicInvalid)
-			error = "Please upload a valid Payslip photo.";
-		Loan newLoan = new Loan
+		try
 		{
-			AccountId = userSession.ActiveAccountSession.AccountId,
-			UserInfoId = userSession.UserInfoId,
-			ContactNo = contactNo,
-			Email = email,
-			LoanTypeId = loanTypeId + 1,
-			LoanPurpose = loanPurpose,
-			LoanAmount = loanAmount,
-			LoanTermMonths = loanTermInMonths,
-			PaymentFrequency = paymentFrequency,
-			ApplicationDate = DateTime.Now.Date
-		};
+			if (isSubmitting)
+			{
+				error = "Please wait before clicking the button again.";
+				await Task.Delay(2000); 
+				error = "";
+				return;
+			}
 
-		if (loanService.IsLoanInvalid(newLoan, minimumLoanAmount, minimumLoanTerm))
-			error = "Please enter valid values that comply with the chosen loan type's terms.";
+			isSubmitting = true;
 
-		bool hasError = !string.IsNullOrWhiteSpace(error);
-		if (hasError)
-		{
-			await Task.Delay(3000);
-			error = "";
-			return;
+			string gmailDomain = "@gmail.com";
+			bool isAnnualGrossInvalid = minAnnualGross < 250000.0m;
+			bool isEmailInvalid = string.IsNullOrWhiteSpace(email)
+				|| email.Length < 6
+				|| !email.EndsWith(gmailDomain, StringComparison.OrdinalIgnoreCase);
+			bool isContactNoMissingOrInvalid = string.IsNullOrWhiteSpace(contactNo)
+				|| !contactNo.All(char.IsDigit)
+				|| contactNo.Length != 11;
+			bool isGovernmentIdInvalid = governmentId is null;
+			bool isPayslipPicInvalid = payslipPicture is null;
+
+			if (isAnnualGrossInvalid)
+				error = "You are required to have a Gross Annual Income not less than 250 000.";
+			else if (isEmailInvalid)
+				error = "Please enter a valid Email.";
+			else if (isContactNoMissingOrInvalid)
+				error = "Please enter a valid Contact No.";
+			else if (isGovernmentIdInvalid)
+				error = "Please upload a valid Government Id photo.";
+			else if (isPayslipPicInvalid)
+				error = "Please upload a valid Payslip photo.";
+			Loan newLoan = new Loan
+				{
+					AccountId = userSession.ActiveAccountSession.AccountId,
+					UserInfoId = userSession.UserInfoId,
+					ContactNo = contactNo,
+					Email = email,
+					LoanTypeId = loanTypeId + 1,
+					LoanPurpose = loanPurpose,
+					LoanAmount = loanAmount,
+					LoanTermMonths = loanTermInMonths,
+					PaymentFrequency = paymentFrequency,
+					ApplicationDate = DateTime.Now.Date
+				};
+
+			if (string.IsNullOrWhiteSpace(error) && loanService.IsLoanInvalid(newLoan, minimumLoanAmount, minimumLoanTerm))
+				error = "Please enter valid values that comply with the chosen loan type's terms.";
+
+			bool hasError = !string.IsNullOrWhiteSpace(error);
+			if (hasError)
+			{
+				await Task.Delay(3000);
+				error = "";
+				return;
+			}
+
+			//	Register loan and update UserInfo employment information.
+			if (governmentId is byte[] govId && payslipPicture is byte[] payslipPic)
+				newLoan = await loanService.RegisterLoanApplication(
+					newLoan, 
+					activeAccountSession.AccountNumber, 
+					userSession.UserInfoId, 
+					govId, 
+					payslipPic
+				);
+
+			//	Update user session.
+			//	Set loan application session.
+			LoanApplication loanApplication = new()
+				{
+					LoanId = newLoan.LoanId,
+					UserInfoId = userSession.UserInfoId
+				};
+			await userControlledSessionService.SetLoanApplicationSessionAsync(loanApplication, userSession);
+
+			await NavigateToLoanReceipt();
 		}
-
-		//	Register loan and update UserInfo employment information.
-		if (governmentId is byte[] govId && payslipPicture is byte[] payslipPic)
-			await loanService.RegisterLoanApplication(newLoan, userSession.UserInfoId, govId, payslipPic);
-
-		await NavigateToClientHome();
+		finally
+		{
+			isSubmitting = false;
+		}
 	}
 
 	private void OnLoanTypeChange()
@@ -430,17 +466,17 @@
 		minimumLoanTerm = loanType.LoanTermInMonths;
 	}
 
-	private async Task NavigateToClientHome()
+	private async Task NavigateToLoanReceipt()
 	{
 		int countDownSeconds = 3;
-		while(countDownSeconds >= 0)
+		while (countDownSeconds >= 0)
 		{
-			loanSubmittedMessage = $"Loan Application Submitted. Redirecting to Home...";
+			loanSubmittedMessage = $"Loan Application Submitted. Please wait...";
 			await Task.Delay(1000 * (countDownSeconds));
 			countDownSeconds--;
 			StateHasChanged();
 		}
 		loanSubmittedMessage = "";
-		NavigationManager.NavigateTo(PageRoutes.CLIENT_HOME);
+		NavigationManager.NavigateTo(PageRoutes.LOAN_RECEIPT);
 	}
 }

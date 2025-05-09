@@ -222,10 +222,11 @@
             }
 
             transactionSession = await transactionService.CreateTransactionAsync(
-            accountId,
-            (int)TransactionTypeIDs.Outgoing_Transfer,
-            transferAmount.Value,
-            externalVendorId: null
+                accountId,
+                (int)TransactionTypeIDs.Outgoing_Transfer,
+                transferAmount.Value,
+                DateTime.Now,
+                externalVendorId: null
             );
 
             await userControlledSessionService.SetTransactionSessionAsync(

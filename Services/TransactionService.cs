@@ -55,7 +55,8 @@ namespace Services
         public async Task<TransactionSession> CreateTransactionAsync(
             int mainAccountId, 
             int transactionTypeId, 
-            decimal amount, 
+            decimal amount,
+            DateTime transactionDate,
             int? counterAccountId = null,
             int? externalVendorId = null)
         {
@@ -64,10 +65,6 @@ namespace Services
                 /*  Retrieve main account from database.    */
                 //  Throws AccountNotFoundException if account is not found.
                 Account mainAccount = await this.GetAccountAsync(dbContext, mainAccountId);
-
-                /*  Get Transaction Date and Time.  */
-                DateTime transactionDate = DateTime.UtcNow.Date;
-                TimeSpan transactionTime = DateTime.UtcNow.TimeOfDay;
 
                 /*  Generate Transaction Number */
                 string accountNumber = mainAccount.AccountNumber;
@@ -78,8 +75,8 @@ namespace Services
                 {
                     TransactionTypeId = transactionTypeId,
                     TransactionNumber = transactionNumber,
-                    TransactionDate = transactionDate,
-                    TransactionTime = transactionTime,
+                    TransactionDate = transactionDate.Date,
+                    TransactionTime = transactionDate.TimeOfDay,
                     MainAccountId = mainAccountId,
                     Amount = amount,
                     CurrentBalance = mainAccount.Balance,

@@ -41,7 +41,7 @@
                         <h2>To Account: </h2>
                         <h5 class="mb-1">@clientName</h5>
                         <p class="mb-0">@FormatHelper.AccountNumberFormatter(accountNumber)</p>
-                        <p class="mb-0">@date</p>
+                        <p class="mb-0">@date @time</p>
                         <p class="mb-0">@confirmationNumber</p>
                     </div>
                     <NavLink class="w-25" href="/Client_home">
@@ -67,6 +67,7 @@
     private decimal transferAmount = 0.0m;
     private decimal currentBalance = 0.0m;
     private DateTime? date;
+    private TimeSpan? time;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -82,7 +83,8 @@
                 clientName = activeAccountSession.AccountName;
                 currentBalance = await _userDataService.GetAccountBalanceAsync(activeAccountSession.AccountId);
                 transferAmount = transactionSession.Amount;
-                date = transactionSession.TransactionDate;
+                date = transactionSession.TransactionDate.Date;
+                time = transactionSession.TransactionTime;
                 confirmationNumber = transactionSession.ConfirmationNumber ?? "N/A";
 
                 StateHasChanged();
