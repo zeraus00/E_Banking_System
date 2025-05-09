@@ -4,6 +4,7 @@ using Data.Enums;
 using Data.Models.Finance;
 using Data.Repositories.Finance;
 using Exceptions;
+using Services.DataManagement;
 using ViewModels.RoleControlledSessions;
 
 namespace Services
@@ -84,6 +85,16 @@ namespace Services
                     ExternalVendorId = externalVendorId
                 };
 
+
+                /*  Retrieve counter account from database as necessary */
+                if (counterAccountId is int counterId)
+                {
+                    //  Throws AccountNotFoundException if account is not found. 
+                    Account counterAccount = await this.GetAccountAsync(dbContext, counterId);
+                    string counterAccountNumber = new DataMaskingService().MaskAccountNumber(counterAccount.AccountNumber);
+                    transactionSession.CounterAccountName = counterAccount.AccountName;
+                    transactionSession.CounterAccountNumber = counterAccountNumber;
+                }
 
 
                 /*  For Withdrawal or Outgoing Transfer Transaction Types   */

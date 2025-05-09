@@ -10,8 +10,11 @@
         public decimal Amount { get; set; }
         public decimal CurrentBalance { get; set; }
         public string? ConfirmationNumber { get; set; } = null;
+        //  Transaction third party.
         public int? CounterAccountId { get; set; } = null;
         public int? ExternalVendorId { get; set; } = null;
+        public string CounterAccountName { get; set; } = string.Empty;
+        public string CounterAccountNumber { get; set; } = string.Empty;
 
     }
 }

@@ -35,22 +35,28 @@
                     <h1 class="fw-bolder py-3 mb-2">@FormatHelper.BalanceFormatter(transferAmount)</h1>
                 </div>
 
+                <h6 class="mx-5 my-3">
+                    <div><strong>Account Name: </strong>@clientAccountName</div>
+                    <div><strong>Account Number: </strong>@FormatHelper.AccountNumberFormatter(clientAccountNumber)</div>
+                    <div><strong>Current Balance: </strong>@FormatHelper.BalanceFormatter(currentBalance)</div>
+                </h6>
+
                 <div class="d-flex justify-content-between mx-5">
                     <div class="d-flex flex-column text-start text-light mb-0">
-                        <h5 class="mb-1 fw-bold">@clientName</h5>
-                        <p class="m-0">@FormatHelper.AccountNumberFormatter(accountNumber)</p>
+                        <h5 class="mb-1 fw-bold">@counterAccountName</h5>
+                        <p class="m-0">@FormatHelper.AccountNumberFormatter(counterAccountNumber)</p>
                         <p class="m-0">@date?.ToString("f") @time</p>
                         <p class="m-0">@transactionNumber</p>
                     </div>
 
                     <section class="d-flex flex-column form-check d-flex justify-content-end mt-3">
                         <div class="text-end mt-3">
-                            <NavLink class="w-25" href="/Transfer_receipt">
+                            <div class="w-25">
                                 <button class="btn btn-primary btn-lg w-100 mb-2" @onclick="ConfirmTransfer" disabled="@(isConfirmed == false)">Confirm</button>
-                            </NavLink>
-                            <NavLink class="w-25" href="/Transfer_amount">
+                            </div>
+                            <div class="w-25">
                                 <button class="btn btn-warning btn-lg w-100 mb-3" @onclick="CancelTransfer">Go Back</button>
-                            </NavLink>
+                            </div>
                         </div>
 
                         <div class="pb-2">
@@ -81,10 +87,11 @@
     private UserSession userSession { get; set; } = default!;
     private LinkedAccount activeAcccountSession { get; set; } = default!;
     private TransactionSession transactionSession { get; set; } = default!;
-    private Account? Account;
 
-    private string accountNumber = string.Empty;
-    private string clientName = string.Empty;
+    private string clientAccountName = string.Empty;
+    private string clientAccountNumber = string.Empty;
+    private string counterAccountNumber = string.Empty;
+    private string counterAccountName = string.Empty;
     private decimal currentBalance = 0.0m;
     private decimal transferAmount = 0.0m;
     private string transactionNumber = string.Empty;
@@ -101,10 +108,17 @@
                 activeAcccountSession = await userControlledSessionService.GetActiveAccountSessionAsync(userSession);
                 transactionSession = await userControlledSessionService.GetTransactionSessionAsync(userSession);
 
-                accountNumber = activeAcccountSession.AccountNumber;
-                clientName = activeAcccountSession.AccountName;
-                currentBalance = await userDataService.GetAccountBalanceAsync(activeAcccountSession.AccountId);
+                //  Set display data.
                 transferAmount = transactionSession.Amount;
+
+                //  Client account.
+                clientAccountName = activeAcccountSession.AccountNumber;
+                clientAccountNumber = activeAcccountSession.AccountName;
+
+                //  Counter Account and other transaction details.
+                counterAccountNumber = transactionSession.CounterAccountNumber;
+                counterAccountName = transactionSession.CounterAccountName;
+                currentBalance = await userDataService.GetAccountBalanceAsync(activeAcccountSession.AccountId);
                 date = transactionSession.TransactionDate.Date;
                 time = transactionSession.TransactionTime;
                 transactionNumber = transactionSession.TransactionNumber;

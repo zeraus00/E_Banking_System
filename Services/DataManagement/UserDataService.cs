@@ -474,20 +474,22 @@ namespace Services.DataManagement
         /// <exception cref="NullReferenceException">
         /// Thrown if no account with the specified account number, account name, and account type id exists.
         /// </exception>
-        public async Task<int> GetAccountIdAsync(string accountNumber, string accountName, int accountTypeId)
+        public async Task<int> GetAccountIdAsync(string accountNumber, string accountName, int accountTypeId=0)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
                 var accountRepo = new AccountRepository(dbContext);
                 try
                 {
-                    //  Returns 0 if no account is found.
-                    return await accountRepo
+                    var accountQuery = accountRepo
                         .Query
                         .HasAccountNumber(accountNumber)
-                        .HasAccountName(accountName)
-                        .HasAccountTypeId(accountTypeId)
-                        .SelectId();
+                        .HasAccountName(accountName);
+
+                    if (accountTypeId > 0)
+                        accountQuery.HasAccountTypeId(accountTypeId);
+
+                    return await accountQuery.SelectId();
                 }
                 catch (NullReferenceException)
                 {
