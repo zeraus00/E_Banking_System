@@ -134,7 +134,7 @@
                 <div class="d-flex justify-content-between align-items-center mt-4">
                     <div class="d-flex align-items-center">
                         <i class="bi bi-cash-stack me-2"></i>
-                        <span>Total Volume</span>
+                        <span class="fst-italic">Total Volume</span>
                     </div>
                     <p class="text-end number mb-0">@transactionVolume</p>
                 </div>
@@ -155,20 +155,30 @@
                     <p class="text-end number mb-0">@newAccounts</p>
                 </div>
 
-                <div class="d-flex justify-content-between align-items-center mt-4">
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-person-dash me-2"></i>
-                        <span class="fst-italic">Closed Accounts</span>
+                <div class="d-flex justify-content-between mt-4">
+                    <div class="d-flex flex-column">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-person-dash me-2"></i>
+                            <span class="fst-italic">Closed Accounts</span>
+                        </div>
+                        <a href="/Closed_accounts" class="nav-link px-0">View</a>
                     </div>
-                    <p class="text-end number mb-0">@closedAccounts</p>
+                    <div class="pt-1">
+                        <p class="text-end number mb-0">@closedAccounts</p>
+                    </div>
                 </div>
 
-                <div class="d-flex justify-content-between align-items-center mt-4">
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-flag me-2"></i>
-                        <span class="fst-italic">Suspicious Transactions</span>
+                <div class="d-flex justify-content-between mt-4">
+                    <div class="d-flex flex-column">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-flag me-2"></i>
+                            <span class="fst-italic">Suspicious Transactions</span>
+                        </div>
+                        <a href="/Suspicious_transactions" class="nav-link px-0">View</a>
                     </div>
-                    <p class="text-end number mb-0">0</p>
+                    <div class="pt-1">
+                        <p class="text-end number mb-0">0</p>
+                    </div>
                 </div>
 
                 <div class="d-flex justify-content-between mt-4">
@@ -177,7 +187,7 @@
                             <i class="bi bi-flag me-2"></i>
                             <span class="fst-italic">Flagged Accounts</span>
                         </div>
-                        <a href="#" class="nav-link px-0">View</a>
+                        <a href="/Flagged_accounts" class="nav-link px-0">View</a>
                     </div>
                     <div class="pt-1">
                         <p class="text-end number mb-0">0</p>

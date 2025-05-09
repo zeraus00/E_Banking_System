@@ -1,0 +1,166 @@
+﻿@page "/Flagged_accounts"
+@attribute [Authorize(Roles = "Administrator")]
+@rendermode InteractiveServer
+
+@inject AdminControlledSessionService adminControlledSessionService
+@inject AdminDataService adminDataService
+@inject NavigationManager Navigation
+@inject PageRedirectService redirectService
+
+<div class="main">
+    <div class="dashboard-container">
+
+        <div class="top-bar mx-3">
+            <h2>Flagged Accounts</h2>
+        </div>
+
+        <hr class="divider" />
+
+        <div class="d-flex align-items-center gap-3 m-3 flex-wrap">
+
+            <div class="d-flex align-items-center gap-3">
+                <input class="form-control form-control-sm" @bind="searchAccount" placeholder="Search specific account">
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+                <label class="text-light mb-0" style="white-space: nowrap;">Start Date</label>
+                <InputDate class="form-control form-control-sm" @bind-Value="startDate" />
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+                <label class="text-light mb-0" style="white-space: nowrap;">End Date</label>
+                <InputDate class="form-control form-control-sm" @bind-Value="endDate" />
+            </div>
+
+            @* <div class="d-flex align-items-center gap-3">
+                <label class="text-light mb-0" style="white-space: nowrap;">Account Type</label>
+                <select class="form-select form-select-sm" @bind="selectedType">
+                    <option value="">All</option>
+                    @foreach (var type in accountTypeList)
+                    {
+                        <option value="@accountTypeList.IndexOf(type)">type</option>
+                    }
+                </select>
+            </div> *@
+
+            <button class="btn btn-primary btn-sm shadow-sm" @onclick="FilterAsync">Filter</button>
+            <button class="btn btn-danger btn-sm shadow-sm" @onclick="ClearFilterAsync">Clear Filter</button>
+
+        </div>
+
+        <hr class="divider" />
+
+        <div class="table-responsive m-4 rounded">
+            <table class="table table-bordered text-center">
+                <thead class="table-info">
+                    <tr>
+                        <th class="align-middle">Account<br />Number</th>
+                        <th class="align-middle">Name</th>
+                        <th class="align-middle">Flagged Date</th>@* 
+                        <th class="align-middle">No. of Transactions (7 Days)</th>
+                        <th class="align-middle">Total Transactions Amount</th> *@
+                        <th class="align-middle">Status</th>
+                        @* <th class="align-middle">Recent Activity</th> *@
+                        <th class="align-middle">Notes/Remarks</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var a in accountList)
+                    {
+                        <tr class="bg-light">
+                            <td>@a.AccountNumber</td>
+                            <td>@a.AccountName</td>
+                            <td>a.DateFlagged.ToString("MM/dd/yyyy")</td>
+                            <td>a.AccountStatus</td>
+                            <td>a.Notes</td>
+                        </tr>
+                    }
+                    @* @foreach (var a in accounts)
+                    {
+                        <tr class="bg-light">
+                            <td>@a.Date.ToString("MM/dd/yyyy")</td>
+                            <td>@a.Time.ToString(@"hh\:mm\:ss")</td>
+                            <td>@a.Name</td>
+                            <td>@a.AccountType</td>
+                            <td>
+                                <button class="btn btn-info btn-secondary btn-sm rounded text-dark shadow-sm" style="border: 2px solid cyan" @onclick="() => ViewDetails(a)">View</button>
+                            </td>
+                            <td class="text-secondary">@a.Status</td>
+                        </tr>
+                    } *@
+                </tbody>
+            </table>
+        </div>
+
+        <div class="scroll-container gap-3 mx-5">
+            <!-- Left Arrow -->
+            <button class="arrow-ud">
+                <i class="bi bi-chevron-left text-light"></i>
+            </button>
+
+            <!-- Right Arrow -->
+            <button class="arrow-ud">
+                <i class="bi bi-chevron-right text-light"></i>
+            </button>
+        </div>
+
+        <div class="page-container text-center text-light mt-2 mb-3 mx-5">
+            Page @pageNumber of @masterListAvailablePages
+        </div>
+
+    </div>
+</div>
+
+@code {
+
+    private List<string> accountTypeList = AccountTypes.AS_STRING_LIST;
+
+    private DateTime? startDate = DateTime.Now.AddDays(-DateTime.Now.Day + 1);
+    private DateTime? endDate = DateTime.Now;
+    // private string selectedType = "";
+    private string searchAccount = "";
+
+    private List<Account> accountList = new();
+
+    private List<string> transactionTypes { get; set; } = new();
+    private string selectedTransactionType = "0";
+
+    private List<Transaction> transactionMasterList = new();
+    private int masterListPageSize = 36;
+    private int masterListAvailablePages = 0;
+    private int masterListPageNumber = 1;
+
+    private List<Transaction> transactionListPage = new();
+    private int pageSize = 6;
+    private int pageNumber = 0;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        accountList = await adminDataService.FilterAccountsAsync(accountStatusTypeId: (int)AccountStatusTypeIDs.Closed);
+    }
+
+
+    private async Task FilterAsync()
+    {
+        accountList = await adminDataService
+            .FilterAccountsAsync(
+            searchAccount,
+            startDate,
+            endDate,
+            (int)AccountTypeIDs.PersonalAccount,
+            (int)AccountStatusTypeIDs.Closed
+        );
+    }
+
+    private async Task ClearFilterAsync()
+    {
+        startDate = null;
+        endDate = null;
+        // selectedType = "";
+        searchAccount = "";
+        accountList = await adminDataService.FilterAccountsAsync(accountStatusTypeId: (int)AccountStatusTypeIDs.Closed);
+    }
+
+}
