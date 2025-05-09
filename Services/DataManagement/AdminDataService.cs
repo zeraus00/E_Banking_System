@@ -306,6 +306,7 @@ namespace Services.DataManagement
                             TransactionType = transactionType
                         };
                 }
+                //  TO DO: INCLUDE LOANS BREAKDOWN
 
                 return transactionBreakdowns;
             }    

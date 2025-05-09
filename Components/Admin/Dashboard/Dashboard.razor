@@ -320,10 +320,10 @@
     //  Load data for dashboard view.
     private async Task LoadDisplayData()
     {
-        // Get largest transactions with count 5.
+        //  Get largest transactions with count 5.
         largestTransactions = await adminDataService.GetLargestTransactions(5, startDate, endDate);
 
-        // Get transaction breakdown.
+        //  Get transaction breakdown.
         transactionBreakdowns = await adminDataService.GetTransactionBreakdowns(startDate, endDate);
         //  Withdrawals count and total amount.
         withdrawalCount = transactionBreakdowns[TransactionTypes.WITHDRAWAL].Count;
