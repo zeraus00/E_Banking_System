@@ -6,7 +6,11 @@
 <AuthorizeView Roles="Administrator">
     <Authorized>
         <!-- Side NavBar Layout -->
-        <nav class="sidebar">
+        <nav class="sidebar @(isSidebarVisible ? "" : "collapsed")">
+            <button class="btn btn-toggle-sidebar text-white" @onclick="ToggleSidebar">
+                <span class="d-flex fs-3">☰</span>
+            </button>
+
             <!-- Top Row -->
             <div class="top-row border-bottom">
 
@@ -23,7 +27,7 @@
             </div>
 
             <!-- Sidebar Navigation Links (Middle Row)-->
-            <div class="position-relative" onclick="document.querySelector('.toggler').click()">
+            <div class="position-relative">
                 <p class="position-absolute text-light top-0 start-0 mx-4 my-3 fw-lighter" style="font-size: 0.75rem;">ADMIN</p>
                 <div class="middle-row border-bottom">
                     <nav class="flex-column">
@@ -40,14 +44,27 @@
                             <NavLink class="nav-link" href="#">Transactions</NavLink>
                         </div>
                         <div class="nav-item px-3">
-                            <NavLink class="nav-link lh-sm" href="#">Loans</NavLink>
+                            <button class="nav-link lh-sm d-flex text-start justify-content-between align-items-center w-100" @onclick="ToggleLoansDropdown">
+                                Loans
+                                <span>@(isLoansDropdownOpen ? "▲" : "▼")</span>
+                            </button>
+
+                            @if (isLoansDropdownOpen)
+                            {
+                                <div class="dropdown-menu-custom ps-3">
+                                    <NavLink class="nav-link lh-sm" href="#">Unpaid</NavLink>
+                                    <NavLink class="nav-link lh-sm" href="#">Paid</NavLink>
+                                    <NavLink class="nav-link lh-sm" href="#">Applying</NavLink>
+                                </div>
+                            }
+
                         </div>
                     </nav>
                 </div>
             </div>
 
             <!-- Sidebar Navigation Links (Bottom Row) -->
-            <div class="position-relative" onclick="document.querySelector('.toggler').click()">
+            <div class="position-relative">
                 <p class="position-absolute text-light top-0 start-0 mx-4 my-3 fw-lighter" style="font-size: 0.75rem;">OTHERS</p>
                 <div class="bottom-row">
                     <nav class="flex-column">
@@ -71,6 +88,19 @@
 
     private string fullName { get; set; } = "Loading...";
     private string email { get; set; } = "Loading...";
+
+    private bool isSidebarVisible = true;
+    private bool isLoansDropdownOpen = false;
+
+    private void ToggleSidebar()
+    {
+        isSidebarVisible = !isSidebarVisible;
+    }
+
+    private void ToggleLoansDropdown()
+    {
+        isLoansDropdownOpen = !isLoansDropdownOpen;
+    }
 
     public async Task LogOutAsync()
     {
