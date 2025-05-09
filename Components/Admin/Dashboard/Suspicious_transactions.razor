@@ -1,0 +1,154 @@
+﻿@page "/Suspicious_transactions"
+@attribute [Authorize(Roles = "Administrator")]
+@rendermode InteractiveServer
+
+@inject AdminControlledSessionService adminControlledSessionService
+@inject AdminDataService adminDataService
+@inject NavigationManager Navigation
+@inject PageRedirectService redirectService
+
+<div class="main">
+    <div class="dashboard-container">
+
+        <div class="top-bar mx-3">
+            <h2>Suspicious Transactions</h2>
+        </div>
+
+        <hr class="divider" />
+
+        <div class="d-flex align-items-center gap-3 m-3 flex-wrap">
+
+            <div class="d-flex align-items-center gap-3">
+                <i class="bi bi-search" />
+                <input class="form-control form-control-sm" @bind="searchAccount" placeholder="Search specific account">
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+                <label class="text-light mb-0" style="white-space: nowrap;">Start Date</label>
+                <InputDate class="form-control form-control-sm" @bind-Value="startDate" />
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+                <label class="text-light mb-0" style="white-space: nowrap;">End Date</label>
+                <InputDate class="form-control form-control-sm" @bind-Value="endDate" />
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+                <label class="text-light mb-0" style="white-space: nowrap;">Account Type</label>
+                <select class="form-select form-select-sm" @bind="selectedType">
+                    <option value="">All</option>
+                    @foreach (var type in accountTypeList)
+                    {
+                        <option value="@accountTypeList.IndexOf(type)">@type</option>
+                    }
+                </select>
+            </div>
+
+            <button class="btn btn-primary btn-sm shadow-sm" @onclick="FilterAsync">Filter</button>
+            <button class="btn btn-danger btn-sm shadow-sm" @onclick="ClearFilterAsync">Clear Filter</button>
+
+        </div>
+
+        <hr class="divider" />
+
+        <div class="table-responsive m-4 rounded">
+            <table class="table table-bordered text-center">
+                <thead class="table-info">
+                    <tr>
+                        <th class="align-middle">Transaction<br />No</th>
+                        <th class="align-middle">Account<br />Number</th>
+                        <th class="align-middle">Name</th>
+                        <th class="align-middle">Date</th>
+                        <th class="align-middle">Time</th>
+                        <th class="align-middle">Transaction Type</th>
+                        <th class="align-middle">Transaction<br />Amount</th>
+                        <th class="align-middle">Notes/Remarks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var a in accountList)
+                    {
+                        <tr class="bg-light">
+                            <td>a.TransactionNumber</td>
+                            <td>a.AccountNumber</td>
+                            <td>a.AccountName</td>
+                            <td>a.Date</td>
+                            <td>a.Time</td>
+                            <td>a.TransactionType</td>
+                            <td>a.TransactionAmount</td>
+                            <td>a.Notes</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="scroll-container gap-3 mx-5">
+            <!-- Left Arrow -->
+            <button class="arrow-ud">
+                <i class="bi bi-chevron-left text-light"></i>
+            </button>
+
+            <!-- Right Arrow -->
+            <button class="arrow-ud">
+                <i class="bi bi-chevron-right text-light"></i>
+            </button>
+        </div>
+
+        <div class="page-container text-center text-light mt-2 mb-3 mx-5">
+            Page @pageNumber of @masterListAvailablePages
+        </div>
+
+    </div>
+</div>
+
+@code {
+    private List<string> accountTypeList = AccountTypes.AS_STRING_LIST;
+
+    private DateTime? startDate = DateTime.Now.AddDays(-DateTime.Now.Day + 1);
+    private DateTime? endDate = DateTime.Now;
+    private string selectedType = "";
+    private string searchAccount = "";
+
+    private List<Account> accountList = new();
+
+    private List<string> transactionTypes { get; set; } = new();
+    private string selectedTransactionType = "0";
+
+    private List<Transaction> transactionMasterList = new();
+    private int masterListPageSize = 36;
+    private int masterListAvailablePages = 0;
+    private int masterListPageNumber = 1;
+
+    private List<Transaction> transactionListPage = new();
+    private int pageSize = 6;
+    private int pageNumber = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        accountList = await adminDataService.FilterAccountsAsync(accountStatusTypeId: (int)AccountStatusTypeIDs.Closed);
+    }
+
+
+    private async Task FilterAsync()
+    {
+        accountList = await adminDataService
+            .FilterAccountsAsync(
+            searchAccount,
+            startDate,
+            endDate,
+            (int)AccountTypeIDs.PersonalAccount,
+            (int)AccountStatusTypeIDs.Closed
+        );
+    }
+
+    private async Task ClearFilterAsync()
+    {
+        startDate = null;
+        endDate = null;
+        selectedType = "";
+        searchAccount = "";
+        accountList = await adminDataService.FilterAccountsAsync(accountStatusTypeId: (int)AccountStatusTypeIDs.Closed);
+    }
+
+}
