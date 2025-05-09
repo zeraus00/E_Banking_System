@@ -2,6 +2,7 @@
 {
     public class TransactionBreakdown
     {
+        public string TransactionType { get; set; } = string.Empty;
         public int Count { get; set; }
         public decimal Total { get; set; } = 0.00m;
         public decimal Average { get; set; } = 0.00m;

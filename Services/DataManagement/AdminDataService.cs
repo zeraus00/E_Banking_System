@@ -27,7 +27,7 @@ namespace Services.DataManagement
             _userDataService = userDataService;
             _userSessionService = userSessionService;
         }
-
+        #region Account Helper Methods
         /// <summary>
         /// Asynchronously filters and retrieves a list of pending <see cref="Account"/> based on optional criteria.
         /// </summary>
@@ -136,6 +136,8 @@ namespace Services.DataManagement
             }
 
         }
+        #endregion
+        #region Pending Accounts Management
         /// <summary>
         /// Updates the <see cref="Account.AccountStatusType"> of an <see cref="Account"/> with a
         /// specified <see cref="Account.AccountId"/> and a <see cref="Account.AccountStatusTypeId"/>
@@ -163,23 +165,8 @@ namespace Services.DataManagement
                 throw;
             }
         }
-        /// <summary>
-        /// Calculates the net movement of currency in the bank through a main <see cref="List{Transaction}">.
-        /// </summary>
-        /// <param name="transactionList">The main <see cref="List{Transaction}">.</param>
-        /// <returns>The calculated <see cref="decimal"/> net movement based on the provided <see cref="List{Transaction}">.
-        /// </returns>
-        public decimal GetNetMovement(List<Transaction> transactionList)
-        {
-            decimal inflow = transactionList
-                .Where(t => t.TransactionTypeId == (int)TransactionTypeIDs.Deposit)
-                .Sum(t => t.Amount);
-            decimal outflow = transactionList
-                .Where(t => t.TransactionTypeId == (int)TransactionTypeIDs.Withdrawal)
-                .Sum(t => t.Amount);
-
-            return inflow - outflow;
-        }
+        #endregion
+        #region Dashboard Helper Methods
         /// <summary>
         /// Retrieves the count of newly opened <see cref="Account"> in a specified time frame or
         /// a default time frame starting from the start of the month until the most recent day.
@@ -207,7 +194,7 @@ namespace Services.DataManagement
         /// being queried.</param>
         /// <param name="startDate">Specifies the earliest date for the query.</param>
         /// <param name="endDate">Specifies the latest date for the query.</param>
-        /// <returns></returns>
+        /// <returns>An <see cref="int"/> representing the count of Accounts in the query after the filter.</returns>
         public async Task<int> GetAccountCountByFilterAsync(int statusTypeId, DateTime? startDate = null, DateTime? endDate = null)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
@@ -237,66 +224,130 @@ namespace Services.DataManagement
             }
         }
         /// <summary>
-        /// Creates a <see cref="Dictionary{String, TransactionBreakdown}"> of <see cref="TransactionBreakdown"/> from a provided 
-        /// <see cref="List{Transaction}">with a <see cref="string"> specifying the <see cref="Account.AccountStatusType"> 
-        /// as key and a <see cref="TransactionBreakdown"/> object as the value. Each <see cref="TransactionBreakdown"/> object 
+        /// Calculates the total transactions done using a <see cref="Dictionary{string, TransactionBreakdown}">
+        /// containing the details of trasaction breakdowns.
+        /// </summary>
+        /// <param name="transactionBreakdowns"></param>
+        /// <returns>An <see cref="int"/> representing the total volume of transactions.</returns>
+        public int GetTransactionVolume(Dictionary<string, TransactionBreakdown> transactionBreakdowns)
+        {
+            int sum = 0;
+            foreach (var kvp in transactionBreakdowns)
+            {
+                sum += kvp.Value.Count;
+            }
+            return sum;
+        }
+        /// <summary>
+        /// Calculates the net movement of currency in the bank through a 
+        /// <see cref="Dictionary{string, TransactionBreakdown}"> containing the details of transaction
+        /// breakdowns.
+        /// </summary>
+        /// <param name="transactionBreakdowns">The main <see cref="Dictionary{string, TransactionBreakdown}">.</param>
+        /// <returns>The calculated <see cref="decimal"/> net movement based on the provided <see cref="List{Transaction}">.
+        /// </returns>
+        public decimal GetNetMovement(Dictionary<string, TransactionBreakdown> transactionBreakdowns)
+        {
+            decimal inflow = transactionBreakdowns[TransactionTypes.DEPOSIT].Total;
+            decimal outflow = transactionBreakdowns[TransactionTypes.WITHDRAWAL].Total;
+
+            return inflow - outflow;
+        }
+        /// <summary>
+        /// Creates a <see cref="Dictionary{String, TransactionBreakdown}"> of <see cref="TransactionBreakdown"/> with a 
+        /// <see cref="string"> specifying the <see cref="TransactionType.TransactionTypeName"> as key and a 
+        /// <see cref="TransactionBreakdown"/> object as the value. Each <see cref="TransactionBreakdown"/> object 
         /// contains details including the count of the transaction types, the total amount involved in all transactions 
         /// of the said type, and the average amount involved in transactions of the said type.
         /// </summary>
-        /// <param name="transactionList">The main list of <see cref="Transaction"/>.</param>
+        /// <param name="startDate">Specifies the earliest date for the query</param>
+        /// <param name="endDate">Specifies the latest date for the query.</param>
         /// <returns>A <see cref="Dictionary{String, TransactionBreakdown}"> containing the details of
         /// the transaction breakdowns.</returns>
-        public Dictionary<string, TransactionBreakdown> GetTransactionBreakDown(List<Transaction> transactionList)
+        public async Task<Dictionary<string, TransactionBreakdown>> GetTransactionBreakdowns(DateTime? startDate = null, DateTime? endDate = null)
         {
-            Dictionary<string, TransactionBreakdown> transactionBreakdownDict = new();
-            transactionBreakdownDict[TransactionTypes.WITHDRAWAL] = new();
-            transactionBreakdownDict[TransactionTypes.DEPOSIT] = new();
-            transactionBreakdownDict[TransactionTypes.OUTGOING_TRANSFER] = new();
-            //  TO DO: ADD LOAN TRANSACTIONS
-            if (transactionList.Any())
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
-                foreach (
-                    var transactionType 
-                    in TransactionTypes
-                        .AS_TRANSACTION_TYPE_LIST
-                        .Where(t => t.TransactionTypeId != (int) TransactionTypeIDs.Incoming_Transfer)
-                    )
+                var transactionRepo = new TransactionRepository(dbContext);
+
+                //  Exclude incoming transfers.
+                var queryBuilder = transactionRepo
+                    .Query
+                    .ExceptTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer);
+
+                //  Filter by start and end dates as needed.
+                if (startDate is DateTime sDate)
+                    queryBuilder.HasStartDate(sDate);
+                if (endDate is DateTime eDate)
+                    queryBuilder.HasEndDate(eDate);
+
+                //  Group the transactions by type and cast the result into a dictionary.
+                Dictionary<string, TransactionBreakdown> transactionBreakdowns = await queryBuilder
+                    .GetQuery()
+                    .GroupBy(t => t.TransactionTypeId)
+                    .ToDictionaryAsync(
+                        g => TransactionTypes.AS_STRING_LIST[g.Key-1],  //  TransactionType string as key.
+                        g => new TransactionBreakdown                   //  TransactionBreakdown object as value.
+                        {
+                            TransactionType = TransactionTypes.AS_STRING_LIST[g.Key-1],
+                            Count = g.Count(),
+                            Total = g.Sum(t => t.Amount),
+                            Average = g.Average(t => t.Amount)
+                    });
+
+                //  Initialize the other transaction types in the dictionary except incoming transfer if
+                //  no transactions of such type exist in the database.
+                foreach(var transactionType in TransactionTypes.AS_STRING_LIST)
                 {
-                    List<Transaction> transactionSublist = transactionList
-                        .Where(t => t.TransactionTypeId == transactionType.TransactionTypeId)
-                        .ToList();
-                    TransactionBreakdown transactionBreakdown = new();
-
-                    if (transactionSublist.Any())
-                    {
-                        transactionBreakdown.Count = transactionSublist.Count();
-                        transactionBreakdown.Total = transactionSublist.Sum(t => t.Amount);
-                        transactionBreakdown.Average = transactionSublist.Average(t => t.Amount);
-                    }
-
-                    transactionBreakdownDict[transactionType.TransactionTypeName] = transactionBreakdown;
+                    if (!transactionBreakdowns.ContainsKey(transactionType)
+                        && !transactionType.Equals(TransactionTypes.INCOMING_TRANSFER))
+                        transactionBreakdowns[transactionType] = new()
+                        {
+                            TransactionType = transactionType
+                        };
                 }
-            }
-            //  TO DO: ADD LOAN TRANSACTIONS
 
-            return transactionBreakdownDict;
+                return transactionBreakdowns;
+            }    
         }
         /// <summary>
         /// Retrieves a <see cref="List{Transaction}"/> with specified <see cref="int"/> count of 
-        /// "/><see cref="Transaction"/> objects from a main list of <see cref="Transaction"/> that 
-        /// have the largest amount of money involved.
+        /// "/><see cref="Transaction"/> objects that have the largest amount of money involved.
         /// </summary>
-        /// <param name="transactionList">The main <see cref="List{Transaction}">.</param>
         /// <param name="count"></param>
-        /// <returns>A <see cref="List{Transaction}"/> containing the largest transactions of
-        /// <see cref="int"/> count.</returns>
-        public List<Transaction> GetLargestTransactions(List<Transaction> transactionList, int count) =>
-            transactionList
-                .Where(t => t.TransactionTypeId != (int)TransactionTypeIDs.Incoming_Transfer)
-                .OrderByDescending(t => t.Amount)
-                .Take(count)
-                .ToList();
+        /// <param name="startDate">Specifies the earliest date for the query</param>
+        /// <param name="endDate">Specifies the latest date for the query.</param>
+        /// <returns>A <see cref="List{Transaction}"/> containing the <see cref="Transaction"> with the largest 
+        /// <see cref="Transaction.Amount"/> of <see cref="int"/> count.</returns>
+        public async Task<List<Transaction>> GetLargestTransactions(int count, DateTime? startDate, DateTime? endDate)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                var transactionRepo = new TransactionRepository(dbContext);
 
+                var queryBuilder = transactionRepo
+                    .Query
+                    .IncludeTransactionType()
+                    .IncludeMainAccount()
+                    .ExceptTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer)
+                    .OrderByAmountDescending()
+                    .TakeWithCount(count);
+                if (startDate is DateTime sDate)
+                    queryBuilder.HasStartDate(sDate);
+                if (endDate is DateTime eDate)
+                    queryBuilder.HasEndDate(eDate);
+
+                List<Transaction> largestTransactions = await queryBuilder.GetQuery().ToListAsync();
+
+                foreach (var transaction in largestTransactions)
+                {
+                    var accountNumber = transaction.MainAccount.AccountNumber;
+                    transaction.MainAccount.AccountNumber = new DataMaskingService().MaskAccountNumber(accountNumber);
+                }
+
+                return largestTransactions;
+            }
+        }
         /// <summary>
         /// Retrieves a <see cref="List{Transaction}"/> filtered by an optional start and end date, and with
         /// optional pagination.
@@ -381,5 +432,6 @@ namespace Services.DataManagement
                 return await queryBuilder.GetCountAsync();
             }
         }
+        #endregion
     }
 }

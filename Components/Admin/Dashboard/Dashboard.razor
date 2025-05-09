@@ -95,12 +95,12 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @if (transactionBreakdown.Any())
+                            @if (transactionBreakdowns.Any())
                             {
-                                foreach (var keyValuePair in transactionBreakdown)
+                                foreach (var keyValuePair in transactionBreakdowns)
                                 {
                                     <tr>
-                                        <td class="fw-bold">@keyValuePair.Key</td>
+                                        <td class="fw-bold">@keyValuePair.Value.TransactionType</td>
                                         <td>@keyValuePair.Value.Count</td>
                                         <td>@FormatHelper.BalanceFormatter(keyValuePair.Value.Total)</td>
                                         <td>@FormatHelper.BalanceFormatter(keyValuePair.Value.Average)</td>
@@ -236,7 +236,7 @@
                                 <td>@transaction.MainAccount.AccountNumber</td>
                                 <td>@FormatHelper.BalanceFormatter(transaction.Amount)</td>
                                 <td>@transaction.TransactionType.TransactionTypeName</td>
-                                <td>@transaction.TransactionDate</td>
+                                <td>@(transaction.TransactionDate.ToShortDateString()) @(transaction.TransactionTime.ToString("hh':'mm"))</td>
                             </tr>
                         }
                     }
@@ -268,8 +268,7 @@
     //  For largest transaction panel.
     private List<Transaction> largestTransactions { get; set; } = new();
     //  For transaction breakdown panel.
-    private Dictionary<string, TransactionBreakdown> transactionBreakdown { get; set; } = new();
-
+    private Dictionary<string, TransactionBreakdown> transactionBreakdowns { get; set; } = new();
     //  For transaction counts.
     private int withdrawalCount;
     private int depositCount;
@@ -290,24 +289,21 @@
 
     protected override async Task OnInitializedAsync()
     {
-        // Load transactions.
-        transactionList = await adminDataService.GetTransactionListAsync(startDate, endDate);
         //  Load data for dashboard view.
         await this.LoadDisplayData();
     }
 
     private async Task FilterAsync()
     {
-        //  Load transactions.
-        transactionList = await adminDataService.GetTransactionListAsync(startDate, endDate);
+        //  Load all data with the new filters
         await this.LoadDisplayData();
     }
 
     private async Task ClearFilterAsync()
     {
+        //  Clear filters then load data again.
         startDate = null;
         endDate = null;
-        transactionList = await adminDataService.GetTransactionListAsync();
         await this.LoadDisplayData();
     }
 
@@ -315,25 +311,25 @@
     private async Task LoadDisplayData()
     {
         // Get largest transactions with count 5.
-        largestTransactions = adminDataService.GetLargestTransactions(transactionList, 5);
+        largestTransactions = await adminDataService.GetLargestTransactions(5, startDate, endDate);
 
         // Get transaction breakdown.
-        transactionBreakdown = adminDataService.GetTransactionBreakDown(transactionList);
+        transactionBreakdowns = await adminDataService.GetTransactionBreakdowns(startDate, endDate);
         //  Withdrawals count and total amount.
-        withdrawalCount = transactionBreakdown[TransactionTypes.WITHDRAWAL].Count;
-        totalWithdrawals = transactionBreakdown[TransactionTypes.WITHDRAWAL].Total;
+        withdrawalCount = transactionBreakdowns[TransactionTypes.WITHDRAWAL].Count;
+        totalWithdrawals = transactionBreakdowns[TransactionTypes.WITHDRAWAL].Total;
         //  Deposits count and total amount.
-        depositCount = transactionBreakdown[TransactionTypes.DEPOSIT].Count;
-        totalDeposits = transactionBreakdown[TransactionTypes.DEPOSIT].Total;
+        depositCount = transactionBreakdowns[TransactionTypes.DEPOSIT].Count;
+        totalDeposits = transactionBreakdowns[TransactionTypes.DEPOSIT].Total;
         //  Transfers count and total amount.
-        transferCount = transactionBreakdown[TransactionTypes.OUTGOING_TRANSFER].Count;
-        totalTransfers = transactionBreakdown[TransactionTypes.OUTGOING_TRANSFER].Total;
+        transferCount = transactionBreakdowns[TransactionTypes.OUTGOING_TRANSFER].Count;
+        totalTransfers = transactionBreakdowns[TransactionTypes.OUTGOING_TRANSFER].Total;
         //  Loans count and total amount.
         loanCount = await adminDataService.GetLoanCountAsync(startDate, endDate);
         totalLoans = 0;
         //  Load Key Metrics.
-        transactionVolume = transactionList.Count;
-        netMovement = adminDataService.GetNetMovement(transactionList);
+        transactionVolume = adminDataService.GetTransactionVolume(transactionBreakdowns);
+        netMovement = adminDataService.GetNetMovement(transactionBreakdowns);
         newAccounts = await adminDataService.GetNewAccountsCount(startDate, endDate);
         closedAccounts = await adminDataService.GetClosedAccountsCount(startDate, endDate);
     }

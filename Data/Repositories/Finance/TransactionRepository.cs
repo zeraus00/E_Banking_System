@@ -71,7 +71,8 @@
                         .ThenByDescending(t => t.TransactionTime);
                 return this;
             }
-
+            public TransactionQuery OrderByAmountDescending(bool isOrdered = true) =>
+                isOrdered ? OrderByDescending(t => t.Amount) : this;
         }
     }
 
