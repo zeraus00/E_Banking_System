@@ -23,6 +23,8 @@ namespace Services.SessionsManagement
             _userDataService = userDataService;
             _userSessionService = userSessionService;
         }
+
+        #region Account Session
         /*      User Account List       */
         /// <summary>
         /// Get the linked accounts of the user inside the user session as a 
@@ -90,7 +92,9 @@ namespace Services.SessionsManagement
 
             return SetAccountPermissions(activeAccountSession);
         }
+        #endregion
 
+        #region Transaction Session
         /*      Transaction Session     */
 
         /// <summary>
@@ -140,7 +144,37 @@ namespace Services.SessionsManagement
             await _userSessionService.UpdateUserSession(userSession);
         }
 
+        #endregion
 
+        #region Loan Session
+        public async Task<LoanApplication> GetLoanApplicationSessionAsync(UserSession? userSession = null)
+        {
+            if (userSession is null)
+                userSession = await _userSessionService.GetUserSession();
+
+            return userSession.LoanApplication
+                ?? throw new ControlledSessionNotFound(
+                    SessionSchemes.USER_SESSION, 
+                    SessionSchemes.LOAN_APPLICATION_SESSION
+                );
+        }
+        public async Task ClearLoanApplicationSessionAsync(UserSession? userSession = null) =>
+            await SetLoanApplicationSessionAsync(null, userSession);
+        public async Task SetLoanApplicationSessionAsync(LoanApplication? loanApplication, UserSession? userSession = null)
+        {
+            if (userSession is null)
+                userSession = await _userSessionService.GetUserSession();
+
+            //  Set session scheme.
+            if (loanApplication is not null)
+                loanApplication.ControlledSessionScheme = SessionSchemes.LOAN_APPLICATION_SESSION;
+
+            userSession.LoanApplication = loanApplication;
+            await _userSessionService.UpdateUserSession(userSession);
+        }
+        #endregion
+
+        #region Helper Methods
         /*      Helper Methods      */
 
         private string GetTransactionSessionScheme(int transactionTypeId) => transactionTypeId switch
@@ -177,5 +211,7 @@ namespace Services.SessionsManagement
 
             return activeAccountSession;
         }
+
+        #endregion
     }
 }

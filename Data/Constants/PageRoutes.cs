@@ -14,6 +14,7 @@
         public const string VIEW_ACCOUNT = "/View_account";
 
         public const string APPLY_LOAN = "/Apply_loan";
+        public const string LOAN_RECEIPT = "/Loan_receipt";
         public const string LOAN_BALANCE = "/Check_Loan_Balance";
 
         public const string ACCOUNTS = "/Accounts";

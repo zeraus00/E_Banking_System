@@ -7,6 +7,7 @@
         public const string DEPOSIT_SESSION = "nexusbanking:deposit_session";
         public const string TRANSFER_SESSION = "nexusbanking:transfer_session";
         public const string LOAN_PAYMENT_SESSION = "nexusbanking:loan_payment_session";
+        public const string LOAN_APPLICATION_SESSION = "nexusbanking:loan_application_session";
 
 
         public const string ADMIN_SESSION = "nexusbanking:admin_session";
