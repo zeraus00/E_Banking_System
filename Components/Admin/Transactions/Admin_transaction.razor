@@ -1,0 +1,242 @@
+﻿@page "/Admin_transaction"
+@using Helpers;
+@using Layout
+
+@attribute [Authorize(Roles = "Administrator")]
+@rendermode InteractiveServer
+
+@inject AdminDataService adminDataService
+@inject PageRedirectService redirectService
+@inject AdminControlledSessionService adminControlledSessionService
+@inject UserSessionService userSessionService
+@inject UserDataService userDataService
+@inject AuthenticationStateProvider AuthStateProvider
+
+
+
+<div class="page">
+    <header class="custom-card-clientpage clientheader py-4 align-items-start">
+        <div class="px-5">
+            <div class="d-flex align-items-center my-4">
+                <h2>Admin - Transactions</h2>
+            </div>
+        </div>
+    </header>
+
+    <div class="d-flex align-items-center gap-3 m-3 flex-wrap">
+        <div class="d-flex align-items-center gap-3">
+            <label class="text-light mb-0" style="white-space: nowrap;">Start Date</label>
+            <InputDate class="form-control" @bind-Value="startDate" />
+        </div>
+
+        <div class="d-flex align-items-center gap-3">
+            <label class="text-light mb-0" style="white-space: nowrap;">End Date</label>
+            <InputDate class="form-control" @bind-Value="endDate" />
+        </div>
+
+        <div class="d-flex align-items-center gap-3">
+            <label class="text-light mb-0" style="white-space: nowrap;">Transaction Type</label>
+            <select class="form-select" @bind="selectedTransactionTypeId">
+                <option value="">All</option>
+                @foreach (var (typeName, index) in transactionTypes.Select((name, i) => (name, i + 1)))
+                {
+                    <option value="@index">@typeName</option>
+                }
+            </select>
+        </div>
+
+        <button class="btn btn-primary shadow-sm" @onclick="FilterTransactionsAsync">Filter</button>
+        <button class="btn btn-danger shadow-sm" @onclick="ClearFilterAsync">Clear Filter</button>
+    </div>
+
+    <hr class="m-3" style="border: 1px solid white; opacity: 100%;" />
+
+    <div class="table-responsive m-4 rounded">
+        <table class="table table-bordered text-center">
+            <thead class="table-info">
+                <tr>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Transaction Type</th>
+                    <th>Status</th>
+                    <th>Amount</th>
+                    <th>Receiver ID</th>
+                    <th>Sender ID</th>
+                    <th>Previous Balance</th>
+                    <th>New Balance</th>
+                    <th>Transaction Fee</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (transactionListPage.Any())
+                {
+                    @foreach (var transaction in transactionListPage)
+                    {
+                        <tr class="bg-light text-white">
+                            <td>@transaction.TransactionDate.ToString("MM/dd/yyyy")</td>
+                            <td>@transaction.TransactionTime.ToString(@"hh\:mm\:ss")</td>
+                            <td>@transaction.TransactionType.TransactionTypeName</td>
+                            <td>@transaction.Status</td>
+                            <td>@FormatHelper.BalanceFormatter(transaction.Amount)</td>
+                            @if (transaction.TransactionType.TransactionTypeId == (int)TransactionTypeIDs.Outgoing_Transfer)
+                            {
+                                <td>@transaction.CounterAccount.AccountName</td>
+                                <td>@transaction.MainAccount.AccountName</td>
+                            }
+                            else if (transaction.TransactionType.TransactionTypeId == (int)TransactionTypeIDs.Incoming_Transfer)
+                            {
+                                <td>@transaction.MainAccount.AccountName</td>
+                                <td>@transaction.CounterAccount.AccountName</td>
+                            }
+                            else if (transaction.TransactionType.TransactionTypeId == (int)TransactionTypeIDs.Withdrawal)
+                            {
+                                <td>@transaction.ExternalVendor.VendorName</td>
+                                <td>--</td>
+                            }
+                            else if (transaction.TransactionType.TransactionTypeId == (int)TransactionTypeIDs.Deposit)
+                            {
+                                <td>--</td>
+                                <td>@transaction.ExternalVendor.VendorName</td>
+                            }
+                            else
+                            {
+                                <td>--</td>
+                                <td>--</td>
+                            }
+                            <td>@FormatHelper.BalanceFormatter(transaction.PreviousBalance)</td>
+                            <td>@FormatHelper.BalanceFormatter(transaction.NewBalance)</td>
+                            <td>@FormatHelper.BalanceFormatter(transaction.TransactionFee)</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="10" class="text-white">No transactions found.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="scroll-container gap-3 mx-5">
+            <button class="arrow-ud" @onclick="PreviousPage">
+                <i class="bi bi-chevron-left text-light"></i>
+            </button>
+            <button class="arrow-ud" @onclick="NextPage">
+                <i class="bi bi-chevron-right text-light"></i>
+            </button>
+        </div>
+
+        <div class="page-container text-center text-light mt-2 mb-3 mx-5">
+            Page @pageNumber of @masterListAvailablePages
+        </div>
+    </div>
+</div>
+
+@code {
+    private string error = "";
+    private AdminSession? adminSession;
+
+    private DateTime? startDate = DateTime.Now.Date.AddDays(-DateTime.Now.Day + 1);
+    private DateTime? endDate = DateTime.Now.Date;
+
+    private List<string> transactionTypes { get; set; } = new();
+    private string selectedTransactionTypeId = "0";
+
+    private List<Transaction> transactionMasterList = new();
+    private List<Transaction> transactionListPage = new();
+
+    private int masterListPageSize = 36;
+    private int pageSize = 6;
+
+    private int masterListPageNumber = 1;
+    private int masterListAvailablePages = 0;
+    private int pageNumber = 1;
+
+    protected override async Task OnInitializedAsync()
+    {
+        transactionTypes = TransactionTypes.AS_STRING_LIST;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                adminSession = await userSessionService.GetAdminSession();
+                await FilterTransactionsAsync();
+                StateHasChanged();
+            }
+            catch (SessionNotFoundException)
+            {
+                redirectService.redirectWithNavigationManager(PageRoutes.DASHBOARD);
+            }
+        }
+    }
+
+    private async Task FilterTransactionsAsync()
+    {
+        int transactionTypeId = !string.IsNullOrWhiteSpace(selectedTransactionTypeId)
+            ? Convert.ToInt32(selectedTransactionTypeId)
+            : 0;
+
+        transactionMasterList = await adminDataService.GetTransactionListAsync(
+            pageSize: masterListPageSize,
+            pageNumber: masterListPageNumber,
+            transactionStartDate: startDate,
+            transactionEndDate: endDate
+        );
+
+        masterListAvailablePages = (int)Math.Ceiling((double)transactionMasterList.Count / pageSize);
+        LoadTransactionListPage(1);
+    }
+
+    private void LoadTransactionListPage(int page = 1)
+    {
+        if (transactionMasterList.Any())
+        {
+            transactionListPage = transactionMasterList.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+        }
+    }
+
+    private async Task NextPage()
+    {
+        if (pageNumber < masterListAvailablePages)
+        {
+            pageNumber++;
+            LoadTransactionListPage(pageNumber);
+        }
+        else if (masterListPageNumber < masterListAvailablePages)
+        {
+            masterListPageNumber++;
+            await FilterTransactionsAsync();
+            pageNumber = 1;
+        }
+    }
+
+    private async Task PreviousPage()
+    {
+        if (pageNumber > 1)
+        {
+            pageNumber--;
+            LoadTransactionListPage(pageNumber);
+        }
+        else if (masterListPageNumber > 1)
+        {
+            masterListPageNumber--;
+            await FilterTransactionsAsync();
+            pageNumber = masterListAvailablePages;
+        }
+    }
+
+    private async Task ClearFilterAsync()
+    {
+        startDate = null;
+        endDate = null;
+        selectedTransactionTypeId = "0";
+        masterListPageNumber = 1;
+        pageNumber = 1;
+        await FilterTransactionsAsync();
+    }
+}
