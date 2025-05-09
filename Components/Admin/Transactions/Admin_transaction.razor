@@ -68,11 +68,11 @@
                 </tr>
             </thead>
             <tbody>
-                @if (transactionList.Any())
+                @if (transactionListPage.Any())
                 {
-                    @foreach (var transaction in transactionList)
+                    @foreach (var transaction in transactionListPage)
                     {
-                        <tr class="bg-light">
+                        <tr class="bg-light text-white">
                             <td>@transaction.TransactionDate.ToString("MM/dd/yyyy")</td>
                             <td>@transaction.TransactionTime.ToString(@"hh\:mm\:ss")</td>
                             <td>@transaction.TransactionType.TransactionTypeName</td>
@@ -112,79 +112,131 @@
                 else
                 {
                     <tr>
-                        <td colspan="10">No transactions found.</td>
+                        <td colspan="10" class="text-white">No transactions found.</td>
                     </tr>
                 }
             </tbody>
         </table>
+
+        <div class="scroll-container gap-3 mx-5">
+            <button class="arrow-ud" @onclick="PreviousPage">
+                <i class="bi bi-chevron-left text-light"></i>
+            </button>
+            <button class="arrow-ud" @onclick="NextPage">
+                <i class="bi bi-chevron-right text-light"></i>
+            </button>
+        </div>
+
+        <div class="page-container text-center text-light mt-2 mb-3 mx-5">
+            Page @pageNumber of @masterListAvailablePages
+        </div>
     </div>
 </div>
 
 @code {
+    private string error = "";
     private AdminSession? adminSession;
-    private List<string> transactionTypes = TransactionTypes.AS_STRING_LIST;
-    private int? selectedTransactionTypeId = null;
 
     private DateTime? startDate = DateTime.Now.Date.AddDays(-DateTime.Now.Day + 1);
     private DateTime? endDate = DateTime.Now.Date;
 
-    private List<Transaction> transactionList = new();
-    private bool _initialized = false;
+    private List<string> transactionTypes { get; set; } = new();
+    private string selectedTransactionTypeId = "0";
+
+    private List<Transaction> transactionMasterList = new();
+    private List<Transaction> transactionListPage = new();
+
+    private int masterListPageSize = 36;
+    private int pageSize = 6;
+
+    private int masterListPageNumber = 1;
+    private int masterListAvailablePages = 0;
+    private int pageNumber = 1;
 
     protected override async Task OnInitializedAsync()
     {
-        try
-        {
-            adminSession = await userSessionService.GetAdminSession();
-        }
-        catch (SessionNotFoundException)
-        {
-            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-            var user = authState.User;
-
-            await userSessionService.StartAdminSession(user);
-            adminSession = await userSessionService.GetAdminSession();
-        }
-
-        await FilterTransactionsAsync();
+        transactionTypes = TransactionTypes.AS_STRING_LIST;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender && !_initialized)
+        if (firstRender)
         {
             try
             {
                 adminSession = await userSessionService.GetAdminSession();
-                await LoadTransactionsAsync();
+                await FilterTransactionsAsync();
+                StateHasChanged();
             }
-            catch (Exception ex)
+            catch (SessionNotFoundException)
             {
-                Console.Error.WriteLine("Session error: " + ex.Message);
+                redirectService.redirectWithNavigationManager(PageRoutes.DASHBOARD);
             }
-
-            _initialized = true;
-            StateHasChanged(); // Re-render after loading session & transactions
         }
     }
 
     private async Task FilterTransactionsAsync()
     {
-        await LoadTransactionsAsync();
+        int transactionTypeId = !string.IsNullOrWhiteSpace(selectedTransactionTypeId)
+            ? Convert.ToInt32(selectedTransactionTypeId)
+            : 0;
+
+        transactionMasterList = await adminDataService.GetTransactionListAsync(
+            pageSize: masterListPageSize,
+            pageNumber: masterListPageNumber,
+            transactionStartDate: startDate,
+            transactionEndDate: endDate
+        );
+
+        masterListAvailablePages = (int)Math.Ceiling((double)transactionMasterList.Count / pageSize);
+        LoadTransactionListPage(1);
+    }
+
+    private void LoadTransactionListPage(int page = 1)
+    {
+        if (transactionMasterList.Any())
+        {
+            transactionListPage = transactionMasterList.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+        }
+    }
+
+    private async Task NextPage()
+    {
+        if (pageNumber < masterListAvailablePages)
+        {
+            pageNumber++;
+            LoadTransactionListPage(pageNumber);
+        }
+        else if (masterListPageNumber < masterListAvailablePages)
+        {
+            masterListPageNumber++;
+            await FilterTransactionsAsync();
+            pageNumber = 1;
+        }
+    }
+
+    private async Task PreviousPage()
+    {
+        if (pageNumber > 1)
+        {
+            pageNumber--;
+            LoadTransactionListPage(pageNumber);
+        }
+        else if (masterListPageNumber > 1)
+        {
+            masterListPageNumber--;
+            await FilterTransactionsAsync();
+            pageNumber = masterListAvailablePages;
+        }
     }
 
     private async Task ClearFilterAsync()
     {
         startDate = null;
         endDate = null;
-        selectedTransactionTypeId = null;
-        await LoadTransactionsAsync();
-    }
-
-    private async Task LoadTransactionsAsync()
-    {
-        transactionList = await adminDataService.GetTransactionListAsync(
-            transactionStartDate: startDate,
-            transactionEndDate: endDate);
+        selectedTransactionTypeId = "0";
+        masterListPageNumber = 1;
+        pageNumber = 1;
+        await FilterTransactionsAsync();
     }
 }
