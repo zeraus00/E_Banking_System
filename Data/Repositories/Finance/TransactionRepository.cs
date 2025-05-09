@@ -62,7 +62,14 @@
                 include ? Include(t => t.CounterAccount) : this;
             public TransactionQuery IncludeExternalVendor(bool include = true) => 
                 include ? Include(t => t.ExternalVendor) : this;
-
+            public TransactionQuery OrderByDateAndTime(bool isOrdered = true)
+            {
+                if (isOrdered)
+                    _query = _query
+                        .OrderBy(t => t.TransactionDate)
+                        .ThenBy(t => t.TransactionTime)
+                return this;
+            }
             public TransactionQuery OrderByDateAndTimeDescending(bool isOrdered = true)
             {
                 if (isOrdered)
