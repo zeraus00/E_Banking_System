@@ -1,4 +1,5 @@
-﻿using Data;
+﻿using System.Linq;
+using Data;
 using Data.Constants;
 using Data.Enums;
 using Data.Repositories.Auth;
@@ -167,6 +168,7 @@ namespace Services.DataManagement
         }
         #endregion
         #region Dashboard Helper Methods
+        #region Account Filtering
         /// <summary>
         /// Retrieves the count of newly opened <see cref="Account"> in a specified time frame or
         /// a default time frame starting from the start of the month until the most recent day.
@@ -223,6 +225,8 @@ namespace Services.DataManagement
                 return await queryBuilder.GetCountAsync();
             }
         }
+        #endregion
+        #region Transaction Metrics
         /// <summary>
         /// Calculates the total transactions done using a <see cref="Dictionary{string, TransactionBreakdown}">
         /// containing the details of trasaction breakdowns.
@@ -433,6 +437,84 @@ namespace Services.DataManagement
                 return await queryBuilder.GetCountAsync();
             }
         }
+        #endregion
+        #region Chart Data
+        public async Task<Dictionary<string, decimal>> GetTransactionVolumeOverTime(string filterMode, DateTime startDate)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                var transactionRepo = new TransactionRepository(dbContext);
+
+                Dictionary<string, decimal> transactionVolumeOverTime = new();
+
+                var queryBuilder = transactionRepo.Query;
+                if (filterMode.Equals(AdminDashboardTimeFilters.HOURLY))
+                    transactionVolumeOverTime = await queryBuilder
+                        .OrderByDateAndTime()
+                        .HasStartDate(startDate.Date)
+                        .GetQuery()
+                        .GroupBy(t => t.TransactionTime.Hours)
+                        .ToDictionaryAsync(
+                            g => new DateTime(1, 1, 1, g.Key, 0, 0).ToString("hh tt"),
+                            g => g.Sum(t => t.Amount)
+                        );
+                else if (filterMode.Equals(AdminDashboardTimeFilters.DAILY))
+                    transactionVolumeOverTime = await queryBuilder
+                        .OrderByDateAndTime()
+                        .HasStartDate(startDate.AddDays(-7))
+                        .GetQuery()
+                        .GroupBy(t => t.TransactionDate.DayOfWeek)
+                        .ToDictionaryAsync(
+                            g => g.Key.ToString(),
+                            g => g.Sum(t => t.Amount)
+                        );
+                else if (filterMode.Equals(AdminDashboardTimeFilters.WEEKLY))
+                {
+                    var tempDict = await queryBuilder
+                        .OrderByDateAndTime()
+                        .HasStartDate(startDate.AddDays(-28))
+                        .GetQuery()
+                        .GroupBy(t => t.TransactionDate.Date)
+                        .ToDictionaryAsync(
+                            g => g.Key,
+                            g => g.Sum(t => t.Amount)
+                        );
+
+                    var orderedDays = tempDict.OrderBy(kvp => kvp.Key).ToList();
+                    int weekIndex = 1;
+                    for (int i = 0; i < orderedDays.Count; i+=7)
+                    {
+                        string key = $"Week {weekIndex++}";
+                        int take = Math.Min(7, orderedDays.Count - i);
+                        decimal value = orderedDays.Skip(i).Take(take).Sum(kvp => kvp.Value);
+                        transactionVolumeOverTime[key] = value;
+                    }
+                }
+                else if (filterMode.Equals(AdminDashboardTimeFilters.MONTHLY))
+                    transactionVolumeOverTime = await queryBuilder
+                        .OrderByDateAndTime()
+                        .HasStartDate(startDate.AddMonths(-startDate.Month + 1))
+                        .GetQuery()
+                        .GroupBy(t => t.TransactionDate.Month)
+                        .ToDictionaryAsync(
+                            g => new DateTime(1, g.Key, 1).ToString("MMM"),
+                            g => g.Sum(t => t.Amount)
+                        );
+                else if (filterMode.Equals(AdminDashboardTimeFilters.YEARLY))
+                    transactionVolumeOverTime = await queryBuilder
+                        .OrderByDateAndTime()
+                        .HasStartDate(startDate.AddYears(-10))
+                        .GetQuery()
+                        .GroupBy(t => t.TransactionDate.Year)
+                        .ToDictionaryAsync(
+                            g => g.Key.ToString(),
+                            g => g.Sum(t => t.Amount)
+                        );
+
+                return transactionVolumeOverTime;
+            }
+        }
+        #endregion
         #endregion
     }
 }
