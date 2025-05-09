@@ -298,18 +298,25 @@ namespace Services.DataManagement
                 .ToList();
 
         /// <summary>
-        /// Retrieves a <see cref="List{Transaction}"/> filtered by an optional start and end date.
+        /// Retrieves a <see cref="List{Transaction}"/> filtered by an optional start and end date, and with
+        /// optional pagination.
         /// </summary>
         /// <param name="transactionStartDate">The start date for filtering transactions. If null, 
         /// no lower bound is applied.</param>
         /// <param name="transactionEndDate">The end date for filtering transactions. If null, no 
         /// upper bound is applied.</param>
+        /// <param name="pageSize">The size of a page.</param>
+        /// <param name="pageNumber">The page number of the list in the pagination.</param>
         /// <returns>A reversed <see cref="List{Transaction}"/> with <see cref="Transaction"/> entities 
         /// matching the specified date range.</returns>
         /// <remarks>
         /// Transactions are ordered such that the most recent ones appear first.
         /// </remarks>
-        public async Task<List<Transaction>> GetTransactionListAsync(DateTime? transactionStartDate = null, DateTime? transactionEndDate = null)
+        public async Task<List<Transaction>> GetTransactionListAsync(
+            DateTime? transactionStartDate = null, 
+            DateTime? transactionEndDate = null,
+            int pageSize = 0,
+            int pageNumber = 0)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
@@ -327,6 +334,15 @@ namespace Services.DataManagement
                     queryBuilder.HasStartDate(startDate);
                 if (transactionEndDate is DateTime endDate)
                     queryBuilder.HasEndDate(endDate);
+                
+                if (pageSize > 0 && pageNumber > 0)
+                {
+                    int skipCount = (pageNumber - 1) * pageSize;
+                    int takeCount = pageSize;
+                    queryBuilder
+                        .SkipBy(skipCount)
+                        .TakeWithCount(takeCount);
+                }
 
                 List<Transaction> transactions = await queryBuilder.GetQuery().ToListAsync();
                 foreach (var transaction in transactions)
