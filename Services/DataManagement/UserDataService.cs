@@ -261,9 +261,9 @@ namespace Services.DataManagement
                     .IncludeTransactionType()
                     .IncludeExternalVendor()
                     .HasMainAccountId(accountId)
+                    .OrderByDateAndTimeDescending()
                     .SkipBy(skipCount)
-                    .TakeWithCount(takeCount)
-                    .OrderByDateAndTimeDescending();
+                    .TakeWithCount(takeCount);
 
                 if (transactionTypeId > 0)
                     queryBuilder.HasTransactionTypeId(transactionTypeId);
@@ -279,7 +279,6 @@ namespace Services.DataManagement
                 {
                     foreach (var transaction in transactionList)
                     {
-                        transaction.MainAccount.AccountNumber = _dataMaskingService.MaskAccountNumber(transaction.MainAccount.AccountNumber);
                         if (transaction.CounterAccount is not null)
                             transaction.CounterAccount.AccountNumber = _dataMaskingService.MaskAccountNumber(transaction.CounterAccount.AccountNumber);
                     }
@@ -363,6 +362,27 @@ namespace Services.DataManagement
             }
         }
 
+        public async Task UpdateUserAccountLink(int userInfoId, int accountId)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                try
+                {
+                    var userInfoAccountRepo = new UserInfoAccountRepository(dbContext);
+
+                    UserInfoAccount userAccountLink = await userInfoAccountRepo.
+                        GetUserInfoAccountAsync(userInfoId, accountId)
+                        ??  throw new NullReferenceException();
+
+                    userAccountLink.IsLinkedToOnlineAccount = true;
+                    await userInfoAccountRepo.SaveChangesAsync();
+                }
+                catch (NullReferenceException)
+                {
+                    return;
+                }
+            }    
+        }
         #endregion
 
         #region Account Helper Methods
@@ -397,9 +417,6 @@ namespace Services.DataManagement
                     .GetQuery()
                     .FirstOrDefaultAsync()
                     ?? throw new AccountNotFoundException(accountId);
-
-                account.AccountNumber = _dataMaskingService.MaskAccountNumber(account.AccountNumber);
-
                 return account;
             }
         }
@@ -453,20 +470,22 @@ namespace Services.DataManagement
         /// <exception cref="NullReferenceException">
         /// Thrown if no account with the specified account number, account name, and account type id exists.
         /// </exception>
-        public async Task<int> GetAccountIdAsync(string accountNumber, string accountName, int accountTypeId)
+        public async Task<int> GetAccountIdAsync(string accountNumber, string accountName, int accountTypeId=0)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
                 var accountRepo = new AccountRepository(dbContext);
                 try
                 {
-                    //  Returns 0 if no account is found.
-                    return await accountRepo
+                    var accountQuery = accountRepo
                         .Query
                         .HasAccountNumber(accountNumber)
-                        .HasAccountName(accountName)
-                        .HasAccountTypeId(accountTypeId)
-                        .SelectId();
+                        .HasAccountName(accountName);
+
+                    if (accountTypeId > 0)
+                        accountQuery.HasAccountTypeId(accountTypeId);
+
+                    return await accountQuery.SelectId();
                 }
                 catch (NullReferenceException)
                 {

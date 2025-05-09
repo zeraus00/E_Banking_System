@@ -4,6 +4,7 @@ using Data.Enums;
 using Data.Models.Finance;
 using Data.Repositories.Finance;
 using Exceptions;
+using Services.DataManagement;
 using ViewModels.RoleControlledSessions;
 
 namespace Services
@@ -55,7 +56,8 @@ namespace Services
         public async Task<TransactionSession> CreateTransactionAsync(
             int mainAccountId, 
             int transactionTypeId, 
-            decimal amount, 
+            decimal amount,
+            DateTime transactionDate,
             int? counterAccountId = null,
             int? externalVendorId = null)
         {
@@ -64,10 +66,6 @@ namespace Services
                 /*  Retrieve main account from database.    */
                 //  Throws AccountNotFoundException if account is not found.
                 Account mainAccount = await this.GetAccountAsync(dbContext, mainAccountId);
-
-                /*  Get Transaction Date and Time.  */
-                DateTime transactionDate = DateTime.UtcNow.Date;
-                TimeSpan transactionTime = DateTime.UtcNow.TimeOfDay;
 
                 /*  Generate Transaction Number */
                 string accountNumber = mainAccount.AccountNumber;
@@ -78,8 +76,8 @@ namespace Services
                 {
                     TransactionTypeId = transactionTypeId,
                     TransactionNumber = transactionNumber,
-                    TransactionDate = transactionDate,
-                    TransactionTime = transactionTime,
+                    TransactionDate = transactionDate.Date,
+                    TransactionTime = transactionDate.TimeOfDay,
                     MainAccountId = mainAccountId,
                     Amount = amount,
                     CurrentBalance = mainAccount.Balance,
@@ -87,6 +85,16 @@ namespace Services
                     ExternalVendorId = externalVendorId
                 };
 
+
+                /*  Retrieve counter account from database as necessary */
+                if (counterAccountId is int counterId)
+                {
+                    //  Throws AccountNotFoundException if account is not found. 
+                    Account counterAccount = await this.GetAccountAsync(dbContext, counterId);
+                    string counterAccountNumber = new DataMaskingService().MaskAccountNumber(counterAccount.AccountNumber);
+                    transactionSession.CounterAccountName = counterAccount.AccountName;
+                    transactionSession.CounterAccountNumber = counterAccountNumber;
+                }
 
 
                 /*  For Withdrawal or Outgoing Transfer Transaction Types   */

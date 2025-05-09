@@ -44,7 +44,7 @@
                         <h5 class="mb-1">@clientName</h5>
                         <p class="mb-0"><strong>Account No.:</strong> @FormatHelper.AccountNumberFormatter(accountNumber)</p>
                         <p class="m-0"><strong>Card/Account Destination:</strong> @cardDestination</p>
-                        <p class="mb-0"><strong>Date:</strong> @date</p>
+                        <p class="mb-0"><strong>Date:</strong> @date @time</p>
                         <p class="mb-0"><strong>Confirmation No.:</strong> @confirmationNumber</p>
                     </div>
                     <div class="w-25">
@@ -69,6 +69,7 @@
     private decimal withdrawAmount = 0.00m;
     private string confirmationNumber = "Loading...";
     private DateTime? date;
+    private TimeSpan? time;
 
     protected override async Task OnAfterRenderAsync(bool firstRender) 
     {
@@ -90,7 +91,8 @@
                 clientName = activeAccountSession.AccountName;
                 currentBalance = await userDataService.GetAccountBalanceAsync(activeAccountSession.AccountId);
                 withdrawAmount = transactionSession.Amount;
-                date = transactionSession.TransactionDate;
+                date = transactionSession.TransactionDate.Date;
+                time = transactionSession.TransactionTime;
                 confirmationNumber = transactionSession.ConfirmationNumber ?? "CONFIRMATION_NUMBER_MISSING";
 
                 //  Reload component.

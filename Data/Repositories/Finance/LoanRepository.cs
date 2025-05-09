@@ -15,6 +15,8 @@ namespace Data.Repositories.Finance
             Query = new LoanQuery(context.Loans.AsQueryable());
         }
 
+        public async Task<Loan?> GetLoanById(int loanId) => await GetById<Loan>(loanId);
+
         public class LoanQuery : CustomQuery<Loan, LoanQuery>
         {
             public LoanQuery(IQueryable<Loan> query) : base(query) { }

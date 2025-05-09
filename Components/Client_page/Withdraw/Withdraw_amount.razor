@@ -187,6 +187,7 @@
                     accountId,
                     (int)TransactionTypeIDs.Withdrawal,
                     withdrawAmount.Value,
+                    DateTime.Now,
                     externalVendorId: methodRef!.selectedCardId
                 );
 

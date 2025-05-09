@@ -4,6 +4,7 @@ using Data.Models.Finance;
 using Data.Repositories.Finance;
 using Data.Repositories.User;
 using Exceptions;
+using Services.DataManagement;
 
 namespace Services.ClientService
 {
@@ -34,8 +35,9 @@ namespace Services.ClientService
             return hasInvalidParameter;
         }
 
-        public async Task RegisterLoanApplication(
+        public async Task<Loan> RegisterLoanApplication(
             Loan newLoan,
+            string accountNumber,
             int userInfoId, 
             byte[] governmentIdPicture, 
             byte[] payslipPicture)
@@ -44,7 +46,7 @@ namespace Services.ClientService
             LoanType loanType = LoanTypes.AS_LOAN_TYPE_LIST[newLoan.LoanTypeId - 1];
 
             //  Set loan details.
-            newLoan.LoanNumber = "";
+            newLoan.LoanNumber = CredentialFactory.GenerateLoanNumber(newLoan.ApplicationDate, accountNumber);
             newLoan.InterestRate = loanType.InterestRatePerAnnum;
             newLoan.PaymentAmount = 0.0m;
             newLoan.RemainingLoanBalance = newLoan.PaymentAmount;
@@ -56,6 +58,7 @@ namespace Services.ClientService
                 {
                     try
                     {
+                        Console.WriteLine("Registering...");
                         var loanRepo = new LoanRepository(dbContext);
                         var userInfoRepo = new UserInfoRepository(dbContext);
 
@@ -73,16 +76,32 @@ namespace Services.ClientService
                         await loanRepo.AddAsync(newLoan);
 
                         //  Save changes to database.
+                        await loanRepo.SaveChangesAsync();
                         await transaction.CommitAsync();
+                        Console.WriteLine("Registered");
+                        return newLoan;
                     }
                     catch
                     {
                         //  Log exception.
                         //  Rollback transaction.
+                        Console.WriteLine("FAILED LOAN REGISTER.");
                         await transaction.RollbackAsync();
                         throw;
                     }
                 }
+            }
+        }
+
+        public async Task<Loan> TryGetLoanAsync(int loanId)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                var loanRepo = new LoanRepository(dbContext);
+
+                return await loanRepo
+                    .GetLoanById(loanId)
+                    ?? throw new NullReferenceException();  // to be updated.
             }
         }
     }

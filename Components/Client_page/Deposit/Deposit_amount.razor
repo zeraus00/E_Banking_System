@@ -175,6 +175,7 @@
                     accountId,
                     (int)TransactionTypeIDs.Deposit,
                     depositAmount.Value,
+                    DateTime.Now,
                     externalVendorId: methodRef?.selectedCardId
                 );
             //  Store transaciton session in user session

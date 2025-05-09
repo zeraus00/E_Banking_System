@@ -1,53 +1,99 @@
 ﻿@using Helpers;
+
 @page "/Loan_receipt"
+@attribute [Authorize(Roles = "User")]
+@rendermode InteractiveServer
+
+@inject LoanService loanService
+@inject NavigationManager NavigationManager
+@inject UserControlledSessionService userControlledSessionService
+@inject UserSessionService userSessionService
 
 <div class="page">
-    <main>
-        <header class="custom-card-clientpage clientheader py-4 align-items-start">
-            <div class="px-5">
-                <div class="d-flex align-items-center my-4">
-                    <h2>Registration for Loan</h2>
-                </div>
-            </div>
-        </header>
+	<main>
+		<header class="custom-card-clientpage clientheader py-4 align-items-start">
+			<div class="px-5">
+				<div class="d-flex align-items-center my-4">
+					<h2>Registration for Loan</h2>
+				</div>
+			</div>
+		</header>
+		<div class="container">
+			<section class="card registration shadow-lg my-5 p-3">
+				<div class="d-flex gap-2 text-start border-bottom w-100 align-items-center p-4">
+					<h3>@accountName </h3>
+				</div>
 
-        <div class="container">
-            <section class="card registration shadow-lg my-5 p-3">
-                <div class="d-flex gap-2 text-start border-bottom w-100 align-items-center p-4">
-                    <h3>_accountName </h3>
-                </div>
+				<div class="d-flex">
+					<h5 class="mx-5 my-3">
+						<p class="mt-2"><strong>Account Number: </strong>@accountNumber</p>
+						<p class="mt-2"><strong>Loan Purpose: </strong>@loanPurpose</p>
+						<p class="mt-2"><strong>Loan Amount: </strong>@loanAmount</p>
+						<p class="mt-2"><strong>Loan Term: </strong>@loanTerm</p>
+						<p class="mt-2"><strong>Payment Frequency: </strong>@paymentFrequency</p>
+					</h5>
+				</div>
 
-                <div class="d-flex">
-                    <h5 class="mx-5 my-3">
-                        <p class="mt-2"><strong>Account Number: </strong>_accountNumber</p>
-                        <p class="mt-2"><strong>Loan Purpose: </strong>_loanPurpose</p>
-                        <p class="mt-2"><strong>Loan Amount: </strong>_loanAmount</p>
-                        <p class="mt-2"><strong>Loan Term: </strong>_loanTerm</p>
-                        <p class="mt-2"><strong>Payment Frequency: </strong>_paymentFrequency</p>
-                    </h5>
-                </div>
-                
-                <!-- Terms and Conditions -->
-                <div class="form-check d-flex justify-content-end mt-3">
-                    <input class="form-check-input mx-2" type="checkbox" id="termsAndConditions" required>
-                    <label class="form-check-label text-light" for="termsAndConditions">
-                        I accept the terms and conditions
-                    </label>
-                </div>
-
-                <!-- Submit -->
-                <div class="text-end mt-3">
-                    <NavLink href="@PageRoutes.CLIENT_HOME">
-                        <button class="btn btn-danger">Cancel</button>
-                    </NavLink>
-                    <a href="/Loan_receipt" class="btn btn-primary">Register</a>
-                </div>
-            </section>
-        </div>
-    </main>
+				<!-- Home -->
+				<div class="text-end mt-3">
+					<button class="btn btn-danger" @onclick="BackToHome">Home</button>
+				</div>
+			</section>
+		</div>
+	</main>
 </div>
 
 @code
 {
+	//  Display data.
+	private string accountName { get; set; } = string.Empty;
+	private string accountNumber { get; set; } = string.Empty;
+	private string loanPurpose { get; set; } = string.Empty;
+	private decimal loanAmount { get; set; } = 0.00m;
+	private string loanTerm { get; set; } = string.Empty;
+	private string paymentFrequency { get; set; } = string.Empty;
 
+	private UserSession userSession = default!;
+	private LinkedAccount activeAccountSession = default!;
+	private LoanApplication loanApplication { get; set; } = default!;
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			try
+			{
+				//  Get Loan Application Session.
+				userSession = await userSessionService.GetUserSession();
+				activeAccountSession = userSession.ActiveAccountSession;
+				loanApplication = await userControlledSessionService.GetLoanApplicationSessionAsync(userSession);
+
+				Loan loan = await loanService.TryGetLoanAsync(loanApplication.LoanId);
+
+				//  Set display data.
+				accountName = activeAccountSession.AccountName;
+				accountNumber = activeAccountSession.AccountNumber;
+				loanPurpose = loan.LoanPurpose;
+				loanAmount = loan.LoanAmount;
+				loanTerm = $"{loan.LoanTermMonths} MONTHS";
+				paymentFrequency = Enum.GetName(typeof(PaymentFrequencyIDs), loan.PaymentFrequency)!;
+
+				StateHasChanged();
+			}
+			catch (SessionNotFoundException)
+			{
+				NavigationManager.NavigateTo(PageRoutes.CLIENT_HOME);
+			}
+			catch (ControlledSessionNotFound)
+			{
+				NavigationManager.NavigateTo(PageRoutes.CLIENT_HOME);
+			}
+		}
+	}
+
+	private async Task BackToHome()
+	{
+		await userControlledSessionService.ClearLoanApplicationSessionAsync(userSession);
+		NavigationManager.NavigateTo(PageRoutes.CLIENT_HOME);
+	}
 }
