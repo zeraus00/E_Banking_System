@@ -138,7 +138,7 @@ namespace Services.DataManagement
 
         }
         #endregion
-        #region Pending Accounts Management
+        #region Pending Accounts Helper Methods
         /// <summary>
         /// Updates the <see cref="Account.AccountStatusType"> of an <see cref="Account"/> with a
         /// specified <see cref="Account.AccountId"/> and a <see cref="Account.AccountStatusTypeId"/>
@@ -164,6 +164,18 @@ namespace Services.DataManagement
             {
                 Console.WriteLine($"ACCOUNT_STATUS_UPDATE_FAILED: {ex.Message}");
                 throw;
+            }
+        }
+        #endregion
+        #region Manage Accounts Helper Methods
+        public async Task<decimal> GetAccountBalanceAsync(int accountId)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                return await new AccountRepository(dbContext)
+                    .Query
+                    .HasAccountId(accountId)
+                    .SelectBalance();
             }
         }
         #endregion

@@ -2,9 +2,11 @@
 
 @page "/Manage_accounts"
 @rendermode InteractiveServer
+@attribute [Authorize(Roles = "Administrator")]
 
 @inject NavigationManager Navigation
 @inject AdminDataService adminDataService
+@inject AdminControlledSessionService adminControlledSessionService
 
 <div class="main">
     <div class="dashboard-container">
@@ -68,8 +70,8 @@
                                 <td>@a.AccountName</td>
                                 <td>@a.AccountType.AccountTypeName</td>
                                 <td>
-                                    <a href="/View_account" class="btn btn-info btn-secondary btn-sm rounded text-dark shadow-sm" style="border: 2px solid cyan">View</a>
-                                    <button class="btn btn-danger btn-secondary btn-sm rounded text-light shadow-sm" style="border: 2px solid red" @onclick="() => DeleteAccount(a)">Delete</button>
+                                    <button class="btn btn-info btn-secondary btn-sm rounded text-dark shadow-sm" style="border: 2px solid cyan" @onclick="async _ => await ViewAccount(a)">View</button>
+                                    <button class="btn btn-danger btn-secondary btn-sm rounded text-light shadow-sm" style="border: 2px solid red" @onclick="_ => DeleteAccount(a)">Delete</button>
                                 </td>
                                 <td class="text-secondary">@a.AccountStatusType.AccountStatusTypeName</td>
                             </tr>
@@ -142,9 +144,19 @@
         accountList = await adminDataService.FilterAccountsAsync();
     }
 
-    private void ViewAccount(Account account)
+    private async Task ViewAccount(Account account)
     {
-        Navigation.NavigateTo($"/View_account");
+        LinkedAccount accountViewSession = new()
+        {
+            AccountId = account.AccountId,
+            AccountNumber = account.AccountNumber,
+            AccountName = account.AccountName,
+            AccountContactNo = account.AccountContactNo
+        };
+
+        await adminControlledSessionService.SetAccountViewSession(accountViewSession);
+
+        Navigation.NavigateTo(PageRoutes.VIEW_ACCOUNT);
     }
 
     private void DeleteAccount(Account account)
