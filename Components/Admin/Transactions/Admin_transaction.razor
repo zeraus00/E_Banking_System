@@ -78,31 +78,31 @@
                             <td>@transaction.TransactionType.TransactionTypeName</td>
                             <td>@transaction.Status</td>
                             <td>@FormatHelper.BalanceFormatter(transaction.Amount)</td>
-                            @if (transaction.TransactionType.TransactionTypeId == (int)TransactionTypeIDs.Outgoing_Transfer)
+
+                            @switch ((TransactionTypeIDs)transaction.TransactionType.TransactionTypeId)
                             {
-                                <td>@transaction.CounterAccount.AccountName</td>
-                                <td>@transaction.MainAccount.AccountName</td>
+                                case TransactionTypeIDs.Outgoing_Transfer:
+                                    <td>@transaction.CounterAccount?.AccountName</td>
+                                    <td>@transaction.MainAccount?.AccountName</td>
+                                    break;
+                                case TransactionTypeIDs.Incoming_Transfer:
+                                    <td>@transaction.MainAccount?.AccountName</td>
+                                    <td>@transaction.CounterAccount?.AccountName</td>
+                                    break;
+                                case TransactionTypeIDs.Withdrawal:
+                                    <td>@(transaction.ExternalVendor?.VendorName ?? "--")</td>
+                                    <td>--</td>
+                                    break;
+                                case TransactionTypeIDs.Deposit:
+                                    <td>--</td>
+                                    <td>@(transaction.ExternalVendor?.VendorName ?? "--")</td>
+                                    break;
+                                default:
+                                    <td>--</td>
+                                    <td>--</td>
+                                    break;
                             }
-                            else if (transaction.TransactionType.TransactionTypeId == (int)TransactionTypeIDs.Incoming_Transfer)
-                            {
-                                <td>@transaction.MainAccount.AccountName</td>
-                                <td>@transaction.CounterAccount.AccountName</td>
-                            }
-                            else if (transaction.TransactionType.TransactionTypeId == (int)TransactionTypeIDs.Withdrawal)
-                            {
-                                <td>@(transaction.ExternalVendor != null ? transaction.ExternalVendor.VendorName : "--")</td>
-                                <td>--</td>
-                            }
-                            else if (transaction.TransactionType.TransactionTypeId == (int)TransactionTypeIDs.Deposit)
-                            {
-                                <td>--</td>
-                                <td>@(transaction.ExternalVendor != null ? transaction.ExternalVendor.VendorName : "--")</td>
-                            }
-                            else
-                            {
-                                <td>--</td>
-                                <td>--</td>
-                            }
+
                             <td>@FormatHelper.BalanceFormatter(transaction.PreviousBalance)</td>
                             <td>@FormatHelper.BalanceFormatter(transaction.NewBalance)</td>
                             <td>@FormatHelper.BalanceFormatter(transaction.TransactionFee)</td>
