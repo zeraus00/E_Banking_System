@@ -21,7 +21,7 @@
             <hr class="divider" />
 
             <!-- Card Section -->
-            <div class="card-section justify-content-between mx-4">
+            <div class="card-section justify-content-between align-items-center mx-4">
                 <!-- Account Card -->
                 @if (accountViewSession.AccountId != 0)
                 {
@@ -29,9 +29,9 @@
                 }
 
                 <!-- Data Card -->
-                <div class="data-card">
-                    <p class="label">Savings</p>
-                    <div class="amount">@savingsAmount</div>
+                <div class="main-chart">
+                    <label>Transaction History</label>
+                    <E_BankingSystem.Components.Admin.Dashboard.Charts.User_LinerChart Labels="LineLabels" WithdrawData="LineWithdrawData" DepositData="LineDepositData" OutgoingTransfer="LineOutgoingTransferData" IncomingTransfer="LineIncomingTransferData" />
                 </div>
             </div>
 
@@ -65,7 +65,6 @@
                             <th>Account No.</th>
                             <th>Name</th>
                             <th>Account Type</th>
-                            <th>Operation</th>
                             <th>Status</th>
                             <th>Date of<br />Registration</th>
                             <th>Time of<br />Registration</th>
@@ -83,6 +82,12 @@
 
     private LinkedAccount accountViewSession = new();
 
+    private List<string> LineLabels = new();
+    private List<decimal> LineWithdrawData = new();
+    private List<decimal> LineDepositData = new();
+    private List<decimal> LineOutgoingTransferData = new();
+    private List<decimal> LineIncomingTransferData = new();
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -91,6 +96,14 @@
             {
                 accountViewSession = await adminControlledSessionService.GetAccountViewSession();
                 savingsAmount = await adminDataService.GetAccountBalanceAsync(accountViewSession.AccountId);
+
+                // mockup data
+                LineLabels = new() { "Sun", "Mon", "Tue", "Wed", "Thurs", "Fri", "Sat" };
+                LineWithdrawData = new() { 5, 15, 10, 3, 8, 16, 2 };
+                LineDepositData = new() { 2, 5, 8, 11, 9, 8, 9 };
+                LineOutgoingTransferData = new() { 0, 3, 6, 4, 3, 5, 6 };
+                LineIncomingTransferData = new() { 2, 4, 3, 2, 6, 7, 8 };
+
                 StateHasChanged();
             }
             catch (ControlledSessionNotFound)

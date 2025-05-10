@@ -95,6 +95,64 @@ window.drawBarChart = (labels, data) => {
         }
     });
 };
+
+window.drawUserLineChart = (labels, withdrawData, depositData, outgoingTransfer, incomingTransfer) => {
+    const ctxUserLine = document.getElementById('UserLineChart').getContext('2d');
+
+    if (window.lineInstance) {
+        window.lineInstance.destroy();
+    }
+
+    window.lineInstance = new Chart(ctxUserLine, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Withdraw',
+                    data: withdrawData,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2,
+                    fill: false
+                },
+                {
+                    label: 'Deposit',
+                    data: depositData,
+                    borderColor: 'rgba(255, 99, 132, 0.6)',
+                    borderWidth: 2,
+                    fill: false
+                },
+                {
+                    label: 'Outgoing Transfer',
+                    data: outgoingTransfer,
+                    borderColor: 'rgba(76, 206, 86, 0.6)',
+                    borderWidth: 2,
+                    fill: false
+                },
+                {
+                    label: 'Incoming Transfer',
+                    data: incomingTransfer,
+                    borderColor: 'rgba(200, 100, 0, 0.6)',
+                    borderWidth: 2,
+                    fill: false
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    align: 'start'
+                }
+            },
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+};
 window.drawDashboardBarChart = (labels, data1, data2, data3) => {
     const ctxBar = document.getElementById('barChart').getContext('2d');
 
