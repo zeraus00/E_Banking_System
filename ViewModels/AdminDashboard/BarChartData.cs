@@ -21,7 +21,8 @@ namespace ViewModels.AdminDashboard
         {
             new(){Label = TransactionTypes.WITHDRAWAL },
             new(){Label = TransactionTypes.DEPOSIT },
-            new(){Label = TransactionTypes.OUTGOING_TRANSFER }
+            new(){Label = TransactionTypes.OUTGOING_TRANSFER },
+            new(){Label = TransactionTypes.LOAN_PAYMENT }
         };
     }
 }
