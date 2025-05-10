@@ -277,10 +277,12 @@
                         @foreach (var t in mockTransactions)
                         {
                             <tr>
-                                <td>@t.AccountNo</td>
+                                <td>@t.AccountNo</td
+                                <td>@t.AccountName</td>
                                 <td>@t.Amount</td>
                                 <td>@t.Type</td>
-                                <td>@t.Date</td>
+                                <td>@t.Date.ToString("MM-dd-yyyy")</td>
+                                <td>@t.Time.ToString("hh:mm ss")</td>
                             </tr>
                         }
                     }
@@ -405,10 +407,10 @@
     //mockup data for table
     private List<MockTransaction> mockTransactions = new()
     {
-        new MockTransaction { Date = DateTime.Today, Type = "Deposit", Amount = 5000, AccountNo = "981738" },
-        new MockTransaction { Date = DateTime.Today.AddDays(-1), Type = "Withdrawal", Amount = 1500, AccountNo = "897937" },
-        new MockTransaction { Date = DateTime.Today.AddDays(-2), Type = "Transfer", Amount = 2000, AccountNo = "727371" },
-        new MockTransaction { Date = DateTime.Today.AddDays(-3), Type = "Loan", Amount = 10000, AccountNo = "913837" }
+        new MockTransaction { Date = DateTime.Today, Time = DateTime.Now, Type = "Deposit", Amount = 5000, AccountNo = "981738", AccountName = "Sample Name 1"},
+        new MockTransaction { Date = DateTime.Today.AddDays(-1), Time = DateTime.Now.AddHours(-1), Type = "Withdrawal", Amount = 1500, AccountNo = "897937", AccountName = "Sample Name 2"},
+        new MockTransaction { Date = DateTime.Today.AddDays(-2), Time = DateTime.Now.AddHours(-2), Type = "Transfer", Amount = 2000, AccountNo = "727371", AccountName = "Sample Name 3"},
+        new MockTransaction { Date = DateTime.Today.AddDays(-3), Time = DateTime.Now.AddHours(-3), Type = "Loan", Amount = 10000, AccountNo = "913837", AccountName = "Sample Name 4"}
     };
 
     private List<MockTransactionBreakdown> mockTransactionsBreakdown = new()
@@ -422,9 +424,11 @@
     private class MockTransaction
     {
         public DateTime Date { get; set; }
+        public DateTime Time { get; set; }
         public string Type { get; set; } = "";
         public decimal Amount { get; set; }
         public string AccountNo { get; set; } = string.Empty;
+        public string AccountName { get; set; } = string.Empty;
     }
 
     private class MockTransactionBreakdown
