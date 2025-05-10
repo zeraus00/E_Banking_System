@@ -1,4 +1,5 @@
-﻿@using Layout
+﻿@using E_BankingSystem.Components.Admin.Dashboard.Charts
+@using Layout
 @using ViewModels.AdminDashboard
 @using Helpers
 
@@ -227,7 +228,14 @@
                     </div>
                     <div class="main-chart small-chart">
                         <label>Transaction Types Chart</label>
-                        <E_BankingSystem.Components.Admin.Dashboard.Charts.PieChart Labels="PieLabels" Data="PieData" />
+                        @if(PieData.Any())
+                        {
+                            <E_BankingSystem.Components.Admin.Dashboard.Charts.PieChart Labels="PieLabels" Data="PieData" />
+                        }
+                        else
+                        {
+                            <p>NO DATA</p>
+                        }
                     </div>
                 </div>
             </div>
