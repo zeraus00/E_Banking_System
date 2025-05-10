@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Globalization;
+using System.Linq;
 using Data;
 using Data.Constants;
 using Data.Enums;
@@ -7,6 +8,8 @@ using Data.Repositories.Finance;
 using Data.Repositories.JointEntity;
 using Data.Repositories.User;
 using Exceptions;
+using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.EntityFrameworkCore;
 using Services.SessionsManagement;
 using ViewModels.AdminDashboard;
 
@@ -451,86 +454,298 @@ namespace Services.DataManagement
         }
         #endregion
         #region Chart Data
-        public async Task<Dictionary<string, decimal>> GetTransactionVolumeOverTime(string filterMode, DateTime startDate)
+        #region Line Chart
+        /// <summary>
+        /// Asynchronously retrieves transaction chart data for all predefined time filter modes
+        /// (e.g., hourly, daily, weekly, monthly, yearly), excluding the current day,
+        /// and stores the result in a dictionary keyed by the time filter.
+        /// This method is used for grabbing non-real-time data, prioritizing querying performance by
+        /// bulk loading all data in one dictionary.
+        /// </summary>
+        /// <param name="currentDate">The current date used as a reference point for time-based filters. 
+        /// Today's data is excluded.</param>
+        /// <returns>
+        /// A dictionary where the key is a string representing the time filter mode,
+        /// and the value is a list of <see cref="ChartData"/> representing the transaction totals for 
+        /// that time frame.
+        /// </returns>
+        public async Task<Dictionary<string, List<ChartData>>> GetAllLineChartData(DateTime currentDate)
+        {
+            Dictionary<string, List<ChartData>> chartCache = new();
+            foreach(var filter in AdminDashboardTimeFilters.AS_STRING_LIST)
+            {
+                chartCache[filter] = await GetLineChartData(filter, currentDate.AddDays(-1));
+            }
+            return chartCache;
+        }
+        /// <summary>
+        /// Asynchronously retrieves transaction chart data for a specific time filter mode
+        /// (e.g., hourly, daily, weekly, monthly, yearly) using the given reference date.
+        /// </summary>
+        /// <param name="filterMode">The selected time filter mode for the chart (e.g., "Hourly", "Daily").</param>
+        /// <param name="currentDate">The current date used to calculate the relevant date range for the selected time 
+        /// filter.</param>
+        /// <returns>
+        /// A list of <see cref="ChartData"/> representing the total transaction amounts grouped by the specified time interval.
+        /// If the filter mode is unrecognized, an empty list is returned.
+        /// </returns>
+        public async Task<List<ChartData>> GetLineChartData(string filterMode, DateTime currentDate)
+        {
+            if (filterMode.Equals(AdminDashboardTimeFilters.HOURLY))
+                return await GetHourlyLineChartData(currentDate);
+            else if (filterMode.Equals(AdminDashboardTimeFilters.DAILY))
+                return await GetDailyLineChartData(currentDate);
+            else if (filterMode.Equals(AdminDashboardTimeFilters.WEEKLY))
+                return await GetWeeklyLineChartData(currentDate);
+            else if (filterMode.Equals(AdminDashboardTimeFilters.MONTHLY))
+                return await GetMonthlyLineChartData(currentDate);
+            else if (filterMode.Equals(AdminDashboardTimeFilters.YEARLY))
+                return await GetYearlyLineChartData(currentDate);
+            else
+                return new List<ChartData>();
+        }
+        /// <summary>
+        /// Asynchronously retrieves transaction data grouped by hour for the specified date.
+        /// Excludes transactions with the type <c>Incoming_Transfer</c>.
+        /// Fills in missing hours with zero values up to the current hour.
+        /// </summary>
+        /// <param name="currentDate">The date for which hourly transaction data will be retrieved.</param>
+        /// <returns>
+        /// A list of <see cref="ChartData"/> where each item represents a specific hour and the total transaction 
+        /// amount for that hour.
+        /// </returns>
+        private async Task<List<ChartData>> GetHourlyLineChartData(DateTime currentDate)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
-                var transactionRepo = new TransactionRepository(dbContext);
-
-                Dictionary<string, decimal> transactionVolumeOverTime = new();
-
+                TransactionRepository transactionRepo = new TransactionRepository(dbContext);
                 var queryBuilder = transactionRepo.Query;
-                if (filterMode.Equals(AdminDashboardTimeFilters.HOURLY))
-                    transactionVolumeOverTime = await queryBuilder
-                        .OrderByDateAndTime()
-                        .HasStartDate(startDate.Date)
-                        .GetQuery()
-                        .GroupBy(t => t.TransactionTime.Hours)
-                        .ToDictionaryAsync(
-                            g => new DateTime(1, 1, 1, g.Key, 0, 0).ToString("hh tt"),
-                            g => g.Sum(t => t.Amount)
-                        );
-                else if (filterMode.Equals(AdminDashboardTimeFilters.DAILY))
-                {
-                    var transactions = await queryBuilder
-                        .OrderByDateAndTime()
-                        .HasStartDate(startDate.AddDays(-7))
-                        .GetQuery()
-                        .ToListAsync();
-                    transactionVolumeOverTime = transactions
-                        .GroupBy(t => t.TransactionDate.DayOfWeek)
-                        .ToDictionary(
-                            g => g.Key.ToString(),
-                            g => g.Sum(t => t.Amount)
-                        );
-                }
-                    
-                else if (filterMode.Equals(AdminDashboardTimeFilters.WEEKLY))
-                {
-                    var tempDict = await queryBuilder
-                        .OrderByDateAndTime()
-                        .HasStartDate(startDate.AddDays(-28))
-                        .GetQuery()
-                        .GroupBy(t => t.TransactionDate.Date)
-                        .ToDictionaryAsync(
-                            g => g.Key,
-                            g => g.Sum(t => t.Amount)
-                        );
 
-                    var orderedDays = tempDict.OrderBy(kvp => kvp.Key).ToList();
-                    int weekIndex = 1;
-                    for (int i = 0; i < orderedDays.Count; i+=7)
+                List<ChartData> chartData = await queryBuilder
+                    .HasStartDate(currentDate.Date)
+                    .ExceptTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer)
+                    .GetQuery()
+                    .GroupBy(t => t.TransactionTime.Hours)
+                    .OrderBy(g => g.Key)
+                    .Select(g => new ChartData
                     {
-                        string key = $"Week {weekIndex++}";
-                        int take = Math.Min(7, orderedDays.Count - i);
-                        decimal value = orderedDays.Skip(i).Take(take).Sum(kvp => kvp.Value);
-                        transactionVolumeOverTime[key] = value;
-                    }
+                        Label = new DateTime(1, 1, 1, g.Key, 0, 0).ToString("hh tt"),
+                        Value = g.Sum(t => t.Amount)
+                    }).ToListAsync();
+                int currentHour = currentDate.Hour;
+                for (int i = 0; i <= currentHour; i++)
+                {
+                    string newLabel = new DateTime(1, 1, 1, i, 0, 0).ToString("hh tt");
+                    if (!chartData.Any(cd => cd.Label.Equals(newLabel)))
+                        chartData.Insert(i, new()
+                        {
+                            Label = newLabel,
+                            Value = 0
+                        });
                 }
-                else if (filterMode.Equals(AdminDashboardTimeFilters.MONTHLY))
-                    transactionVolumeOverTime = await queryBuilder
-                        .OrderByDateAndTime()
-                        .HasStartDate(startDate.AddMonths(-startDate.Month + 1))
-                        .GetQuery()
-                        .GroupBy(t => t.TransactionDate.Month)
-                        .ToDictionaryAsync(
-                            g => new DateTime(1, g.Key, 1).ToString("MMM"),
-                            g => g.Sum(t => t.Amount)
-                        );
-                else if (filterMode.Equals(AdminDashboardTimeFilters.YEARLY))
-                    transactionVolumeOverTime = await queryBuilder
-                        .OrderByDateAndTime()
-                        .HasStartDate(startDate.AddYears(-10))
-                        .GetQuery()
-                        .GroupBy(t => t.TransactionDate.Year)
-                        .ToDictionaryAsync(
-                            g => g.Key.ToString(),
-                            g => g.Sum(t => t.Amount)
-                        );
 
-                return transactionVolumeOverTime;
+                return chartData;
+            }
+            
+        }
+        /// <summary>
+        /// Asynchronously retrieves transaction data grouped by day for the past 7 days up to the specified date.
+        /// Excludes transactions with the type <c>Incoming_Transfer</c>.
+        /// Fills in missing days with zero values.
+        /// </summary>
+        /// <param name="currentDate">The current date used to determine the 7-day range (excluding today).</param>
+        /// <returns>
+        /// A list of <see cref="ChartData"/> where each item represents a date label and the total transaction amount for 
+        /// that day.
+        /// </returns>
+        private async Task<List<ChartData>> GetDailyLineChartData(DateTime currentDate)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                TransactionRepository transactionRepo = new TransactionRepository(dbContext);
+                var queryBuilder = transactionRepo.Query;
+
+                DateTime dailyModeStartDate = currentDate.AddDays(-7);
+                
+                List<ChartData> chartData = await queryBuilder
+                    .HasStartDate(dailyModeStartDate.Date)
+                    .ExceptTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer)
+                    .GetQuery()
+                    .GroupBy(t => t.TransactionDate.Date)
+                    .OrderBy(g => g.Key)
+                    .Select(g => new ChartData
+                    {
+                        Label = g.Key.ToString("MMM dd"),
+                        Value = g.Sum(t => t.Amount)
+                    }).ToListAsync();
+
+                for (int dayIterator = 0; dailyModeStartDate.AddDays(dayIterator) <= currentDate; dayIterator++)
+                {
+                    string newLabel = dailyModeStartDate.AddDays(dayIterator).ToString("MMM dd");
+                    if (!chartData.Any(cd => cd.Label.Equals(newLabel)))
+                        chartData.Insert(dayIterator, new()
+                        {
+                            Label = newLabel,
+                            Value = 0
+                        });
+                }
+
+                return chartData;
             }
         }
+        /// <summary>
+        /// Asynchronously retrieves transaction data grouped into 4 weekly segments from the past 28 days up to 
+        /// the specified date.
+        /// Excludes transactions with the type <c>Incoming_Transfer</c>.
+        /// Fills in missing days and aggregates totals by week.
+        /// </summary>
+        /// <param name="currentDate">The current date used to determine the 4-week range (excluding today).</param>
+        /// <returns>
+        /// A list of <see cref="ChartData"/> where each item represents a week label (e.g., "Week 1") and the total 
+        /// transaction amount for that week.
+        /// </returns>
+        private async Task<List<ChartData>> GetWeeklyLineChartData(DateTime currentDate)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                TransactionRepository transactionRepo = new TransactionRepository(dbContext);
+                var queryBuilder = transactionRepo.Query;
+
+                //  Get the start date of the weekly filter mode.
+                DateTime weeklyModeStartDate = currentDate.AddDays(-28);
+                //  Group the transactions by day and cast the result into a temporary object.
+                var result = await queryBuilder
+                    .HasStartDate(weeklyModeStartDate.Date)
+                    .ExceptTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer)
+                    .GetQuery()
+                    .GroupBy(t => t.TransactionDate.Date)
+                    .OrderBy(g => g.Key)
+                    .Select(g => new
+                    {
+                        Label = g.Key,
+                        Value = g.Sum(t => t.Amount)
+                    }).ToListAsync();
+
+                //  Initialize fillers for days where no transactions took place.
+                for (int dayIterator = 0; weeklyModeStartDate.AddDays(dayIterator) <= currentDate; dayIterator++)
+                {
+                    DateTime newLabel = weeklyModeStartDate.AddDays(dayIterator);
+                    if (!result.Any(t => t.Label == newLabel))
+                        result.Insert(dayIterator, new
+                        {
+                            Label = newLabel,
+                            Value = 0.0m
+                        });
+                }
+
+                //  Cast the result into the LineChartData object indexed by week.
+                List<ChartData> chartData = new();
+                int weekindex = 1;
+                for (int i = 0; i < result.Count; i += 7)
+                {
+                    string newLabel = $"Week {weekindex++}";
+                    int take = Math.Min(7, result.Count - i);
+                    decimal value = result.Skip(i).Take(take).Sum(cd => cd.Value);
+                    chartData.Add(new ChartData
+                    {
+                        Label = newLabel,
+                        Value = value
+                    });
+                }
+
+                return chartData;
+            }
+        }
+        /// <summary>
+        /// Asynchronously retrieves transaction data grouped by month from the start of the current year up to the 
+        /// specified date.
+        /// Excludes transactions with the type <c>Incoming_Transfer</c>.
+        /// Fills in missing months with zero values.
+        /// </summary>
+        /// <param name="currentDate">The current date used to determine the year-to-date range.</param>
+        /// <returns>
+        /// A list of <see cref="ChartData"/> where each item represents a month label (e.g., "Jan") and the total 
+        /// transaction amount for that month.
+        /// </returns>
+        private async Task<List<ChartData>> GetMonthlyLineChartData(DateTime currentDate)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                TransactionRepository transactionRepo = new TransactionRepository(dbContext);
+                var queryBuilder = transactionRepo.Query;
+                DateTime monthlyModeStartDate = currentDate.AddMonths(-currentDate.Month + 1);
+
+                List<ChartData> chartData = await queryBuilder
+                    .HasStartDate(monthlyModeStartDate.Date)
+                    .ExceptTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer)
+                    .GetQuery()
+                    .GroupBy(t => t.TransactionDate.Month)
+                    .OrderBy(g => g.Key)
+                    .Select(g => new ChartData
+                    {
+                        Label = new DateTime(1, g.Key, 1).ToString("MMM"),
+                        Value = g.Sum(t => t.Amount)
+                    }).ToListAsync();
+
+                for (int monthIterator = 0; monthlyModeStartDate.AddMonths(monthIterator) <= currentDate; monthIterator++)
+                {
+                    string newLabel = monthlyModeStartDate.AddMonths(monthIterator).ToString("MMM");
+                    if (!chartData.Any(cd => cd.Label.Equals(newLabel)))
+                        chartData.Insert(monthIterator, new ChartData
+                        {
+                            Label = newLabel,
+                            Value = 0
+                        });
+                }
+
+                return chartData;
+            }
+        }
+        /// <summary>
+        /// Asynchronously retrieves transaction data grouped by year over the past 10 years up to the specified date.
+        /// Excludes transactions with the type <c>Incoming_Transfer</c>.
+        /// Fills in missing years with zero values.
+        /// </summary>
+        /// <param name="currentDate">The current date used to determine the 10-year range.</param>
+        /// <returns>
+        /// A list of <see cref="ChartData"/> where each item represents a year label and the total transaction amount 
+        /// for that year.
+        /// </returns>
+        private async Task<List<ChartData>> GetYearlyLineChartData(DateTime currentDate)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                TransactionRepository transactionRepo = new TransactionRepository(dbContext);
+                var queryBuilder = transactionRepo.Query;
+                DateTime yearlyModeStartDate = currentDate.AddYears(-10);
+
+                List<ChartData> chartData = await queryBuilder
+                    .HasStartDate(yearlyModeStartDate)
+                    .ExceptTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer)
+                    .GetQuery()
+                    .GroupBy(t => t.TransactionDate.Year)
+                    .OrderBy(g => g.Key)
+                    .Select(g => new ChartData
+                    {
+                        Label = g.Key.ToString(),
+                        Value = g.Sum(t => t.Amount)
+                    }).ToListAsync();
+
+                for (int yearIterator = 0; yearlyModeStartDate.AddYears(yearIterator) <= currentDate; yearIterator++)
+                {
+                    string newLabel = yearlyModeStartDate.AddYears(yearIterator).Year.ToString();
+                    if (!chartData.Any(cd => cd.Label.Equals(newLabel)))
+                        chartData.Insert(yearIterator, new ChartData
+                        {
+                            Label = newLabel,
+                            Value = 0
+                        });
+                }
+
+                return chartData;
+            }
+        }
+        #endregion
         #endregion
         #endregion
     }

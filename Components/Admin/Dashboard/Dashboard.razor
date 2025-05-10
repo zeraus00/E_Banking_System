@@ -202,7 +202,7 @@
         <div>
             <div class="d-flex align-items-center gap-3 flex-wrap">
                 <label class="text-light mb-0" style="white-space: nowrap;">Filter: </label>
-                <select class="form-select form-select-sm w-25" @onchange="OnChartFilterChanged">
+                <select class="form-select form-select-sm w-25" @bind="selectedFilter" @bind:after="OnChartFilterChanged">
                     @foreach (var chartFilter in AdminDashboardTimeFilters.AS_STRING_LIST)
                     {
                         <option value="@chartFilter">@chartFilter</option>
@@ -306,28 +306,34 @@
     private int newAccounts;
     private int closedAccounts;
 
+    //  For charts.
+    private string selectedFilter = AdminDashboardTimeFilters.HOURLY;
 
     private List<string> BarLabels = new();
     private List<int> BarData = new();
 
     private List<string> LineLabels = new();
-    private List<int> LineData = new();
+    private List<decimal> LineData = new();
 
     private List<string> PieLabels = new() { "Withdrawals", "Deposits", "Transfers", "Loans" };
     private List<int> PieData = new();
 
-    private async Task OnChartFilterChanged(ChangeEventArgs e)
+    private async Task OnChartFilterChanged()
     {
-        var selectedChartFilter = e.Value?.ToString();
+        await LoadChartData(selectedFilter);
 
         // mockup data for filter system
-        if (selectedChartFilter == Data.Constants.AdminDashboardTimeFilters.HOURLY)
+        if (selectedFilter == AdminDashboardTimeFilters.HOURLY)
         {
             BarLabels = new() { "Mon", "Tue", "Wed" };
             BarData = new() { 10, 20, 30 };
 
-            LineLabels = new() { "Mon", "Tue", "Wed" };
-            LineData = new() { 5, 15, 10 };
+            PieData = new() { 20, 40, 30, 10 };
+        }
+        else if (selectedFilter.Equals(AdminDashboardTimeFilters.DAILY))
+        {
+            BarLabels = new() { "Mon", "Tue", "Wed" };
+            BarData = new() { 10, 20, 30 };
 
             PieData = new() { 20, 40, 30, 10 };
         }
@@ -335,9 +341,6 @@
         {
             BarLabels = new() { "Thu", "Fri", "Sat" };
             BarData = new() { 15, 25, 35 };
-
-            LineLabels = new() { "Thu", "Fri", "Sat" };
-            LineData = new() { 7, 12, 18 };
 
             PieData = new() { 25, 35, 25, 15 };
         }
@@ -390,6 +393,15 @@
         netMovement = adminDataService.GetNetMovement(transactionBreakdowns);
         newAccounts = await adminDataService.GetNewAccountsCount(startDate, endDate);
         closedAccounts = await adminDataService.GetClosedAccountsCount(startDate, endDate);
+    }
+
+    private async Task LoadChartData(string filterMode)
+    {
+        //  LineChart
+        var LineChartData = await adminDataService.GetLineChartData(filterMode, DateTime.Now);
+        LineLabels = LineChartData.Select(lcd => lcd.Label).ToList();
+        LineData = LineChartData.Select(lcd => lcd.Value).ToList();
+
     }
 
     //mockup data for table
