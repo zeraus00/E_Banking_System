@@ -19,7 +19,8 @@ namespace Data.Seeders.Finance
                 "Deposit",
                 "Withdrawal",
                 "Incoming Transfer",
-                "Outgoing Transfer"
+                "Outgoing Transfer",
+                "Loan Payment"
             };
 
             foreach (var transactionTypeName in transactionTypes)

@@ -12,6 +12,7 @@
         public int MainAccountId { get; set; }                          // Foreign Key to Accounts Table
         public int? CounterAccountId { get; set; }                      // Optional; only for Transfer type transactions
         public int? ExternalVendorId { get; set; }                      // Optional; only for Deposit/Withdrawal types
+        public int? LoanId { get; set; }
         public decimal Amount { get; set; }                             // Required; Amount of money involved in transaction
         public decimal PreviousBalance { get; set; }                    // Required; Balance before transaction
         public decimal NewBalance { get; set; }                         // Required; Balance after transaction
@@ -25,5 +26,6 @@
         public Account MainAccount { get; set; } = null!;
         public Account CounterAccount { get; set; } = null!;
         public ExternalVendor ExternalVendor { get; set; } = null!;
+        public Loan Loan { get; set; } = null!;
     }
 }

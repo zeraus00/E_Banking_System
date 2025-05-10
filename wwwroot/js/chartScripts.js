@@ -153,3 +153,55 @@ window.drawUserLineChart = (labels, withdrawData, depositData, outgoingTransfer,
         }
     });
 };
+window.drawDashboardBarChart = (labels, data1, data2, data3, data4) => {
+    const ctxBar = document.getElementById('barChart').getContext('2d');
+
+    if (window.barInstance) {
+        window.barInstance.destroy();
+    }
+
+    window.barInstance = new Chart(ctxBar, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Withdraw',
+                    data: data1,
+                    backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Deposit',
+                    data: data2,
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Transfer',
+                    data: data3,
+                    backgroundColor: 'rgba(255, 206, 86, 0.6)',
+                    borderColor: 'rgba(255, 206, 86, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Loan Payment',
+                    data: data4,
+                    backgroundColor: 'rgba(200, 100, 0, 0.6)',
+                    backgroundColor: 'rgba(200, 100, 0, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+};

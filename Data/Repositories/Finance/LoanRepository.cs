@@ -43,6 +43,7 @@ namespace Data.Repositories.Finance
         private string _loanPurpose = string.Empty;
         private decimal _loanAmount;
         private decimal _interestRate;
+        private decimal _interestAmount;
         private int _loanTermMonths;
         private int _paymentFrequency;
         private decimal _paymentAmount;
@@ -99,6 +100,11 @@ namespace Data.Repositories.Finance
         public LoanBuilder WithInterestRate(decimal interestRate)
         {
             _interestRate = interestRate;
+            return this;
+        }
+        public LoanBuilder WithInterestAmount(decimal interestAmount)
+        {
+            _interestAmount = interestAmount;
             return this;
         }
         public LoanBuilder WithLoanTermMonths(int loanTermMonths)
@@ -173,6 +179,7 @@ namespace Data.Repositories.Finance
                 LoanPurpose = _loanPurpose,
                 LoanAmount = _loanAmount,
                 InterestRate = _interestRate,
+                InterestAmount = _interestAmount,
                 LoanTermMonths = _loanTermMonths,
                 PaymentFrequency = _paymentFrequency,
                 PaymentAmount = _paymentAmount,

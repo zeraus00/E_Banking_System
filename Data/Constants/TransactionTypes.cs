@@ -2,17 +2,19 @@
 {
     public class TransactionTypes
     {
-        public const string DEPOSIT = "DEPOSIT";
-        public const string WITHDRAWAL = "WITHDRAWAL";
-        public const string INCOMING_TRANSFER = "INCOMING_TRANSFER";
-        public const string OUTGOING_TRANSFER = "OUTGOING_TRANSFER";
+        public const string DEPOSIT = "Deposit";
+        public const string WITHDRAWAL = "Withdrawal";
+        public const string INCOMING_TRANSFER = "Incoming Transfer";
+        public const string OUTGOING_TRANSFER = "Outgoing Transfer";
+        public const string LOAN_PAYMENT = "Loan Payment";
 
         public static List<string> AS_STRING_LIST { get; } = new List<string>
         {
             DEPOSIT,
             WITHDRAWAL,
             INCOMING_TRANSFER,
-            OUTGOING_TRANSFER
+            OUTGOING_TRANSFER,
+            LOAN_PAYMENT
         };
 
         public static TransactionType DEPOSIT_TYPE { get; } = new TransactionType { 
@@ -31,14 +33,19 @@
             TransactionTypeId = 4,
             TransactionTypeName = OUTGOING_TRANSFER
         };
-
+        public static TransactionType LOAN_PAYMENT_TYPE { get; } = new TransactionType
+        {
+            TransactionTypeId = 5,
+            TransactionTypeName = LOAN_PAYMENT
+        };
 
         public static List<TransactionType> AS_TRANSACTION_TYPE_LIST { get; } = new List<TransactionType>
         {
             DEPOSIT_TYPE,
             WITHDRAWAL_TYPE,
             INCOMING_TRANSFER_TYPE,
-            OUTGOING_TRANSFER_TYPE
+            OUTGOING_TRANSFER_TYPE,
+            LOAN_PAYMENT_TYPE
         };
     }
 }
