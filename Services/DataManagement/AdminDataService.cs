@@ -471,15 +471,20 @@ namespace Services.DataManagement
                             g => g.Sum(t => t.Amount)
                         );
                 else if (filterMode.Equals(AdminDashboardTimeFilters.DAILY))
-                    transactionVolumeOverTime = await queryBuilder
+                {
+                    var transactions = await queryBuilder
                         .OrderByDateAndTime()
                         .HasStartDate(startDate.AddDays(-7))
                         .GetQuery()
+                        .ToListAsync();
+                    transactionVolumeOverTime = transactions
                         .GroupBy(t => t.TransactionDate.DayOfWeek)
-                        .ToDictionaryAsync(
+                        .ToDictionary(
                             g => g.Key.ToString(),
                             g => g.Sum(t => t.Amount)
                         );
+                }
+                    
                 else if (filterMode.Equals(AdminDashboardTimeFilters.WEEKLY))
                 {
                     var tempDict = await queryBuilder
