@@ -241,9 +241,11 @@
                 <thead class="table-info text-dark">
                     <tr>
                         <th>Account No</th>
+                        <th>Account Name</th>
                         <th>Amount</th>
                         <th>Type</th>
-                        <th>Timestamp</th>
+                        <th>Date</th>
+                        <th>Time</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -253,9 +255,11 @@
                         {
                             <tr>
                                 <td>@transaction.MainAccount.AccountNumber</td>
+                                <td>@transaction.MainAccount.AccountName</td>
                                 <td>@FormatHelper.BalanceFormatter(transaction.Amount)</td>
                                 <td>@transaction.TransactionType.TransactionTypeName</td>
-                                <td>@(transaction.TransactionDate.ToShortDateString()) @(transaction.TransactionTime.ToString("hh':'mm"))</td>
+                                <td>@(transaction.TransactionDate.ToShortDateString())</td>
+                                <td>@(new DateTime(1, 1, 1, transaction.TransactionTime.Hours, transaction.TransactionTime.Minutes, 0).ToString("hh':'mm tt"))</td>
                             </tr>
                         }
                     }
