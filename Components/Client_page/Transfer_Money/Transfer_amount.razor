@@ -105,13 +105,13 @@
                             <p class="m-0"><strong>Account No.:</strong> @FormatHelper.AccountNumberFormatter(accountNumber)</p>
                         </div>
 
-                        <div class="text-end mt-3">
-                            <div class="w-25">
+                        <div class="text-end mt-3 w-25">
+                            <div class="w-100">
                                 <button class="btn btn-primary btn-lg w-100 mb-2" @onclick="HandleContinue">Continue</button>
                             </div>
-                            <div class="w-25">
+                            <NavLink class="w-100" href="/Client_home">
                                 <button class="btn btn-danger btn-lg w-100">Cancel</button>
-                            </div>
+                            </NavLink>
                         </div>
                     </div>
                 }
