@@ -223,7 +223,7 @@
 
             int finalCounterId = transferType.Equals("Own")
                 ? selectedOwnAccountId
-                : await userDataService.GetAccountIdAsync(otherAccountNumber, otherAccountName);
+                : await userDataService.GetAccountIdAsync(otherAccountNumber.Replace('-'.ToString(), ""), otherAccountName);
             transactionSession = await transactionService.CreateTransactionAsync(
                 accountId,
                 (int)TransactionTypeIDs.Outgoing_Transfer,
