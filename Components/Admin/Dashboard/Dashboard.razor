@@ -310,7 +310,7 @@
     private string selectedFilter = AdminDashboardTimeFilters.HOURLY;
 
     private List<string> BarLabels = new();
-    private List<int> BarData = new();
+    private List<decimal> BarData = new();
 
     private List<string> LineLabels = new();
     private List<decimal> LineData = new();
@@ -322,23 +322,6 @@
     {
         await LoadChartData(selectedFilter);
 
-        // mockup data for filter system
-        if (selectedFilter == AdminDashboardTimeFilters.HOURLY)
-        {
-            BarLabels = new() { "Mon", "Tue", "Wed" };
-            BarData = new() { 10, 20, 30 };
-        }
-        else if (selectedFilter.Equals(AdminDashboardTimeFilters.DAILY))
-        {
-            BarLabels = new() { "Mon", "Tue", "Wed" };
-            BarData = new() { 10, 20, 30 };
-        }
-        else
-        {
-            BarLabels = new() { "Thu", "Fri", "Sat" };
-            BarData = new() { 15, 25, 35 };
-        }
-
         StateHasChanged(); // this will trigger chart redraw
     }
 
@@ -346,6 +329,7 @@
     {
         //  Load data for dashboard view.
         await this.LoadDisplayData();
+        await this.LoadChartData(selectedFilter);
     }
 
     private async Task FilterAsync()
@@ -399,6 +383,10 @@
         var PieChartData = await adminDataService.GetPieChartData(filterMode, DateTime.Now);
         PieLabels = PieChartData.Select(pcd => pcd.Label).ToList();
         PieData = PieChartData.Select(pcd => pcd.Value).ToList();
+        //  BarChart
+        var BarChartData = await adminDataService.GetBarChartData(filterMode, DateTime.Now);
+        BarLabels = BarChartData.Select(bcd => bcd.Label).ToList();
+        BarData = BarChartData.Select(bcd => bcd.Value).ToList();
 
     }
 
