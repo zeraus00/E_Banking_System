@@ -24,6 +24,8 @@ namespace Data.Repositories.Finance
                 WhereCondition(l => l.ApplicationDate >= startDate.Date);
             public LoanQuery HasEndDateFilter(DateTime endDate) =>
                 WhereCondition(l => l.ApplicationDate <= endDate.Date);
+            public LoanQuery IncludeAccount(bool include = true) => include ? Include(l => l.Account) : this;
+            public LoanQuery IncludeUserInfo(bool include = true) => include ? Include(l => l.UserInfo) : this;
             public LoanQuery OrderByDateDescending(bool isOrdered = true)
                 => OrderByDescending(l => l.ApplicationDate);
         }

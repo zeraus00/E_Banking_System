@@ -892,7 +892,7 @@ namespace Services.DataManagement
                     .Select(subgroup => new BarChartData
                     {
                         Label = new DateTime(1, 1, 1, subgroup.Key, 0, 0).ToString("hh tt"),
-                        Values = subgroup
+                        Bars = subgroup
                             .GroupBy(t => t.TransactionTypeId)
                             .Select(subgroup => new Bar
                             {
@@ -904,10 +904,10 @@ namespace Services.DataManagement
                     .Select(cd => new BarChartData
                     {
                         Label = cd.Label,
-                        Values = BarChartConstants
+                        Bars = BarChartConstants
                             .ALL_TRANSACTION_TYPES
                             .GroupJoin(
-                                cd.Values,
+                                cd.Bars,
                                 type => type.Label,
                                 bar => bar.Label,
                                 (type, matchingBars) => new Bar
@@ -926,7 +926,7 @@ namespace Services.DataManagement
                         chartData.Insert(i, new()
                         {
                             Label = newLabel,
-                            Values = BarChartConstants.ALL_TRANSACTION_TYPES
+                            Bars = BarChartConstants.ALL_TRANSACTION_TYPES
                         });
                 }
 
@@ -956,7 +956,7 @@ namespace Services.DataManagement
                     .Select(subgroup => new BarChartData
                     {
                         Label = subgroup.Key.ToString("MMM dd"),
-                        Values = subgroup
+                        Bars = subgroup
                             .GroupBy(t => t.TransactionTypeId)
                             .Select(subgroup => new Bar
                             {
@@ -968,10 +968,10 @@ namespace Services.DataManagement
                     .Select(cd => new BarChartData
                     {
                         Label = cd.Label,
-                        Values = BarChartConstants
+                        Bars = BarChartConstants
                             .ALL_TRANSACTION_TYPES
                             .GroupJoin(
-                                cd.Values,
+                                cd.Bars,
                                 type => type.Label,
                                 bar => bar.Label,
                                 (type, matchingBars) => new Bar
@@ -988,7 +988,7 @@ namespace Services.DataManagement
                         chartData.Insert(dayIterator, new()
                         {
                             Label = newLabel,
-                            Values = BarChartConstants.ALL_TRANSACTION_TYPES
+                            Bars = BarChartConstants.ALL_TRANSACTION_TYPES
                         });
                 }
 
@@ -1076,7 +1076,7 @@ namespace Services.DataManagement
                     chartData.Add(new BarChartData
                     {
                         Label = newLabel,
-                        Values = barSummations
+                        Bars = barSummations
                     });
                 }
 
@@ -1105,7 +1105,7 @@ namespace Services.DataManagement
                     .Select(subgroup => new BarChartData
                     {
                         Label = new DateTime(1, subgroup.Key, 1).ToString("MMM"),
-                        Values = subgroup
+                        Bars = subgroup
                             .GroupBy(t => t.TransactionTypeId)
                             .Select(subgroup => new Bar
                             {
@@ -1117,10 +1117,10 @@ namespace Services.DataManagement
                     .Select(cd => new BarChartData
                     {
                         Label = cd.Label,
-                        Values = BarChartConstants
+                        Bars = BarChartConstants
                             .ALL_TRANSACTION_TYPES
                             .GroupJoin(
-                                cd.Values,
+                                cd.Bars,
                                 type => type.Label,
                                 bar => bar.Label,
                                 (type, matchingBars) => new Bar
@@ -1139,7 +1139,7 @@ namespace Services.DataManagement
                         chartData.Insert(monthIterator, new BarChartData
                         {
                             Label = newLabel,
-                            Values = BarChartConstants.ALL_TRANSACTION_TYPES
+                            Bars = BarChartConstants.ALL_TRANSACTION_TYPES
                         });
                 }
 
@@ -1168,7 +1168,7 @@ namespace Services.DataManagement
                     .Select(subgroup => new BarChartData
                     {
                         Label = subgroup.Key.ToString(),
-                        Values = subgroup
+                        Bars = subgroup
                             .GroupBy(t => t.TransactionTypeId)
                             .Select(subgroup => new Bar
                             {
@@ -1180,10 +1180,10 @@ namespace Services.DataManagement
                     .Select(cd => new BarChartData
                     {
                         Label = cd.Label,
-                        Values = BarChartConstants
+                        Bars = BarChartConstants
                             .ALL_TRANSACTION_TYPES
                             .GroupJoin(
-                                cd.Values,
+                                cd.Bars,
                                 type => type.Label,
                                 bar => bar.Label,
                                 (type, matchingBars) => new Bar
@@ -1201,7 +1201,7 @@ namespace Services.DataManagement
                         chartData.Insert(yearIterator, new BarChartData
                         {
                             Label = newLabel,
-                            Values = BarChartConstants.ALL_TRANSACTION_TYPES
+                            Bars = BarChartConstants.ALL_TRANSACTION_TYPES
                         });
                 }
 

@@ -400,7 +400,7 @@
         //  BarChart
         var BarChartData = await adminDataService.GetBarChartData(filterMode, DateTime.Now);
         BarLabels = BarChartData.Select(bcd => bcd.Label).ToList();
-        BarData = BarChartData.Select(bcd => bcd.Values).ToList();
+        BarData = BarChartData.Select(bcd => bcd.Bars).ToList();
 
     }
 

@@ -412,7 +412,7 @@
 					LoanAmount = loanAmount,
 					LoanTermMonths = loanTermInMonths,
 					PaymentFrequency = paymentFrequency,
-					ApplicationDate = DateTime.Now.Date
+					ApplicationDate = DateTime.Now
 				};
 
 			if (string.IsNullOrWhiteSpace(error) && loanService.IsLoanInvalid(newLoan, minimumLoanAmount, minimumLoanTerm))

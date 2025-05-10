@@ -2,10 +2,11 @@
 
 namespace ViewModels.AdminDashboard
 {
-    public class BarChartData
+    public class BarChartData : IChartData
     {
         public string Label { get; set; } = string.Empty;
-        public List<Bar> Values { get; set; } = new();
+        public decimal Value { get; set; }
+        public List<Bar> Bars { get; set; } = new();
     }
 
     public class Bar
