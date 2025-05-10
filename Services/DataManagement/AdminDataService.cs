@@ -398,6 +398,7 @@ namespace Services.DataManagement
                 //  Compose Query
                 var queryBuilder = transactionRepo
                     .Query
+                    .ExceptTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer)
                     .IncludeMainAccount()
                     .IncludeTransactionType()
                     .OrderByDateAndTimeDescending();
