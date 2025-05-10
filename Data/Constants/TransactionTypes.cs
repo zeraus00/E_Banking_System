@@ -2,11 +2,11 @@
 {
     public class TransactionTypes
     {
-        public const string DEPOSIT = "DEPOSIT";
-        public const string WITHDRAWAL = "WITHDRAWAL";
-        public const string INCOMING_TRANSFER = "INCOMING_TRANSFER";
-        public const string OUTGOING_TRANSFER = "OUTGOING_TRANSFER";
-        public const string LOAN_PAYMENT = "LOAN_PAYMENT";
+        public const string DEPOSIT = "Deposit";
+        public const string WITHDRAWAL = "Withdrawal";
+        public const string INCOMING_TRANSFER = "Incoming Transfer";
+        public const string OUTGOING_TRANSFER = "Outgoing Transfer";
+        public const string LOAN_PAYMENT = "Loan Payment";
 
         public static List<string> AS_STRING_LIST { get; } = new List<string>
         {
