@@ -12,5 +12,6 @@
 
         public const string ADMIN_SESSION = "nexusbanking:admin_session";
         public const string PENDING_ACCOUNT_SESSION = "nexusbanking:pending_account_session";
+        public const string ACCOUNT_VIEW_SESSION = "nexusbanking:account_view_session";
     }
 }

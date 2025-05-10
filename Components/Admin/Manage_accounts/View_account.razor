@@ -1,7 +1,13 @@
 ﻿@page "/View_account"
 
 @using E_BankingSystem.Components.Client_page.Accounts
+@attribute [Authorize(Roles = "Administrator")]
 @rendermode InteractiveServer
+
+@inject AdminControlledSessionService adminControlledSessionService
+@inject AdminDataService adminDataService
+@inject NavigationManager navigationManager
+@inject UserDataService userDataService
 
 <div class="page">
     <main>
@@ -17,12 +23,15 @@
             <!-- Card Section -->
             <div class="card-section justify-content-between mx-4">
                 <!-- Account Card -->
-                <AccountCard LinkedAccount="@mockupData" ContactNumber="09171234567" IsEditable="true" />
+                @if (accountViewSession.AccountId != 0)
+                {
+                    <AccountCard LinkedAccount="@accountViewSession" ContactNumber="@accountViewSession.AccountContactNo" IsEditable="true" />
+                }
 
                 <!-- Data Card -->
                 <div class="data-card">
                     <p class="label">Savings</p>
-                    <div class="amount">1,000,000</div>
+                    <div class="amount">@savingsAmount</div>
                 </div>
             </div>
 
@@ -70,13 +79,25 @@
 </div>
 
 @code {
-    //mockup data (kinuha ko lang component sa AccountCard di ko alam pano kumuhang data shjdshj)
-    private LinkedAccount mockupData = new LinkedAccount
+    private decimal savingsAmount = 0.0m;
+
+    private LinkedAccount accountViewSession = new();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
         {
-            AccountId = 1,
-            AccountName = "Savings Account",
-            AccountNumber = "123456789",
-            AccountContactNo = "09171234567"
-        };
+            try
+            {
+                accountViewSession = await adminControlledSessionService.GetAccountViewSession();
+                savingsAmount = await adminDataService.GetAccountBalanceAsync(accountViewSession.AccountId);
+                StateHasChanged();
+            }
+            catch (ControlledSessionNotFound)
+            {
+                navigationManager.NavigateTo(PageRoutes.MANAGE_ACCOUNTS);
+            }
+        }
+    }
 
 }

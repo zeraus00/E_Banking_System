@@ -24,8 +24,8 @@ namespace Services.SessionsManagement
                     SessionSchemes.PENDING_ACCOUNT_SESSION
                 );
         }
-        public async Task ClearPendingAccountSession(AdminSession? adminSession = null)
-            => await SetPendingAccountSession(null, adminSession);
+        public async Task ClearPendingAccountSession(AdminSession? adminSession = null) => 
+            await SetPendingAccountSession(null, adminSession);
 
         public async Task SetPendingAccountSession(PendingAccountSession? pendingAccountSession, AdminSession? adminSession = null)
         {
@@ -37,5 +37,28 @@ namespace Services.SessionsManagement
             await _userSessionService.UpdateAdminSession(adminSession);
         }
 
+        public async Task<LinkedAccount> GetAccountViewSession(AdminSession? adminSession = null)
+        {
+            if (adminSession is null)
+                adminSession = await _userSessionService.GetAdminSession();
+            return adminSession.AccountViewSession
+                ?? throw new ControlledSessionNotFound(
+                    SessionSchemes.ADMIN_SESSION,
+                    SessionSchemes.ACCOUNT_VIEW_SESSION
+                );
+        }
+
+        public async Task ClearAccountViewSession(AdminSession? adminSession = null) =>
+            await SetAccountViewSession(null, adminSession);
+
+        public async Task SetAccountViewSession(LinkedAccount? accountViewSession, AdminSession? adminSession = null)
+        {
+            if (adminSession is null)
+                adminSession = await _userSessionService.GetAdminSession();
+            
+            adminSession.AccountViewSession = accountViewSession;
+
+            await _userSessionService.UpdateAdminSession(adminSession);
+        }
     }
 }

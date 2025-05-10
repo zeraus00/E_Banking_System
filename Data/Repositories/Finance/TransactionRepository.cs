@@ -52,6 +52,8 @@
                 WhereCondition(t => t.CounterAccountId == accountId);
             public TransactionQuery HasStartDate(DateTime startDate) =>
                 WhereCondition(t => t.TransactionDate >= startDate.Date);
+            public TransactionQuery HasStartTime(TimeSpan startTime) =>
+                WhereCondition(t => t.TransactionTime >= startTime);
             public TransactionQuery HasEndDate(DateTime endDate) =>
                 WhereCondition(t => t.TransactionDate <= endDate.Date);
             public TransactionQuery IncludeTransactionType(bool include = true) => 
