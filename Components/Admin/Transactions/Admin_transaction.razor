@@ -78,31 +78,31 @@
                             <td>@transaction.TransactionType.TransactionTypeName</td>
                             <td>@transaction.Status</td>
                             <td>@FormatHelper.BalanceFormatter(transaction.Amount)</td>
-                            @if (transaction.TransactionType.TransactionTypeId == (int)TransactionTypeIDs.Outgoing_Transfer)
+
+                            @switch ((TransactionTypeIDs)transaction.TransactionType.TransactionTypeId)
                             {
-                                <td>@transaction.CounterAccount.AccountName</td>
-                                <td>@transaction.MainAccount.AccountName</td>
+                                case TransactionTypeIDs.Outgoing_Transfer:
+                                    <td>@transaction.CounterAccount?.AccountName</td>
+                                    <td>@transaction.MainAccount?.AccountName</td>
+                                    break;
+                                case TransactionTypeIDs.Incoming_Transfer:
+                                    <td>@transaction.MainAccount?.AccountName</td>
+                                    <td>@transaction.CounterAccount?.AccountName</td>
+                                    break;
+                                case TransactionTypeIDs.Withdrawal:
+                                    <td>@(transaction.ExternalVendor?.VendorName ?? "--")</td>
+                                    <td>--</td>
+                                    break;
+                                case TransactionTypeIDs.Deposit:
+                                    <td>--</td>
+                                    <td>@(transaction.ExternalVendor?.VendorName ?? "--")</td>
+                                    break;
+                                default:
+                                    <td>--</td>
+                                    <td>--</td>
+                                    break;
                             }
-                            else if (transaction.TransactionType.TransactionTypeId == (int)TransactionTypeIDs.Incoming_Transfer)
-                            {
-                                <td>@transaction.MainAccount.AccountName</td>
-                                <td>@transaction.CounterAccount.AccountName</td>
-                            }
-                            else if (transaction.TransactionType.TransactionTypeId == (int)TransactionTypeIDs.Withdrawal)
-                            {
-                                <td>@(transaction.ExternalVendor != null ? transaction.ExternalVendor.VendorName : "--")</td>
-                                <td>--</td>
-                            }
-                            else if (transaction.TransactionType.TransactionTypeId == (int)TransactionTypeIDs.Deposit)
-                            {
-                                <td>--</td>
-                                <td>@(transaction.ExternalVendor != null ? transaction.ExternalVendor.VendorName : "--")</td>
-                            }
-                            else
-                            {
-                                <td>--</td>
-                                <td>--</td>
-                            }
+
                             <td>@FormatHelper.BalanceFormatter(transaction.PreviousBalance)</td>
                             <td>@FormatHelper.BalanceFormatter(transaction.NewBalance)</td>
                             <td>@FormatHelper.BalanceFormatter(transaction.TransactionFee)</td>
@@ -137,6 +137,8 @@
     private AdminSession? adminSession;
     private List<string> transactionTypes = new();
     private string selectedTransactionTypeId = "0";
+
+    private string message = "";
 
     private DateTime? startDate = DateTime.Now.Date.AddDays(-DateTime.Now.Day + 1);
     private DateTime? endDate = DateTime.Now.Date;
@@ -184,6 +186,12 @@
 
     private async Task FilterTransactionsAsync()
     {
+        if (startDate > endDate)
+        {
+            await InvokeMessage("Start date cannot be later than end date.");
+            return;
+        }
+
         int transactionTypeId = !string.IsNullOrWhiteSpace(selectedTransactionTypeId)
     ? Convert.ToInt32(selectedTransactionTypeId)
     : 0;
@@ -197,10 +205,10 @@
         );
 
         masterListAvailablePages = (int)Math.Ceiling((double)transactionMasterList.Count / pageSize);
-        LoadTransactionListPage(pageNumber == 0 ? 1 : pageNumber);
+        await LoadTransactionListPage(pageNumber == 0 ? 1 : pageNumber);
     }
 
-    private void LoadTransactionListPage(int page = 1)
+    private async Task LoadTransactionListPage(int page = 1)
     {
         if (transactionMasterList.Any())
         {
@@ -209,6 +217,10 @@
                 .Take(pageSize)
                 .ToList();
         }
+        else
+        {
+            await InvokeMessage("No transactions found.");
+        }
     }
 
     private async Task NextPage()
@@ -216,7 +228,7 @@
         if (pageNumber < masterListAvailablePages)
         {
             pageNumber++;
-            LoadTransactionListPage(pageNumber);
+            await LoadTransactionListPage(pageNumber);
         }
         else if (masterListPageNumber < masterListAvailablePages)
         {
@@ -233,8 +245,18 @@
             }
             else
             {
+                await InvokeMessage("You are at the last page.");
                 masterListPageNumber--;
+                return;
             }
+        }
+        else if (masterListAvailablePages == 1)
+        {
+            await InvokeMessage("There are no other page.");
+        }
+        else
+        {
+            await InvokeMessage("You are at the last Page.");    
         }
     }
 
@@ -243,13 +265,17 @@
         if (pageNumber > 1)
         {
             pageNumber--;
-            LoadTransactionListPage(pageNumber);
+            await LoadTransactionListPage(pageNumber);
         }
         else if (masterListPageNumber > 1)
         {
             masterListPageNumber--;
             pageNumber = masterListAvailablePages;
             await FilterTransactionsAsync();
+        }
+        else
+        {
+            await InvokeMessage("You are at the first page.");
         }
     }
 
@@ -286,5 +312,13 @@
         masterListPageNumber = 1;
         pageNumber = 1;
         await FilterTransactionsAsync();
+    }
+
+    private async Task InvokeMessage(string errorMessage)
+    {
+        message = errorMessage;
+        StateHasChanged();
+        await Task.Delay(5000);
+        StateHasChanged();
     }
 }
