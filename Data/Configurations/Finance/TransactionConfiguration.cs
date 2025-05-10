@@ -57,6 +57,11 @@
                 .Property(t => t.ExternalVendorId)
                 .IsRequired(false);
 
+            //  LoanId (Optional)
+            Transactions
+                .Property(t => t.LoanId)
+                .IsRequired(false);
+
             //  Amount (Required, DECIMAL(18,2))
             Transactions
                 .Property(t => t.Amount)
@@ -102,6 +107,7 @@
              *  Accounts: CounterAccount (many-to-one)
              *  TransactionTypes (many-to-one)
              *  ExternalVendors: (many-to-one)
+             *  Loans: (many-to-one)
              */
             Transactions
                 .HasOne(t => t.MainAccount)
@@ -122,6 +128,11 @@
                 .HasOne(t => t.ExternalVendor)
                 .WithMany(ev => ev.Transactions)
                 .HasForeignKey(t => t.ExternalVendorId)
+                .OnDelete(DeleteBehavior.Restrict);
+            Transactions
+                .HasOne(t => t.Loan)
+                .WithMany(l => l.Transactions)
+                .HasForeignKey(t => t.LoanId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

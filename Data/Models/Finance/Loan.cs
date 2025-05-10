@@ -13,6 +13,7 @@
         public string LoanPurpose { get; set; } = string.Empty; //  Required; Varchar(30)
         public decimal LoanAmount { get; set; }                 //  Required; Decimal(18,2)
         public decimal InterestRate { get; set; }               //  Required; Decimal(5,2)
+        public decimal InterestAmount { get; set; }             //  Required; Decimal(10, 2)
         public int LoanTermMonths { get; set; }                 //  Required; 3, 6, or 12 months
         public int PaymentFrequency { get; set; }               //  Required; In one year; Monthly: 12; Bi-monthly: 6; Quarterly: 3;
         public decimal PaymentAmount { get; set; }              //  Required; Decimal(18,2)
@@ -29,7 +30,8 @@
 
         public Account Account { get; set; } = null!;
         public UserInfo UserInfo { get; set; } = null!;
-        public LoanType LoanType { get; set; } = null!;     
+        public LoanType LoanType { get; set; } = null!;
+        public ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
         public ICollection<LoanTransaction> LoanTransactions { get; set; } = new List<LoanTransaction>();
     }
 }

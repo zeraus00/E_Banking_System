@@ -50,6 +50,10 @@
                 WhereCondition(t => t.MainAccountId == accountId);
             public TransactionQuery HasCounterAccountId(int accountId) =>
                 WhereCondition(t => t.CounterAccountId == accountId);
+            public TransactionQuery HasExternalVendorId(int vendorId) =>
+                WhereCondition(t => t.ExternalVendorId == vendorId);
+            public TransactionQuery HasLoanId(int loanId) =>
+                WhereCondition(t => t.LoanId == loanId);
             public TransactionQuery HasStartDate(DateTime startDate) =>
                 WhereCondition(t => t.TransactionDate >= startDate.Date);
             public TransactionQuery HasStartTime(TimeSpan startTime) =>
@@ -97,6 +101,7 @@
         private int _mainAccountId;
         private int? _counterAccountId = null;
         private int? _externalVendorId = null;
+        private int? _loanId = null;
         private decimal _amount;
         private decimal _previousBalance;
         private decimal _newBalance;
@@ -138,6 +143,11 @@
         public TransactionBuilder WithExternalVendorId(int externalVendorId)
         {
             _externalVendorId = externalVendorId;
+            return this;
+        }
+        public TransactionBuilder WithLoanId(int loanId)
+        {
+            _loanId = loanId;
             return this;
         }
         public TransactionBuilder WithAmount(decimal amount)
@@ -187,6 +197,7 @@
                 MainAccountId = _mainAccountId,
                 CounterAccountId = _counterAccountId,
                 ExternalVendorId = _externalVendorId,
+                LoanId = _loanId,
                 Amount = _amount,
                 PreviousBalance = _previousBalance,
                 NewBalance = _newBalance
