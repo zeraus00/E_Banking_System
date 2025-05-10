@@ -322,7 +322,7 @@
     private string selectedFilter = AdminDashboardTimeFilters.HOURLY;
 
     private List<string> BarLabels = new();
-    private List<decimal> BarData = new();
+    private List<List<Bar>> BarData = new();
 
     private List<string> LineLabels = new();
     private List<decimal> LineData = new();
@@ -398,7 +398,7 @@
         //  BarChart
         var BarChartData = await adminDataService.GetBarChartData(filterMode, DateTime.Now);
         BarLabels = BarChartData.Select(bcd => bcd.Label).ToList();
-        BarData = BarChartData.Select(bcd => bcd.Value).ToList();
+        BarData = BarChartData.Select(bcd => bcd.Values).ToList();
 
     }
 
