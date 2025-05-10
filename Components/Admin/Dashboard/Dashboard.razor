@@ -315,8 +315,8 @@
     private List<string> LineLabels = new();
     private List<decimal> LineData = new();
 
-    private List<string> PieLabels = new() { "Withdrawals", "Deposits", "Transfers", "Loans" };
-    private List<int> PieData = new();
+    private List<string> PieLabels = new();
+    private List<decimal> PieData = new();
 
     private async Task OnChartFilterChanged()
     {
@@ -327,22 +327,16 @@
         {
             BarLabels = new() { "Mon", "Tue", "Wed" };
             BarData = new() { 10, 20, 30 };
-
-            PieData = new() { 20, 40, 30, 10 };
         }
         else if (selectedFilter.Equals(AdminDashboardTimeFilters.DAILY))
         {
             BarLabels = new() { "Mon", "Tue", "Wed" };
             BarData = new() { 10, 20, 30 };
-
-            PieData = new() { 20, 40, 30, 10 };
         }
         else
         {
             BarLabels = new() { "Thu", "Fri", "Sat" };
             BarData = new() { 15, 25, 35 };
-
-            PieData = new() { 25, 35, 25, 15 };
         }
 
         StateHasChanged(); // this will trigger chart redraw
@@ -401,6 +395,10 @@
         var LineChartData = await adminDataService.GetLineChartData(filterMode, DateTime.Now);
         LineLabels = LineChartData.Select(lcd => lcd.Label).ToList();
         LineData = LineChartData.Select(lcd => lcd.Value).ToList();
+        //  PieChart
+        var PieChartData = await adminDataService.GetPieChartData(filterMode, DateTime.Now);
+        PieLabels = PieChartData.Select(pcd => pcd.Label).ToList();
+        PieData = PieChartData.Select(pcd => pcd.Value).ToList();
 
     }
 

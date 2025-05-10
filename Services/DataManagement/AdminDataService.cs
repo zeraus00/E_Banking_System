@@ -473,9 +473,7 @@ namespace Services.DataManagement
         {
             Dictionary<string, List<ChartData>> chartCache = new();
             foreach(var filter in AdminDashboardTimeFilters.AS_STRING_LIST)
-            {
                 chartCache[filter] = await GetLineChartData(filter, currentDate.AddDays(-1));
-            }
             return chartCache;
         }
         /// <summary>
@@ -491,18 +489,15 @@ namespace Services.DataManagement
         /// </returns>
         public async Task<List<ChartData>> GetLineChartData(string filterMode, DateTime currentDate)
         {
-            if (filterMode.Equals(AdminDashboardTimeFilters.HOURLY))
-                return await GetHourlyLineChartData(currentDate);
-            else if (filterMode.Equals(AdminDashboardTimeFilters.DAILY))
-                return await GetDailyLineChartData(currentDate);
-            else if (filterMode.Equals(AdminDashboardTimeFilters.WEEKLY))
-                return await GetWeeklyLineChartData(currentDate);
-            else if (filterMode.Equals(AdminDashboardTimeFilters.MONTHLY))
-                return await GetMonthlyLineChartData(currentDate);
-            else if (filterMode.Equals(AdminDashboardTimeFilters.YEARLY))
-                return await GetYearlyLineChartData(currentDate);
-            else
-                return new List<ChartData>();
+            return filterMode switch
+            {
+                AdminDashboardTimeFilters.HOURLY => await GetHourlyLineChartData(currentDate),
+                AdminDashboardTimeFilters.DAILY => await GetDailyLineChartData(currentDate),
+                AdminDashboardTimeFilters.WEEKLY => await GetWeeklyLineChartData(currentDate),
+                AdminDashboardTimeFilters.MONTHLY => await GetMonthlyLineChartData(currentDate),
+                AdminDashboardTimeFilters.YEARLY => await GetYearlyLineChartData(currentDate),
+                _ => new List<ChartData>()
+            };
         }
         /// <summary>
         /// Asynchronously retrieves transaction data grouped by hour for the specified date.
@@ -743,6 +738,104 @@ namespace Services.DataManagement
                 }
 
                 return chartData;
+            }
+        }
+        #endregion
+        #region Pie Chart
+        /// <summary>
+        /// Retrieves pie chart data for all time filter modes (hourly, daily, weekly, monthly, yearly),
+        /// relative to the specified current date.
+        /// </summary>
+        /// <param name="currentDate">The base date used to calculate each time filter's start date.</param>
+        /// <returns>A dictionary where each key is a time filter label and the value is the pie chart data for that filter.</returns>
+        public async Task<Dictionary<string, List<ChartData>>> GetAllPieChartData(DateTime currentDate)
+        {
+            Dictionary<string, List<ChartData>> chartCache = new();
+            foreach (var filter in AdminDashboardTimeFilters.AS_STRING_LIST)
+                chartCache[filter] = await GetPieChartData(filter, currentDate.AddDays(-1));
+            return chartCache;
+        }
+        /// <summary>
+        /// Retrieves pie chart data based on the specified time filter mode.
+        /// </summary>
+        /// <param name="filterMode">The time filter mode (e.g., hourly, daily, weekly).</param>
+        /// <param name="currentDate">The current date used to calculate the range of the filter.</param>
+        /// <returns>A list of ChartData objects grouped by transaction type.</returns>
+        public async Task<List<ChartData>> GetPieChartData(string filterMode, DateTime currentDate)
+        {
+            return filterMode switch
+            {
+                AdminDashboardTimeFilters.HOURLY => await GetHourlyPieChartData(currentDate),
+                AdminDashboardTimeFilters.DAILY => await GetDailyPieChartData(currentDate),
+                AdminDashboardTimeFilters.WEEKLY => await GetWeeklyPieChartData(currentDate),
+                AdminDashboardTimeFilters.MONTHLY => await GetMonthlyPieChartData(currentDate),
+                AdminDashboardTimeFilters.YEARLY => await GetYearlyPieChartData(currentDate),
+                _ => new List<ChartData>()
+            };
+        }
+        /// <summary>
+        /// Retrieves pie chart data for the last hour relative to the specified date.
+        /// </summary>
+        /// <param name="currentDate">The current date and time.</param>
+        /// <returns>A list of ChartData for the past hour.</returns>
+        public async Task<List<ChartData>> GetHourlyPieChartData(DateTime currentDate) =>
+            await GetPieChartDataByDateAndTime(currentDate, currentDate.AddHours(-1).TimeOfDay);
+        /// <summary>
+        /// Retrieves pie chart data for the previous day.
+        /// </summary>
+        /// <param name="currentDate">The current date.</param>
+        /// <returns>A list of ChartData for the current day.</returns>
+        public async Task<List<ChartData>> GetDailyPieChartData(DateTime currentDate) =>
+            await GetPieChartDataByDateAndTime(currentDate);
+        /// <summary>
+        /// Retrieves pie chart data for the past 7 days.
+        /// </summary>
+        /// <param name="currentDate">The current date.</param>
+        /// <returns>A list of ChartData for the past week.</returns>
+        public async Task<List<ChartData>> GetWeeklyPieChartData(DateTime currentDate) =>
+            await GetPieChartDataByDateAndTime(currentDate.AddDays(-7));
+        /// <summary>
+        /// Retrieves pie chart data for the past month (approximated using DateTime.AddMonths).
+        /// </summary>
+        /// <param name="currentDate">The current date.</param>
+        /// <returns>A list of ChartData for the past month.</returns>
+        public async Task<List<ChartData>> GetMonthlyPieChartData(DateTime currentDate) =>
+            await GetPieChartDataByDateAndTime(currentDate.AddMonths(-1));
+        /// <summary>
+        /// Retrieves pie chart data for the past year (approximated using DateTime.AddYears).
+        /// </summary>
+        /// <param name="currentDate">The current date.</param>
+        /// <returns>A list of ChartData for the past year.</returns>
+        public async Task<List<ChartData>> GetYearlyPieChartData(DateTime currentDate) =>
+            await GetPieChartDataByDateAndTime(currentDate.AddYears(-1));
+        /// <summary>
+        /// Retrieves pie chart data starting from a given date and optionally a specific time of day.
+        /// Filters out transactions of a specific type (Incoming Transfer).
+        /// </summary>
+        /// <param name="startDate">The starting date for the data range.</param>
+        /// <param name="startTime">Optional: the starting time on the given date to begin filtering.</param>
+        /// <returns>A list of ChartData grouped by transaction type.</returns>
+        private async Task<List<ChartData>> GetPieChartDataByDateAndTime(DateTime startDate, TimeSpan? startTime = null)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                var transactionRepo = new TransactionRepository(dbContext);
+
+                var queryBuilder = transactionRepo.Query;
+
+                if (startTime is not null)
+                    queryBuilder.HasStartTime(startTime.Value);
+
+                return await queryBuilder
+                    .HasStartDate(startDate.Date)
+                    .ExceptTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer)
+                    .GetQuery()
+                    .GroupBy(t => t.TransactionTypeId)
+                    .Select(g => new ChartData
+                    {
+                        Label = TransactionTypes.AS_STRING_LIST[g.Key - 1],
+                        Value = g.Count()
+                    }).ToListAsync();
             }
         }
         #endregion
