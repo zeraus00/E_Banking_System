@@ -1,4 +1,5 @@
 ﻿@using E_BankingSystem.Components.Admin.Dashboard.Charts
+@using ViewModels.AdminDashboard
 
 @inject IJSRuntime JSRuntime
 
@@ -9,13 +10,18 @@
     public List<string> Labels { get; set; } = new();
 
     [Parameter]
-    public List<decimal> Data { get; set; } = new();
+    public List<List<Bar>> Data { get; set; } = new();
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (Labels.Count > 0 && Data.Count > 0)
         {
-            await JSRuntime.InvokeVoidAsync("drawBarChart", Labels, Data);
+            var dataSets = Enumerable.Range(0, Data[0].Count)
+                .Select(col => Data.Select(row => row[col])).ToList();
+            var dataSet1 = Data.Select(row => row[0].Value).ToList();
+            var dataSet2 = Data.Select(row => row[1].Value).ToList();
+            var dataSet3 = Data.Select(row => row[2].Value).ToList();
+            await JSRuntime.InvokeVoidAsync("drawDashboardBarChart", Labels, dataSet1, dataSet2, dataSet3);
         }
     }
 }
