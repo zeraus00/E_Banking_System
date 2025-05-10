@@ -2,15 +2,20 @@
 
 @inject IJSRuntime JSRuntime
 
-<canvas id="lineChart" width="1000" height="400"></canvas>
+<canvas id="lineChart"></canvas>
 
 @code {
+    [Parameter]
+    public List<string> Labels { get; set; } = new();
+
+    [Parameter]
+    public List<int> Data { get; set; } = new();
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
+        if (Labels.Count > 0 && Data.Count > 0)
         {
-            await JSRuntime.InvokeVoidAsync("drawLineChart");
-            StateHasChanged();
+            await JSRuntime.InvokeVoidAsync("drawLineChart", Labels, Data);
         }
     }
 }

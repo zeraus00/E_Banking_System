@@ -23,11 +23,6 @@
     background-clip: content-box;
 }
 
-/*    .sidebar.hidden {
-        transform: translateX(-100%);
-        position: absolute;
-    }*/
-
     .sidebar.collapsed {
         width: 80px;
     }
@@ -119,7 +114,6 @@
 }
 
 .middle-row {
-    height: 530px;
     margin-right: 10%;
     margin-left: 10%;
     padding: 0;

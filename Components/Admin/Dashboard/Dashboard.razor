@@ -197,34 +197,43 @@
             </div>
         </div>
 
+        <hr class="divider" />
 
-
-        <div class="chart-section my-5">
-            <!-- Left: Bar Chart -->
-            <div class="main-chart pie-chart">
-                <label class="fs-6">Activities</label>
-                <select id="barChartFilter" class="form-select-sm" onchange="drawBarChart">
-                    <option value="hourly">Hour</option>
-                    <option value="daily">Day</option>
-                    <option value="weekly">Week</option>
+        <div>
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+                <label class="text-light mb-0" style="white-space: nowrap;">Filter: </label>
+                <select class="form-select form-select-sm w-25" @onchange="OnChartFilterChanged">
+                    @foreach (var chartFilter in AdminDashboardTimeFilters.AS_STRING_LIST)
+                    {
+                        <option value="@chartFilter">@chartFilter</option>
+                    }
                 </select>
-                <E_BankingSystem.Components.Admin.Dashboard.Charts.BarChart />
             </div>
 
-            <!-- Right: Line + Pie Chart stacked vertically -->
-            <div class="right-charts">
-                <div class="main-chart small-chart">
-                    <label>Transaction Volume</label>
-                    <E_BankingSystem.Components.Admin.Dashboard.Charts.LineChart />
+            <hr class="divider" />
+
+            <div class="chart-section my-5">
+                <!-- Left: Bar Chart -->
+                <div class="main-chart pie-chart">
+                    <label>Activity Chart</label>
+                    <E_BankingSystem.Components.Admin.Dashboard.Charts.BarChart Labels="BarLabels" Data="BarData" />
                 </div>
-                <div class="main-chart small-chart">
-                    <label>Transaction Types Chart</label>
-                    <E_BankingSystem.Components.Admin.Dashboard.Charts.PieChart />
+
+                <!-- Right: Line + Pie Chart -->
+                <div class="right-charts">
+                    <div class="main-chart small-chart">
+                        <label>Transaction Volume</label>
+                        <E_BankingSystem.Components.Admin.Dashboard.Charts.LineChart Labels="LineLabels" Data="LineData" />
+                    </div>
+                    <div class="main-chart small-chart">
+                        <label>Transaction Types Chart</label>
+                        <E_BankingSystem.Components.Admin.Dashboard.Charts.PieChart Labels="PieLabels" Data="PieData" />
+                    </div>
                 </div>
             </div>
         </div>
 
-
+        <hr class="divider" />
 
         <div class="mt-4">
             <label class="text-light text-center fw-bold">Top 5 Largest Transactions</label>
@@ -296,6 +305,45 @@
     private decimal netMovement;
     private int newAccounts;
     private int closedAccounts;
+
+
+    private List<string> BarLabels = new();
+    private List<int> BarData = new();
+
+    private List<string> LineLabels = new();
+    private List<int> LineData = new();
+
+    private List<string> PieLabels = new() { "Withdrawals", "Deposits", "Transfers", "Loans" };
+    private List<int> PieData = new();
+
+    private async Task OnChartFilterChanged(ChangeEventArgs e)
+    {
+        var selectedChartFilter = e.Value?.ToString();
+
+        // mockup data for filter system
+        if (selectedChartFilter == Data.Constants.AdminDashboardTimeFilters.HOURLY)
+        {
+            BarLabels = new() { "Mon", "Tue", "Wed" };
+            BarData = new() { 10, 20, 30 };
+
+            LineLabels = new() { "Mon", "Tue", "Wed" };
+            LineData = new() { 5, 15, 10 };
+
+            PieData = new() { 20, 40, 30, 10 };
+        }
+        else
+        {
+            BarLabels = new() { "Thu", "Fri", "Sat" };
+            BarData = new() { 15, 25, 35 };
+
+            LineLabels = new() { "Thu", "Fri", "Sat" };
+            LineData = new() { 7, 12, 18 };
+
+            PieData = new() { 25, 35, 25, 15 };
+        }
+
+        StateHasChanged(); // this will trigger chart redraw
+    }
 
     protected override async Task OnInitializedAsync()
     {

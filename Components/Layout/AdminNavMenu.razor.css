@@ -1,7 +1,6 @@
 .sidebar {
     width: 270px;
-    min-height: 100vh;
-    height: auto;
+    height: 100%;
     overflow-y: auto;
     background: #212B5E;
     position: sticky;
@@ -9,20 +8,25 @@
     transition: width 0.3s ease;
 }
 
-    .sidebar::-webkit-scrollbar {
-        width: 6px;
-    }
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
 
-    .sidebar::-webkit-scrollbar-track {
-        background: transparent;
-    }
+.sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
 
-    .sidebar::-webkit-scrollbar-thumb {
-        background-color: rgba(255, 255, 255, 0.3);
-        border-radius: 10px;
-        border: 2px solid transparent;
-        background-clip: content-box;
-    }
+.sidebar::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+
+/*    .sidebar.hidden {
+    transform: translateX(-100%);
+    position: absolute;
+}*/
 
     .sidebar.collapsed {
         width: 80px;
@@ -55,6 +59,7 @@
         right: 10px;
         z-index: 10;
     }
+
 .profile-picture-container {
     position: relative;
     width: 150px;

@@ -145,7 +145,8 @@
     height: 400px;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
+    align-items: center;
+    justify-content: center;
 }
 
 .right-charts {
@@ -169,6 +170,9 @@
 
 .small-chart {
     height: 190px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 @media (max-width: 768px) {
