@@ -1,0 +1,30 @@
+﻿@using E_BankingSystem.Components.Admin.Dashboard.Charts
+
+@inject IJSRuntime JSRuntime
+
+<canvas id="UserLineChart"></canvas>
+
+@code {
+    [Parameter]
+    public List<string> Labels { get; set; } = new();
+
+    [Parameter]
+    public List<decimal> WithdrawData { get; set; } = new();
+
+    [Parameter]
+    public List<decimal> DepositData { get; set; } = new();
+
+    [Parameter]
+    public List<decimal> OutgoingTransfer { get; set; } = new();
+
+    [Parameter]
+    public List<decimal> IncomingTransfer { get; set; } = new();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (Labels.Count > 0 && WithdrawData.Count > 0 && DepositData.Count > 0 && OutgoingTransfer.Count > 0 && IncomingTransfer.Count > 0)
+        {
+            await JSRuntime.InvokeVoidAsync("drawUserLineChart", Labels, WithdrawData, DepositData, OutgoingTransfer, IncomingTransfer);
+        }
+    }
+}
