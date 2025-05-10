@@ -138,6 +138,8 @@
     private List<string> transactionTypes = new();
     private string selectedTransactionTypeId = "0";
 
+    private string message = "";
+
     private DateTime? startDate = DateTime.Now.Date.AddDays(-DateTime.Now.Day + 1);
     private DateTime? endDate = DateTime.Now.Date;
 
@@ -184,6 +186,12 @@
 
     private async Task FilterTransactionsAsync()
     {
+        if (startDate > endDate)
+        {
+            await InvokeMessage("Start date cannot be later than end date.");
+            return;
+        }
+
         int transactionTypeId = !string.IsNullOrWhiteSpace(selectedTransactionTypeId)
     ? Convert.ToInt32(selectedTransactionTypeId)
     : 0;
@@ -197,10 +205,10 @@
         );
 
         masterListAvailablePages = (int)Math.Ceiling((double)transactionMasterList.Count / pageSize);
-        LoadTransactionListPage(pageNumber == 0 ? 1 : pageNumber);
+        await LoadTransactionListPage(pageNumber == 0 ? 1 : pageNumber);
     }
 
-    private void LoadTransactionListPage(int page = 1)
+    private async Task LoadTransactionListPage(int page = 1)
     {
         if (transactionMasterList.Any())
         {
@@ -209,6 +217,10 @@
                 .Take(pageSize)
                 .ToList();
         }
+        else
+        {
+            await InvokeMessage("No transactions found.");
+        }
     }
 
     private async Task NextPage()
@@ -216,7 +228,7 @@
         if (pageNumber < masterListAvailablePages)
         {
             pageNumber++;
-            LoadTransactionListPage(pageNumber);
+            await LoadTransactionListPage(pageNumber);
         }
         else if (masterListPageNumber < masterListAvailablePages)
         {
@@ -233,8 +245,18 @@
             }
             else
             {
+                await InvokeMessage("You are at the last page.");
                 masterListPageNumber--;
+                return;
             }
+        }
+        else if (masterListAvailablePages == 1)
+        {
+            await InvokeMessage("There are no other page.");
+        }
+        else
+        {
+            await InvokeMessage("You are at the last Page.");    
         }
     }
 
@@ -243,13 +265,17 @@
         if (pageNumber > 1)
         {
             pageNumber--;
-            LoadTransactionListPage(pageNumber);
+            await LoadTransactionListPage(pageNumber);
         }
         else if (masterListPageNumber > 1)
         {
             masterListPageNumber--;
             pageNumber = masterListAvailablePages;
             await FilterTransactionsAsync();
+        }
+        else
+        {
+            await InvokeMessage("You are at the first page.");
         }
     }
 
@@ -286,5 +312,13 @@
         masterListPageNumber = 1;
         pageNumber = 1;
         await FilterTransactionsAsync();
+    }
+
+    private async Task InvokeMessage(string errorMessage)
+    {
+        message = errorMessage;
+        StateHasChanged();
+        await Task.Delay(5000);
+        StateHasChanged();
     }
 }
