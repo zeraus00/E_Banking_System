@@ -778,35 +778,35 @@ namespace Services.DataManagement
         /// </summary>
         /// <param name="currentDate">The current date and time.</param>
         /// <returns>A list of ChartData for the past hour.</returns>
-        public async Task<List<ChartData>> GetHourlyPieChartData(DateTime currentDate) =>
+        private async Task<List<ChartData>> GetHourlyPieChartData(DateTime currentDate) =>
             await GetPieChartDataByDateAndTime(currentDate, currentDate.AddHours(-1).TimeOfDay);
         /// <summary>
         /// Retrieves pie chart data for the previous day.
         /// </summary>
         /// <param name="currentDate">The current date.</param>
         /// <returns>A list of ChartData for the current day.</returns>
-        public async Task<List<ChartData>> GetDailyPieChartData(DateTime currentDate) =>
+        private async Task<List<ChartData>> GetDailyPieChartData(DateTime currentDate) =>
             await GetPieChartDataByDateAndTime(currentDate);
         /// <summary>
         /// Retrieves pie chart data for the past 7 days.
         /// </summary>
         /// <param name="currentDate">The current date.</param>
         /// <returns>A list of ChartData for the past week.</returns>
-        public async Task<List<ChartData>> GetWeeklyPieChartData(DateTime currentDate) =>
+        private async Task<List<ChartData>> GetWeeklyPieChartData(DateTime currentDate) =>
             await GetPieChartDataByDateAndTime(currentDate.AddDays(-7));
         /// <summary>
         /// Retrieves pie chart data for the past month (approximated using DateTime.AddMonths).
         /// </summary>
         /// <param name="currentDate">The current date.</param>
         /// <returns>A list of ChartData for the past month.</returns>
-        public async Task<List<ChartData>> GetMonthlyPieChartData(DateTime currentDate) =>
+        private async Task<List<ChartData>> GetMonthlyPieChartData(DateTime currentDate) =>
             await GetPieChartDataByDateAndTime(currentDate.AddMonths(-1));
         /// <summary>
         /// Retrieves pie chart data for the past year (approximated using DateTime.AddYears).
         /// </summary>
         /// <param name="currentDate">The current date.</param>
         /// <returns>A list of ChartData for the past year.</returns>
-        public async Task<List<ChartData>> GetYearlyPieChartData(DateTime currentDate) =>
+        private async Task<List<ChartData>> GetYearlyPieChartData(DateTime currentDate) =>
             await GetPieChartDataByDateAndTime(currentDate.AddYears(-1));
         /// <summary>
         /// Retrieves pie chart data starting from a given date and optionally a specific time of day.
@@ -838,6 +838,9 @@ namespace Services.DataManagement
                     }).ToListAsync();
             }
         }
+        #endregion
+        #region Bar Chart
+
         #endregion
         #endregion
         #endregion
