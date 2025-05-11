@@ -96,7 +96,7 @@ window.drawBarChart = (labels, data) => {
     });
 };
 
-window.drawUserLineChart = (labels, withdrawData, depositData, outgoingTransfer, incomingTransfer) => {
+window.drawUserLineChart = (labels, withdrawData, depositData, outgoingTransfer, incomingTransfer, netBalance) => {
     const ctxUserLine = document.getElementById('UserLineChart').getContext('2d');
 
     if (window.lineInstance) {
@@ -109,9 +109,16 @@ window.drawUserLineChart = (labels, withdrawData, depositData, outgoingTransfer,
             labels: labels,
             datasets: [
                 {
+                    label: 'Net Balance',
+                    data: netBalance,
+                    backgroundColor: 'rgba(211, 211, 211, 0.6)',
+                    borderWidth: 2,
+                    fill: false
+                },
+                {
                     label: 'Withdraw',
                     data: withdrawData,
-                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderColor: 'rgba(75, 192, 192, 0.6)',
                     borderWidth: 2,
                     fill: false
                 },

@@ -283,7 +283,7 @@
                         @foreach (var t in mockTransactions)
                         {
                             <tr>
-                                <td>@t.AccountNo</td
+                                <td>@t.AccountNo</td>
                                 <td>@t.AccountName</td>
                                 <td>@t.Amount</td>
                                 <td>@t.Type</td>
@@ -410,7 +410,7 @@
         PieData = PieChartData.Select(pcd => pcd.Value).ToList();
         //  BarChart
         BarChartTitle = "Transaction Type Breakdown by " + filterMode;
-        var BarChartData = await adminDataService.GetTrsansactionsVolumeByTimeFilter(filterMode, DateTime.Now);
+        var BarChartData = await adminDataService.GetTransactionsVolumeByTimeFilter(filterMode, DateTime.Now);
         BarLabels = BarChartData.Select(bcd => bcd.Label).ToList();
         BarData = BarChartData.Select(bcd => bcd.DataUnits).ToList();
 

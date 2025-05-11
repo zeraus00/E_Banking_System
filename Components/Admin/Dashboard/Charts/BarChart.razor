@@ -16,12 +16,11 @@
     {
         if (Labels.Count > 0 && Data.Count > 0)
         {
-            var dataSets = Enumerable.Range(0, Data[0].Count)
-                .Select(col => Data.Select(row => row[col])).ToList();
             var dataSet1 = Data.Select(row => row[0].Value).ToList();
             var dataSet2 = Data.Select(row => row[1].Value).ToList();
             var dataSet3 = Data.Select(row => row[2].Value).ToList();
-            await JSRuntime.InvokeVoidAsync("drawDashboardBarChart", Labels, dataSet1, dataSet2, dataSet3);
+            var dataSet4 = Data.Select(row => row[4].Value).ToList();
+            await JSRuntime.InvokeVoidAsync("drawDashboardBarChart", Labels, dataSet1, dataSet2, dataSet3, dataSet4);
         }
     }
 }
