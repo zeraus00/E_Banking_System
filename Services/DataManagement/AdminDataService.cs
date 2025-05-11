@@ -292,7 +292,8 @@ namespace Services.DataManagement
                 //  Exclude incoming transfers.
                 var queryBuilder = transactionRepo
                     .Query
-                    .ExceptTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer);
+                    .ExceptTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer)
+                    .HasStatusConfirmed();
 
                 //  Filter by start and end dates as needed.
                 if (startDate is DateTime sDate)
