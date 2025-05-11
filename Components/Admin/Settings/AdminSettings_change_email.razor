@@ -1,0 +1,102 @@
+﻿@using ViewModels;
+
+@page "/AdminSettings_change_email"
+@attribute [Authorize(Roles = "Administrator")]
+@rendermode InteractiveServer
+
+@inject PageRedirectService redirectService
+@inject UserSessionService adminSessionService
+
+<div class="page">
+	<main>
+		<!-- Header -->
+		<header class="custom-card-clientpage clientheader py-4 align-items-start">
+			<div class="px-5">
+				<div class="d-flex align-items-center my-4">
+					<h2>Update Email</h2>
+				</div>
+			</div>
+		</header>
+
+		<!-- Main Content -->
+		<div class="card registration shadow mt-3">
+			<div class="mt-3 mx-5">
+
+				<!-- Password Conditions -->
+				<h5 class="text-start fw-light text-light my-3">
+					Enter your new email address.
+				</h5>
+				<ul class="fs-6 fw-light">
+					<li>
+						A verification email will be sent to the new email address.
+						Click the URL in the verification email to complete the procedure.
+					</li>
+				</ul>
+			</div>
+			<EditForm Model="emailChangeModel" OnValidSubmit="ValidateEmail" FormName="ChangeEmailConfirm">
+				<DataAnnotationsValidator />
+				<!-- Password Fields -->
+				<div class="loginform sm mt-1">
+
+					<InputText class="form-control form-control-custom form-control-lg mb-3" type="email" @bind-Value="emailChangeModel.EmailNew" placeholder="New Email Address" />
+					<ValidationMessage For="() => emailChangeModel.EmailNew" />
+					<InputText class="form-control form-control-custom form-control-lg mb-3" type="email" @bind-Value="emailChangeModel.EmailConfirm" placeholder="Confirm New Email Address" />
+					<ValidationMessage For="() => emailChangeModel.EmailNew" />
+				</div>
+
+				<!-- Change Password Button -->
+				<div class="mt-3 text-center">
+					<NavLink class="w-25 mx-auto" href="/AdminSettings_page">
+						<button class="btn btn-danger w-25">Cancel</button>
+					</NavLink>
+					<button type="submit" class="btn btn-primary w-25">Send Verification Email</button>
+				</div>
+			</EditForm>
+
+		</div>
+	</main>
+</div>
+
+@code 
+{
+	[SupplyParameterFromForm]
+	private EmailChangeViewModel emailChangeModel { get; set; } = new();
+
+	private string error = string.Empty;
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			try
+			{
+				//	Get user session details from session storage.
+				//	Throws SessionNotFoundException if session is not found.
+				AdminSession adminSession = await adminSessionService.GetAdminSession();
+
+				//	Reload component.
+				StateHasChanged();
+			}
+			catch (SessionNotFoundException)
+			{
+				//	Redirect to LOGGING_IN_PAGE if session is not found.
+				redirectService.redirectWithNavigationManager(PageRoutes.LOGGING_IN_PAGE);
+			}
+		}
+	}
+
+	private void ValidateEmail() 
+	{
+		if (emailChangeModel.EmailNew!.Equals(emailChangeModel.EmailConfirm)) 
+		{
+			//	Handle email verification logic here.
+
+			//	Redirect to LOG_OUT_PAGE.
+			redirectService.redirectWithNavigationManager(PageRoutes.LOG_OUT_PAGE);
+			return;
+		} else 
+		{
+			error = "Emails do not match.";
+		}
+	}
+}

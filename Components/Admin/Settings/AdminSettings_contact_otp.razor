@@ -1,0 +1,63 @@
+﻿@page "/AdminSettings_contact_otp"
+@attribute [Authorize(Roles = "Administrator")]
+
+@inject NavigationManager NavigationManager
+@inject ClaimsHelperService claimsHelper
+@inject NexusAuthenticationStateProvider authenticationStateProvider
+@inject PageRedirectService redirectService
+
+<div class="page">
+	<main>
+		<!-- Header -->
+		<header class="custom-card-clientpage clientheader py-4 align-items-start">
+			<div class="px-5">
+				<div class="d-flex align-items-center my-4">
+					<h2>Verification</h2>
+				</div>
+			</div>
+		</header>
+
+		<!-- Verification Card Container -->
+		<div class="card registration shadow-lg mt-3">
+			<h3 class="fw-bold text-light mt-5 mx-5">Enter Verification Pin</h3>
+
+			<!-- Instructions -->
+			<h5 class="indent fw-light text-light my-3 mx-5">
+				A one-time password (OTP) has been sent to your new contact number. Enter the OTP code to complete the procedure.
+			</h5>
+
+			<!-- OTP Input Field -->
+			<div class="otp-container mt-3 mb-3">
+				@for (int i = 0; i < 6; i++)
+				{
+					<input 
+						type="text" 
+						class="otp-input" 
+						maxlength="1" 
+						id="otp-@i" 
+						/>
+				}
+			</div>
+
+			<!-- Continue Button -->
+			<NavLink class="btn btn-primary btn-lg d-grid col-4 mx-auto mt-3" href="/AdminSettings_page">
+				Submit
+			</NavLink>
+
+			<!-- Resend Pin Navlink -->
+			<NavLink class="nav-link custom-nav-link-2 fw-lighter mx-auto mt-1 mb-5" href="#">
+				Resend pin
+			</NavLink>
+
+			<!-- try Another Way Navlink -->
+@* 			<NavLink class="nav-link custom-nav-link-2 fw-lighter mx-auto mb-5" href="#">
+				Try another way
+			</NavLink> *@
+
+			<NavLink class="nav-link custom-nav-link margin" href="/AdminSettings_page">
+				← Go Back
+			</NavLink>
+		</div>
+
+	</main>
+</div>

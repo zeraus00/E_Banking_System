@@ -18,6 +18,10 @@
         public const string LOAN_RECEIPT = "/Loan_receipt";
         public const string LOAN_BALANCE = "/Check_Loan_Balance";
 
+        public const string ADMINSETTINGS_CHANGE_PASSWORD = "/AdminSettings_change_password";
+        public const string ADMINSETTINGS_CHANGE_CONTACT = "/AdminSettings_change_contact";
+        public const string ADMINSETTINGS_CHANGE_EMAIL = "/AdminSettings_change_email";
+
         public const string ACCOUNTS = "/Accounts";
         public const string ADD_ACCOUNT = "/Add_account";
         public const string CLIENT_HOME = "/Client_home";

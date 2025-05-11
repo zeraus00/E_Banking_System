@@ -17,6 +17,8 @@
 
   <ItemGroup>
     <Content Remove="Components\Admin\Filter.razor" />
+    <Content Remove="Components\Admin\Settings\AdminSettings_change_contact.razor" />
+    <Content Remove="Components\Admin\Settings\AdminSettings_contact_password.razor" />
     <Content Remove="Components\Client_page\Accounts\AddAccount.razor" />
     <Content Remove="Components\Client_page\Accounts\ManageAccounts.razor" />
     <Content Remove="Components\Client_page\Accounts\Manage_accounts.razor" />

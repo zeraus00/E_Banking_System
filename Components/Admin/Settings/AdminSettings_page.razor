@@ -1,0 +1,111 @@
+﻿@using Helpers;
+
+@page "/AdminSettings_page"
+@attribute [Authorize(Roles="Administrator")]
+@rendermode InteractiveServer
+
+@inject PageRedirectService redirectService
+@inject AdminControlledSessionService adminControlledSessionService
+@inject UserSessionService userSessionService
+
+<div class="page">
+	<main>
+
+		<!-- Header -->
+		<header class="custom-card-clientpage clientheader py-4 align-items-start">
+			<div class="px-5">
+				<div class="d-flex align-items-center my-4">
+					<h2>Settings</h2>
+				</div>
+			</div>
+		</header>
+
+		<!-- Settings Main Content -->
+		<div class="container-fluid text-white px-4 py-5">
+
+			<div class="card registration shadow-lg p-5">
+				<!-- Profile Section -->
+				<div class="d-flex align-items-center mb-4">
+					<div class="rounded-circle bg-secondary" style="width: 80px; height: 80px;"></div>
+					<div class="ms-3">
+						<h5 class="mb-1">@clientName</h5>
+					</div>
+				</div>
+
+				<!-- Email -->
+				<div class="mb-3 border-bottom pb-2 d-flex justify-content-between align-items-center">
+					<div>
+						<label class="form-label text-muted">Email Address</label>
+						<div>@email</div>
+					</div>
+					<NavLink class="custom-nav-link" href="/AdminSettings_email_password">
+						<button class="btn btn-link text-decoration-none text-light">Change</button>
+					</NavLink>
+				</div>
+
+@* 				<!-- Contact Number -->
+				<div class="mb-3 border-bottom pb-2 d-flex justify-content-between align-items-center">
+					<div>
+						<label class="form-label text-muted">Contact No.</label>
+						<div>@FormatHelper.PhoneNumberFormatter(contactNo)</div>
+					</div>
+					<NavLink class="custom-nav-link" href="/AdminSettings_contact_password">
+						<button class="btn btn-link text-decoration-none text-light">Change</button>
+					</NavLink>
+				</div> *@
+
+				<!-- Password -->
+				<div class="border-bottom pb-2 d-flex justify-content-between align-items-center">
+					<div>
+						<label class="form-label text-muted">Password</label>
+						<div>**********</div>
+					</div>
+					<NavLink class="custom-nav-link" href="/AdminSettings_password_otp">
+						<button class="btn btn-link text-decoration-none text-light">Change</button>
+					</NavLink>
+				</div>
+
+				<!-- Go Back Navlink -->
+				<section class="d-flex justify-content-end align-items-end">
+					<a href="/Dashboard_home" class="btn btn-primary btn-lg mt-5 mb-3">
+						← Go Back
+					</a>
+				</section>
+			</div>
+		</div>
+	</main>
+</div>
+
+@code 
+{
+	private AdminSession adminSession { get; set; } = default!;
+	private LinkedAccount activeAccountSession { get; set; } = default!;
+	private string email = "Loading...";
+	private string clientName = "Loading...";
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			try
+			{
+				//	Get user session details from session storage.
+				//	Throws SessionNotFoundException if session is not found.
+				adminSession = await userSessionService.GetAdminSession();
+				// activeAccountSession = await adminControlledSessionService.GetActiveAccountSessionAsync(adminSession);
+
+				//	Set display data.
+				email = adminSession.Email;
+				clientName = adminSession.FullName;
+
+				//	Reload component.
+				StateHasChanged();
+			}
+			catch (SessionNotFoundException)
+			{
+				//	Redirect to LOGGING_IN_PAGE if session is not found.
+				redirectService.redirectWithNavigationManager(PageRoutes.LOGGING_IN_PAGE);
+			}
+		}
+	}
+}
