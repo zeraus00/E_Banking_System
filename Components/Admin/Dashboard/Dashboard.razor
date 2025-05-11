@@ -137,7 +137,7 @@
                         <i class="bi bi-cash-stack me-2"></i>
                         <span class="fst-italic">Total Volume</span>
                     </div>
-                    <p class="text-end number mb-0">@transactionVolume</p>
+                    <p class="text-end number mb-0">@FormatHelper.BalanceFormatter(transactionVolume)</p>
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center mt-4">
@@ -145,7 +145,7 @@
                         <i class="bi bi-graph-up-arrow me-2"></i>
                         <span class="fst-italic">Net Movement</span>
                     </div>
-                    <p class="text-end number mb-0">@netMovement</p>
+                    <p class="text-end number mb-0">@FormatHelper.BalanceFormatter(netMovement)</p>
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center mt-4">
@@ -321,7 +321,7 @@
     private decimal totalLoans;
 
     //  For key metrics.
-    private int transactionVolume;
+    private decimal transactionVolume;
     private decimal netMovement;
     private int newAccounts;
     private int closedAccounts;
@@ -388,10 +388,10 @@
         totalTransfers = transactionBreakdowns[TransactionTypes.OUTGOING_TRANSFER].Total;
         //  Loans count and total amount.
         loanCount = await adminDataService.GetLoanCountAsync(startDate, endDate);
-        totalLoans = 0;
+        totalLoans = await adminDataService.GetLoanAmountAsync(startDate, endDate);
         //  Load Key Metrics.
-        transactionVolume = adminDataService.GetTransactionVolume(transactionBreakdowns);
-        netMovement = adminDataService.GetNetMovement(transactionBreakdowns);
+        transactionVolume = adminDataService.GetTransactionVolume(transactionBreakdowns, totalLoans);
+        netMovement = adminDataService.GetNetMovement(transactionBreakdowns, totalLoans);
         newAccounts = await adminDataService.GetNewAccountsCount(startDate, endDate);
         closedAccounts = await adminDataService.GetClosedAccountsCount(startDate, endDate);
     }
