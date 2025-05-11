@@ -521,6 +521,7 @@ namespace Services.DataManagement
                     .HasStartDate(currentDate.Date)
                     .ExceptTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer)
                     .ExceptTransactionTypeId((int)TransactionTypeIDs.Outgoing_Transfer)
+                    .HasStatusConfirmed()
                     .GetQuery()
                     .GroupBy(t => t.TransactionTime.Hours)
                     .OrderBy(transactionGroup => transactionGroup.Key)
@@ -570,6 +571,8 @@ namespace Services.DataManagement
                 List<ChartData> chartData = await queryBuilder
                     .HasStartDate(dailyModeStartDate.Date)
                     .ExceptTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer)
+                    .ExceptTransactionTypeId((int)TransactionTypeIDs.Outgoing_Transfer)
+                    .HasStatusConfirmed()
                     .GetQuery()
                     .GroupBy(t => t.TransactionDate.Date)
                     .OrderBy(transactionGroup => transactionGroup.Key)
@@ -620,6 +623,8 @@ namespace Services.DataManagement
                 var result = await queryBuilder
                     .HasStartDate(weeklyModeStartDate.Date)
                     .ExceptTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer)
+                    .ExceptTransactionTypeId((int)TransactionTypeIDs.Outgoing_Transfer)
+                    .HasStatusConfirmed()
                     .GetQuery()
                     .GroupBy(t => t.TransactionDate.Date)
                     .OrderBy(transactionGroup => transactionGroup.Key)
@@ -684,6 +689,8 @@ namespace Services.DataManagement
                 List<ChartData> chartData = await queryBuilder
                     .HasStartDate(monthlyModeStartDate.Date)
                     .ExceptTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer)
+                    .ExceptTransactionTypeId((int)TransactionTypeIDs.Outgoing_Transfer)
+                    .HasStatusConfirmed()
                     .GetQuery()
                     .GroupBy(t => t.TransactionDate.Month)
                     .OrderBy(transactionGroup => transactionGroup.Key)
@@ -731,6 +738,8 @@ namespace Services.DataManagement
                 List<ChartData> chartData = await queryBuilder
                     .HasStartDate(yearlyModeStartDate)
                     .ExceptTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer)
+                    .ExceptTransactionTypeId((int)TransactionTypeIDs.Outgoing_Transfer) 
+                    .HasStatusConfirmed()
                     .GetQuery()
                     .GroupBy(t => t.TransactionDate.Year)
                     .OrderBy(transactionGroup => transactionGroup.Key)
@@ -765,11 +774,11 @@ namespace Services.DataManagement
         /// </summary>
         /// <param name="currentDate">The base date used to calculate each time filter's start date.</param>
         /// <returns>A dictionary where each key is a time filter label and the value is the pie chart data for that filter.</returns>
-        public async Task<Dictionary<string, List<ChartData>>> GetTransactionTypeCountsDictionary(DateTime currentDate)
+        public async Task<Dictionary<string, List<ChartData>>> GetTransactionTypeCountsDictionary(DateTime currentDate, params string[] exceptStatus)
         {
             Dictionary<string, List<ChartData>> chartCache = new();
             foreach (var filter in AdminDashboardTimeFilters.AS_STRING_LIST)
-                chartCache[filter] = await GetRecentTransactionTypeCounts(filter, currentDate.AddDays(-1));
+                chartCache[filter] = await GetRecentTransactionTypeCounts(filter, currentDate.AddDays(-1), exceptStatus);
             return chartCache;
         }
         /// <summary>
@@ -778,15 +787,15 @@ namespace Services.DataManagement
         /// <param name="filterMode">The time filter mode (e.g., hourly, daily, weekly).</param>
         /// <param name="currentDate">The current date used to calculate the range of the filter.</param>
         /// <returns>A list of ChartData objects grouped by transaction type.</returns>
-        public async Task<List<ChartData>> GetRecentTransactionTypeCounts(string filterMode, DateTime currentDate)
+        public async Task<List<ChartData>> GetRecentTransactionTypeCounts(string filterMode, DateTime currentDate, params string[] exceptStatus)
         {
             return filterMode switch
             {
-                AdminDashboardTimeFilters.HOURLY => await GetLastHourTransactionTypeCounts(currentDate),
-                AdminDashboardTimeFilters.DAILY => await GetLastDayTransactionTypeCounts(currentDate),
-                AdminDashboardTimeFilters.WEEKLY => await GetLastWeekTransactionTypeCounts(currentDate),
-                AdminDashboardTimeFilters.MONTHLY => await GetLastMonthTransactionTypeCounts(currentDate),
-                AdminDashboardTimeFilters.YEARLY => await GetLastYearTransactionTypeCounts(currentDate),
+                AdminDashboardTimeFilters.HOURLY => await GetLastHourTransactionTypeCounts(currentDate, exceptStatus),
+                AdminDashboardTimeFilters.DAILY => await GetLastDayTransactionTypeCounts(currentDate, exceptStatus),
+                AdminDashboardTimeFilters.WEEKLY => await GetLastWeekTransactionTypeCounts(currentDate, exceptStatus),
+                AdminDashboardTimeFilters.MONTHLY => await GetLastMonthTransactionTypeCounts(currentDate, exceptStatus),
+                AdminDashboardTimeFilters.YEARLY => await GetLastYearTransactionTypeCounts(currentDate, exceptStatus),
                 _ => new List<ChartData>()
             };
         }
@@ -795,36 +804,36 @@ namespace Services.DataManagement
         /// </summary>
         /// <param name="currentDate">The current date and time.</param>
         /// <returns>A list of ChartData for the past hour.</returns>
-        private async Task<List<ChartData>> GetLastHourTransactionTypeCounts(DateTime currentDate) =>
-            await GetPieChartDataByDateAndTime(currentDate, currentDate.AddHours(-1).TimeOfDay);
+        private async Task<List<ChartData>> GetLastHourTransactionTypeCounts(DateTime currentDate, params string[] exceptStatus) =>
+            await GetPieChartDataByDateAndTime(currentDate, currentDate.AddHours(-1).TimeOfDay, exceptStatus: exceptStatus);
         /// <summary>
         /// Retrieves pie chart data for the previous day.
         /// </summary>
         /// <param name="currentDate">The current date.</param>
         /// <returns>A list of ChartData for the current day.</returns>
-        private async Task<List<ChartData>> GetLastDayTransactionTypeCounts(DateTime currentDate) =>
-            await GetPieChartDataByDateAndTime(currentDate);
+        private async Task<List<ChartData>> GetLastDayTransactionTypeCounts(DateTime currentDate, params string[] exceptStatus) =>
+            await GetPieChartDataByDateAndTime(currentDate, exceptStatus: exceptStatus);
         /// <summary>
         /// Retrieves pie chart data for the past 7 days.
         /// </summary>
         /// <param name="currentDate">The current date.</param>
         /// <returns>A list of ChartData for the past week.</returns>
-        private async Task<List<ChartData>> GetLastWeekTransactionTypeCounts(DateTime currentDate) =>
-            await GetPieChartDataByDateAndTime(currentDate.AddDays(-7));
+        private async Task<List<ChartData>> GetLastWeekTransactionTypeCounts(DateTime currentDate, params string[] exceptStatus) =>
+            await GetPieChartDataByDateAndTime(currentDate.AddDays(-7), exceptStatus: exceptStatus);
         /// <summary>
         /// Retrieves pie chart data for the past month (approximated using DateTime.AddMonths).
         /// </summary>
         /// <param name="currentDate">The current date.</param>
         /// <returns>A list of ChartData for the past month.</returns>
-        private async Task<List<ChartData>> GetLastMonthTransactionTypeCounts(DateTime currentDate) =>
-            await GetPieChartDataByDateAndTime(currentDate.AddMonths(-1));
+        private async Task<List<ChartData>> GetLastMonthTransactionTypeCounts(DateTime currentDate, params string[] exceptStatus) =>
+            await GetPieChartDataByDateAndTime(currentDate.AddMonths(-1), exceptStatus: exceptStatus);
         /// <summary>
         /// Retrieves pie chart data for the past year (approximated using DateTime.AddYears).
         /// </summary>
         /// <param name="currentDate">The current date.</param>
         /// <returns>A list of ChartData for the past year.</returns>
-        private async Task<List<ChartData>> GetLastYearTransactionTypeCounts(DateTime currentDate) =>
-            await GetPieChartDataByDateAndTime(currentDate.AddYears(-1));
+        private async Task<List<ChartData>> GetLastYearTransactionTypeCounts(DateTime currentDate, params string[] exceptStatus) =>
+            await GetPieChartDataByDateAndTime(currentDate.AddYears(-1), exceptStatus: exceptStatus);
         /// <summary>
         /// Retrieves pie chart data starting from a given date and optionally a specific time of day.
         /// Filters out transactions of a specific type (Incoming Transfer).
@@ -832,7 +841,7 @@ namespace Services.DataManagement
         /// <param name="startDate">The starting date for the data range.</param>
         /// <param name="startTime">Optional: the starting time on the given date to begin filtering.</param>
         /// <returns>A list of ChartData grouped by transaction type.</returns>
-        private async Task<List<ChartData>> GetPieChartDataByDateAndTime(DateTime startDate, TimeSpan? startTime = null)
+        private async Task<List<ChartData>> GetPieChartDataByDateAndTime(DateTime startDate, TimeSpan? startTime = null, params string[] exceptStatus)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
@@ -842,6 +851,9 @@ namespace Services.DataManagement
 
                 if (startTime is not null)
                     queryBuilder.HasStartTime(startTime.Value);
+
+                foreach (var status in exceptStatus)
+                    queryBuilder.ExceptStatus(status);
 
                 return await queryBuilder
                     .HasStartDate(startDate.Date)
