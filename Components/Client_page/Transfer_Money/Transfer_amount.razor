@@ -1,4 +1,5 @@
 ﻿@using Helpers;
+@using System.Text.RegularExpressions;
 @using E_BankingSystem.Components.Client_page.Method;
 @page "/Transfer_amount"
 @attribute [Authorize(Roles = "User")]
@@ -75,7 +76,7 @@
                             <div class="row g-2 mb-4">
                                 <div class="col-12 col-md-6">
                                     <label class="text-light">Enter Account Number</label>
-                                    <input type="number" class="form-control form-control-custom mb-1" placeholder="Account Number"
+                                    <input class="form-control form-control-custom mb-1" placeholder="Account Number"
                                     @bind="otherAccountNumber" required />
                                 </div>
                                 <div class="col-12 col-md-6">
@@ -140,6 +141,7 @@
     private int selectedOwnAccountId = 0;
     private string otherAccountName = "";
     private string otherAccountNumber = "";
+    private string strippedOtherAccountNumber = "";
     private decimal? transferAmount = null;
 
     private bool accountCanTransfer = true;
@@ -223,7 +225,7 @@
 
             int finalCounterId = transferType.Equals("Own")
                 ? selectedOwnAccountId
-                : await userDataService.GetAccountIdAsync(otherAccountNumber.Replace('-'.ToString(), ""), otherAccountName);
+                : await userDataService.GetAccountIdAsync(strippedOtherAccountNumber, otherAccountName);
             transactionSession = await transactionService.CreateTransactionAsync(
                 accountId,
                 (int)TransactionTypeIDs.Outgoing_Transfer,
@@ -264,10 +266,13 @@
             error = "Please select one of your own accounts.";
         else if (transferType == "Other")
         {
-            if (string.IsNullOrWhiteSpace(otherAccountNumber))
+            strippedOtherAccountNumber = otherAccountNumber.Replace("-", "").Trim();
+            if (string.IsNullOrWhiteSpace(strippedOtherAccountNumber))
                 error = "Please enter the recipient's account number.";
-            if (string.IsNullOrWhiteSpace(otherAccountName))
+            if (string.IsNullOrWhiteSpace(strippedOtherAccountNumber))
                 error = "Please enter the recipient's account name.";
+            if (!Regex.IsMatch(strippedOtherAccountNumber, @"^\d+$"))
+                error = "Please enter a valid account number.";
         }
         else if (!transferAmount.HasValue || transferAmount <= 0)
             error = "Please enter a valid transfer amount.";

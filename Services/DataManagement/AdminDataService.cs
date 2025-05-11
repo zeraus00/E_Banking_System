@@ -455,7 +455,7 @@ namespace Services.DataManagement
         }
         #endregion
         #region Chart Data
-        #region Line Chart
+        #region Net Movement Data By Time Filter
         /// <summary>
         /// Asynchronously retrieves transaction chart data for all predefined time filter modes
         /// (e.g., hourly, daily, weekly, monthly, yearly), excluding the current day,
@@ -470,11 +470,11 @@ namespace Services.DataManagement
         /// and the value is a list of <see cref="ChartData"/> representing the transaction totals for 
         /// that time frame.
         /// </returns>
-        public async Task<Dictionary<string, List<ChartData>>> GetAllLineChartData(DateTime currentDate)
+        public async Task<Dictionary<string, List<ChartData>>> GetNetMovementDictionary(DateTime currentDate)
         {
             Dictionary<string, List<ChartData>> chartCache = new();
             foreach(var filter in AdminDashboardTimeFilters.AS_STRING_LIST)
-                chartCache[filter] = await GetLineChartData(filter, currentDate.AddDays(-1));
+                chartCache[filter] = await GetNetMovementByTimeFilter(filter, currentDate.AddDays(-1));
             return chartCache;
         }
         /// <summary>
@@ -488,15 +488,15 @@ namespace Services.DataManagement
         /// A list of <see cref="ChartData"/> representing the total transaction amounts grouped by the specified time interval.
         /// If the filter mode is unrecognized, an empty list is returned.
         /// </returns>
-        public async Task<List<ChartData>> GetLineChartData(string filterMode, DateTime currentDate)
+        public async Task<List<ChartData>> GetNetMovementByTimeFilter(string filterMode, DateTime currentDate)
         {
             return filterMode switch
             {
-                AdminDashboardTimeFilters.HOURLY => await GetHourlyLineChartData(currentDate),
-                AdminDashboardTimeFilters.DAILY => await GetDailyLineChartData(currentDate),
-                AdminDashboardTimeFilters.WEEKLY => await GetWeeklyLineChartData(currentDate),
-                AdminDashboardTimeFilters.MONTHLY => await GetMonthlyLineChartData(currentDate),
-                AdminDashboardTimeFilters.YEARLY => await GetYearlyLineChartData(currentDate),
+                AdminDashboardTimeFilters.HOURLY => await GetHourlyNetMovement(currentDate),
+                AdminDashboardTimeFilters.DAILY => await GetDailyNetMovement(currentDate),
+                AdminDashboardTimeFilters.WEEKLY => await GetWeeklyNetMovement(currentDate),
+                AdminDashboardTimeFilters.MONTHLY => await GetMonthlyNetMovement(currentDate),
+                AdminDashboardTimeFilters.YEARLY => await GetYearlyNetMovement(currentDate),
                 _ => new List<ChartData>()
             };
         }
@@ -510,7 +510,7 @@ namespace Services.DataManagement
         /// A list of <see cref="ChartData"/> where each item represents a specific hour and the total transaction 
         /// amount for that hour.
         /// </returns>
-        private async Task<List<ChartData>> GetHourlyLineChartData(DateTime currentDate)
+        private async Task<List<ChartData>> GetHourlyNetMovement(DateTime currentDate)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
@@ -520,13 +520,18 @@ namespace Services.DataManagement
                 List<ChartData> chartData = await queryBuilder
                     .HasStartDate(currentDate.Date)
                     .ExceptTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer)
+                    .ExceptTransactionTypeId((int)TransactionTypeIDs.Outgoing_Transfer)
+                    .HasStatusConfirmed()
                     .GetQuery()
                     .GroupBy(t => t.TransactionTime.Hours)
-                    .OrderBy(g => g.Key)
-                    .Select(g => new ChartData
+                    .OrderBy(transactionGroup => transactionGroup.Key)
+                    .Select(transactionGroup => new ChartData
                     {
-                        Label = new DateTime(1, 1, 1, g.Key, 0, 0).ToString("hh tt"),
-                        Value = g.Sum(t => t.Amount)
+                        Label = new DateTime(1, 1, 1, transactionGroup.Key, 0, 0).ToString("hh tt"),
+                        Value = transactionGroup.Sum(t =>
+                            t.TransactionTypeId == (int)TransactionTypeIDs.Deposit ? t.Amount :
+                            t.TransactionTypeId == (int)TransactionTypeIDs.Withdrawal ? -t.Amount :
+                            0)
                     }).ToListAsync();
                 int currentHour = currentDate.Hour;
                 for (int i = 0; i <= currentHour; i++)
@@ -554,7 +559,7 @@ namespace Services.DataManagement
         /// A list of <see cref="ChartData"/> where each item represents a date label and the total transaction amount for 
         /// that day.
         /// </returns>
-        private async Task<List<ChartData>> GetDailyLineChartData(DateTime currentDate)
+        private async Task<List<ChartData>> GetDailyNetMovement(DateTime currentDate)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
@@ -566,13 +571,18 @@ namespace Services.DataManagement
                 List<ChartData> chartData = await queryBuilder
                     .HasStartDate(dailyModeStartDate.Date)
                     .ExceptTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer)
+                    .ExceptTransactionTypeId((int)TransactionTypeIDs.Outgoing_Transfer)
+                    .HasStatusConfirmed()
                     .GetQuery()
                     .GroupBy(t => t.TransactionDate.Date)
-                    .OrderBy(g => g.Key)
-                    .Select(g => new ChartData
+                    .OrderBy(transactionGroup => transactionGroup.Key)
+                    .Select(transactionGroup => new ChartData
                     {
-                        Label = g.Key.ToString("MMM dd"),
-                        Value = g.Sum(t => t.Amount)
+                        Label = transactionGroup.Key.ToString("MMM dd"),
+                        Value = transactionGroup.Sum(t =>
+                            t.TransactionTypeId == (int)TransactionTypeIDs.Deposit ? t.Amount :
+                            t.TransactionTypeId == (int)TransactionTypeIDs.Withdrawal ? -t.Amount :
+                            0)
                     }).ToListAsync();
 
                 for (int dayIterator = 0; dailyModeStartDate.AddDays(dayIterator) <= currentDate; dayIterator++)
@@ -600,7 +610,7 @@ namespace Services.DataManagement
         /// A list of <see cref="ChartData"/> where each item represents a week label (e.g., "Week 1") and the total 
         /// transaction amount for that week.
         /// </returns>
-        private async Task<List<ChartData>> GetWeeklyLineChartData(DateTime currentDate)
+        private async Task<List<ChartData>> GetWeeklyNetMovement(DateTime currentDate)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
@@ -613,13 +623,18 @@ namespace Services.DataManagement
                 var result = await queryBuilder
                     .HasStartDate(weeklyModeStartDate.Date)
                     .ExceptTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer)
+                    .ExceptTransactionTypeId((int)TransactionTypeIDs.Outgoing_Transfer)
+                    .HasStatusConfirmed()
                     .GetQuery()
                     .GroupBy(t => t.TransactionDate.Date)
-                    .OrderBy(g => g.Key)
-                    .Select(g => new
+                    .OrderBy(transactionGroup => transactionGroup.Key)
+                    .Select(transactionGroup => new
                     {
-                        Label = g.Key,
-                        Value = g.Sum(t => t.Amount)
+                        Label = transactionGroup.Key,
+                        Value = transactionGroup.Sum(t =>
+                            t.TransactionTypeId == (int)TransactionTypeIDs.Deposit ? t.Amount :
+                            t.TransactionTypeId == (int)TransactionTypeIDs.Withdrawal ? -t.Amount :
+                            0)
                     }).ToListAsync();
 
                 //  Initialize fillers for days where no transactions took place.
@@ -663,7 +678,7 @@ namespace Services.DataManagement
         /// A list of <see cref="ChartData"/> where each item represents a month label (e.g., "Jan") and the total 
         /// transaction amount for that month.
         /// </returns>
-        private async Task<List<ChartData>> GetMonthlyLineChartData(DateTime currentDate)
+        private async Task<List<ChartData>> GetMonthlyNetMovement(DateTime currentDate)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
@@ -674,13 +689,18 @@ namespace Services.DataManagement
                 List<ChartData> chartData = await queryBuilder
                     .HasStartDate(monthlyModeStartDate.Date)
                     .ExceptTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer)
+                    .ExceptTransactionTypeId((int)TransactionTypeIDs.Outgoing_Transfer)
+                    .HasStatusConfirmed()
                     .GetQuery()
                     .GroupBy(t => t.TransactionDate.Month)
-                    .OrderBy(g => g.Key)
-                    .Select(g => new ChartData
+                    .OrderBy(transactionGroup => transactionGroup.Key)
+                    .Select(transactionGroup => new ChartData
                     {
-                        Label = new DateTime(1, g.Key, 1).ToString("MMM"),
-                        Value = g.Sum(t => t.Amount)
+                        Label = new DateTime(1, transactionGroup.Key, 1).ToString("MMM"),
+                        Value = transactionGroup.Sum(t =>
+                            t.TransactionTypeId == (int)TransactionTypeIDs.Deposit ? t.Amount :
+                            t.TransactionTypeId == (int)TransactionTypeIDs.Withdrawal ? -t.Amount :
+                            0)
                     }).ToListAsync();
 
                 for (int monthIterator = 0; monthlyModeStartDate.AddMonths(monthIterator) <= currentDate; monthIterator++)
@@ -707,7 +727,7 @@ namespace Services.DataManagement
         /// A list of <see cref="ChartData"/> where each item represents a year label and the total transaction amount 
         /// for that year.
         /// </returns>
-        private async Task<List<ChartData>> GetYearlyLineChartData(DateTime currentDate)
+        private async Task<List<ChartData>> GetYearlyNetMovement(DateTime currentDate)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
@@ -718,13 +738,18 @@ namespace Services.DataManagement
                 List<ChartData> chartData = await queryBuilder
                     .HasStartDate(yearlyModeStartDate)
                     .ExceptTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer)
+                    .ExceptTransactionTypeId((int)TransactionTypeIDs.Outgoing_Transfer) 
+                    .HasStatusConfirmed()
                     .GetQuery()
                     .GroupBy(t => t.TransactionDate.Year)
-                    .OrderBy(g => g.Key)
-                    .Select(g => new ChartData
+                    .OrderBy(transactionGroup => transactionGroup.Key)
+                    .Select(transactionGroup => new ChartData
                     {
-                        Label = g.Key.ToString(),
-                        Value = g.Sum(t => t.Amount)
+                        Label = transactionGroup.Key.ToString(),
+                        Value = transactionGroup.Sum(t =>
+                            t.TransactionTypeId == (int)TransactionTypeIDs.Deposit ? t.Amount :
+                            t.TransactionTypeId == (int)TransactionTypeIDs.Withdrawal ? -t.Amount :
+                            0)
                     }).ToListAsync();
 
                 for (int yearIterator = 0; yearlyModeStartDate.AddYears(yearIterator) <= currentDate; yearIterator++)
@@ -742,18 +767,18 @@ namespace Services.DataManagement
             }
         }
         #endregion
-        #region Pie Chart
+        #region Recent Transaction Type Volumes (Pie Chart)
         /// <summary>
         /// Retrieves pie chart data for all time filter modes (hourly, daily, weekly, monthly, yearly),
         /// relative to the specified current date.
         /// </summary>
         /// <param name="currentDate">The base date used to calculate each time filter's start date.</param>
         /// <returns>A dictionary where each key is a time filter label and the value is the pie chart data for that filter.</returns>
-        public async Task<Dictionary<string, List<ChartData>>> GetAllPieChartData(DateTime currentDate)
+        public async Task<Dictionary<string, List<ChartData>>> GetTransactionTypeCountsDictionary(DateTime currentDate, params string[] exceptStatus)
         {
             Dictionary<string, List<ChartData>> chartCache = new();
             foreach (var filter in AdminDashboardTimeFilters.AS_STRING_LIST)
-                chartCache[filter] = await GetPieChartData(filter, currentDate.AddDays(-1));
+                chartCache[filter] = await GetRecentTransactionTypeCounts(filter, currentDate.AddDays(-1), exceptStatus);
             return chartCache;
         }
         /// <summary>
@@ -762,15 +787,15 @@ namespace Services.DataManagement
         /// <param name="filterMode">The time filter mode (e.g., hourly, daily, weekly).</param>
         /// <param name="currentDate">The current date used to calculate the range of the filter.</param>
         /// <returns>A list of ChartData objects grouped by transaction type.</returns>
-        public async Task<List<ChartData>> GetPieChartData(string filterMode, DateTime currentDate)
+        public async Task<List<ChartData>> GetRecentTransactionTypeCounts(string filterMode, DateTime currentDate, params string[] exceptStatus)
         {
             return filterMode switch
             {
-                AdminDashboardTimeFilters.HOURLY => await GetHourlyPieChartData(currentDate),
-                AdminDashboardTimeFilters.DAILY => await GetDailyPieChartData(currentDate),
-                AdminDashboardTimeFilters.WEEKLY => await GetWeeklyPieChartData(currentDate),
-                AdminDashboardTimeFilters.MONTHLY => await GetMonthlyPieChartData(currentDate),
-                AdminDashboardTimeFilters.YEARLY => await GetYearlyPieChartData(currentDate),
+                AdminDashboardTimeFilters.HOURLY => await GetLastHourTransactionTypeCounts(currentDate, exceptStatus),
+                AdminDashboardTimeFilters.DAILY => await GetLastDayTransactionTypeCounts(currentDate, exceptStatus),
+                AdminDashboardTimeFilters.WEEKLY => await GetLastWeekTransactionTypeCounts(currentDate, exceptStatus),
+                AdminDashboardTimeFilters.MONTHLY => await GetLastMonthTransactionTypeCounts(currentDate, exceptStatus),
+                AdminDashboardTimeFilters.YEARLY => await GetLastYearTransactionTypeCounts(currentDate, exceptStatus),
                 _ => new List<ChartData>()
             };
         }
@@ -779,36 +804,36 @@ namespace Services.DataManagement
         /// </summary>
         /// <param name="currentDate">The current date and time.</param>
         /// <returns>A list of ChartData for the past hour.</returns>
-        private async Task<List<ChartData>> GetHourlyPieChartData(DateTime currentDate) =>
-            await GetPieChartDataByDateAndTime(currentDate, currentDate.AddHours(-1).TimeOfDay);
+        private async Task<List<ChartData>> GetLastHourTransactionTypeCounts(DateTime currentDate, params string[] exceptStatus) =>
+            await GetPieChartDataByDateAndTime(currentDate, currentDate.AddHours(-1).TimeOfDay, exceptStatus: exceptStatus);
         /// <summary>
         /// Retrieves pie chart data for the previous day.
         /// </summary>
         /// <param name="currentDate">The current date.</param>
         /// <returns>A list of ChartData for the current day.</returns>
-        private async Task<List<ChartData>> GetDailyPieChartData(DateTime currentDate) =>
-            await GetPieChartDataByDateAndTime(currentDate);
+        private async Task<List<ChartData>> GetLastDayTransactionTypeCounts(DateTime currentDate, params string[] exceptStatus) =>
+            await GetPieChartDataByDateAndTime(currentDate, exceptStatus: exceptStatus);
         /// <summary>
         /// Retrieves pie chart data for the past 7 days.
         /// </summary>
         /// <param name="currentDate">The current date.</param>
         /// <returns>A list of ChartData for the past week.</returns>
-        private async Task<List<ChartData>> GetWeeklyPieChartData(DateTime currentDate) =>
-            await GetPieChartDataByDateAndTime(currentDate.AddDays(-7));
+        private async Task<List<ChartData>> GetLastWeekTransactionTypeCounts(DateTime currentDate, params string[] exceptStatus) =>
+            await GetPieChartDataByDateAndTime(currentDate.AddDays(-7), exceptStatus: exceptStatus);
         /// <summary>
         /// Retrieves pie chart data for the past month (approximated using DateTime.AddMonths).
         /// </summary>
         /// <param name="currentDate">The current date.</param>
         /// <returns>A list of ChartData for the past month.</returns>
-        private async Task<List<ChartData>> GetMonthlyPieChartData(DateTime currentDate) =>
-            await GetPieChartDataByDateAndTime(currentDate.AddMonths(-1));
+        private async Task<List<ChartData>> GetLastMonthTransactionTypeCounts(DateTime currentDate, params string[] exceptStatus) =>
+            await GetPieChartDataByDateAndTime(currentDate.AddMonths(-1), exceptStatus: exceptStatus);
         /// <summary>
         /// Retrieves pie chart data for the past year (approximated using DateTime.AddYears).
         /// </summary>
         /// <param name="currentDate">The current date.</param>
         /// <returns>A list of ChartData for the past year.</returns>
-        private async Task<List<ChartData>> GetYearlyPieChartData(DateTime currentDate) =>
-            await GetPieChartDataByDateAndTime(currentDate.AddYears(-1));
+        private async Task<List<ChartData>> GetLastYearTransactionTypeCounts(DateTime currentDate, params string[] exceptStatus) =>
+            await GetPieChartDataByDateAndTime(currentDate.AddYears(-1), exceptStatus: exceptStatus);
         /// <summary>
         /// Retrieves pie chart data starting from a given date and optionally a specific time of day.
         /// Filters out transactions of a specific type (Incoming Transfer).
@@ -816,7 +841,7 @@ namespace Services.DataManagement
         /// <param name="startDate">The starting date for the data range.</param>
         /// <param name="startTime">Optional: the starting time on the given date to begin filtering.</param>
         /// <returns>A list of ChartData grouped by transaction type.</returns>
-        private async Task<List<ChartData>> GetPieChartDataByDateAndTime(DateTime startDate, TimeSpan? startTime = null)
+        private async Task<List<ChartData>> GetPieChartDataByDateAndTime(DateTime startDate, TimeSpan? startTime = null, params string[] exceptStatus)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
@@ -826,6 +851,9 @@ namespace Services.DataManagement
 
                 if (startTime is not null)
                     queryBuilder.HasStartTime(startTime.Value);
+
+                foreach (var status in exceptStatus)
+                    queryBuilder.ExceptStatus(status);
 
                 return await queryBuilder
                     .HasStartDate(startDate.Date)
@@ -840,17 +868,17 @@ namespace Services.DataManagement
             }
         }
         #endregion
-        #region Bar Chart
+        #region Transaction Volume By Time Filter
         /// <summary>
         /// Retrieves bar chart data for all predefined time filters (hourly, daily, weekly, monthly, yearly).
         /// </summary>
         /// <param name="currentDate">The reference date used to calculate the time ranges.</param>
         /// <returns>A dictionary mapping each time filter to its corresponding list of chart data.</returns>
-        public async Task<Dictionary<string, List<BarChartData>>> GetAllBarChartData(DateTime currentDate)
+        public async Task<Dictionary<string, List<ChartData>>> GetTransactionsVolumeDictionary(DateTime currentDate)
         {
-            Dictionary<string, List<BarChartData>> chartCache = new();
+            Dictionary<string, List<ChartData>> chartCache = new();
             foreach (var filter in AdminDashboardTimeFilters.AS_STRING_LIST)
-                chartCache[filter] = await GetBarChartData(filter, currentDate.AddDays(-1));
+                chartCache[filter] = await GetTrsansactionsVolumeByTimeFilter(filter, currentDate.AddDays(-1));
             return chartCache;
         }
         /// <summary>
@@ -859,15 +887,15 @@ namespace Services.DataManagement
         /// <param name="filterMode">The time filter mode (e.g., HOURLY, DAILY, etc.).</param>
         /// <param name="currentDate">The reference date used to calculate the time range.</param>
         /// <returns>A list of chart data for the specified filter.</returns>
-        public async Task<List<BarChartData>> GetBarChartData(string filterMode, DateTime currentDate)
+        public async Task<List<ChartData>> GetTrsansactionsVolumeByTimeFilter(string filterMode, DateTime currentDate)
         {
             return filterMode switch
             {
-                AdminDashboardTimeFilters.HOURLY => await GetHourlyBarChartData(currentDate),
-                AdminDashboardTimeFilters.DAILY => await GetDailyBarChartData(currentDate),
-                AdminDashboardTimeFilters.WEEKLY => await GetWeeklyBarChartData(currentDate),
-                AdminDashboardTimeFilters.MONTHLY => await GetMonthlyBarChartData(currentDate),
-                AdminDashboardTimeFilters.YEARLY => await GetYearlyBarChartData(currentDate),
+                AdminDashboardTimeFilters.HOURLY => await GetHourlyTrsansactionsVolume(currentDate),
+                AdminDashboardTimeFilters.DAILY => await GetDailyTrsansactionsVolume(currentDate),
+                AdminDashboardTimeFilters.WEEKLY => await GetWeeklyTrsansactionsVolume(currentDate),
+                AdminDashboardTimeFilters.MONTHLY => await GetMonthlyTrsansactionsVolume(currentDate),
+                AdminDashboardTimeFilters.YEARLY => await GetYearlyTrsansactionsVolume(currentDate),
                 _ => new()
             };
         }
@@ -876,44 +904,44 @@ namespace Services.DataManagement
         /// </summary>
         /// <param name="currentDate">The reference date and time.</param>
         /// <returns>A list of chart data with hourly labels and counts.</returns>
-        private async Task<List<BarChartData>> GetHourlyBarChartData(DateTime currentDate)
+        private async Task<List<ChartData>> GetHourlyTrsansactionsVolume(DateTime currentDate)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
                 TransactionRepository transactionRepo = new TransactionRepository(dbContext);
                 var queryBuilder = transactionRepo.Query;
 
-                List<BarChartData> chartData = await queryBuilder
+                List<ChartData> chartData = await queryBuilder
                     .HasStartDate(currentDate.Date)
                     .ExceptTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer)
                     .GetQuery()
                     .GroupBy(t => t.TransactionTime.Hours)
                     .OrderBy(g => g.Key)
-                    .Select(subgroup => new BarChartData
+                    .Select(subgroup => new ChartData
                     {
                         Label = new DateTime(1, 1, 1, subgroup.Key, 0, 0).ToString("hh tt"),
-                        Bars = subgroup
+                        DataUnits = subgroup
                             .GroupBy(t => t.TransactionTypeId)
-                            .Select(subgroup => new Bar
+                            .Select(subgroup => new DataUnit
                             {
                                 Label = TransactionTypes.AS_STRING_LIST[subgroup.Key - 1],
                                 Value = subgroup.Count()
                             }).ToList()
                     }).ToListAsync();
                 chartData = chartData
-                    .Select(cd => new BarChartData
+                    .Select(cd => new ChartData
                     {
                         Label = cd.Label,
-                        Bars = BarChartConstants
+                        DataUnits = ChartDataConstants
                             .ALL_TRANSACTION_TYPES
                             .GroupJoin(
-                                cd.Bars,
+                                cd.DataUnits,
                                 type => type.Label,
-                                bar => bar.Label,
-                                (type, matchingBars) => new Bar
+                                dataUnit => dataUnit.Label,
+                                (type, matchingDataUnits) => new DataUnit
                                 {
                                     Label = type.Label,
-                                    Value = matchingBars.FirstOrDefault()?.Value ?? 0
+                                    Value = matchingDataUnits.FirstOrDefault()?.Value ?? 0
                                 }
                             ).ToList()
                     }).ToList();
@@ -926,7 +954,7 @@ namespace Services.DataManagement
                         chartData.Insert(i, new()
                         {
                             Label = newLabel,
-                            Bars = BarChartConstants.ALL_TRANSACTION_TYPES
+                            DataUnits = ChartDataConstants.ALL_TRANSACTION_TYPES
                         });
                 }
 
@@ -938,7 +966,7 @@ namespace Services.DataManagement
         /// </summary>
         /// <param name="currentDate">The reference date.</param>
         /// <returns>A list of chart data with daily labels (e.g., "Apr 09") and counts.</returns>
-        private async Task<List<BarChartData>> GetDailyBarChartData(DateTime currentDate)
+        private async Task<List<ChartData>> GetDailyTrsansactionsVolume(DateTime currentDate)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
@@ -947,37 +975,37 @@ namespace Services.DataManagement
 
                 DateTime dailyModeStartDate = currentDate.AddDays(-7);
 
-                List<BarChartData> chartData = await queryBuilder
+                List<ChartData> chartData = await queryBuilder
                     .HasStartDate(dailyModeStartDate.Date)
                     .ExceptTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer)
                     .GetQuery()
                     .GroupBy(t => t.TransactionDate.Date)
                     .OrderBy(g => g.Key)
-                    .Select(subgroup => new BarChartData
+                    .Select(subgroup => new ChartData
                     {
                         Label = subgroup.Key.ToString("MMM dd"),
-                        Bars = subgroup
+                        DataUnits = subgroup
                             .GroupBy(t => t.TransactionTypeId)
-                            .Select(subgroup => new Bar
+                            .Select(subgroup => new DataUnit
                             {
                                 Label = TransactionTypes.AS_STRING_LIST[subgroup.Key - 1],
                                 Value = subgroup.Count()
                             }).ToList()
                     }).ToListAsync();
                 chartData = chartData
-                    .Select(cd => new BarChartData
+                    .Select(cd => new ChartData
                     {
                         Label = cd.Label,
-                        Bars = BarChartConstants
+                        DataUnits = ChartDataConstants
                             .ALL_TRANSACTION_TYPES
                             .GroupJoin(
-                                cd.Bars,
+                                cd.DataUnits,
                                 type => type.Label,
-                                bar => bar.Label,
-                                (type, matchingBars) => new Bar
+                                dataUnit => dataUnit.Label,
+                                (type, matchingDataUnits) => new DataUnit
                                 {
                                     Label = type.Label,
-                                    Value = matchingBars.FirstOrDefault()?.Value ?? 0
+                                    Value = matchingDataUnits.FirstOrDefault()?.Value ?? 0
                                 }
                             ).ToList()
                     }).ToList();
@@ -988,7 +1016,7 @@ namespace Services.DataManagement
                         chartData.Insert(dayIterator, new()
                         {
                             Label = newLabel,
-                            Bars = BarChartConstants.ALL_TRANSACTION_TYPES
+                            DataUnits = ChartDataConstants.ALL_TRANSACTION_TYPES
                         });
                 }
 
@@ -1000,7 +1028,7 @@ namespace Services.DataManagement
         /// </summary>
         /// <param name="currentDate">The reference date.</param>
         /// <returns>A list of chart data with "Week 1", "Week 2", etc., as labels and total weekly counts.</returns>
-        private async Task<List<BarChartData>> GetWeeklyBarChartData(DateTime currentDate)
+        private async Task<List<ChartData>> GetWeeklyTrsansactionsVolume(DateTime currentDate)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
@@ -1019,9 +1047,9 @@ namespace Services.DataManagement
                     .Select(subgroup => new
                     {
                         Label = subgroup.Key,
-                        Values = subgroup
+                        DataUnits = subgroup
                             .GroupBy(t => t.TransactionTypeId)
-                            .Select(subgroup => new Bar
+                            .Select(subgroup => new DataUnit
                             {
                                 Label = TransactionTypes.AS_STRING_LIST[subgroup.Key - 1],
                                 Value = subgroup.Count()
@@ -1031,16 +1059,16 @@ namespace Services.DataManagement
                     .Select(cd => new
                     {
                         Label = cd.Label,
-                        Values = BarChartConstants
+                        DataUnits = ChartDataConstants
                             .ALL_TRANSACTION_TYPES
                             .GroupJoin(
-                                cd.Values,
+                                cd.DataUnits,
                                 type => type.Label,
-                                bar => bar.Label,
-                                (type, matchingBars) => new Bar
+                                dataUnit => dataUnit.Label,
+                                (type, matchingDataUnits) => new DataUnit
                                 {
                                     Label = type.Label,
-                                    Value = matchingBars.FirstOrDefault()?.Value ?? 0
+                                    Value = matchingDataUnits.FirstOrDefault()?.Value ?? 0
                                 }
                             ).ToList()
                     }).ToList();
@@ -1053,12 +1081,12 @@ namespace Services.DataManagement
                         result.Insert(dayIterator, new
                         {
                             Label = newLabel,
-                            Values = BarChartConstants.ALL_TRANSACTION_TYPES
+                            DataUnits = ChartDataConstants.ALL_TRANSACTION_TYPES
                         });
                 }
 
                 //  Cast the result into the LineChartData object indexed by week.
-                List<BarChartData> chartData = new();
+                List<ChartData> chartData = new();
                 int weekindex = 1;
                 for (int i = 0; i < result.Count; i += 7)
                 {
@@ -1068,15 +1096,15 @@ namespace Services.DataManagement
                         .Skip(i)
                         .Take(take)
                         .ToList();
-                    var barSummations = Enumerable.Range(0, dailyDataInWeek[0].Values.Count)
-                        .Select(col => new Bar{
-                            Label = dailyDataInWeek[0].Values[col].Label,
-                            Value = dailyDataInWeek.Sum(day => day.Values[col].Value)
+                    var unitSummations = Enumerable.Range(0, dailyDataInWeek[0].DataUnits.Count)
+                        .Select(col => new DataUnit {
+                            Label = dailyDataInWeek[0].DataUnits[col].Label,
+                            Value = dailyDataInWeek.Sum(day => day.DataUnits[col].Value)
                         }).ToList();
-                    chartData.Add(new BarChartData
+                    chartData.Add(new ChartData
                     {
                         Label = newLabel,
-                        Bars = barSummations
+                        DataUnits = unitSummations
                     });
                 }
 
@@ -1088,7 +1116,7 @@ namespace Services.DataManagement
         /// </summary>
         /// <param name="currentDate">The reference date used to determine the current year.</param>
         /// <returns>A list of chart data with monthly labels (e.g., "Jan", "Feb") and counts.</returns>
-        private async Task<List<BarChartData>> GetMonthlyBarChartData(DateTime currentDate)
+        private async Task<List<ChartData>> GetMonthlyTrsansactionsVolume(DateTime currentDate)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
@@ -1096,37 +1124,37 @@ namespace Services.DataManagement
                 var queryBuilder = transactionRepo.Query;
                 DateTime monthlyModeStartDate = currentDate.AddMonths(-currentDate.Month + 1);
 
-                List<BarChartData> chartData = await queryBuilder
+                List<ChartData> chartData = await queryBuilder
                     .HasStartDate(monthlyModeStartDate.Date)
                     .ExceptTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer)
                     .GetQuery()
                     .GroupBy(t => t.TransactionDate.Month)
                     .OrderBy(g => g.Key)
-                    .Select(subgroup => new BarChartData
+                    .Select(subgroup => new ChartData
                     {
                         Label = new DateTime(1, subgroup.Key, 1).ToString("MMM"),
-                        Bars = subgroup
+                        DataUnits = subgroup
                             .GroupBy(t => t.TransactionTypeId)
-                            .Select(subgroup => new Bar
+                            .Select(subgroup => new DataUnit
                             {
                                 Label = TransactionTypes.AS_STRING_LIST[subgroup.Key - 1],
                                 Value = subgroup.Count()
                             }).ToList()
                     }).ToListAsync();
                 chartData = chartData
-                    .Select(cd => new BarChartData
+                    .Select(cd => new ChartData
                     {
                         Label = cd.Label,
-                        Bars = BarChartConstants
+                        DataUnits = ChartDataConstants
                             .ALL_TRANSACTION_TYPES
                             .GroupJoin(
-                                cd.Bars,
+                                cd.DataUnits,
                                 type => type.Label,
-                                bar => bar.Label,
-                                (type, matchingBars) => new Bar
+                                dataUnit => dataUnit.Label,
+                                (type, matchingDataUnits) => new DataUnit
                                 {
                                     Label = type.Label,
-                                    Value = matchingBars.FirstOrDefault()?.Value ?? 0
+                                    Value = matchingDataUnits.FirstOrDefault()?.Value ?? 0
                                 }
                             ).ToList()
                     }).ToList();
@@ -1136,10 +1164,10 @@ namespace Services.DataManagement
                 {
                     string newLabel = monthlyModeStartDate.AddMonths(monthIterator).ToString("MMM");
                     if (!chartData.Any(cd => cd.Label.Equals(newLabel)))
-                        chartData.Insert(monthIterator, new BarChartData
+                        chartData.Insert(monthIterator, new ChartData
                         {
                             Label = newLabel,
-                            Bars = BarChartConstants.ALL_TRANSACTION_TYPES
+                            DataUnits = ChartDataConstants.ALL_TRANSACTION_TYPES
                         });
                 }
 
@@ -1151,7 +1179,7 @@ namespace Services.DataManagement
         /// </summary>
         /// <param name="currentDate">The reference date used to determine the year range.</param>
         /// <returns>A list of chart data with year labels and counts.</returns>
-        private async Task<List<BarChartData>> GetYearlyBarChartData(DateTime currentDate)
+        private async Task<List<ChartData>> GetYearlyTrsansactionsVolume(DateTime currentDate)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
@@ -1159,37 +1187,37 @@ namespace Services.DataManagement
                 var queryBuilder = transactionRepo.Query;
                 DateTime yearlyModeStartDate = currentDate.AddYears(-10);
 
-                List<BarChartData> chartData = await queryBuilder
+                List<ChartData> chartData = await queryBuilder
                     .HasStartDate(yearlyModeStartDate)
                     .ExceptTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer)
                     .GetQuery()
                     .GroupBy(t => t.TransactionDate.Year)
                     .OrderBy(g => g.Key)
-                    .Select(subgroup => new BarChartData
+                    .Select(subgroup => new ChartData
                     {
                         Label = subgroup.Key.ToString(),
-                        Bars = subgroup
+                        DataUnits = subgroup
                             .GroupBy(t => t.TransactionTypeId)
-                            .Select(subgroup => new Bar
+                            .Select(subgroup => new DataUnit
                             {
                                 Label = TransactionTypes.AS_STRING_LIST[subgroup.Key - 1],
                                 Value = subgroup.Count()
                             }).ToList()
                     }).ToListAsync();
                 chartData = chartData
-                    .Select(cd => new BarChartData
+                    .Select(cd => new ChartData
                     {
                         Label = cd.Label,
-                        Bars = BarChartConstants
+                        DataUnits = ChartDataConstants
                             .ALL_TRANSACTION_TYPES
                             .GroupJoin(
-                                cd.Bars,
+                                cd.DataUnits,
                                 type => type.Label,
-                                bar => bar.Label,
-                                (type, matchingBars) => new Bar
+                                dataUnit => dataUnit.Label,
+                                (type, matchingDataUnits) => new DataUnit
                                 {
                                     Label = type.Label,
-                                    Value = matchingBars.FirstOrDefault()?.Value ?? 0
+                                    Value = matchingDataUnits.FirstOrDefault()?.Value ?? 0
                                 }
                             ).ToList()
                     }).ToList();
@@ -1198,10 +1226,10 @@ namespace Services.DataManagement
                 {
                     string newLabel = yearlyModeStartDate.AddYears(yearIterator).Year.ToString();
                     if (!chartData.Any(cd => cd.Label.Equals(newLabel)))
-                        chartData.Insert(yearIterator, new BarChartData
+                        chartData.Insert(yearIterator, new ChartData
                         {
                             Label = newLabel,
-                            Bars = BarChartConstants.ALL_TRANSACTION_TYPES
+                            DataUnits = ChartDataConstants.ALL_TRANSACTION_TYPES
                         });
                 }
 

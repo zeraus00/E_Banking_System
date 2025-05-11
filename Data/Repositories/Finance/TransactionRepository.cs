@@ -1,4 +1,6 @@
-﻿namespace Data.Repositories.Finance
+﻿using Data.Constants;
+
+namespace Data.Repositories.Finance
 {
     /// <summary>
     /// CRUD operations handler for Transactions table.
@@ -46,6 +48,16 @@
                 WhereCondition(t => t.TransactionTypeId == transactionTypeId);
             public TransactionQuery ExceptTransactionTypeId(int transactionTypeId) =>
                 WhereCondition(t => t.TransactionTypeId != transactionTypeId);
+            public TransactionQuery HasStatus(string status) =>
+                WhereCondition(t => t.Status == status);
+            public TransactionQuery HasStatusConfirmed(bool hasStatusConfirmed = true) =>
+                hasStatusConfirmed ? WhereCondition(t => t.Status == TransactionStatus.CONFIRMED) : this;
+            public TransactionQuery HasStatusCancelled(bool hasStatusCancelled = true) =>
+                hasStatusCancelled ? WhereCondition(t => t.Status == TransactionStatus.CANCELLED) : this;
+            public TransactionQuery HasStatusDenied(bool hasStatusDenied = true) =>
+                hasStatusDenied ? WhereCondition(t => t.Status == TransactionStatus.DENIED) : this;
+            public TransactionQuery ExceptStatus(string status) =>
+                WhereCondition(t => t.Status != status);
             public TransactionQuery HasMainAccountId(int accountId) =>
                 WhereCondition(t => t.MainAccountId == accountId);
             public TransactionQuery HasCounterAccountId(int accountId) =>

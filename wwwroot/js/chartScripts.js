@@ -10,7 +10,7 @@
         data: {
             labels: labels,
             datasets: [{
-                label: 'Transaction Volume',
+                label: 'Net Cash Flow',
                 data: data,
                 borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 2,
