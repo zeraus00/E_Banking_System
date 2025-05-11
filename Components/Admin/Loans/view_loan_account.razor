@@ -226,9 +226,9 @@
 							<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
 						</div>
 						<div class="modal-body text-center">
-							@if (!string.IsNullOrWhiteSpace(ProfilePicture))
+							@if (!string.IsNullOrWhiteSpace(PayslipPicture))
 							{
-								<img src="@ProfilePicture" class="img-fluid rounded shadow" alt="Profile Picture" />
+								<img src="@PayslipPicture" class="img-fluid rounded shadow" alt="Payslip" />
 							}
 							else
 							{
@@ -310,8 +310,8 @@ private string? GovernmentId => userInfo?.GovernmentId != null
 ? $"data:image/jpeg;base64,{Convert.ToBase64String(userInfo.GovernmentId)}"
 : null;
 
-private string? ProfilePicture => userInfo?.ProfilePicture != null
-	? $"data:image/jpeg;base64,{Convert.ToBase64String(userInfo.ProfilePicture)}"
+private string? PayslipPicture => userInfo?.PayslipPicture != null
+	? $"data:image/jpeg;base64,{Convert.ToBase64String(userInfo.PayslipPicture)}"
 	: null;
 
 protected override async Task OnAfterRenderAsync(bool firstRender)
