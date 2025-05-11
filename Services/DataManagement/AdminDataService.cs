@@ -248,14 +248,14 @@ namespace Services.DataManagement
         /// </summary>
         /// <param name="transactionBreakdowns"></param>
         /// <returns>An <see cref="int"/> representing the total volume of transactions.</returns>
-        public int GetTransactionVolume(Dictionary<string, TransactionBreakdown> transactionBreakdowns)
+        public decimal GetTransactionVolume(Dictionary<string, TransactionBreakdown> transactionBreakdowns, decimal totalLoanAmount)
         {
-            int sum = 0;
-            foreach (var kvp in transactionBreakdowns)
+            decimal sum = 0;
+            foreach (var kvp in transactionBreakdowns.Where(t => t.Key != TransactionTypes.OUTGOING_TRANSFER).ToDictionary())
             {
-                sum += kvp.Value.Count;
+                sum += kvp.Value.Total;
             }
-            return sum;
+            return sum + totalLoanAmount;
         }
         /// <summary>
         /// Calculates the net movement of currency in the bank through a 
@@ -265,10 +265,10 @@ namespace Services.DataManagement
         /// <param name="transactionBreakdowns">The main <see cref="Dictionary{string, TransactionBreakdown}">.</param>
         /// <returns>The calculated <see cref="decimal"/> net movement based on the provided <see cref="List{Transaction}">.
         /// </returns>
-        public decimal GetNetMovement(Dictionary<string, TransactionBreakdown> transactionBreakdowns)
+        public decimal GetNetMovement(Dictionary<string, TransactionBreakdown> transactionBreakdowns, decimal totalLoanAmount)
         {
-            decimal inflow = transactionBreakdowns[TransactionTypes.DEPOSIT].Total;
-            decimal outflow = transactionBreakdowns[TransactionTypes.WITHDRAWAL].Total;
+            decimal inflow = transactionBreakdowns[TransactionTypes.DEPOSIT].Total + transactionBreakdowns[TransactionTypes.LOAN_PAYMENT].Total;
+            decimal outflow = transactionBreakdowns[TransactionTypes.WITHDRAWAL].Total + totalLoanAmount;
 
             return inflow - outflow;
         }
@@ -292,7 +292,8 @@ namespace Services.DataManagement
                 //  Exclude incoming transfers.
                 var queryBuilder = transactionRepo
                     .Query
-                    .ExceptTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer);
+                    .ExceptTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer)
+                    .HasStatusConfirmed();
 
                 //  Filter by start and end dates as needed.
                 if (startDate is DateTime sDate)
@@ -350,6 +351,7 @@ namespace Services.DataManagement
                     .IncludeTransactionType()
                     .IncludeMainAccount()
                     .ExceptTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer)
+                    .HasStatusConfirmed()
                     .OrderByAmountDescending()
                     .TakeWithCount(count);
                 if (startDate is DateTime sDate)
@@ -443,14 +445,43 @@ namespace Services.DataManagement
 
                 var queryBuilder = loanRepo
                     .Query
-                    .OrderByDateDescending();
+                    .OrderByDateDescending()
+                    .HasPostDisbursementStatus();
 
                 if (startDate is DateTime sDate)
-                    queryBuilder.HasStartDateFilter(sDate);
+                    queryBuilder.LoanStartsOnOrAfter(sDate);
                 if (endDate is DateTime eDate)
-                    queryBuilder.HasEndDateFilter(eDate);
+                    queryBuilder.LoanStartsOnOrBefore(eDate);
 
                 return await queryBuilder.GetCountAsync();
+            }
+        }
+        /// <summary>
+        /// Gets the total sum of <see cref="Loan.RemainingLoanBalance"/> in the databse. between a given timeframe.
+        /// </summary>
+        /// <param name="startDate">The earliest <see cref="Loan.ApplicationDate"/> value.</param>
+        /// <param name="endDate">The latest. <see cref="Loan.ApplicationDate"/> value.</param>
+        /// <returns></returns>
+        public async Task<decimal> GetLoanAmountAsync(DateTime? startDate = null, DateTime? endDate = null)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                var loanRepo = new LoanRepository(dbContext);
+
+                var queryBuilder = loanRepo
+                    .Query
+                    .OrderByDateDescending()
+                    .HasPostDisbursementStatus();
+
+                if (startDate is DateTime sDate)
+                    queryBuilder.LoanStartsOnOrAfter(sDate);
+                if (endDate is DateTime eDate)
+                    queryBuilder.LoanStartsOnOrBefore(eDate);
+
+                return await queryBuilder
+                    .GetQuery()
+                    .Select(l => l.RemainingLoanBalance)
+                    .SumAsync();
             }
         }
         #endregion
@@ -545,6 +576,33 @@ namespace Services.DataManagement
                         });
                 }
 
+                LoanRepository loanRepo = new LoanRepository(dbContext);
+                var queryBuilderLoan = loanRepo.Query;
+
+                var loanChartData = await queryBuilderLoan
+                    .LoanStartsOnOrAfter(currentDate.Date)
+                    .HasPostDisbursementStatus()
+                    .GetQuery()
+                    .GroupBy(l => l.StartDate!.Value.Hour)
+                    .OrderBy(loanGroup => loanGroup.Key)
+                    .Select(loanGroup => new ChartData
+                    {
+                        Label = new DateTime(1, 1, 1, loanGroup.Key, 0, 0).ToString("hh tt"),
+                        Value = loanGroup.Sum(loan => loan.RemainingLoanBalance)
+                    }).ToListAsync();
+
+                chartData = chartData
+                    .GroupJoin(
+                        loanChartData,
+                        mainChart => mainChart.Label,
+                        loanChart => loanChart.Label,
+                        (mainChart, matchingLoans) => new ChartData
+                        {
+                            Label = mainChart.Label,
+                            Value = mainChart.Value - matchingLoans.Sum(l => l.Value)
+                        }
+                    ).ToList();
+
                 return chartData;
             }
             
@@ -595,6 +653,33 @@ namespace Services.DataManagement
                             Value = 0
                         });
                 }
+
+                LoanRepository loanRepo = new LoanRepository(dbContext);
+                var queryBuilderLoan = loanRepo.Query;
+
+                var loanChartData = await queryBuilderLoan
+                    .LoanStartsOnOrAfter(dailyModeStartDate.Date)
+                    .HasPostDisbursementStatus()
+                    .GetQuery()
+                    .GroupBy(l => l.StartDate!.Value.Date)
+                    .OrderBy(loanGroup => loanGroup.Key)
+                    .Select(loanGroup => new ChartData
+                    {
+                        Label = loanGroup.Key.ToString("MMM dd"),
+                        Value = loanGroup.Sum(loan => loan.RemainingLoanBalance)
+                    }).ToListAsync();
+
+                chartData = chartData
+                    .GroupJoin(
+                        loanChartData,
+                        mainChart => mainChart.Label,
+                        loanChart => loanChart.Label,
+                        (mainChart, matchingLoans) => new ChartData
+                        {
+                            Label = mainChart.Label,
+                            Value = mainChart.Value - matchingLoans.Sum(l => l.Value)
+                        }
+                    ).ToList();
 
                 return chartData;
             }
@@ -649,6 +734,32 @@ namespace Services.DataManagement
                         });
                 }
 
+                LoanRepository loanRepo = new LoanRepository(dbContext);
+                var queryBuilderLoan = loanRepo.Query;
+                var resultLoan = await queryBuilderLoan
+                    .LoanStartsOnOrAfter(weeklyModeStartDate.Date)
+                    .HasPostDisbursementStatus()
+                    .GetQuery()
+                    .GroupBy(l => l.StartDate!.Value.Date)
+                    .OrderBy(loanGroup => loanGroup.Key)
+                    .Select(loanGroup => new
+                    {
+                        Label = loanGroup.Key,
+                        Value = loanGroup.Sum(loan => loan.RemainingLoanBalance)
+                    }).ToListAsync();
+
+                result = result
+                    .GroupJoin(
+                        resultLoan,
+                        mainChart => mainChart.Label,
+                        loanChart => loanChart.Label,
+                        (mainChart, matchingLoans) => new
+                        {
+                            Label = mainChart.Label,
+                            Value = mainChart.Value - matchingLoans.Sum(l => l.Value)
+                        }
+                    ).ToList();
+                
                 //  Cast the result into the LineChartData object indexed by week.
                 List<ChartData> chartData = new();
                 int weekindex = 1;
@@ -714,6 +825,35 @@ namespace Services.DataManagement
                         });
                 }
 
+
+                LoanRepository loanRepo = new LoanRepository(dbContext);
+                var queryBuilderLoan = loanRepo.Query;
+
+                var loanChartData = await queryBuilderLoan
+                    .LoanStartsOnOrAfter(monthlyModeStartDate.Date)
+                    .HasPostDisbursementStatus()
+                    .GetQuery()
+                    .GroupBy(l => l.StartDate!.Value.Month)
+                    .OrderBy(loanGroup => loanGroup.Key)
+                    .Select(loanGroup => new ChartData
+                    {
+                        Label = new DateTime(1, loanGroup.Key, 1).ToString("MMM"),
+                        Value = loanGroup.Sum(loan => loan.RemainingLoanBalance)
+                    }).ToListAsync();
+
+                chartData = chartData
+                    .GroupJoin(
+                        loanChartData,
+                        mainChart => mainChart.Label,
+                        loanChart => loanChart.Label,
+                        (mainChart, matchingLoans) => new ChartData
+                        {
+                            Label = mainChart.Label,
+                            Value = mainChart.Value - matchingLoans.Sum(l => l.Value)
+                        }
+                    ).ToList();
+
+
                 return chartData;
             }
         }
@@ -762,6 +902,33 @@ namespace Services.DataManagement
                             Value = 0
                         });
                 }
+
+                LoanRepository loanRepo = new LoanRepository(dbContext);
+                var queryBuilderLoan = loanRepo.Query;
+
+                var loanChartData = await queryBuilderLoan
+                    .LoanStartsOnOrAfter(currentDate.Date)
+                    .HasPostDisbursementStatus()
+                    .GetQuery()
+                    .GroupBy(l => l.StartDate!.Value.Year)
+                    .OrderBy(loanGroup => loanGroup.Key)
+                    .Select(loanGroup => new ChartData
+                    {
+                        Label = loanGroup.Key.ToString(),
+                        Value = loanGroup.Sum(loan => loan.RemainingLoanBalance)
+                    }).ToListAsync();
+
+                chartData = chartData
+                    .GroupJoin(
+                        loanChartData,
+                        mainChart => mainChart.Label,
+                        loanChart => loanChart.Label,
+                        (mainChart, matchingLoans) => new ChartData
+                        {
+                            Label = mainChart.Label,
+                            Value = mainChart.Value - matchingLoans.Sum(l => l.Value)
+                        }
+                    ).ToList();
 
                 return chartData;
             }

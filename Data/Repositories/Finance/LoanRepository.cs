@@ -1,4 +1,4 @@
-﻿
+﻿using Data.Constants;
 
 namespace Data.Repositories.Finance
 {
@@ -20,10 +20,28 @@ namespace Data.Repositories.Finance
         public class LoanQuery : CustomQuery<Loan, LoanQuery>
         {
             public LoanQuery(IQueryable<Loan> query) : base(query) { }
-            public LoanQuery HasStartDateFilter(DateTime startDate) => 
+            public LoanQuery LoanStartsOnOrAfter(DateTime startDate) =>
+                WhereCondition(l => l.StartDate >= startDate.Date);
+            public LoanQuery LoanStartsOnOrBefore(DateTime endDate) =>
+                WhereCondition(l => l.StartDate <= endDate.Date);
+            public LoanQuery LoanApplicationOrOrAfter(DateTime startDate) =>
                 WhereCondition(l => l.ApplicationDate >= startDate.Date);
-            public LoanQuery HasEndDateFilter(DateTime endDate) =>
+            public LoanQuery LoanApplicationOnOrBefore(DateTime endDate) =>
                 WhereCondition(l => l.ApplicationDate <= endDate.Date);
+            public LoanQuery HasStatus(string status) =>
+                WhereCondition(l => l.LoanStatus == status);
+            public LoanQuery HasPostDisbursementStatus(bool hasOngoingStatus = true) =>
+                hasOngoingStatus ?
+                WhereCondition(l =>
+                    l.LoanStatus == LoanStatusTypes.DISBURSED ||
+                    l.LoanStatus == LoanStatusTypes.ACTIVE ||
+                    l.LoanStatus == LoanStatusTypes.DEFAULTED ||
+                    l.LoanStatus == LoanStatusTypes.DELINQUENT ||
+                    l.LoanStatus == LoanStatusTypes.RESTRUCTURED
+                ) :
+                this;
+            public LoanQuery HasNoStatus(string status) =>
+                WhereCondition(l => l.LoanStatus != status);
             public LoanQuery IncludeAccount(bool include = true) => include ? Include(l => l.Account) : this;
             public LoanQuery IncludeUserInfo(bool include = true) => include ? Include(l => l.UserInfo) : this;
             public LoanQuery OrderByDateDescending(bool isOrdered = true)
