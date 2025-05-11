@@ -1,0 +1,211 @@
+﻿@page "/Workers"
+@attribute [Authorize(Roles="Administrator")]
+@rendermode InteractiveServer
+
+@inject AdminControlledSessionService adminControlledSessionService
+@inject AdminDataService adminDataService
+@inject NavigationManager Navigation
+@inject PageRedirectService redirectService
+
+<div class="main">
+    <div class="dashboard-container">
+
+        <div class="top-bar mx-3">
+            <h2>Pending Accounts</h2>
+        </div>
+
+        <hr class="divider" />
+
+        <div class="d-flex align-items-center gap-3 m-3 flex-wrap">
+
+            <div class="d-flex align-items-center gap-3">
+                <input class="form-control form-control-sm" @bind="searchAccount" placeholder="Search specific account">
+            </div>
+@* 
+            <div class="d-flex align-items-center gap-3">
+                <label class="text-light mb-0" style="white-space: nowrap;">Start Date</label>
+                <InputDate class="form-control form-control-sm" @bind-Value="startDate" />
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+                <label class="text-light mb-0" style="white-space: nowrap;">End Date</label>
+                <InputDate class="form-control form-control-sm" @bind-Value="endDate" />
+            </div>
+ *@
+            <div class="d-flex align-items-center gap-3">
+                <label class="text-light mb-0" style="white-space: nowrap;">Job Position</label>
+                <select class="form-select form-select-sm" @bind="selectedJobPosition">
+                    <option value="">All</option>
+                    @foreach (var type in selectedJobPosition)
+                    {
+                        <option value="@selectedJobPosition.IndexOf(type)">type</option>
+                    }
+                </select>
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+                <label class="text-light mb-0" style="white-space: nowrap;">Branch</label>
+                <select class="form-select form-select-sm" @bind="selectedBranch">
+                    <option value="">All</option>
+                    @foreach (var type in selectedBranch)
+                    {
+                        <option value="@selectedBranch.IndexOf(type)">type</option>
+                    }
+                </select>
+            </div>
+
+            <button class="btn btn-primary btn-sm shadow-sm" @onclick="FilterAsync">Filter</button>
+            <button class="btn btn-danger btn-sm shadow-sm" @onclick="ClearFilterAsync">Clear Filter</button>
+
+        </div>
+
+        <hr class="divider" />
+
+        <div class="table-responsive m-4 rounded">
+            <table class="table table-bordered text-center">
+                <thead class="table-info">
+                    <tr>
+                        <th class="align-middle">Employee<br />Number</th>
+                        <th class="align-middle">Name</th>
+                        <th class="align-middle">Job Position</th>
+                        <th class="align-middle">Branch</th>
+                        <th class="align-middle">Operation</th>
+                        <th class="align-middle">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var a in allAccounts)
+                    {
+                        <tr class="bg-light">
+                            <td>@a.EmployeeNumber</td>
+                            <td>@a.EmployeeName</td>
+                            <td>@a.JobPosition</td>
+                            <td>@a.Branch</td>
+                            <td>
+                                <a href="/WorkersViewDetails" class="btn btn-info btn-secondary btn-sm rounded text-dark shadow-sm" style="border: 2px solid cyan">View</a>
+                                <button class="btn btn-danger btn-secondary btn-sm rounded text-light shadow-sm" style="border: 2px solid red">Remove</button>
+                            </td>
+                            <td class="text-secondary">@a.Status</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="scroll-container gap-3 mx-5">
+            <button class="arrow-ud">
+                <i class="bi bi-chevron-left text-light"></i>
+            </button>
+            <button class="arrow-ud">
+                <i class="bi bi-chevron-right text-light"></i>
+            </button>
+        </div>
+@* 
+        <div class="page-container text-center text-light mt-2 mb-3 mx-5">
+            Page @pageNumber of @masterListAvailablePages
+        </div> *@
+
+    </div>
+</div>
+
+@code {
+
+    // private List<string> accountTypeList = AccountTypes.AS_STRING_LIST;
+
+    private DateTime? startDate = DateTime.Now.AddDays(-DateTime.Now.Day + 1);
+    private DateTime? endDate = DateTime.Now;
+    private string selectedBranch = "";
+    private string selectedJobPosition = "";
+    private string searchAccount = "";
+
+    private List<Account> accountList = new();
+
+    private List<AccountRecord> allAccounts = new();
+    private List<AccountRecord> accounts = new();
+
+    // Mockup data
+    protected override async Task OnInitializedAsync()
+    {
+        allAccounts = new List<AccountRecord>
+        {
+            new AccountRecord
+            {
+                EmployeeNumber = 123456,
+                EmployeeName = "Sample Name 1",
+                JobPosition = "Teller",
+                Branch = "Branch A",
+                Status = "Active"
+            },
+
+            new AccountRecord
+            {
+                EmployeeNumber = 567890,
+                EmployeeName = "Sample Name 2",
+                JobPosition = "Loan Officer",
+                Branch = "Main Branch",
+                Status = "On Leave"
+            }
+        };
+        accounts = allAccounts.ToList();
+        // accountList = await adminDataService.FilterAccountsAsync(accountStatusTypeId: (int)AccountStatusTypeIDs.Pending);
+    }
+
+    private async Task FilterAsync()
+    {
+        accounts = allAccounts
+            .Where(t =>
+                (string.IsNullOrEmpty(searchAccount) || t.EmployeeName.Contains(searchAccount, StringComparison.OrdinalIgnoreCase)) &&
+                (!startDate.HasValue || t.Date >= startDate.Value.Date) &&
+                (!endDate.HasValue || t.Date <= endDate.Value.Date) &&
+                (string.IsNullOrEmpty(selectedBranch) || t.Branch == selectedBranch)
+            ).ToList();
+        // accountList = await adminDataService
+        //     .FilterAccountsAsync(
+        //     searchAccount,
+        //     startDate,
+        //     endDate,
+        //     (int)AccountTypeIDs.PersonalAccount,
+        //     (int)AccountStatusTypeIDs.Pending
+        // );
+    }
+
+    private async Task ClearFilterAsync()
+    {
+        startDate = null;
+        endDate = null;
+        selectedBranch = "";
+        selectedJobPosition = "";
+        searchAccount = "";
+        accounts = allAccounts.ToList();
+        // accountList = await adminDataService.FilterAccountsAsync(accountStatusTypeId: (int)AccountStatusTypeIDs.Pending);
+    }
+
+    // private async Task ViewDetails(Account account)
+    // {
+    //     try
+    //     {
+    //         PendingAccountSession pendingAccountSession = new PendingAccountSession()
+    //             {
+    //                 PendingAccountId = account.AccountId
+    //             };
+
+    //         await adminControlledSessionService.SetPendingAccountSession(pendingAccountSession);
+
+    //         redirectService.redirectWithNavigationManager(PageRoutes.VIEW_DETAILS);
+    //     } catch (SessionNotFoundException)
+    //     {
+    //         redirectService.redirectWithNavigationManager(PageRoutes.DASHBOARD);
+    //     }
+    // }
+
+    public class AccountRecord
+    {
+        public DateTime Date { get; set; }
+        public TimeSpan Time { get; set; }
+        public string EmployeeName { get; set; }
+        public int EmployeeNumber { get; set; }
+        public string JobPosition { get; set; }
+        public string Branch { get; set; }
+        public string Status { get; set; }
+    }
+}

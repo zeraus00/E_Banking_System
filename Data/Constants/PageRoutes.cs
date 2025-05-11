@@ -22,6 +22,8 @@
         public const string ADMINSETTINGS_CHANGE_CONTACT = "/AdminSettings_change_contact";
         public const string ADMINSETTINGS_CHANGE_EMAIL = "/AdminSettings_change_email";
 
+        public const string WORKERS_VIEW_ACCOUNT = "/WorkersViewDetails";
+
         public const string ACCOUNTS = "/Accounts";
         public const string ADD_ACCOUNT = "/Add_account";
         public const string CLIENT_HOME = "/Client_home";
