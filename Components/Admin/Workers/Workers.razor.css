@@ -1,0 +1,36 @@
+﻿.date-picker {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.filter-button {
+    background-color: #4a63f0;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.card-section {
+    display: flex;
+    gap: 3%;
+    margin-bottom: 40px;
+}
+
+.data-card {
+    background-color: #5cc9d8;
+    padding: 20px;
+    width: 300px;
+    border: 2px solid white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    color: black;
+}
+
+.number {
+    font-size: 24px;
+    font-weight: normal;
+}
+

@@ -3,7 +3,7 @@
 @inject PageRedirectService redirectService
 @inject UserSessionService userSessionService
 
-<AuthorizeView Roles="Administrator">
+<AuthorizeView Roles="Employee">
     <Authorized>
         <!-- Side NavBar Layout -->
         <nav class="sidebar @(isSidebarVisible ? "" : "collapsed")">
@@ -28,36 +28,17 @@
 
             <!-- Sidebar Navigation Links (Middle Row)-->
             <div class="position-relative">
-                <p class="position-absolute text-light top-0 start-0 mx-4 my-3 fw-lighter" style="font-size: 0.75rem;">ADMIN</p>
+                <p class="position-absolute text-light top-0 start-0 mx-4 my-3 fw-lighter" style="font-size: 0.75rem;">EMPLOYEE</p>
                 <div class="middle-row border-bottom">
                     <nav class="flex-column">
                         <div class="nav-item px-3 pt-5">
-                            <NavLink class="nav-link" href="/Dashboard" Match="NavLinkMatch.All">Dashboard</NavLink>
+                            <NavLink class="nav-link" href="/Employee_PendingAccounts" Match="NavLinkMatch.All">Pending Accounts</NavLink>
                         </div>
                         <div class="nav-item px-3">
-                            <NavLink class="nav-link lh-sm" href="/PendingAccounts">Pending Accounts</NavLink>
+                            <NavLink class="nav-link lh-sm" href="Employee_Manage_accounts">Manage Accounts</NavLink>
                         </div>
                         <div class="nav-item px-3">
-                            <NavLink class="nav-link lh-sm" href="Manage_accounts">Manage Accounts</NavLink>
-                        </div>
-                        <div class="nav-item px-3">
-                            <NavLink class="nav-link" href="/Admin_transaction">Transactions</NavLink>
-                        </div>
-                        <div class="nav-item px-3">
-                            <button class="nav-link lh-sm d-flex text-start justify-content-between align-items-center w-100" @onclick="ToggleLoansDropdown">
-                                Loans
-                                <span>@(isLoansDropdownOpen ? "▲" : "▼")</span>
-                            </button>
-
-                            @if (isLoansDropdownOpen)
-                            {
-                                <div class="dropdown-menu-custom ps-3">
-                                    <NavLink class="nav-link lh-sm" href="/Unpaid">Unpaid</NavLink>
-                                    <NavLink class="nav-link lh-sm" href="/Paid">Paid</NavLink>
-                                    <NavLink class="nav-link lh-sm" href="/Applying">Applying</NavLink>
-                                </div>
-                            }
-
+                            <NavLink class="nav-link" href="/Employee_Transaction">Transactions</NavLink>
                         </div>
                     </nav>
                 </div>
@@ -69,13 +50,7 @@
                 <div class="bottom-row">
                     <nav class="flex-column">
                         <div class="nav-item px-3 pt-5">
-                            <NavLink class="nav-link" href="/Workers" Match="NavLinkMatch.All">Worker's Page</NavLink>
-                        </div>
-                        <div class="nav-item px-3">
-                            <NavLink class="nav-link" href="/AdminSettings_page">Settings</NavLink>
-                        </div>
-                        <div class="nav-item px-3">
-                            <button class="nav-link" @onclick="LogOutAsync"> Logout</button>
+                            <NavLink class="nav-link" Match="NavLinkMatch.All" @onclick="LogOutAsync"> Logout</NavLink>
                         </div>
                     </nav>
                 </div>

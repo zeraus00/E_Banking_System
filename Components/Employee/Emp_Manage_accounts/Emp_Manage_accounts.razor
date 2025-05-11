@@ -1,0 +1,159 @@
+﻿@using Layout
+
+@page "/Employee_Manage_accounts"
+@rendermode InteractiveServer
+
+@inject NavigationManager Navigation
+
+<div class="main">
+    <div class="dashboard-container">
+
+        <div class="top-bar mx-3">
+            <h2>Manage Accounts</h2>
+        </div>
+
+        <hr class="divider" />
+
+        <div class="d-flex align-items-center gap-3 m-3 flex-wrap">
+            <div class="d-flex align-items-center gap-3">
+                <input class="form-control form-control-sm" @bind="searchAccount" placeholder="Search specific account" />
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+                <label class="text-light mb-0" style="white-space: nowrap;">Start Date</label>
+                <InputDate class="form-control form-control-sm" @bind-Value="startDate" />
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+                <label class="text-light mb-0" style="white-space: nowrap;">End Date</label>
+                <InputDate class="form-control form-control-sm" @bind-Value="endDate" />
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+                <label class="text-light mb-0" style="white-space: nowrap;">Account Type</label>
+                <select class="form-select form-select-sm" @bind="selectedType">
+                    <option value="0">All</option>
+                    <option value="1">Personal Account</option>
+                    <option value="2">Joint Account</option>
+                </select>
+            </div>
+
+            <button class="btn btn-primary btn-sm shadow-sm" @onclick="Filter">Filter</button>
+            <button class="btn btn-danger btn-sm shadow-sm" @onclick="ClearFilter">Clear Filter</button>
+        </div>
+
+        <hr class="divider" />
+
+        <div class="table-responsive m-4 rounded">
+            <table class="table table-bordered text-center">
+                <thead class="table-info">
+                    <tr>
+                        <th>Date of<br />Registration</th>
+                        <th>Account No.</th>
+                        <th>Name</th>
+                        <th>Account Type</th>
+                        <th>Operation</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (accountList != null && accountList.Any())
+                    {
+                        @foreach (var a in accountList)
+                        {
+                            <tr class="bg-light">
+                                <td>@a.DateOpened.ToString("MM/dd/yyyy")</td>
+                                <td>@a.AccountNumber</td>
+                                <td>@a.AccountName</td>
+                                <td>@a.AccountType.AccountTypeName</td>
+                                <td>
+                                    <a href="Employee_View_account" class="btn btn-info btn-secondary btn-sm rounded text-dark shadow-sm" style="border: 2px solid cyan">View</a>
+                                    <button class="btn btn-danger btn-secondary btn-sm rounded text-light shadow-sm" style="border: 2px solid red">Delete</button>
+                                </td>
+                                <td class="text-secondary">@a.AccountStatusType.AccountStatusTypeName</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-muted">No accounts found.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="scroll-container gap-3 mx-5">
+            <button class="arrow-ud">
+                <i class="bi bi-chevron-left text-light"></i>
+            </button>
+            <button class="arrow-ud">
+                <i class="bi bi-chevron-right text-light"></i>
+            </button>
+        </div>
+
+        @*         <div class="page-container text-center text-light mt-2 mb-3 mx-5">
+            Page @pageNumber of @masterListAvailablePages
+        </div> *@
+    </div>
+</div>
+
+@code {
+    private DateTime? startDate ;
+    private DateTime? endDate;
+    private int selectedType = 0;
+    private string searchAccount = "";
+
+    private List<Account> accountList = new();
+    private List<Account> mockAccounts = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        mockAccounts = new List<Account>
+    {
+        new Account
+        {
+            AccountNumber = "1234-5678",
+            AccountName = "Sample Name 1",
+            AccountType = new AccountType(){AccountTypeName="Personal Account"},
+            AccountStatusType = new AccountStatusType() {AccountStatusTypeName = "Active"},
+            DateOpened = DateTime.Today.AddDays(-1)
+        },
+        new Account
+        {
+            AccountNumber = "0987-6543",
+            AccountName = "Sample Name 2",
+            AccountType = new AccountType(){AccountTypeName="Joint Account"},
+            AccountStatusType = new AccountStatusType() {AccountStatusTypeName = "Deactivated"},
+            DateOpened = DateTime.Today.AddDays(-1)
+        }
+    };
+
+        accountList = mockAccounts;
+    }
+
+
+    private async Task Filter()
+    {
+        accountList = mockAccounts
+            .Where(a =>
+                (string.IsNullOrEmpty(searchAccount) || a.AccountName.Contains(searchAccount, StringComparison.OrdinalIgnoreCase)) &&
+                (!startDate.HasValue || a.DateOpened.Date >= startDate.Value.Date) &&
+                (!endDate.HasValue || a.DateOpened.Date <= endDate.Value.Date) &&
+                (selectedType == 0 ||
+                (selectedType == 1 && a.AccountType.AccountTypeName == "Personal Account") ||
+                (selectedType == 2 && a.AccountType.AccountTypeName == "Joint Account"))
+            )
+            .ToList();
+    }
+
+    private async Task ClearFilter()
+    {
+        startDate = null;
+        endDate = null;
+        selectedType = 0;
+        searchAccount = "";
+        accountList = mockAccounts;
+    }
+
+}

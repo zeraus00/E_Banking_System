@@ -1,0 +1,11 @@
+﻿.btn-fixed-height {
+    height: 70px;
+    white-space: normal;
+    line-height: 1.2;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 5px;
+}
+

@@ -33,6 +33,14 @@
                         </div>
                     </Authorized>
                 </AuthorizeView>
+
+                <AuthorizeView Roles="Employee">
+                    <Authorized>
+                        <div class="d-flex align-items-end px-3">
+                            <button class="btn btn-primary btn-sm" @onclick="EnterUpdateMode">View</button>
+                        </div>
+                    </Authorized>
+                </AuthorizeView>
             }
         </div>
         <hr />
