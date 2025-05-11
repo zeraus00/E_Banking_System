@@ -25,6 +25,11 @@
             </Authorized>
         </AuthorizeView>
 
+        <AuthorizeView Roles="Employee">
+            <Authorized>
+                <EmpNavMenu />
+            </Authorized>
+        </AuthorizeView>
     }
     <div class="main-content">
         @Body
