@@ -109,9 +109,16 @@ window.drawUserLineChart = (labels, withdrawData, depositData, outgoingTransfer,
             labels: labels,
             datasets: [
                 {
+                    label: 'Net Balance',
+                    data: netBalance,
+                    backgroundColor: 'rgba(211, 211, 211, 0.6)',
+                    borderWidth: 2,
+                    fill: false
+                },
+                {
                     label: 'Withdraw',
                     data: withdrawData,
-                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderColor: 'rgba(75, 192, 192, 0.6)',
                     borderWidth: 2,
                     fill: false
                 },
@@ -135,13 +142,6 @@ window.drawUserLineChart = (labels, withdrawData, depositData, outgoingTransfer,
                     borderColor: 'rgba(102, 204, 255, 0.6)',
                     borderWidth: 2,
                     fill: false
-                },
-                {
-                    label: 'Net Balance',
-                    data: netBalance,
-                    backgroundColor: 'rgba(211, 211, 211, 0.6)',
-                    backgroundColor: 'rgba(211, 211, 211, 1)',
-                    borderWidth: 2
                 }
             ]
         },
