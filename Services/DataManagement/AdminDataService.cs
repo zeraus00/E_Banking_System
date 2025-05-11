@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Services.SessionsManagement;
 using ViewModels.AdminDashboard;
+using static Data.Repositories.Finance.TransactionRepository;
 
 namespace Services.DataManagement
 {
@@ -501,11 +502,11 @@ namespace Services.DataManagement
         /// and the value is a list of <see cref="ChartData"/> representing the transaction totals for 
         /// that time frame.
         /// </returns>
-        public async Task<Dictionary<string, List<ChartData>>> GetNetMovementDictionary(DateTime currentDate)
+        public async Task<Dictionary<string, List<ChartData>>> GetNetMovementDictionary(DateTime currentDate, int accountId = 0)
         {
             Dictionary<string, List<ChartData>> chartCache = new();
             foreach(var filter in AdminDashboardTimeFilters.AS_STRING_LIST)
-                chartCache[filter] = await GetNetMovementByTimeFilter(filter, currentDate.AddDays(-1));
+                chartCache[filter] = await GetNetMovementByTimeFilter(filter, currentDate.AddDays(-1), accountId);
             return chartCache;
         }
         /// <summary>
@@ -519,17 +520,28 @@ namespace Services.DataManagement
         /// A list of <see cref="ChartData"/> representing the total transaction amounts grouped by the specified time interval.
         /// If the filter mode is unrecognized, an empty list is returned.
         /// </returns>
-        public async Task<List<ChartData>> GetNetMovementByTimeFilter(string filterMode, DateTime currentDate)
+        public async Task<List<ChartData>> GetNetMovementByTimeFilter(string filterMode, DateTime currentDate, int accountId = 0)
         {
-            return filterMode switch
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
-                AdminDashboardTimeFilters.HOURLY => await GetHourlyNetMovement(currentDate),
-                AdminDashboardTimeFilters.DAILY => await GetDailyNetMovement(currentDate),
-                AdminDashboardTimeFilters.WEEKLY => await GetWeeklyNetMovement(currentDate),
-                AdminDashboardTimeFilters.MONTHLY => await GetMonthlyNetMovement(currentDate),
-                AdminDashboardTimeFilters.YEARLY => await GetYearlyNetMovement(currentDate),
-                _ => new List<ChartData>()
-            };
+                var transactionRepo = new TransactionRepository(dbContext);
+                var loanRepo = new LoanRepository(dbContext);
+
+                var transactionQuery = BuildTransactionQuery(transactionRepo, filterMode, currentDate, accountId);
+                var loanQuery = BuildLoanQuery(loanRepo, filterMode, currentDate, accountId);
+
+                bool isAccountNetMovement = accountId > 0 ? true : false;
+
+                return filterMode switch
+                {
+                    AdminDashboardTimeFilters.HOURLY => await GetHourlyNetMovement(transactionQuery, loanQuery, currentDate, isAccountNetMovement),
+                    AdminDashboardTimeFilters.DAILY => await GetDailyNetMovement(transactionQuery, loanQuery, currentDate, isAccountNetMovement),
+                    AdminDashboardTimeFilters.WEEKLY => await GetWeeklyNetMovement(transactionQuery, loanQuery, currentDate, isAccountNetMovement),
+                    AdminDashboardTimeFilters.MONTHLY => await GetMonthlyNetMovement(transactionQuery, loanQuery, currentDate, isAccountNetMovement),
+                    AdminDashboardTimeFilters.YEARLY => await GetYearlyNetMovement(transactionQuery, loanQuery, currentDate, isAccountNetMovement),
+                    _ => new List<ChartData>()
+                };
+            }
         }
         /// <summary>
         /// Asynchronously retrieves transaction data grouped by hour for the specified date.
@@ -541,71 +553,50 @@ namespace Services.DataManagement
         /// A list of <see cref="ChartData"/> where each item represents a specific hour and the total transaction 
         /// amount for that hour.
         /// </returns>
-        private async Task<List<ChartData>> GetHourlyNetMovement(DateTime currentDate)
+        private async Task<List<ChartData>> GetHourlyNetMovement(IQueryable<Transaction> transactionQuery, IQueryable<Loan> loanQuery, DateTime currentDate, bool isAccountNetMovement = false)
         {
-            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
-            {
-                TransactionRepository transactionRepo = new TransactionRepository(dbContext);
-                var queryBuilder = transactionRepo.Query;
-
-                List<ChartData> chartData = await queryBuilder
-                    .HasStartDate(currentDate.Date)
-                    .ExceptTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer)
-                    .ExceptTransactionTypeId((int)TransactionTypeIDs.Outgoing_Transfer)
-                    .HasStatusConfirmed()
-                    .GetQuery()
+            List<ChartData> transactionChartData = await transactionQuery
                     .GroupBy(t => t.TransactionTime.Hours)
                     .OrderBy(transactionGroup => transactionGroup.Key)
                     .Select(transactionGroup => new ChartData
                     {
                         Label = new DateTime(1, 1, 1, transactionGroup.Key, 0, 0).ToString("hh tt"),
-                        Value = transactionGroup.Sum(t =>
-                            t.TransactionTypeId == (int)TransactionTypeIDs.Deposit ? t.Amount :
-                            t.TransactionTypeId == (int)TransactionTypeIDs.Withdrawal ? -t.Amount :
-                            0)
+                        Value = isAccountNetMovement ?
+                            transactionGroup.Sum(t =>
+                                t.TransactionTypeId == (int)TransactionTypeIDs.Deposit ||
+                                t.TransactionTypeId == (int)TransactionTypeIDs.Incoming_Transfer ? t.Amount :
+                                t.TransactionTypeId == (int)TransactionTypeIDs.Withdrawal ||
+                                t.TransactionTypeId == (int)TransactionTypeIDs.Outgoing_Transfer ? -t.Amount :
+                                0
+                            ) : 
+                            transactionGroup.Sum(t =>
+                                t.TransactionTypeId == (int)TransactionTypeIDs.Deposit ? t.Amount :
+                                t.TransactionTypeId == (int)TransactionTypeIDs.Withdrawal ? -t.Amount :
+                                0
+                            )
                     }).ToListAsync();
-                int currentHour = currentDate.Hour;
-                for (int i = 0; i <= currentHour; i++)
-                {
-                    string newLabel = new DateTime(1, 1, 1, i, 0, 0).ToString("hh tt");
-                    if (!chartData.Any(cd => cd.Label.Equals(newLabel)))
-                        chartData.Insert(i, new()
-                        {
-                            Label = newLabel,
-                            Value = 0
-                        });
-                }
+            //  filler
+            transactionChartData = FillHourlyData(transactionChartData, currentDate);
 
-                LoanRepository loanRepo = new LoanRepository(dbContext);
-                var queryBuilderLoan = loanRepo.Query;
+            //  get loan chart data
+            var loanChartData = await GetHourlyLoaned(loanQuery, currentDate);
 
-                var loanChartData = await queryBuilderLoan
-                    .LoanStartsOnOrAfter(currentDate.Date)
-                    .HasPostDisbursementStatus()
-                    .GetQuery()
-                    .GroupBy(l => l.StartDate!.Value.Hour)
-                    .OrderBy(loanGroup => loanGroup.Key)
-                    .Select(loanGroup => new ChartData
+            //  Left Join transaction chart with loan chart
+            transactionChartData = transactionChartData
+                .GroupJoin(
+                    loanChartData,
+                    mainChart => mainChart.Label,
+                    loanChart => loanChart.Label,
+                    (mainChart, matchingLoans) => new ChartData
                     {
-                        Label = new DateTime(1, 1, 1, loanGroup.Key, 0, 0).ToString("hh tt"),
-                        Value = loanGroup.Sum(loan => loan.RemainingLoanBalance)
-                    }).ToListAsync();
+                        Label = mainChart.Label,
+                        Value = isAccountNetMovement ?
+                            mainChart.Value + matchingLoans.Sum(l => l.Value) :
+                            mainChart.Value - matchingLoans.Sum(l => l.Value)
+                    }
+                ).ToList();
 
-                chartData = chartData
-                    .GroupJoin(
-                        loanChartData,
-                        mainChart => mainChart.Label,
-                        loanChart => loanChart.Label,
-                        (mainChart, matchingLoans) => new ChartData
-                        {
-                            Label = mainChart.Label,
-                            Value = mainChart.Value - matchingLoans.Sum(l => l.Value)
-                        }
-                    ).ToList();
-
-                return chartData;
-            }
-            
+            return transactionChartData;
         }
         /// <summary>
         /// Asynchronously retrieves transaction data grouped by day for the past 7 days up to the specified date.
@@ -617,72 +608,51 @@ namespace Services.DataManagement
         /// A list of <see cref="ChartData"/> where each item represents a date label and the total transaction amount for 
         /// that day.
         /// </returns>
-        private async Task<List<ChartData>> GetDailyNetMovement(DateTime currentDate)
+        private async Task<List<ChartData>> GetDailyNetMovement(IQueryable<Transaction> transactionQuery, IQueryable<Loan> loanQuery, DateTime currentDate, bool isAccountNetMovement = false)
         {
-            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
-            {
-                TransactionRepository transactionRepo = new TransactionRepository(dbContext);
-                var queryBuilder = transactionRepo.Query;
-
-                DateTime dailyModeStartDate = currentDate.AddDays(-7);
-                
-                List<ChartData> chartData = await queryBuilder
-                    .HasStartDate(dailyModeStartDate.Date)
-                    .ExceptTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer)
-                    .ExceptTransactionTypeId((int)TransactionTypeIDs.Outgoing_Transfer)
-                    .HasStatusConfirmed()
-                    .GetQuery()
-                    .GroupBy(t => t.TransactionDate.Date)
-                    .OrderBy(transactionGroup => transactionGroup.Key)
-                    .Select(transactionGroup => new ChartData
-                    {
-                        Label = transactionGroup.Key.ToString("MMM dd"),
-                        Value = transactionGroup.Sum(t =>
-                            t.TransactionTypeId == (int)TransactionTypeIDs.Deposit ? t.Amount :
-                            t.TransactionTypeId == (int)TransactionTypeIDs.Withdrawal ? -t.Amount :
-                            0)
-                    }).ToListAsync();
-
-                for (int dayIterator = 0; dailyModeStartDate.AddDays(dayIterator) <= currentDate; dayIterator++)
+            List<ChartData> transactionChartData = await transactionQuery
+                .GroupBy(t => t.TransactionDate.Date)
+                .OrderBy(transactionGroup => transactionGroup.Key)
+                .Select(transactionGroup => new ChartData
                 {
-                    string newLabel = dailyModeStartDate.AddDays(dayIterator).ToString("MMM dd");
-                    if (!chartData.Any(cd => cd.Label.Equals(newLabel)))
-                        chartData.Insert(dayIterator, new()
-                        {
-                            Label = newLabel,
-                            Value = 0
-                        });
-                }
+                    Label = transactionGroup.Key.ToString("MMM dd"),
+                    Value = isAccountNetMovement ?
+                            transactionGroup.Sum(t =>
+                                t.TransactionTypeId == (int)TransactionTypeIDs.Deposit ||
+                                t.TransactionTypeId == (int)TransactionTypeIDs.Incoming_Transfer ? t.Amount :
+                                t.TransactionTypeId == (int)TransactionTypeIDs.Withdrawal ||
+                                t.TransactionTypeId == (int)TransactionTypeIDs.Outgoing_Transfer ? -t.Amount :
+                                0
+                            ) :
+                            transactionGroup.Sum(t =>
+                                t.TransactionTypeId == (int)TransactionTypeIDs.Deposit ? t.Amount :
+                                t.TransactionTypeId == (int)TransactionTypeIDs.Withdrawal ? -t.Amount :
+                                0
+                            )
+                }).ToListAsync();
 
-                LoanRepository loanRepo = new LoanRepository(dbContext);
-                var queryBuilderLoan = loanRepo.Query;
+            //  fillers
+            transactionChartData = FillDailyData(transactionChartData, currentDate);
 
-                var loanChartData = await queryBuilderLoan
-                    .LoanStartsOnOrAfter(dailyModeStartDate.Date)
-                    .HasPostDisbursementStatus()
-                    .GetQuery()
-                    .GroupBy(l => l.StartDate!.Value.Date)
-                    .OrderBy(loanGroup => loanGroup.Key)
-                    .Select(loanGroup => new ChartData
+            //  Get loan chart
+            var loanChartData = await GetDailyLoaned(loanQuery, currentDate);
+
+            //  Left join transaction chart with loan chart.
+            transactionChartData = transactionChartData
+                .GroupJoin(
+                    loanChartData,
+                    mainChart => mainChart.Label,
+                    loanChart => loanChart.Label,
+                    (mainChart, matchingLoans) => new ChartData
                     {
-                        Label = loanGroup.Key.ToString("MMM dd"),
-                        Value = loanGroup.Sum(loan => loan.RemainingLoanBalance)
-                    }).ToListAsync();
+                        Label = mainChart.Label,
+                        Value = isAccountNetMovement ?
+                            mainChart.Value + matchingLoans.Sum(l => l.Value) :
+                            mainChart.Value - matchingLoans.Sum(l => l.Value)
+                    }
+                ).ToList();
 
-                chartData = chartData
-                    .GroupJoin(
-                        loanChartData,
-                        mainChart => mainChart.Label,
-                        loanChart => loanChart.Label,
-                        (mainChart, matchingLoans) => new ChartData
-                        {
-                            Label = mainChart.Label,
-                            Value = mainChart.Value - matchingLoans.Sum(l => l.Value)
-                        }
-                    ).ToList();
-
-                return chartData;
-            }
+            return transactionChartData;
         }
         /// <summary>
         /// Asynchronously retrieves transaction data grouped into 4 weekly segments from the past 28 days up to 
@@ -695,88 +665,67 @@ namespace Services.DataManagement
         /// A list of <see cref="ChartData"/> where each item represents a week label (e.g., "Week 1") and the total 
         /// transaction amount for that week.
         /// </returns>
-        private async Task<List<ChartData>> GetWeeklyNetMovement(DateTime currentDate)
+        private async Task<List<ChartData>> GetWeeklyNetMovement(IQueryable<Transaction> transactionQuery, IQueryable<Loan> loanQuery, DateTime currentDate, bool isAccountNetMovement = false)
         {
-            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            //  Group the transactions by day and cast the result into a temporary object.
+            var result = await transactionQuery
+                .GroupBy(t => t.TransactionDate.Date)
+                .OrderBy(transactionGroup => transactionGroup.Key)
+                .Select(transactionGroup => new TempChartData
+                {
+                    Label = transactionGroup.Key,
+                    Value = isAccountNetMovement ?
+                            transactionGroup.Sum(t =>
+                                t.TransactionTypeId == (int)TransactionTypeIDs.Deposit ||
+                                t.TransactionTypeId == (int)TransactionTypeIDs.Incoming_Transfer ? t.Amount :
+                                t.TransactionTypeId == (int)TransactionTypeIDs.Withdrawal ||
+                                t.TransactionTypeId == (int)TransactionTypeIDs.Outgoing_Transfer ? -t.Amount :
+                                0
+                            ) :
+                            transactionGroup.Sum(t =>
+                                t.TransactionTypeId == (int)TransactionTypeIDs.Deposit ? t.Amount :
+                                t.TransactionTypeId == (int)TransactionTypeIDs.Withdrawal ? -t.Amount :
+                                0
+                            )
+                }).ToListAsync();
+
+            //  Filler
+            result = FillWeeklyData(result, currentDate);
+
+            //  Cast the result into the LineChartData object indexed by week.
+            List<ChartData> transactionChartData = new();
+            int weekindex = 1;
+            for (int i = 0; i < result.Count; i += 7)
             {
-                TransactionRepository transactionRepo = new TransactionRepository(dbContext);
-                var queryBuilder = transactionRepo.Query;
-
-                //  Get the start date of the weekly filter mode.
-                DateTime weeklyModeStartDate = currentDate.AddDays(-28);
-                //  Group the transactions by day and cast the result into a temporary object.
-                var result = await queryBuilder
-                    .HasStartDate(weeklyModeStartDate.Date)
-                    .ExceptTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer)
-                    .ExceptTransactionTypeId((int)TransactionTypeIDs.Outgoing_Transfer)
-                    .HasStatusConfirmed()
-                    .GetQuery()
-                    .GroupBy(t => t.TransactionDate.Date)
-                    .OrderBy(transactionGroup => transactionGroup.Key)
-                    .Select(transactionGroup => new
-                    {
-                        Label = transactionGroup.Key,
-                        Value = transactionGroup.Sum(t =>
-                            t.TransactionTypeId == (int)TransactionTypeIDs.Deposit ? t.Amount :
-                            t.TransactionTypeId == (int)TransactionTypeIDs.Withdrawal ? -t.Amount :
-                            0)
-                    }).ToListAsync();
-
-                //  Initialize fillers for days where no transactions took place.
-                for (int dayIterator = 0; weeklyModeStartDate.AddDays(dayIterator) <= currentDate; dayIterator++)
+                string newLabel = $"Week {weekindex++}";
+                int take = Math.Min(7, result.Count - i);
+                decimal value = result.Skip(i).Take(take).Sum(cd => cd.Value);
+                transactionChartData.Add(new ChartData
                 {
-                    DateTime newLabel = weeklyModeStartDate.AddDays(dayIterator);
-                    if (!result.Any(t => t.Label == newLabel))
-                        result.Insert(dayIterator, new
-                        {
-                            Label = newLabel,
-                            Value = 0.0m
-                        });
-                }
-
-                LoanRepository loanRepo = new LoanRepository(dbContext);
-                var queryBuilderLoan = loanRepo.Query;
-                var resultLoan = await queryBuilderLoan
-                    .LoanStartsOnOrAfter(weeklyModeStartDate.Date)
-                    .HasPostDisbursementStatus()
-                    .GetQuery()
-                    .GroupBy(l => l.StartDate!.Value.Date)
-                    .OrderBy(loanGroup => loanGroup.Key)
-                    .Select(loanGroup => new
-                    {
-                        Label = loanGroup.Key,
-                        Value = loanGroup.Sum(loan => loan.RemainingLoanBalance)
-                    }).ToListAsync();
-
-                result = result
-                    .GroupJoin(
-                        resultLoan,
-                        mainChart => mainChart.Label,
-                        loanChart => loanChart.Label,
-                        (mainChart, matchingLoans) => new
-                        {
-                            Label = mainChart.Label,
-                            Value = mainChart.Value - matchingLoans.Sum(l => l.Value)
-                        }
-                    ).ToList();
-                
-                //  Cast the result into the LineChartData object indexed by week.
-                List<ChartData> chartData = new();
-                int weekindex = 1;
-                for (int i = 0; i < result.Count; i += 7)
-                {
-                    string newLabel = $"Week {weekindex++}";
-                    int take = Math.Min(7, result.Count - i);
-                    decimal value = result.Skip(i).Take(take).Sum(cd => cd.Value);
-                    chartData.Add(new ChartData
-                    {
-                        Label = newLabel,
-                        Value = value
-                    });
-                }
-
-                return chartData;
+                    Label = newLabel,
+                    Value = value
+                });
             }
+
+            //  Get Loan Chart Data
+            var loanChartData = await GetWeeklyLoaned(loanQuery, currentDate);
+
+            //  Left join transaction chart with loan chart.
+            transactionChartData = transactionChartData
+                .GroupJoin(
+                    loanChartData,
+                    mainChart => mainChart.Label,
+                    loanChart => loanChart.Label,
+                    (mainChart, matchingLoans) => new ChartData
+                    {
+                        Label = mainChart.Label,
+                        Value = isAccountNetMovement ?
+                            mainChart.Value + matchingLoans.Sum(l => l.Value) :
+                            mainChart.Value - matchingLoans.Sum(l => l.Value)
+                    }
+                ).ToList();
+
+            return transactionChartData;
         }
         /// <summary>
         /// Asynchronously retrieves transaction data grouped by month from the start of the current year up to the 
@@ -789,73 +738,48 @@ namespace Services.DataManagement
         /// A list of <see cref="ChartData"/> where each item represents a month label (e.g., "Jan") and the total 
         /// transaction amount for that month.
         /// </returns>
-        private async Task<List<ChartData>> GetMonthlyNetMovement(DateTime currentDate)
+        private async Task<List<ChartData>> GetMonthlyNetMovement(IQueryable<Transaction> transactionQuery, IQueryable<Loan> loanQuery, DateTime currentDate, bool isAccountNetMovement = false)
         {
-            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
-            {
-                TransactionRepository transactionRepo = new TransactionRepository(dbContext);
-                var queryBuilder = transactionRepo.Query;
-                DateTime monthlyModeStartDate = currentDate.AddMonths(-currentDate.Month + 1);
-
-                List<ChartData> chartData = await queryBuilder
-                    .HasStartDate(monthlyModeStartDate.Date)
-                    .ExceptTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer)
-                    .ExceptTransactionTypeId((int)TransactionTypeIDs.Outgoing_Transfer)
-                    .HasStatusConfirmed()
-                    .GetQuery()
-                    .GroupBy(t => t.TransactionDate.Month)
-                    .OrderBy(transactionGroup => transactionGroup.Key)
-                    .Select(transactionGroup => new ChartData
-                    {
-                        Label = new DateTime(1, transactionGroup.Key, 1).ToString("MMM"),
-                        Value = transactionGroup.Sum(t =>
-                            t.TransactionTypeId == (int)TransactionTypeIDs.Deposit ? t.Amount :
-                            t.TransactionTypeId == (int)TransactionTypeIDs.Withdrawal ? -t.Amount :
-                            0)
-                    }).ToListAsync();
-
-                for (int monthIterator = 0; monthlyModeStartDate.AddMonths(monthIterator) <= currentDate; monthIterator++)
+            List<ChartData> transactionChartData = await transactionQuery
+                .GroupBy(t => t.TransactionDate.Month)
+                .OrderBy(transactionGroup => transactionGroup.Key)
+                .Select(transactionGroup => new ChartData
                 {
-                    string newLabel = monthlyModeStartDate.AddMonths(monthIterator).ToString("MMM");
-                    if (!chartData.Any(cd => cd.Label.Equals(newLabel)))
-                        chartData.Insert(monthIterator, new ChartData
-                        {
-                            Label = newLabel,
-                            Value = 0
-                        });
-                }
+                    Label = new DateTime(1, transactionGroup.Key, 1).ToString("MMM"),
+                    Value = isAccountNetMovement ?
+                            transactionGroup.Sum(t =>
+                                t.TransactionTypeId == (int)TransactionTypeIDs.Deposit ||
+                                t.TransactionTypeId == (int)TransactionTypeIDs.Incoming_Transfer ? t.Amount :
+                                t.TransactionTypeId == (int)TransactionTypeIDs.Withdrawal ||
+                                t.TransactionTypeId == (int)TransactionTypeIDs.Outgoing_Transfer ? -t.Amount :
+                                0
+                            ) :
+                            transactionGroup.Sum(t =>
+                                t.TransactionTypeId == (int)TransactionTypeIDs.Deposit ? t.Amount :
+                                t.TransactionTypeId == (int)TransactionTypeIDs.Withdrawal ? -t.Amount :
+                                0
+                            )
+                }).ToListAsync();
+            //  Filler
+            transactionChartData = FillMonthlyData(transactionChartData, currentDate);
 
+            //  Get loan chart data.
+            var loanChartData = await GetMonthlyLoaned(loanQuery, currentDate);
 
-                LoanRepository loanRepo = new LoanRepository(dbContext);
-                var queryBuilderLoan = loanRepo.Query;
-
-                var loanChartData = await queryBuilderLoan
-                    .LoanStartsOnOrAfter(monthlyModeStartDate.Date)
-                    .HasPostDisbursementStatus()
-                    .GetQuery()
-                    .GroupBy(l => l.StartDate!.Value.Month)
-                    .OrderBy(loanGroup => loanGroup.Key)
-                    .Select(loanGroup => new ChartData
+            //  Left join transaction chart data with loan chart data.
+            transactionChartData = transactionChartData
+                .GroupJoin(
+                    loanChartData,
+                    mainChart => mainChart.Label,
+                    loanChart => loanChart.Label,
+                    (mainChart, matchingLoans) => new ChartData
                     {
-                        Label = new DateTime(1, loanGroup.Key, 1).ToString("MMM"),
-                        Value = loanGroup.Sum(loan => loan.RemainingLoanBalance)
-                    }).ToListAsync();
+                        Label = mainChart.Label,
+                        Value = mainChart.Value - matchingLoans.Sum(l => l.Value)
+                    }
+                ).ToList();
 
-                chartData = chartData
-                    .GroupJoin(
-                        loanChartData,
-                        mainChart => mainChart.Label,
-                        loanChart => loanChart.Label,
-                        (mainChart, matchingLoans) => new ChartData
-                        {
-                            Label = mainChart.Label,
-                            Value = mainChart.Value - matchingLoans.Sum(l => l.Value)
-                        }
-                    ).ToList();
-
-
-                return chartData;
-            }
+            return transactionChartData;
         }
         /// <summary>
         /// Asynchronously retrieves transaction data grouped by year over the past 10 years up to the specified date.
@@ -867,7 +791,7 @@ namespace Services.DataManagement
         /// A list of <see cref="ChartData"/> where each item represents a year label and the total transaction amount 
         /// for that year.
         /// </returns>
-        private async Task<List<ChartData>> GetYearlyNetMovement(DateTime currentDate)
+        private async Task<List<ChartData>> GetYearlyNetMovement(IQueryable<Transaction> transactionQuery, IQueryable<Loan> loanQuery, DateTime currentDate, bool isAccountNetMovement = false)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
@@ -875,50 +799,35 @@ namespace Services.DataManagement
                 var queryBuilder = transactionRepo.Query;
                 DateTime yearlyModeStartDate = currentDate.AddYears(-10);
 
-                List<ChartData> chartData = await queryBuilder
-                    .HasStartDate(yearlyModeStartDate)
-                    .ExceptTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer)
-                    .ExceptTransactionTypeId((int)TransactionTypeIDs.Outgoing_Transfer) 
-                    .HasStatusConfirmed()
-                    .GetQuery()
+                List<ChartData> transactionChartData = await transactionQuery
                     .GroupBy(t => t.TransactionDate.Year)
                     .OrderBy(transactionGroup => transactionGroup.Key)
                     .Select(transactionGroup => new ChartData
                     {
                         Label = transactionGroup.Key.ToString(),
-                        Value = transactionGroup.Sum(t =>
-                            t.TransactionTypeId == (int)TransactionTypeIDs.Deposit ? t.Amount :
-                            t.TransactionTypeId == (int)TransactionTypeIDs.Withdrawal ? -t.Amount :
-                            0)
+                        Value = isAccountNetMovement ?
+                            transactionGroup.Sum(t =>
+                                t.TransactionTypeId == (int)TransactionTypeIDs.Deposit ||
+                                t.TransactionTypeId == (int)TransactionTypeIDs.Incoming_Transfer ? t.Amount :
+                                t.TransactionTypeId == (int)TransactionTypeIDs.Withdrawal ||
+                                t.TransactionTypeId == (int)TransactionTypeIDs.Outgoing_Transfer ? -t.Amount :
+                                0
+                            ) :
+                            transactionGroup.Sum(t =>
+                                t.TransactionTypeId == (int)TransactionTypeIDs.Deposit ? t.Amount :
+                                t.TransactionTypeId == (int)TransactionTypeIDs.Withdrawal ? -t.Amount :
+                                0
+                            )
                     }).ToListAsync();
 
-                for (int yearIterator = 0; yearlyModeStartDate.AddYears(yearIterator) <= currentDate; yearIterator++)
-                {
-                    string newLabel = yearlyModeStartDate.AddYears(yearIterator).Year.ToString();
-                    if (!chartData.Any(cd => cd.Label.Equals(newLabel)))
-                        chartData.Insert(yearIterator, new ChartData
-                        {
-                            Label = newLabel,
-                            Value = 0
-                        });
-                }
+                //  Filler
+                transactionChartData = FillYearlyData(transactionChartData, currentDate);
 
-                LoanRepository loanRepo = new LoanRepository(dbContext);
-                var queryBuilderLoan = loanRepo.Query;
+                //  Get loan chart data.
+                var loanChartData = await GetYearlyLoaned(loanQuery, currentDate);
 
-                var loanChartData = await queryBuilderLoan
-                    .LoanStartsOnOrAfter(currentDate.Date)
-                    .HasPostDisbursementStatus()
-                    .GetQuery()
-                    .GroupBy(l => l.StartDate!.Value.Year)
-                    .OrderBy(loanGroup => loanGroup.Key)
-                    .Select(loanGroup => new ChartData
-                    {
-                        Label = loanGroup.Key.ToString(),
-                        Value = loanGroup.Sum(loan => loan.RemainingLoanBalance)
-                    }).ToListAsync();
-
-                chartData = chartData
+                //  Left join transaction chart data with loan chart data.
+                transactionChartData = transactionChartData
                     .GroupJoin(
                         loanChartData,
                         mainChart => mainChart.Label,
@@ -930,8 +839,127 @@ namespace Services.DataManagement
                         }
                     ).ToList();
 
-                return chartData;
+                return transactionChartData;
             }
+        }
+        #endregion
+        #region Loan Data By Time Filter
+        private async Task<List<ChartData>> GetHourlyLoaned(IQueryable<Loan> query, DateTime currentDate)
+        {
+            var loanChartData = await query
+                .GroupBy(l => l.StartDate!.Value.Hour)
+                .OrderBy(loanGroup => loanGroup.Key)
+                .Select(loanGroup => new ChartData
+                {
+                    Label = new DateTime(1, 1, 1, loanGroup.Key, 0, 0).ToString("hh tt"),
+                    Value = loanGroup.Sum(loan => loan.LoanAmount)
+                }).ToListAsync();
+
+            //  Filler
+            loanChartData = FillHourlyData(loanChartData, currentDate);
+
+            return loanChartData;
+        }
+        private async Task<List<ChartData>> GetDailyLoaned(IQueryable<Loan> query, DateTime currentDate)
+        {
+            var loanChartData = await query
+                .GroupBy(l => l.StartDate!.Value.Date)
+                .OrderBy(loanGroup => loanGroup.Key)
+                .Select(loanGroup => new ChartData
+                {
+                    Label = loanGroup.Key.ToString("MMM dd"),
+                    Value = loanGroup.Sum(loan => loan.LoanAmount)
+                }).ToListAsync();
+
+            //  Filler
+            loanChartData = FillDailyData(loanChartData, currentDate);
+
+            return loanChartData;
+        }
+        private async Task<List<ChartData>> GetWeeklyLoaned(IQueryable<Loan> query, DateTime currentDate)
+        {
+            var result = await query
+                .GroupBy(l => l.StartDate!.Value.Date)
+                .OrderBy(loanGroup => loanGroup.Key)
+                .Select(loanGroup => new TempChartData
+                {
+                    Label = loanGroup.Key,
+                    Value = loanGroup.Sum(loan => loan.LoanAmount)
+                }).ToListAsync();
+            //  Initialize fillers for days where no loans took place.
+            result = FillWeeklyData(result, currentDate);
+
+            //  Cast the result into the LineChartData object indexed by week.
+            List<ChartData> chartData = new();
+            int weekindex = 1;
+            for (int i = 0; i < result.Count; i += 7)
+            {
+                string newLabel = $"Week {weekindex++}";
+                int take = Math.Min(7, result.Count - i);
+                decimal value = result.Skip(i).Take(take).Sum(cd => cd.Value);
+                chartData.Add(new ChartData
+                {
+                    Label = newLabel,
+                    Value = value
+                });
+            }
+
+            return chartData;
+        }
+        private async Task<List<ChartData>> GetMonthlyLoaned(IQueryable<Loan> query, DateTime currentDate)
+        {
+            var loanChartData = await query
+                .GroupBy(l => l.StartDate!.Value.Month)
+                .OrderBy(loanGroup => loanGroup.Key)
+                .Select(loanGroup => new ChartData
+                {
+                    Label = new DateTime(1, loanGroup.Key, 1).ToString("MMM"),
+                    Value = loanGroup.Sum(loan => loan.LoanAmount)
+                }).ToListAsync();
+
+            //  Filler
+            loanChartData = FillMonthlyData(loanChartData, currentDate);
+
+            return loanChartData;
+        }
+        private async Task<List<ChartData>> GetYearlyLoaned(IQueryable<Loan> query, DateTime currentDate)
+        {
+            var loanChartData = await query
+                .GroupBy(l => l.StartDate!.Value.Year)
+                .OrderBy(loanGroup => loanGroup.Key)
+                .Select(loanGroup => new ChartData
+                {
+                    Label = loanGroup.Key.ToString(),
+                    Value = loanGroup.Sum(loan => loan.LoanAmount)
+                }).ToListAsync();
+
+            //  Filler
+            loanChartData = FillYearlyData(loanChartData, currentDate);
+
+            return loanChartData;
+        }
+        private IQueryable<Loan> BuildLoanQuery(
+            LoanRepository loanRepo,
+            string filterMode,
+            DateTime currentDate,
+            int accountId = 0)
+        {
+            var queryBuilder = loanRepo
+                .Query
+                .LoanStartsOnOrAfter(filterMode switch
+                {
+                    AdminDashboardTimeFilters.HOURLY => currentDate.Date,
+                    AdminDashboardTimeFilters.DAILY => currentDate.AddDays(-7),
+                    AdminDashboardTimeFilters.WEEKLY => currentDate.AddDays(-28),
+                    AdminDashboardTimeFilters.MONTHLY => currentDate.AddMonths(-currentDate.Month + 1),
+                    AdminDashboardTimeFilters.YEARLY => currentDate.AddYears(-10),
+                    _ => currentDate.Date
+                })
+                .HasPostDisbursementStatus();
+            if (accountId > 0)
+                queryBuilder.HasAccountId(accountId);
+
+            return queryBuilder.GetQuery();
         }
         #endregion
         #region Recent Transaction Type Volumes (Pie Chart)
@@ -1073,26 +1101,6 @@ namespace Services.DataManagement
                 };
 
             }
-        }
-        public IQueryable<Transaction> BuildTransactionQuery(TransactionRepository transactionRepo, string filterMode, DateTime currentDate, int accountId = 0)
-        {
-            var queryBuilder = transactionRepo
-                .Query
-                .ExceptStatus(TransactionStatus.CANCELLED)
-                .ExceptStatus(TransactionStatus.DENIED)
-                .HasStartDate(filterMode switch
-                {
-                    AdminDashboardTimeFilters.HOURLY => currentDate.Date,
-                    AdminDashboardTimeFilters.DAILY => currentDate.AddDays(-7),
-                    AdminDashboardTimeFilters.WEEKLY => currentDate.AddDays(-28),
-                    AdminDashboardTimeFilters.MONTHLY => currentDate.AddMonths(-currentDate.Month + 1),
-                    AdminDashboardTimeFilters.YEARLY => currentDate.AddYears(-10),
-                    _ => currentDate.Date
-                });
-            if (accountId > 0)
-                queryBuilder.HasMainAccountId(accountId);
-
-            return queryBuilder.GetQuery();
         }
         /// <summary>
         /// Retrieves hourly bar chart data representing the transaction volume per hour from the start of the day to the current hour.
@@ -1387,6 +1395,116 @@ namespace Services.DataManagement
                     });
             }
 
+            return chartData;
+        }
+        #endregion
+        private IQueryable<Transaction> BuildTransactionQuery(
+            TransactionRepository transactionRepo, 
+            string filterMode, 
+            DateTime currentDate, 
+            int accountId = 0)
+        {
+            var queryBuilder = transactionRepo
+                .Query
+                .ExceptStatus(TransactionStatus.CANCELLED)
+                .ExceptStatus(TransactionStatus.DENIED)
+                .HasStartDate(filterMode switch
+                {
+                    AdminDashboardTimeFilters.HOURLY => currentDate.Date,
+                    AdminDashboardTimeFilters.DAILY => currentDate.AddDays(-7),
+                    AdminDashboardTimeFilters.WEEKLY => currentDate.AddDays(-28),
+                    AdminDashboardTimeFilters.MONTHLY => currentDate.AddMonths(-currentDate.Month + 1),
+                    AdminDashboardTimeFilters.YEARLY => currentDate.AddYears(-10),
+                    _ => currentDate.Date
+                });
+            if (accountId > 0)
+                queryBuilder.HasMainAccountId(accountId);
+
+            return queryBuilder.GetQuery();
+        }
+
+        #region Data Chart Fillers
+        private List<ChartData> FillHourlyData(List<ChartData> chartData, DateTime currentDate)
+        {
+
+            int currentHour = currentDate.Hour;
+            for (int i = 0; i <= currentHour; i++)
+            {
+                string newLabel = new DateTime(1, 1, 1, i, 0, 0).ToString("hh tt");
+                if (!chartData.Any(cd => cd.Label.Equals(newLabel)))
+                    chartData.Insert(i, new()
+                    {
+                        Label = newLabel,
+                        Value = 0
+                    });
+            }
+
+            return chartData;
+        }
+        private List<ChartData> FillDailyData(List<ChartData> chartData, DateTime currentDate)
+        {
+
+            //  fillers
+            DateTime dailyModeStartDate = currentDate.AddDays(-7);
+            for (int dayIterator = 0; dailyModeStartDate.AddDays(dayIterator) <= currentDate; dayIterator++)
+            {
+                string newLabel = dailyModeStartDate.AddDays(dayIterator).ToString("MMM dd");
+                if (!chartData.Any(cd => cd.Label.Equals(newLabel)))
+                    chartData.Insert(dayIterator, new()
+                    {
+                        Label = newLabel,
+                        Value = 0
+                    });
+            }
+
+            return chartData;
+        }
+        private List<TempChartData> FillWeeklyData(List<TempChartData> chartData, DateTime currentDate)
+        {
+            //  Get the start date of the weekly filter mode.
+            DateTime weeklyModeStartDate = currentDate.AddDays(-28);
+            //  Initialize fillers for days where no transactions took place.
+            for (int dayIterator = 0; weeklyModeStartDate.AddDays(dayIterator) <= currentDate; dayIterator++)
+            {
+                DateTime newLabel = weeklyModeStartDate.AddDays(dayIterator);
+                if (!chartData.Any(t => t.Label == newLabel))
+                    chartData.Insert(dayIterator, new TempChartData
+                    {
+                        Label = newLabel,
+                        Value = 0.0m
+                    });
+            }
+            return chartData;
+        }
+        private List<ChartData> FillMonthlyData(List<ChartData> chartData, DateTime currentDate)
+        {
+            DateTime monthlyModeStartDate = currentDate.AddMonths(-currentDate.Month + 1);
+
+            for (int monthIterator = 0; monthlyModeStartDate.AddMonths(monthIterator) <= currentDate; monthIterator++)
+            {
+                string newLabel = monthlyModeStartDate.AddMonths(monthIterator).ToString("MMM");
+                if (!chartData.Any(cd => cd.Label.Equals(newLabel)))
+                    chartData.Insert(monthIterator, new ChartData
+                    {
+                        Label = newLabel,
+                        Value = 0
+                    });
+            }
+            return chartData;
+        }
+        private List<ChartData> FillYearlyData(List<ChartData> chartData, DateTime currentDate)
+        {
+            DateTime yearlyModeStartDate = currentDate.AddYears(-10);
+            for (int yearIterator = 0; yearlyModeStartDate.AddYears(yearIterator) <= currentDate; yearIterator++)
+            {
+                string newLabel = yearlyModeStartDate.AddYears(yearIterator).Year.ToString();
+                if (!chartData.Any(cd => cd.Label.Equals(newLabel)))
+                    chartData.Insert(yearIterator, new ChartData
+                    {
+                        Label = newLabel,
+                        Value = 0
+                    });
+            }
             return chartData;
         }
         #endregion

@@ -19,7 +19,15 @@
             </div>
 
             <hr class="divider" />
-
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+                <label class="text-light mb-0" style="white-space: nowrap;">Filter: </label>
+                <select class="form-select form-select-sm w-25" @bind="selectedFilter" @bind:after="OnChartFilterChanged">
+                    @foreach (var chartFilter in AdminDashboardTimeFilters.AS_STRING_LIST)
+                    {
+                        <option value="@chartFilter">By @chartFilter</option>
+                    }
+                </select>
+            </div>
             <!-- Card Section -->
             <div class="card-section justify-content-between align-items-center mx-4">
                 <!-- Account Card -->
@@ -31,7 +39,7 @@
                 <!-- Data Card -->
                 <div class="main-chart">
                     <label>Transaction History</label>
-                    <E_BankingSystem.Components.Admin.Dashboard.Charts.User_LinerChart Labels="LineLabels" WithdrawData="LineWithdrawData" DepositData="LineDepositData" OutgoingTransfer="LineOutgoingTransferData" IncomingTransfer="LineIncomingTransferData" />
+                    <E_BankingSystem.Components.Admin.Dashboard.Charts.User_LinerChart Labels="LineLabels" WithdrawData="LineWithdrawData" DepositData="LineDepositData" OutgoingTransfer="LineOutgoingTransferData" IncomingTransfer="LineIncomingTransferData" NetBalance="LineNetBalanceData" />
                 </div>
             </div>
 
@@ -78,6 +86,8 @@
 </div>
 
 @code {
+    private string selectedFilter { get; set; } = AdminDashboardTimeFilters.HOURLY;
+
     private decimal savingsAmount = 0.0m;
 
     private LinkedAccount accountViewSession = new();
@@ -87,6 +97,7 @@
     private List<decimal> LineDepositData = new();
     private List<decimal> LineOutgoingTransferData = new();
     private List<decimal> LineIncomingTransferData = new();
+    private List<decimal> LineNetBalanceData = new();
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -97,18 +108,7 @@
                 accountViewSession = await adminControlledSessionService.GetAccountViewSession();
                 savingsAmount = await adminDataService.GetAccountBalanceAsync(accountViewSession.AccountId);
 
-                var LineChartData = await adminDataService.GetTransactionsVolumeByTimeFilter(
-                    AdminDashboardTimeFilters.DAILY,
-                    DateTime.Now,
-                    accountViewSession.AccountId
-                );
-
-                // mockup data
-                LineLabels = LineChartData.Select(lcd => lcd.Label).ToList();
-                LineWithdrawData = LineChartData.Select(lcd => lcd.DataUnits[0].Value).ToList();
-                LineDepositData = LineChartData.Select(lcd => lcd.DataUnits[1].Value).ToList();
-                LineOutgoingTransferData = LineChartData.Select(lcd => lcd.DataUnits[2].Value).ToList();
-                LineIncomingTransferData = LineChartData.Select(lcd => lcd.DataUnits[3].Value).ToList();
+                await LoadChartData();
 
                 StateHasChanged();
             }
@@ -119,4 +119,32 @@
         }
     }
 
+    private async Task OnChartFilterChanged()
+    {
+        await Task.Delay(500);
+    }
+
+    private async Task LoadChartData()
+    {
+        var LineChartData = await adminDataService.GetTransactionsVolumeByTimeFilter(
+            selectedFilter,
+            DateTime.Now,
+            accountViewSession.AccountId
+        );
+
+        var NetBalanceData = await adminDataService.GetNetMovementByTimeFilter(
+            selectedFilter,
+            DateTime.Now,
+            accountViewSession.AccountId
+        );
+
+        LineLabels = LineChartData.Select(lcd => lcd.Label).ToList();
+        LineWithdrawData = LineChartData.Select(lcd => lcd.DataUnits[0].Value).ToList();
+        LineDepositData = LineChartData.Select(lcd => lcd.DataUnits[1].Value).ToList();
+        LineOutgoingTransferData = LineChartData.Select(lcd => lcd.DataUnits[2].Value).ToList();
+        LineIncomingTransferData = LineChartData.Select(lcd => lcd.DataUnits[3].Value).ToList();
+        LineNetBalanceData = NetBalanceData.Select(nbd => nbd.Value).ToList();
+
+        StateHasChanged();
+    }
 }

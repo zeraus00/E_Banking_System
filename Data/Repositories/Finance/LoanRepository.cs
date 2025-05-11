@@ -20,6 +20,8 @@ namespace Data.Repositories.Finance
         public class LoanQuery : CustomQuery<Loan, LoanQuery>
         {
             public LoanQuery(IQueryable<Loan> query) : base(query) { }
+            public LoanQuery HasAccountId(int accountId) =>
+                WhereCondition(l => l.AccountId == accountId);
             public LoanQuery LoanStartsOnOrAfter(DateTime startDate) =>
                 WhereCondition(l => l.StartDate >= startDate.Date);
             public LoanQuery LoanStartsOnOrBefore(DateTime endDate) =>
