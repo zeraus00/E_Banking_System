@@ -1041,7 +1041,7 @@ namespace Services.DataManagement
         /// </summary>
         /// <param name="currentDate">The reference date used to calculate the time ranges.</param>
         /// <returns>A dictionary mapping each time filter to its corresponding list of chart data.</returns>
-        public async Task<Dictionary<string, List<ChartData>>> GetTransactionsVolumeDictionary(DateTime currentDate, int acccountId = 0, bool excludeIncomingTransfer = true)
+        public async Task<Dictionary<string, List<ChartData>>> GetTransactionsVolumeDictionary(DateTime currentDate, int acccountId = 0)
         {
             Dictionary<string, List<ChartData>> chartCache = new();
             foreach (var filter in AdminDashboardTimeFilters.AS_STRING_LIST)
@@ -1054,13 +1054,13 @@ namespace Services.DataManagement
         /// <param name="filterMode">The time filter mode (e.g., HOURLY, DAILY, etc.).</param>
         /// <param name="currentDate">The reference date used to calculate the time range.</param>
         /// <returns>A list of chart data for the specified filter.</returns>
-        public async Task<List<ChartData>> GetTransactionsVolumeByTimeFilter(string filterMode, DateTime currentDate, int accountId = 0, bool excludeIncomingTransfer = true)
+        public async Task<List<ChartData>> GetTransactionsVolumeByTimeFilter(string filterMode, DateTime currentDate, int accountId = 0)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
                 TransactionRepository transactionRepo = new TransactionRepository(dbContext);
 
-                var query = BuildTransactionQuery(transactionRepo, filterMode, currentDate, accountId, excludeIncomingTransfer);
+                var query = BuildTransactionQuery(transactionRepo, filterMode, currentDate, accountId);
 
                 return filterMode switch
                 {
@@ -1074,7 +1074,7 @@ namespace Services.DataManagement
 
             }
         }
-        public IQueryable<Transaction> BuildTransactionQuery(TransactionRepository transactionRepo, string filterMode, DateTime currentDate, int accountId = 0, bool excludeIncomingTransfer = true)
+        public IQueryable<Transaction> BuildTransactionQuery(TransactionRepository transactionRepo, string filterMode, DateTime currentDate, int accountId = 0)
         {
             var queryBuilder = transactionRepo
                 .Query
@@ -1091,8 +1091,6 @@ namespace Services.DataManagement
                 });
             if (accountId > 0)
                 queryBuilder.HasMainAccountId(accountId);
-            if (excludeIncomingTransfer)
-                queryBuilder.ExceptTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer);
 
             return queryBuilder.GetQuery();
         }

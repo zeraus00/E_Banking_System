@@ -100,8 +100,7 @@
                 var LineChartData = await adminDataService.GetTransactionsVolumeByTimeFilter(
                     AdminDashboardTimeFilters.DAILY,
                     DateTime.Now,
-                    accountViewSession.AccountId,
-                    false
+                    accountViewSession.AccountId
                 );
 
                 // mockup data
