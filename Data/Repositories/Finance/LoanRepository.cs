@@ -20,6 +20,12 @@ namespace Data.Repositories.Finance
         public class LoanQuery : CustomQuery<Loan, LoanQuery>
         {
             public LoanQuery(IQueryable<Loan> query) : base(query) { }
+            public LoanQuery HasLoanId(int loanId) =>
+                WhereCondition(l => l.LoanId == loanId);
+            public LoanQuery HasLoanNumber(string loanNumber) =>
+                WhereCondition(l => l.LoanNumber == loanNumber);
+            public LoanQuery HasLoanTypeId(int loanTypeId) =>
+                WhereCondition(l => l.LoanTypeId == loanTypeId);
             public LoanQuery HasAccountId(int accountId) =>
                 WhereCondition(l => l.AccountId == accountId);
             public LoanQuery LoanStartsOnOrAfter(DateTime startDate) =>
