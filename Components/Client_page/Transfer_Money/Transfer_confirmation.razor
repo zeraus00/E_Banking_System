@@ -45,7 +45,7 @@
                     <div class="d-flex flex-column text-start text-light mb-0">
                         <h5 class="mb-1 fw-bold">@counterAccountName</h5>
                         <p class="m-0">@FormatHelper.AccountNumberFormatter(counterAccountNumber)</p>
-                        <p class="m-0">@date?.ToString("f") @time</p>
+                        <p class="m-0"><strong>Date:</strong> @(date?.ToShortDateString() ?? "") @(time?.ToString(@"hh\:mm") ?? "")</p>
                         <p class="m-0">@transactionNumber</p>
                     </div>
 

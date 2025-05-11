@@ -44,7 +44,7 @@
                         <h5 class="mb-1">@clientName</h5>
                         <p class="mb-0"><strong>Account No.:</strong> @FormatHelper.AccountNumberFormatter(accountNumber)</p>
                         <p class="m-0"><strong>Card/Account Destination:</strong> @cardDestination</p>
-                        <p class="mb-0"><strong>Date:</strong> @date @time</p>
+                        <p class="m-0"><strong>Date:</strong> @(date?.ToShortDateString() ?? "") @(time?.ToString(@"hh\:mm") ?? "")</p>
                         <p class="mb-0"><strong>Confirmation No.:</strong> @confirmationNumber</p>
                     </div>
                     <div class="w-25">
