@@ -96,7 +96,7 @@ window.drawBarChart = (labels, data) => {
     });
 };
 
-window.drawUserLineChart = (labels, withdrawData, depositData, outgoingTransfer, incomingTransfer, netBalance) => {
+window.drawUserLineChart = (labels, withdrawData, depositData, outgoingTransfer, incomingTransfer, loanPayment, netBalance) => {
     const ctxUserLine = document.getElementById('UserLineChart').getContext('2d');
 
     if (window.lineInstance) {
@@ -142,6 +142,13 @@ window.drawUserLineChart = (labels, withdrawData, depositData, outgoingTransfer,
                     borderColor: 'rgba(102, 204, 255, 0.6)',
                     borderWidth: 2,
                     fill: false
+                },
+                {
+                    label: 'Loan Payment',
+                    data: loanPayment,
+                    borderColor: 'rgba(255, 206, 86, 0.6)',
+                    borderWidth: 2,
+                    fill: false
                 }
             ]
         },
@@ -155,7 +162,9 @@ window.drawUserLineChart = (labels, withdrawData, depositData, outgoingTransfer,
                 }
             },
             scales: {
-                y: { beginAtZero: true }
+                y: {
+                    beginAtZero: true
+                }
             }
         }
     });

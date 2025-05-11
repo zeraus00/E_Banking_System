@@ -20,13 +20,15 @@
     [Parameter]
     public List<decimal> IncomingTransfer { get; set; } = new();
     [Parameter]
+    public List<decimal> LoanPayment { get; set; } = new();
+    [Parameter]
     public List<decimal> NetBalance { get; set; } = new();
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (Labels.Count > 0 && WithdrawData.Count > 0 && DepositData.Count > 0 && OutgoingTransfer.Count > 0 && IncomingTransfer.Count > 0 && NetBalance.Count > 0)
+        if (Labels.Count > 0 && WithdrawData.Count > 0 && DepositData.Count > 0 && OutgoingTransfer.Count > 0 && IncomingTransfer.Count > 0 && LoanPayment.Count > 0 && NetBalance.Count > 0)
         {
-            await JSRuntime.InvokeVoidAsync("drawUserLineChart", Labels, WithdrawData, DepositData, OutgoingTransfer, IncomingTransfer, NetBalance);
+            await JSRuntime.InvokeVoidAsync("drawUserLineChart", Labels, WithdrawData, DepositData, OutgoingTransfer, IncomingTransfer, LoanPayment, NetBalance);
         }
     }
 }

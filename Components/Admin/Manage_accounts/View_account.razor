@@ -25,14 +25,19 @@
 
             <hr class="divider" />
             <div class="d-flex align-items-center gap-3 flex-wrap">
-                        <label class="text-light mb-0" style="white-space: nowrap;">Filter: </label>
-                        <select class="form-select form-select-sm w-25" @bind="selectedFilter" @bind:after="OnChartFilterChanged">
-                            @foreach (var chartFilter in AdminDashboardTimeFilters.AS_STRING_LIST)
-                            {
-                                <option value="@chartFilter">By @chartFilter</option>
-                            }
-                        </select>
-                    </div>
+                    <label class="text-light mb-0" style="white-space: nowrap;">Filter: </label>
+                    <select class="form-select form-select-sm w-25" @bind="timeFilter" @bind:after="OnChartFilterChanged">
+                        @foreach (var chartFilter in AdminDashboardTimeFilters.AS_STRING_LIST)
+                    {
+                        <option value="@chartFilter">By @chartFilter</option>
+                    }
+                </select>
+                <label class="text-light mb-0" style="white-space: nowrap;">Filter: </label>
+                <select class="form-select form-select-sm w-25" @bind="dataFilter" @bind:after="OnChartFilterChanged">
+                    <option value="@ChartDataTypes.TRANSACTION_VOLUME_OVER_TIME"> @ChartDataTypes.TRANSACTION_VOLUME_OVER_TIME</option>
+                    <option value="@ChartDataTypes.TRANSACTION_COUNT_OVER_TIME"> @ChartDataTypes.TRANSACTION_COUNT_OVER_TIME</option>
+                </select>
+            </div>
             <!-- Card Section -->
             <div class="card-section justify-content-between align-items-center mx-4">
                 <div>
@@ -67,7 +72,7 @@
                     <label>Transaction History</label>
                     @if (LineChartData is not null && LineChartData.Any() && NetBalanceData is not null && NetBalanceData.Any())
                     {
-                        <E_BankingSystem.Components.Admin.Dashboard.Charts.User_LinerChart Labels="LineLabels" WithdrawData="LineWithdrawData" DepositData="LineDepositData" OutgoingTransfer="LineOutgoingTransferData" IncomingTransfer="LineIncomingTransferData" NetBalance="LineNetBalanceData" />
+                        <E_BankingSystem.Components.Admin.Dashboard.Charts.User_LinerChart Labels="LineLabels" WithdrawData="LineWithdrawData" DepositData="LineDepositData" OutgoingTransfer="LineOutgoingTransferData" IncomingTransfer="LineIncomingTransferData" LoanPayment="LineLoanPaymentData" NetBalance="LineNetBalanceData" />
                     }
                 </div>
             </div>
@@ -115,8 +120,8 @@
 </div>
 
 @code {
-    private string selectedFilter { get; set; } = AdminDashboardTimeFilters.HOURLY;
-
+    private string timeFilter { get; set; } = AdminDashboardTimeFilters.HOURLY;
+    private string dataFilter { get; set; } = ChartDataTypes.TRANSACTION_VOLUME_OVER_TIME;
     //  Account Status Type Update Button Flags
     private bool isFrozen = false;
     private bool isActive = false;
@@ -133,6 +138,7 @@
     private List<decimal> LineDepositData = new();
     private List<decimal> LineOutgoingTransferData = new();
     private List<decimal> LineIncomingTransferData = new();
+    private List<decimal> LineLoanPaymentData = new();
     private List<decimal> LineNetBalanceData = new();
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -172,23 +178,41 @@
 
     private async Task LoadChartData()
     {
-        LineChartData = await adminDataService.GetTransactionsVolumeByTimeFilter(
-            selectedFilter,
-            DateTime.Now,
-            accountViewSession.AccountId
-        );
+        if (dataFilter.Equals(ChartDataTypes.TRANSACTION_VOLUME_OVER_TIME))
+        {
+            LineChartData = await adminDataService.GetTransactionsVolumeByTimeFilter(
+                timeFilter,
+                DateTime.Now,
+                accountViewSession.AccountId
+            );
 
-        NetBalanceData = await adminDataService.GetNetMovementByTimeFilter(
-            selectedFilter,
-            DateTime.Now,
-            accountViewSession.AccountId
-        );
+            NetBalanceData = await adminDataService.GetNetMovementByTimeFilter(
+                timeFilter,
+                DateTime.Now,
+                accountViewSession.AccountId
+            );
+        }
+        else if (dataFilter.Equals(ChartDataTypes.TRANSACTION_COUNT_OVER_TIME))
+        {
 
+            LineChartData = await adminDataService.GetTransactionsCountByTimeFilter(
+                timeFilter,
+                DateTime.Now,
+                accountViewSession.AccountId
+            );
+
+            NetBalanceData = await adminDataService.GetTransactionsCountByTimeFilter(
+                timeFilter,
+                DateTime.Now,
+                accountViewSession.AccountId
+            );
+        }
         LineLabels = LineChartData.Select(lcd => lcd.Label).ToList();
         LineWithdrawData = LineChartData.Select(lcd => lcd.DataUnits[0].Value).ToList();
         LineDepositData = LineChartData.Select(lcd => lcd.DataUnits[1].Value).ToList();
         LineOutgoingTransferData = LineChartData.Select(lcd => lcd.DataUnits[2].Value).ToList();
         LineIncomingTransferData = LineChartData.Select(lcd => lcd.DataUnits[3].Value).ToList();
+        LineLoanPaymentData = LineChartData.Select(lcd => lcd.DataUnits[4].Value).ToList();
         LineNetBalanceData = NetBalanceData.Select(nbd => nbd.Value).ToList();
     }
 
