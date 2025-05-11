@@ -13,6 +13,7 @@
         public const string VIEW_DETAILS = "/ViewDetails";
         public const string VIEW_ACCOUNT = "/View_account";
         public const string ADMIN_TRANSACTIONS = "/Admin_transaction";
+        public const string APPLLYING_LOAN = "/Applying";
 
         public const string APPLY_LOAN = "/Apply_loan";
         public const string LOAN_RECEIPT = "/Loan_receipt";

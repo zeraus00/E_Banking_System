@@ -43,13 +43,13 @@ window.drawPieChart = (labels, data) => {
                     'rgba(75, 192, 192, 0.6)',
                     'rgba(255, 99, 132, 0.6)',
                     'rgba(255, 206, 86, 0.6)',
-                    'rgba(200, 100, 0, 0.6)'
+                    'rgba(102, 204, 255, 0.6)'
                 ],
                 borderColor: [
                     'rgba(75, 192, 192, 1)',
                     'rgba(255, 99, 132, 1)',
                     'rgba(255, 206, 86, 1)',
-                    'rgba(200, 100, 0, 1)'
+                    'rgba(102, 204, 255, 1)'
                 ],
                 borderWidth: 1
             }]
@@ -132,7 +132,7 @@ window.drawUserLineChart = (labels, withdrawData, depositData, outgoingTransfer,
                 {
                     label: 'Incoming Transfer',
                     data: incomingTransfer,
-                    borderColor: 'rgba(200, 100, 0, 0.6)',
+                    borderColor: 'rgba(102, 204, 255, 0.6)',
                     borderWidth: 2,
                     fill: false
                 },
@@ -196,8 +196,8 @@ window.drawDashboardBarChart = (labels, data1, data2, data3, data4) => {
                 {
                     label: 'Loan Payment',
                     data: data4,
-                    backgroundColor: 'rgba(200, 100, 0, 0.6)',
-                    backgroundColor: 'rgba(200, 100, 0, 1)',
+                    backgroundColor: 'rgba(102, 204, 255, 0.6)',
+                    backgroundColor: 'rgba(51, 204, 255, 1)',
                     borderWidth: 1
                 }
             ]

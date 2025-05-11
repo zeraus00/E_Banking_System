@@ -70,8 +70,37 @@
                                 <td>@a.AccountName</td>
                                 <td>@a.AccountType.AccountTypeName</td>
                                 <td>
+
                                     <button class="btn btn-info btn-secondary btn-sm rounded text-dark shadow-sm" style="border: 2px solid cyan" @onclick="async _ => await ViewAccount(a)">View</button>
-                                    <button class="btn btn-danger btn-secondary btn-sm rounded text-light shadow-sm" style="border: 2px solid red" @onclick="_ => DeleteAccount(a)">Delete</button>
+                                    
+                                    @* <button class="btn btn-danger btn-secondary btn-sm rounded text-light shadow-sm" style="border: 2px solid red" @onclick="_ => DeleteAccount(a)">Delete</button>
+                                     *@
+                                    @* <div>
+                                        <button class="btn btn-info btn-secondary btn-sm rounded text-light shadow-sm"
+                                                style="border: 2px solid cyan"
+                                                title="View"
+                                                @onclick="async _ => await ViewAccount(a)">
+                                            <i class="bi bi-eye-fill"></i>
+                                        </button>
+
+                                        <button class="btn btn-danger btn-secondary btn-sm rounded text-light shadow-sm"
+                                                style="border: 2px solid red"
+                                                title="Delete"
+                                                @onclick="_ => DeleteAccount(a)">
+                                            <i class="bi bi-trash-fill"></i>
+                                        </button>
+                                    </div>
+                                    <div class="mt-2">
+                                        <button class="btn btn-danger btn-secondary btn-sm rounded text-light shadow-sm" style="border: 2px solid red" title="Flag">
+                                            <i class="bi bi-flag-fill"></i>
+                                        </button>
+                                        <button class="btn btn-success btn-secondary btn-sm rounded text-light shadow-sm" style="border: 2px solid green" title="Activate">
+                                            <i class="bi bi-check-circle-fill"></i>
+                                        </button>
+                                        <button class="btn btn-info btn-secondary btn-sm rounded text-light shadow-sm" style="border: 2px solid cyan" title="Freeze">
+                                            <i class="bi bi-snow"></i>
+                                        </button>
+                                    </div> *@
                                 </td>
                                 <td class="text-secondary">@a.AccountStatusType.AccountStatusTypeName</td>
                             </tr>
