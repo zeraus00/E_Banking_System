@@ -1045,7 +1045,7 @@ namespace Services.DataManagement
         {
             Dictionary<string, List<ChartData>> chartCache = new();
             foreach (var filter in AdminDashboardTimeFilters.AS_STRING_LIST)
-                chartCache[filter] = await GetTrsansactionsVolumeByTimeFilter(filter, currentDate.AddDays(-1));
+                chartCache[filter] = await GetTransactionsVolumeByTimeFilter(filter, currentDate.AddDays(-1));
             return chartCache;
         }
         /// <summary>
@@ -1054,7 +1054,7 @@ namespace Services.DataManagement
         /// <param name="filterMode">The time filter mode (e.g., HOURLY, DAILY, etc.).</param>
         /// <param name="currentDate">The reference date used to calculate the time range.</param>
         /// <returns>A list of chart data for the specified filter.</returns>
-        public async Task<List<ChartData>> GetTrsansactionsVolumeByTimeFilter(string filterMode, DateTime currentDate)
+        public async Task<List<ChartData>> GetTransactionsVolumeByTimeFilter(string filterMode, DateTime currentDate)
         {
             return filterMode switch
             {
