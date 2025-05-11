@@ -151,7 +151,7 @@ namespace Services.DataManagement
         /// <param name="accountId"></param>
         /// <param name="newStatus"></param>
         /// <returns></returns>
-        public async Task UpdatePendingAccountStatus(int accountId, int newStatus)
+        public async Task UpdateAccountStatus(int accountId, int newStatus)
         {
             try
             {

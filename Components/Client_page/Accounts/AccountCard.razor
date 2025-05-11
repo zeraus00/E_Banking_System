@@ -12,6 +12,7 @@
         <div class="d-flex justify-content-between">
             <div>
                 <h3 class="fw-bold mt-3">@LinkedAccount.AccountName</h3>
+                <h6 class="fw-lighter m-0">@(AccountStatusTypes.AS_STRING_LIST[LinkedAccount.AccountStatusId - 1])</h6>
                 <h5 class="fw-lighter m-0">@FormatHelper.AccountNumberFormatter(LinkedAccount.AccountNumber)</h5>
             </div>
 

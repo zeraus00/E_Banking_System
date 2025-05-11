@@ -25,14 +25,14 @@
 
             <hr class="divider" />
             <div class="d-flex align-items-center gap-3 flex-wrap">
-                <label class="text-light mb-0" style="white-space: nowrap;">Filter: </label>
-                <select class="form-select form-select-sm w-25" @bind="selectedFilter" @bind:after="OnChartFilterChanged">
-                    @foreach (var chartFilter in AdminDashboardTimeFilters.AS_STRING_LIST)
-                    {
-                        <option value="@chartFilter">By @chartFilter</option>
-                    }
-                </select>
-            </div>
+                        <label class="text-light mb-0" style="white-space: nowrap;">Filter: </label>
+                        <select class="form-select form-select-sm w-25" @bind="selectedFilter" @bind:after="OnChartFilterChanged">
+                            @foreach (var chartFilter in AdminDashboardTimeFilters.AS_STRING_LIST)
+                            {
+                                <option value="@chartFilter">By @chartFilter</option>
+                            }
+                        </select>
+                    </div>
             <!-- Card Section -->
             <div class="card-section justify-content-between align-items-center mx-4">
                 <div>
@@ -43,15 +43,18 @@
                     }
 
                     <div class="mt-3 g-3">
-                        <button class="btn btn-info btn-secondary btn rounded text-dark shadow-sm" style="border: 2px solid cyan" title="Freeze">
+                        <button class="btn btn-info btn-secondary btn rounded text-dark shadow-sm" style="border: 2px solid cyan" disabled="@isFrozen" title="Freeze" 
+                        @onclick="async _ => await UpdateStatusAsync((int)AccountStatusTypeIDs.Frozen)">
                             <i class="bi bi-snow"></i>
                             Freeze
                         </button>
-                        <button class="btn btn-success btn-secondary btn rounded text-light shadow-sm" style="border: 2px solid green" title="Activate">
+                        <button class="btn btn-success btn-secondary btn rounded text-light shadow-sm" style="border: 2px solid green" disabled="@isActive" title="Activate" 
+                        @onclick="async _ => await UpdateStatusAsync((int)AccountStatusTypeIDs.Active)">
                             <i class="bi bi-check-circle-fill"></i>
                             Activate
                         </button>
-                        <button class="btn btn-danger btn-secondary btn rounded text-light shadow-sm" style="border: 2px solid red" title="Flag">
+                        <button class="btn btn-danger btn-secondary btn rounded text-light shadow-sm" style="border: 2px solid red" disabled="@isFlagged" title="Flag"
+                        @onclick="async _ => await UpdateStatusAsync((int)AccountStatusTypeIDs.Suspended)">
                             <i class="bi bi-flag-fill"></i>
                             Flag
                         </button>
@@ -114,6 +117,11 @@
 @code {
     private string selectedFilter { get; set; } = AdminDashboardTimeFilters.HOURLY;
 
+    //  Account Status Type Update Button Flags
+    private bool isFrozen = false;
+    private bool isActive = false;
+    private bool isFlagged = false;
+
     private decimal savingsAmount = 0.0m;
 
     private LinkedAccount accountViewSession = new();
@@ -136,6 +144,8 @@
                 accountViewSession = await adminControlledSessionService.GetAccountViewSession();
                 savingsAmount = await adminDataService.GetAccountBalanceAsync(accountViewSession.AccountId);
 
+                EvaluateAccountStatus(accountViewSession.AccountStatusId);
+
                 await LoadChartData();
 
                 StateHasChanged();
@@ -150,6 +160,14 @@
     private async Task OnChartFilterChanged()
     {
         await LoadChartData();
+        StateHasChanged();
+    }
+
+    private void EvaluateAccountStatus(int currentStatusId)
+    {
+        isFrozen = currentStatusId == (int)AccountStatusTypeIDs.Frozen;
+        isActive = currentStatusId == (int)AccountStatusTypeIDs.Active;
+        isFlagged = currentStatusId == (int)AccountStatusTypeIDs.Suspended;
     }
 
     private async Task LoadChartData()
@@ -172,7 +190,14 @@
         LineOutgoingTransferData = LineChartData.Select(lcd => lcd.DataUnits[2].Value).ToList();
         LineIncomingTransferData = LineChartData.Select(lcd => lcd.DataUnits[3].Value).ToList();
         LineNetBalanceData = NetBalanceData.Select(nbd => nbd.Value).ToList();
+    }
 
+    private async Task UpdateStatusAsync(int statusId) 
+    {
+        await adminDataService.UpdateAccountStatus(accountViewSession.AccountId, statusId);
+        accountViewSession.AccountStatusId = statusId;
+        await adminControlledSessionService.SetAccountViewSession(accountViewSession);
+        EvaluateAccountStatus(statusId);
         StateHasChanged();
     }
 }

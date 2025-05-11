@@ -35,10 +35,10 @@
             <div class="d-flex align-items-center gap-3">
                 <label class="text-light mb-0" style="white-space: nowrap;">Account Type</label>
                 <select class="form-select form-select-sm" @bind="selectedType">
-                    <option value="">All</option>
+                    <option value="0">All</option>
                     @foreach(var type in accountTypeList)
                     {
-                        <option value="@accountTypeList.IndexOf(type)">type</option>
+                        <option value="@accountTypeList.IndexOf(type)">@type</option>
                     }
                 </select>
             </div>
@@ -101,7 +101,7 @@
                 <i class="bi bi-chevron-right text-light"></i>
             </button>
         </div>
-@* 
+        @* 
         <div class="page-container text-center text-light mt-2 mb-3 mx-5">
             Page @pageNumber of @masterListAvailablePages
         </div> *@
@@ -115,7 +115,7 @@
 
     private DateTime? startDate = DateTime.Now.AddDays(-DateTime.Now.Day + 1);
     private DateTime? endDate = DateTime.Now;
-    private string selectedType = "";
+    private int selectedType = 0;
     private string searchAccount = "";
 
     private List<Account> accountList = new();
@@ -164,8 +164,8 @@
             searchAccount,
             startDate,
             endDate,
-            (int)AccountTypeIDs.PersonalAccount,
-            (int)AccountStatusTypeIDs.Pending
+            accountTypeId: selectedType,
+            accountStatusTypeId: (int)AccountStatusTypeIDs.Pending
         );
     }
 
@@ -173,7 +173,7 @@
     {
         startDate = null;
         endDate = null;
-        selectedType = "";
+        selectedType = 0;
         searchAccount = "";
         // accounts = allAccounts.ToList();
         accountList = await adminDataService.FilterAccountsAsync(accountStatusTypeId: (int)AccountStatusTypeIDs.Pending);

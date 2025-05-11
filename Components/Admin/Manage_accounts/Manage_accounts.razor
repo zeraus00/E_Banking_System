@@ -192,7 +192,8 @@
             AccountId = account.AccountId,
             AccountNumber = account.AccountNumber,
             AccountName = account.AccountName,
-            AccountContactNo = account.AccountContactNo
+            AccountContactNo = account.AccountContactNo,
+            AccountStatusId = account.AccountStatusTypeId
         };
 
         await adminControlledSessionService.SetAccountViewSession(accountViewSession);
