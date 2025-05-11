@@ -97,12 +97,19 @@
                 accountViewSession = await adminControlledSessionService.GetAccountViewSession();
                 savingsAmount = await adminDataService.GetAccountBalanceAsync(accountViewSession.AccountId);
 
+                var LineChartData = await adminDataService.GetTransactionsVolumeByTimeFilter(
+                    AdminDashboardTimeFilters.DAILY,
+                    DateTime.Now,
+                    accountViewSession.AccountId,
+                    false
+                );
+
                 // mockup data
-                LineLabels = new() { "Sun", "Mon", "Tue", "Wed", "Thurs", "Fri", "Sat" };
-                LineWithdrawData = new() { 5, 15, 10, 3, 8, 16, 2 };
-                LineDepositData = new() { 2, 5, 8, 11, 9, 8, 9 };
-                LineOutgoingTransferData = new() { 0, 3, 6, 4, 3, 5, 6 };
-                LineIncomingTransferData = new() { 2, 4, 3, 2, 6, 7, 8 };
+                LineLabels = LineChartData.Select(lcd => lcd.Label).ToList();
+                LineWithdrawData = LineChartData.Select(lcd => lcd.DataUnits[0].Value).ToList();
+                LineDepositData = LineChartData.Select(lcd => lcd.DataUnits[1].Value).ToList();
+                LineOutgoingTransferData = LineChartData.Select(lcd => lcd.DataUnits[2].Value).ToList();
+                LineIncomingTransferData = LineChartData.Select(lcd => lcd.DataUnits[3].Value).ToList();
 
                 StateHasChanged();
             }

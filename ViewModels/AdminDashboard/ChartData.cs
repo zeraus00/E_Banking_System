@@ -24,5 +24,14 @@ namespace ViewModels.AdminDashboard
             new(){ Label = TransactionTypes.OUTGOING_TRANSFER },
             new(){ Label = TransactionTypes.LOAN_PAYMENT }
         };
+
+        public static readonly List<DataUnit> TRANSACTION_TYPES = new()
+        {
+            new(){ Label = TransactionTypes.WITHDRAWAL},
+            new(){ Label = TransactionTypes.DEPOSIT},
+            new(){ Label = TransactionTypes.OUTGOING_TRANSFER},
+            new(){ Label = TransactionTypes.INCOMING_TRANSFER},
+            new(){ Label = TransactionTypes.LOAN_PAYMENT}
+        };
     }
 }
