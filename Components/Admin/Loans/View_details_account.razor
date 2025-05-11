@@ -1,10 +1,10 @@
-﻿@page "/View_loan_account"
+﻿@page "/View_details_account"
 @attribute [Authorize(Roles = "Administrator")]
 @rendermode InteractiveServer
 
 @using E_BankingSystem.Components.Client_page.Accounts
 
-@inject AdminControlledSessionService adminControlledSessionService 
+@inject AdminControlledSessionService adminControlledSessionService
 @inject AdminDataService adminDataService
 @inject PageRedirectService redirectService
 @inject NavigationManager navigationManager
@@ -14,23 +14,23 @@
 
 
 <div class="page">
-<main>
-	@if (error.Length > 0)
-	{
-		<div class="alert alert-danger alert-dismissible fade show" role="alert">
-			<strong>@error</strong>
-		</div>
-	}
+	<main>
+		@if (error.Length > 0)
+		{
+			<div class="alert alert-danger alert-dismissible fade show" role="alert">
+				<strong>@error</strong>
+			</div>
+		}
 
-	<div class="card registration mt-3 p-4 shadow-lg">
-		<div class="d-flex justify-content-between align-items-center flex-wrap">
-			<h3 class="fw-bold text-light">Registration For Loan</h3>
+		<div class="card registration mt-3 p-4 shadow-lg">
+			<div class="d-flex justify-content-between align-items-center flex-wrap">
+				<h3 class="fw-bold text-light">Registration For Loan</h3>
 
-			<!-- Close Button -->
-			<NavLink href="/Dashboard">
-				<button class="btn-close" aria-label="Close"></button>
-			</NavLink>
-		</div>
+				<!-- Close Button -->
+				<NavLink href="/Dashboard">
+					<button class="btn-close" aria-label="Close"></button>
+				</NavLink>
+			</div>
 
 			<!-- Row 1 -->
 			<div class="row g-3 mt-2">
@@ -191,7 +191,7 @@
 				<div class="col-6">
 					<label class="text-light">Upload Latest Complete 1 Month Payslip</label>
 					<div class="d-flex flex-wrap gap-2">
-						<button class="btn btn-outline-light btn-sm" data-bs-toggle="modal" data-bs-target="payslipModal">View Attachment</button>
+						<button class="btn btn-outline-light btn-sm" data-bs-toggle="modal" data-bs-target="#payslipModal">View Attachment</button>
 					</div>
 				</div>
 			</div>
@@ -218,11 +218,11 @@
 				</div>
 			</div>
 
-			<div class="modal fade" id="picModal" tabindex="-1" aria-labelledby="payslipModal" aria-hidden="true">
+			<div class="modal fade" id="payslipModal" tabindex="-1" aria-labelledby="payslipModalLabel" aria-hidden="true">
 				<div class="modal-dialog modal-lg modal-dialog-centered">
 					<div class="modal-content bg-dark text-white">
 						<div class="modal-header">
-							<h5 class="modal-title" id="payslipModal">Profile Picture</h5>
+							<h5 class="modal-title" id="payslipModalLabel">Payslip</h5>
 							<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
 						</div>
 						<div class="modal-body text-center">
@@ -232,7 +232,7 @@
 							}
 							else
 							{
-								<p>No profile picture uploaded.</p>
+								<p>No payslip picture uploaded.</p>
 							}
 						</div>
 					</div>
@@ -249,76 +249,76 @@
 
 			<!-- Register Button -->
 			<div class="d-flex justify-content-end gap-2 mt-3">
-				<button class="btn btn-danger btn-secondary fs-5 mx-2" >Reject</button>
+				<button class="btn btn-danger btn-secondary fs-5 mx-2">Reject</button>
 				<button class="btn btn-warning btn-secondary fs-6 mx-2">Resubmission<br />Request</button>
-				<button class="btn btn-primary btn-secondary fs-5 mx-2" >Approve</button>
+				<button class="btn btn-primary btn-secondary fs-5 mx-2">Approve</button>
 			</div>
-	</div>
-</main>
+		</div>
+	</main>
 
 </div>
 
 @code {
-private string error = "";
+	private string error = "";
 
-//display labels
-private string loanAmountLabel = "Loan Amount";
-private string loanTermInMonthsLabel = "Loan term in Months";
-private decimal minimumLoanAmount = 0.00m;
-private int minimumLoanTerm;
+	//display labels
+	private string loanAmountLabel = "Loan Amount";
+	private string loanTermInMonthsLabel = "Loan term in Months";
+	private decimal minimumLoanAmount = 0.00m;
+	private int minimumLoanTerm;
 
-// personal information
-private string firstName = "";
-private string middleName = "";
-private string lastName = "";
-private string suffix = "";
-private int age;
-private DateTime birthDate;
-private string sex = "";
-private string contactNo = "";
-private string civilStatus = "";
-private string occupation = "";
-private decimal minAnnualGross = 0.00m;
+	// personal information
+	private string firstName = "";
+	private string middleName = "";
+	private string lastName = "";
+	private string suffix = "";
+	private int age;
+	private DateTime birthDate;
+	private string sex = "";
+	private string contactNo = "";
+	private string civilStatus = "";
+	private string occupation = "";
+	private decimal minAnnualGross = 0.00m;
 
-// address
-private string province = "";
-private string municipality = "";
-private string barangay = "";
-private string street = "";
-private string houseNumber = "";
+	// address
+	private string province = "";
+	private string municipality = "";
+	private string barangay = "";
+	private string street = "";
+	private string houseNumber = "";
 
-//authentication
-private string email = "";
+	//authentication
+	private string email = "";
 
-//loan details
-private int loanTypeId = -1;
-private decimal loanAmount;
-private string loanPurpose = "";
-private int loanTermInMonths;
-private int paymentFrequency = -1;
+	//loan details
+	private int loanTypeId = -1;
+	private decimal loanAmount;
+	private string loanPurpose = "";
+	private int loanTermInMonths;
+	private int paymentFrequency = -1;
 
-//pictures
-private byte[]? governmentId;
-private byte[]? payslipPicture;
+	//pictures
+	private byte[]? governmentId;
+	private byte[]? payslipPicture;
 
-private UserInfo? userInfo { get; set; } = default!;
-private Address? address { get; set; } = default!;
-private BirthInfo? birthInfo { get; set; } = default!;
-private int accountId { get; set; }
+	private UserInfo? userInfo { get; set; } = default!;
+	private Address? address { get; set; } = default!;
+	private BirthInfo? birthInfo { get; set; } = default!;
+	private int accountId { get; set; }
 
-private string? GovernmentId => userInfo?.GovernmentId != null
-? $"data:image/jpeg;base64,{Convert.ToBase64String(userInfo.GovernmentId)}"
-: null;
-
-private string? PayslipPicture => userInfo?.PayslipPicture != null
-	? $"data:image/jpeg;base64,{Convert.ToBase64String(userInfo.PayslipPicture)}"
+	private string? GovernmentId => userInfo?.GovernmentId != null
+	? $"data:image/jpeg;base64,{Convert.ToBase64String(userInfo.GovernmentId)}"
 	: null;
 
-protected override async Task OnAfterRenderAsync(bool firstRender)
-{
-	if (firstRender)
+	private string? PayslipPicture => userInfo?.PayslipPicture != null
+		? $"data:image/jpeg;base64,{Convert.ToBase64String(userInfo.PayslipPicture)}"
+		: null;
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
-		//PendingAccountSession pendingAccountSession = await adminDataService.
-	}	
-}
+		if (firstRender)
+		{
+			//PendingAccountSession pendingAccountSession = await adminDataService.
+		}
+	}
 }
