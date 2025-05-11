@@ -75,7 +75,7 @@
                             <div class="row g-2 mb-4">
                                 <div class="col-12 col-md-6">
                                     <label class="text-light">Enter Account Number</label>
-                                    <input type="number" class="form-control form-control-custom mb-1" placeholder="Account Number"
+                                    <input class="form-control form-control-custom mb-1" placeholder="Account Number"
                                     @bind="otherAccountNumber" required />
                                 </div>
                                 <div class="col-12 col-md-6">
@@ -221,9 +221,11 @@
                 throw new ArgumentException();    
             }
 
+            var finalAccountNumber = otherAccountNumber.Replace("-", "");
+            Console.WriteLine(finalAccountNumber);
             int finalCounterId = transferType.Equals("Own")
                 ? selectedOwnAccountId
-                : await userDataService.GetAccountIdAsync(otherAccountNumber.Replace('-'.ToString(), ""), otherAccountName);
+            : await userDataService.GetAccountIdAsync(finalAccountNumber, otherAccountName);
             transactionSession = await transactionService.CreateTransactionAsync(
                 accountId,
                 (int)TransactionTypeIDs.Outgoing_Transfer,
