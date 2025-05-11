@@ -102,9 +102,8 @@ namespace Data.Configurations.Finance
             //  ApplicationDate (Required; Default: CURDATE())
             Loans
                 .Property(l => l.ApplicationDate)
-                .HasColumnType("DATE")
                 .IsRequired()
-                .HasDefaultValueSql("CAST(GETDATE() AS DATE)");
+                .HasDefaultValueSql("GETDATE()");
 
             //  LoanStatus (Required; Default: 'Pending')
             Loans
