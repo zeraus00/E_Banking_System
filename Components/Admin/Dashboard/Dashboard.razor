@@ -206,7 +206,7 @@
                 <select class="form-select form-select-sm w-25" @bind="selectedFilter" @bind:after="OnChartFilterChanged">
                     @foreach (var chartFilter in AdminDashboardTimeFilters.AS_STRING_LIST)
                     {
-                        <option value="@chartFilter">@chartFilter</option>
+                        <option value="@chartFilter">By @chartFilter</option>
                     }
                 </select>
             </div>
@@ -216,19 +216,25 @@
             <div class="chart-section my-5">
                 <!-- Left: Bar Chart -->
                 <div class="main-chart pie-chart">
-                    <label>Activity Chart</label>
-                    <E_BankingSystem.Components.Admin.Dashboard.Charts.BarChart Labels="BarLabels" Data="BarData" />
+                    <label>@BarChartTitle</label>
+                    @if (BarData is not null && BarData.Any())
+                    {
+                        <E_BankingSystem.Components.Admin.Dashboard.Charts.BarChart Labels="BarLabels" Data="BarData" />
+                    }
                 </div>
 
                 <!-- Right: Line + Pie Chart -->
                 <div class="right-charts">
                     <div class="main-chart small-chart">
-                        <label>Transaction Volume</label>
-                        <E_BankingSystem.Components.Admin.Dashboard.Charts.LineChart Labels="LineLabels" Data="LineData" />
+                        <label>@LineChartTitle</label>
+                        @if (LineData is not null && LineData.Any())
+                        {
+                            <E_BankingSystem.Components.Admin.Dashboard.Charts.LineChart Labels="LineLabels" Data="LineData" />
+                        }
                     </div>
                     <div class="main-chart small-chart">
-                        <label>Transaction Types Chart</label>
-                        @if(PieData.Any())
+                        <label>@PieChartTitle</label>
+                        @if(PieData is not null && PieData.Any())
                         {
                             <E_BankingSystem.Components.Admin.Dashboard.Charts.PieChart Labels="PieLabels" Data="PieData" />
                         }
@@ -323,12 +329,15 @@
     //  For charts.
     private string selectedFilter = AdminDashboardTimeFilters.HOURLY;
 
+    private string BarChartTitle = "";
     private List<string> BarLabels = new();
-    private List<List<Bar>> BarData = new();
+    private List<List<DataUnit>> BarData = new();
 
+    private string LineChartTitle = "";
     private List<string> LineLabels = new();
     private List<decimal> LineData = new();
 
+    private string PieChartTitle = "";
     private List<string> PieLabels = new();
     private List<decimal> PieData = new();
 
@@ -390,17 +399,20 @@
     private async Task LoadChartData(string filterMode)
     {
         //  LineChart
-        var LineChartData = await adminDataService.GetLineChartData(filterMode, DateTime.Now);
+        LineChartTitle = "Net Cash Flow by " + filterMode;
+        var LineChartData = await adminDataService.GetNetMovementByTimeFilter(filterMode, DateTime.Now);
         LineLabels = LineChartData.Select(lcd => lcd.Label).ToList();
         LineData = LineChartData.Select(lcd => lcd.Value).ToList();
         //  PieChart
-        var PieChartData = await adminDataService.GetPieChartData(filterMode, DateTime.Now);
+        PieChartTitle = "Transaction Type Breakdown in the last " + filterMode;
+        var PieChartData = await adminDataService.GetRecentTransactionTypeCounts(filterMode, DateTime.Now);
         PieLabels = PieChartData.Select(pcd => pcd.Label).ToList();
         PieData = PieChartData.Select(pcd => pcd.Value).ToList();
         //  BarChart
-        var BarChartData = await adminDataService.GetBarChartData(filterMode, DateTime.Now);
+        BarChartTitle = "Transaction Type Breakdown by " + filterMode;
+        var BarChartData = await adminDataService.GetTrsansactionsVolumeByTimeFilter(filterMode, DateTime.Now);
         BarLabels = BarChartData.Select(bcd => bcd.Label).ToList();
-        BarData = BarChartData.Select(bcd => bcd.Values).ToList();
+        BarData = BarChartData.Select(bcd => bcd.DataUnits).ToList();
 
     }
 

@@ -71,6 +71,12 @@ namespace Data.Configurations.Finance
                 .IsRequired()
                 .HasColumnType("DECIMAL (5, 2)");
 
+            //  InterestAmount (Required; Decimal(10,2))
+            Loans
+                .Property(l => l.InterestAmount)
+                .IsRequired()
+                .HasColumnType("DECIMAL (10, 2)");
+
             //  LoanTermMonths (Required; Integer)
             Loans
                 .Property(l => l.LoanTermMonths)

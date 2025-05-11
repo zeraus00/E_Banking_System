@@ -10,7 +10,7 @@
         data: {
             labels: labels,
             datasets: [{
-                label: 'Transaction Volume',
+                label: 'Net Cash Flow',
                 data: data,
                 borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 2,
@@ -153,7 +153,7 @@ window.drawUserLineChart = (labels, withdrawData, depositData, outgoingTransfer,
         }
     });
 };
-window.drawDashboardBarChart = (labels, data1, data2, data3) => {
+window.drawDashboardBarChart = (labels, data1, data2, data3, data4) => {
     const ctxBar = document.getElementById('barChart').getContext('2d');
 
     if (window.barInstance) {
@@ -184,6 +184,13 @@ window.drawDashboardBarChart = (labels, data1, data2, data3) => {
                     data: data3,
                     backgroundColor: 'rgba(255, 206, 86, 0.6)',
                     borderColor: 'rgba(255, 206, 86, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Loan Payment',
+                    data: data4,
+                    backgroundColor: 'rgba(200, 100, 0, 0.6)',
+                    backgroundColor: 'rgba(200, 100, 0, 1)',
                     borderWidth: 1
                 }
             ]

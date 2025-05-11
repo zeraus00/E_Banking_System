@@ -1,4 +1,5 @@
 ﻿using Data.Repositories.Finance;
+using Data.Constants;
 using Data.Enums;
 
 namespace Data.Seeders.Finance
@@ -14,24 +15,21 @@ namespace Data.Seeders.Finance
 
         public async Task SeedTransactionTypes()
         {
-            var transactionTypes = new List<string>
+            if (!_context.TransactionTypes.Any())
             {
-                "Deposit",
-                "Withdrawal",
-                "Incoming Transfer",
-                "Outgoing Transfer"
-            };
 
-            foreach (var transactionTypeName in transactionTypes)
-            {
-                var transactionType = new TransactionTypeBuilder()
-                    .WithTransactionTypeName(transactionTypeName)
-                    .Build();
+                foreach (var transactionTypeName in TransactionTypes.AS_STRING_LIST)
+                {
+                    var transactionType = new TransactionTypeBuilder()
+                        .WithTransactionTypeName(transactionTypeName)
+                        .Build();
 
-                await _transactionTypesRepo.AddAsync(transactionType);
+                    await _transactionTypesRepo.AddAsync(transactionType);
+                }
+
+                await _transactionTypesRepo.SaveChangesAsync();
+
             }
-
-            await _transactionTypesRepo.SaveChangesAsync();
         }
 
     }

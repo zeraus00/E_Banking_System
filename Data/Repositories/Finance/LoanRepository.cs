@@ -24,6 +24,8 @@ namespace Data.Repositories.Finance
                 WhereCondition(l => l.ApplicationDate >= startDate.Date);
             public LoanQuery HasEndDateFilter(DateTime endDate) =>
                 WhereCondition(l => l.ApplicationDate <= endDate.Date);
+            public LoanQuery IncludeAccount(bool include = true) => include ? Include(l => l.Account) : this;
+            public LoanQuery IncludeUserInfo(bool include = true) => include ? Include(l => l.UserInfo) : this;
             public LoanQuery OrderByDateDescending(bool isOrdered = true)
                 => OrderByDescending(l => l.ApplicationDate);
         }
@@ -43,6 +45,7 @@ namespace Data.Repositories.Finance
         private string _loanPurpose = string.Empty;
         private decimal _loanAmount;
         private decimal _interestRate;
+        private decimal _interestAmount;
         private int _loanTermMonths;
         private int _paymentFrequency;
         private decimal _paymentAmount;
@@ -99,6 +102,11 @@ namespace Data.Repositories.Finance
         public LoanBuilder WithInterestRate(decimal interestRate)
         {
             _interestRate = interestRate;
+            return this;
+        }
+        public LoanBuilder WithInterestAmount(decimal interestAmount)
+        {
+            _interestAmount = interestAmount;
             return this;
         }
         public LoanBuilder WithLoanTermMonths(int loanTermMonths)
@@ -173,6 +181,7 @@ namespace Data.Repositories.Finance
                 LoanPurpose = _loanPurpose,
                 LoanAmount = _loanAmount,
                 InterestRate = _interestRate,
+                InterestAmount = _interestAmount,
                 LoanTermMonths = _loanTermMonths,
                 PaymentFrequency = _paymentFrequency,
                 PaymentAmount = _paymentAmount,
