@@ -63,18 +63,18 @@
                     </tr>
                 </thead>
                 <tbody>
+                    <tr class="bg-light">
+                        <td>05/10/2025</td>
+                        <td>1234567890</td>
+                        <td>Juan Dela Cruz</td>
+                        <td>juan.delacruz@example.com</td>
+                        <td>
+                            <a href="Account_paid_loan" class="btn btn-info btn-secondary btn-sm rounded text-dark shadow-sm" style="border: 2px solid cyan">View</a>
+                        </td>
+                    </tr>
                     @foreach (var a in accountList)
                     {
 
-                        <tr class="bg-light">
-                            <td>05/10/2025</td>
-                            <td>1234567890</td>
-                            <td>Juan Dela Cruz</td>
-                            <td>juan.delacruz@example.com</td>
-                            <td>
-                                <a href="/Account_paid_loan" class="btn btn-info btn-secondary btn-sm rounded text-dark shadow-sm" style="border: 2px solid cyan">View</a>
-                            </td>
-                        </tr>
                         @*<tr class="bg-light">
                             <td>a.StatementDate.ToString("MM/dd/yyyy")</td>
                             <td>@a.AccountNumber</td>
