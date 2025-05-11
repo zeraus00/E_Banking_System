@@ -44,7 +44,7 @@
                         <h2>To Account: </h2>
                         <h5 class="mb-1">@counterAccountName</h5>
                         <p class="mb-0">@FormatHelper.AccountNumberFormatter(counterAccountNumber)</p>
-                        <p class="mb-0">@date @time</p>
+                        <p class="m-0"><strong>Date:</strong> @(date?.ToShortDateString() ?? "") @(time?.ToString(@"hh\:mm") ?? "")</p>
                         <p class="mb-0">@confirmationNumber</p>
                     </div>
                     <NavLink class="w-25" href="/Client_home">
