@@ -4,6 +4,7 @@ using Exceptions;
 using ViewModels.RoleControlledSessions;
 using ViewModels.Sessions;
 using Services.DataManagement;
+using Data.Models.User;
 
 namespace Services.SessionsManagement
 {
@@ -38,6 +39,38 @@ namespace Services.SessionsManagement
         => userSession is null
             ? (await _userSessionService.GetUserSession()).LinkedAccountList
             : userSession.LinkedAccountList;
+
+        public async Task SetUserAccountListAsync(List<LinkedAccount>? accountList = null, UserSession? userSession = null)
+        {
+            if (userSession is null)
+                userSession = await _userSessionService.GetUserSession();
+            if (accountList is null)
+            {
+                //  Get Accounts linked to the online account of the user.
+                List<UserInfoAccount> userAccountLinks = await _userDataService
+                    .GetUserAccountLinks(userSession.UserInfoId, includeAccount: true, isLinkedToOnlineAccount: true);
+                accountList = new();
+                //  Get LinkedAccount list.
+                if (userAccountLinks.Any())
+                {
+                    foreach (var userAccountLink in userAccountLinks)
+                    {
+                        LinkedAccount accountSession = new()
+                        {
+                            UserAccessRoleId = userAccountLink.AccessRoleId,
+                            AccountId = userAccountLink.AccountId,
+                            AccountName = userAccountLink.Account.AccountName,
+                            AccountNumber = userAccountLink.Account.AccountNumber,
+                            AccountContactNo = userAccountLink.Account.AccountContactNo,
+                            AccountStatusId = userAccountLink.Account.AccountStatusTypeId
+                        };
+                        accountList.Add(accountSession);
+                    }
+                }
+            }
+            userSession.LinkedAccountList = accountList;
+            await _userSessionService.UpdateUserSession(userSession);
+        }
 
         /*      Active Account Session      */
 

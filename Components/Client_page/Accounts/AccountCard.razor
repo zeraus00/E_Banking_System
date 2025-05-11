@@ -1,5 +1,6 @@
 ﻿@using E_BankingSystem.Components.Client_page.Accounts
 @using Helpers
+@inject UserControlledSessionService userControlledSessionService
 @inject NavigationManager Navigation
 @inject UserDataService userDataService
 
@@ -116,6 +117,8 @@
     {
         LinkedAccount.AccountName = editedAccountName;
         await userDataService.RenameAccountAsync(LinkedAccount.AccountId, editedAccountName);
+        await userControlledSessionService.SetActiveAccountSessionAsync(LinkedAccount);
+        await userControlledSessionService.SetUserAccountListAsync();
         isEditing = false;
     }
 
