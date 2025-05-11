@@ -350,6 +350,7 @@ namespace Services.DataManagement
                     .IncludeTransactionType()
                     .IncludeMainAccount()
                     .ExceptTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer)
+                    .HasStatusConfirmed()
                     .OrderByAmountDescending()
                     .TakeWithCount(count);
                 if (startDate is DateTime sDate)
