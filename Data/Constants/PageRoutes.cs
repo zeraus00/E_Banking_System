@@ -21,8 +21,16 @@
         public const string ADMINSETTINGS_CHANGE_PASSWORD = "/AdminSettings_change_password";
         public const string ADMINSETTINGS_CHANGE_CONTACT = "/AdminSettings_change_contact";
         public const string ADMINSETTINGS_CHANGE_EMAIL = "/AdminSettings_change_email";
-
         public const string WORKERS_VIEW_ACCOUNT = "/WorkersViewDetails";
+
+        public const string EMPLOYEE_MANAGE_ACCOUNTS = "/Employee_Manage_accounts";
+        public const string EMPLOYEE_UPDATE_ACCOUNTS = "/Employee_Update_account";
+        public const string EMPLOYEE_VIEW_ACCOUNTS = "/Employee_View_account";
+
+        public const string EMPLOYEE_PENDING_ACCOUNTS = "/Employee_Pending_accounts";
+        public const string EMPLOYEE_VIEW_DETAILS = "/Employee_View_details";
+
+        public const string EMPLOYEE_TRANSACTIONS = "/Employee_Transaction";
 
         public const string ACCOUNTS = "/Accounts";
         public const string ADD_ACCOUNT = "/Add_account";
