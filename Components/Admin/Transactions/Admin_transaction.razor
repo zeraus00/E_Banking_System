@@ -160,6 +160,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        isPreviousDisabled = true;
         transactionTypes = TransactionTypes.AS_STRING_LIST;
         await base.OnInitializedAsync();
     }

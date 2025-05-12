@@ -182,6 +182,7 @@
     protected override async Task OnInitializedAsync()
     {
         //  Load transaction types
+        isPreviousDisabled = true;
         transactionTypes = TransactionTypes.AS_STRING_LIST;
         await base.OnInitializedAsync();
     }
