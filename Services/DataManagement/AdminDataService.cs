@@ -42,13 +42,14 @@ namespace Services.DataManagement
         /// <param name="endDate">Optional end date to filter accounts opened on or before this date. If null, this filter is ignored.</param>
         /// <param name="accountTypeId">Optional account type ID to filter by. Only applies if greater than zero.</param>
         /// <returns>A list of <see cref="Account"> objects matching the specified filters.</returns>
-        public async Task<List<Account>> FilterAccountsAsync(
+        public async Task<List<Account>> LoadAccountsListAsync(
             string accountNumber = "",
             DateTime? startDate = null,
             DateTime? endDate = null,
             int accountTypeId = 0,
             int accountStatusTypeId = 0,
-            int pageNumber = 1
+            int pageNumber = 1,
+            int pageSize = 5
             )
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
@@ -79,10 +80,11 @@ namespace Services.DataManagement
                     queryBuilder.HasAccountStatusTypeId(accountStatusTypeId);
 
                 //  Pagination
-                int pageSize = 5;
+                int skipCount = (pageNumber - 1) * pageSize;
+                int takeCount = pageSize;
                 List<Account> accountList = await queryBuilder
-                    .SkipBy((pageNumber - 1) * pageSize)
-                    .TakeWithCount(pageSize)
+                    .SkipBy(skipCount)
+                    .TakeWithCount(takeCount)
                     .GetQuery()
                     .ToListAsync();
 
@@ -102,7 +104,8 @@ namespace Services.DataManagement
             DateTime? endDate = null,
             int accountTypeId = 0,
             int accountStatusTypeId = 0,
-            int pageNumber = 1)
+            int pageNumber = 1,
+            int pageSize = 5)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
@@ -131,9 +134,9 @@ namespace Services.DataManagement
                     queryBuilder.HasAccountStatusTypeId(accountStatusTypeId);
 
                 //  Pagination
-                int pageSize = 5;
+                int skipCount = pageNumber * pageSize;
                 return await queryBuilder
-                    .SkipBy(pageNumber * pageSize)
+                    .SkipBy(skipCount)
                     .GetQuery()
                     .CountAsync();
             }
@@ -553,7 +556,7 @@ namespace Services.DataManagement
         /// <remarks>
         /// Transactions are ordered such that the most recent ones appear first.
         /// </remarks>
-        public async Task<List<Transaction>> AdminFilterTransactionsAsync(
+        public async Task<List<Transaction>> AdminLoadTransactionsListAsync(
             DateTime? transactionStartDate = null, 
             DateTime? transactionEndDate = null,
             int transactionTypeId = 0,

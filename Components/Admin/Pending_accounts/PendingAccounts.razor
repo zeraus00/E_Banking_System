@@ -147,7 +147,7 @@
         //     }
         // };
         // accounts = allAccounts.ToList();
-        accountList = await adminDataService.FilterAccountsAsync(accountStatusTypeId: (int)AccountStatusTypeIDs.Pending);
+        accountList = await adminDataService.LoadAccountsListAsync(accountStatusTypeId: (int)AccountStatusTypeIDs.Pending);
     }
 
     private async Task FilterAsync()
@@ -160,7 +160,7 @@
         //         (string.IsNullOrEmpty(selectedType) || t.AccountType == selectedType)
         //     ).ToList();
         accountList = await adminDataService
-            .FilterAccountsAsync(
+            .LoadAccountsListAsync(
             searchAccount,
             startDate,
             endDate,
@@ -176,7 +176,7 @@
         selectedType = 0;
         searchAccount = "";
         // accounts = allAccounts.ToList();
-        accountList = await adminDataService.FilterAccountsAsync(accountStatusTypeId: (int)AccountStatusTypeIDs.Pending);
+        accountList = await adminDataService.LoadAccountsListAsync(accountStatusTypeId: (int)AccountStatusTypeIDs.Pending);
     }
 
     private async Task ViewDetails(Account account)

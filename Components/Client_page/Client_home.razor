@@ -282,7 +282,7 @@
                 _currentBalance = await userDataService.GetAccountBalanceAsync(activeAccountSession.AccountId);
                 //  Get 3 most recent transactions of the account.
                 recentTransactions = await userDataService
-                    .FilterAccountTransactionsAsync(
+                    .LoadAccountTransactionsAsync(
                         activeAccountSession.AccountId,
                         pageSize: 3
                     );

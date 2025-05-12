@@ -46,8 +46,8 @@
                 </select>
             </div>
 
-            <button class="btn btn-primary btn-sm shadow-sm" @onclick="Filter">Filter</button>
-            <button class="btn btn-danger btn-sm shadow-sm" @onclick="ClearFilter">Clear Filter</button>
+            <button class="btn btn-primary btn-sm shadow-sm" @onclick="OnFilterAsync">Filter</button>
+            <button class="btn btn-danger btn-sm shadow-sm" @onclick="OnClearFilterAsync">Clear Filter</button>
         </div>
 
         <hr class="divider" />
@@ -179,13 +179,12 @@
             };
         //  Disable the previous button at the start when the list is automatically at the first page.
         isPreviousDisabled = true;
-        await Filter();
+        await LoadAccountsAsync();
         if (!accountList.Any())
             accountList = mockAccounts;
         StateHasChanged();
     }
-
-    private async Task Filter()
+    private async Task OnFilterAsync()
     {
         if (startDate > endDate)
         {
@@ -196,47 +195,20 @@
         bool isAccountNumberValid = await ValidateAccountNumberInput();
         if (!isAccountNumberValid)
             return;
+        pageNumber = 1;
+        await LoadAccountsAsync();
 
-        //  Filter the accounts.
-        accountList = await adminDataService
-            .FilterAccountsAsync(
-                cleanedAccountNumber,
-                startDate,
-                endDate,
-                selectedType,
-                pageNumber: pageNumber
-            );
-
-        //  Get the remaining accounts count after the current page.
-        remainingAccountsCount = await adminDataService
-            .CountRemainingAccountsAsync(
-                cleanedAccountNumber,
-                startDate,
-                endDate,
-                selectedType,
-                pageNumber: pageNumber
-            );
-
-        //  Calculate the number of available pages.
-        availablePages = remainingAccountsCount == 0 && pageNumber == 1 ?
-            1 :
-            pageNumber + ((int)Math.Ceiling((double)remainingAccountsCount / 10));
-
-        if (!accountList.Any())
-            //  Disable the next button if the list is empty if there are no more accounts 
-            //  after the current page.
-            isNextDisabled = true;
     }
-    private async Task ClearFilter()
+    private async Task OnClearFilterAsync()
     {
         //  Resets all filters and reloads the list.
         startDate = null;
         endDate = null;
         selectedType = 0;
         searchAccount = "";
-        accountList = await adminDataService.FilterAccountsAsync();
+        pageNumber = 1;
+        await LoadAccountsAsync();
     }
-
     private async Task OnViewClick(Account account)
     {
         //  Create an AccountViewSession
@@ -259,7 +231,7 @@
         //  Enable the previous button
         isPreviousDisabled = false;
         pageNumber++;
-        await Filter();
+        await LoadAccountsAsync();
         StateHasChanged();
     }
 
@@ -271,9 +243,43 @@
             pageNumber--;
             if (pageNumber == 1)
                 isPreviousDisabled = true;
-            await Filter();
+            await LoadAccountsAsync();
             StateHasChanged();
         }
+    }
+    private async Task LoadAccountsAsync()
+    {
+        //  Filter the accounts.
+        accountList = await adminDataService
+            .LoadAccountsListAsync(
+                cleanedAccountNumber,
+                startDate,
+                endDate,
+                selectedType,
+                pageNumber: pageNumber,
+                pageSize: pageSize
+            );
+
+        //  Get the remaining accounts count after the current page.
+        remainingAccountsCount = await adminDataService
+            .CountRemainingAccountsAsync(
+                cleanedAccountNumber,
+                startDate,
+                endDate,
+                selectedType,
+                pageNumber: pageNumber,
+                pageSize: pageSize
+            );
+
+        //  Calculate the number of available pages.
+        availablePages = remainingAccountsCount == 0 && pageNumber == 1 ?
+            1 :
+            pageNumber + ((int)Math.Ceiling((double)remainingAccountsCount / 10));
+
+        if (!accountList.Any())
+            //  Disable the next button if the list is empty if there are no more accounts 
+            //  after the current page.
+            isNextDisabled = true;
     }
     private async Task<bool> ValidateAccountNumberInput()
     {
