@@ -62,7 +62,7 @@
     private Task<AuthenticationState> authenticationState { get; set; } = default!;
 
     private ClaimsPrincipal? user;
-    private List<LinkedAccount> userAccountList = new();
+    private List<AccountViewSession> userAccountList = new();
     private Dictionary<int, decimal> balanceDict = new();       // <------  FOR ACCOUNT BALANCE
     private UserInfo? userInfo;
     private bool IsEditable { get; set; } = false; // Default to view mode

@@ -239,7 +239,7 @@
     private async Task OnViewClick(Account account)
     {
         //  Create an AccountViewSession
-        LinkedAccount accountViewSession = new()
+        AccountViewSession accountViewSession = new()
             {
                 AccountId = account.AccountId,
                 AccountNumber = account.AccountNumber,

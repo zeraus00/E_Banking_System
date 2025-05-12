@@ -8,6 +8,7 @@ namespace ViewModels.Sessions
         public string Email { get; set; } = string.Empty;
 
         public PendingAccountSession? PendingAccountSession { get; set; } = null;
-        public LinkedAccount? AccountViewSession { get; set; } = null;
+        public AccountViewSession? AccountViewSession { get; set; } = null;
+        public LoanViewSession? LoanViewSession { get; set; } = null;
     }
 }

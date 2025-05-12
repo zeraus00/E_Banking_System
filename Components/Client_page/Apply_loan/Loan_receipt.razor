@@ -54,8 +54,8 @@
 	private string paymentFrequency { get; set; } = string.Empty;
 
 	private UserSession userSession = default!;
-	private LinkedAccount activeAccountSession = default!;
-	private LoanApplication loanApplication { get; set; } = default!;
+	private AccountViewSession activeAccountSession = default!;
+	private LoanViewSession loanApplication { get; set; } = default!;
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{

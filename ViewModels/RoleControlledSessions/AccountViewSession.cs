@@ -2,7 +2,7 @@
 
 namespace ViewModels.RoleControlledSessions
 {
-    public class LinkedAccount
+    public class AccountViewSession
     {
         public int UserAccessRoleId { get; set; } = 0;
         public int AccountId { get; set; } = 0;

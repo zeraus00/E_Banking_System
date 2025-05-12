@@ -14,10 +14,10 @@ namespace Services.SessionsManagement
             _userSessionService = userSessionService;
         }
 
+        #region Pending Account Session
         public async Task<PendingAccountSession> GetPendingAccountSession(AdminSession? adminSession = null)
         {
-            if (adminSession is null)
-                adminSession = await _userSessionService.GetAdminSession();
+            adminSession = await HandleNullAdminSession(adminSession);
             return adminSession.PendingAccountSession
                 ?? throw new ControlledSessionNotFound(
                     SessionSchemes.ADMIN_SESSION,
@@ -29,36 +29,58 @@ namespace Services.SessionsManagement
 
         public async Task SetPendingAccountSession(PendingAccountSession? pendingAccountSession, AdminSession? adminSession = null)
         {
-            if (adminSession is null)
-                adminSession = await _userSessionService.GetAdminSession();
+            adminSession = await HandleNullAdminSession(adminSession);
 
             adminSession.PendingAccountSession = pendingAccountSession;
 
             await _userSessionService.UpdateAdminSession(adminSession);
         }
-
-        public async Task<LinkedAccount> GetAccountViewSession(AdminSession? adminSession = null)
+        #endregion
+        #region Account View Session
+        public async Task<AccountViewSession> GetAccountViewSession(AdminSession? adminSession = null)
         {
-            if (adminSession is null)
-                adminSession = await _userSessionService.GetAdminSession();
+            adminSession = await HandleNullAdminSession(adminSession);
             return adminSession.AccountViewSession
                 ?? throw new ControlledSessionNotFound(
                     SessionSchemes.ADMIN_SESSION,
                     SessionSchemes.ACCOUNT_VIEW_SESSION
                 );
         }
-
         public async Task ClearAccountViewSession(AdminSession? adminSession = null) =>
             await SetAccountViewSession(null, adminSession);
-
-        public async Task SetAccountViewSession(LinkedAccount? accountViewSession, AdminSession? adminSession = null)
+        public async Task SetAccountViewSession(AccountViewSession? accountViewSession, AdminSession? adminSession = null)
         {
-            if (adminSession is null)
-                adminSession = await _userSessionService.GetAdminSession();
-            
+            adminSession = await HandleNullAdminSession(adminSession);
+
             adminSession.AccountViewSession = accountViewSession;
 
             await _userSessionService.UpdateAdminSession(adminSession);
         }
+        #endregion
+        #region Loan View Session
+        public async Task<LoanViewSession> GetLoanViewSession(AdminSession? adminSession = null)
+        {
+            adminSession = await HandleNullAdminSession(adminSession);
+            return adminSession.LoanViewSession ??
+                throw new ControlledSessionNotFound(
+                    SessionSchemes.ADMIN_SESSION,
+                    SessionSchemes.LOAN_VIEW_SESSION
+                );
+        }
+        public async Task ClearLoanViewSession(AdminSession? adminSession = null) =>
+            await SetLoanViewSession(null, adminSession);
+        public async Task SetLoanViewSession(LoanViewSession? loanViewSession, AdminSession? adminSession = null)
+        {
+            adminSession = await HandleNullAdminSession(adminSession);
+
+            adminSession.LoanViewSession = loanViewSession;
+
+            await _userSessionService.UpdateAdminSession(adminSession);
+        }
+        #endregion
+        public async Task<AdminSession> HandleNullAdminSession(AdminSession? adminSession = null)
+            => adminSession is null ?
+                await _userSessionService.GetAdminSession() :
+                adminSession;
     }
 }

@@ -29,18 +29,18 @@ namespace Services.SessionsManagement
         /*      User Account List       */
         /// <summary>
         /// Get the linked accounts of the user inside the user session as a 
-        /// list of <see cref="LinkedAccount"/> objects.
+        /// list of <see cref="AccountViewSession"/> objects.
         /// </summary>
         /// <param name="userSession">
         /// The user session containing the linked accounts.
         /// </param>
         /// <returns></returns>
-        public async Task<List<LinkedAccount>> GetUserAccountListAsync(UserSession? userSession = null)
+        public async Task<List<AccountViewSession>> GetUserAccountListAsync(UserSession? userSession = null)
         => userSession is null
             ? (await _userSessionService.GetUserSession()).LinkedAccountList
             : userSession.LinkedAccountList;
 
-        public async Task SetUserAccountListAsync(List<LinkedAccount>? accountList = null, UserSession? userSession = null)
+        public async Task SetUserAccountListAsync(List<AccountViewSession>? accountList = null, UserSession? userSession = null)
         {
             if (userSession is null)
                 userSession = await _userSessionService.GetUserSession();
@@ -55,7 +55,7 @@ namespace Services.SessionsManagement
                 {
                     foreach (var userAccountLink in userAccountLinks)
                     {
-                        LinkedAccount accountSession = new()
+                        AccountViewSession accountSession = new()
                         {
                             UserAccessRoleId = userAccountLink.AccessRoleId,
                             AccountId = userAccountLink.AccountId,
@@ -76,11 +76,11 @@ namespace Services.SessionsManagement
 
         /// <summary>
         /// Retrieves the current active session inside the user session as a
-        /// <see cref="LinkedAccount"/> object.
+        /// <see cref="AccountViewSession"/> object.
         /// </summary>
         /// <param name="userSession"></param>
         /// <returns></returns>
-        public async Task<LinkedAccount> GetActiveAccountSessionAsync(UserSession? userSession = null)
+        public async Task<AccountViewSession> GetActiveAccountSessionAsync(UserSession? userSession = null)
         => userSession is null
             ? (await _userSessionService.GetUserSession()).ActiveAccountSession
             : userSession.ActiveAccountSession;
@@ -91,7 +91,7 @@ namespace Services.SessionsManagement
         /// <param name="activeAccountSession"></param>
         /// <param name="userSession"></param>
         /// <returns></returns>
-        public async Task SetActiveAccountSessionAsync(LinkedAccount? activeAccountSession = null, UserSession? userSession = null)
+        public async Task SetActiveAccountSessionAsync(AccountViewSession? activeAccountSession = null, UserSession? userSession = null)
         {
             if (userSession is null)
                 userSession = await _userSessionService.GetUserSession();
@@ -112,9 +112,9 @@ namespace Services.SessionsManagement
         /// </summary>
         /// <param name="account"></param>
         /// <returns></returns>
-        public LinkedAccount CreateAccountSession(Account account)
+        public AccountViewSession CreateAccountSession(Account account)
         {
-            LinkedAccount activeAccountSession = new LinkedAccount
+            AccountViewSession activeAccountSession = new AccountViewSession
             {
 
                 AccountId = account.AccountId,
@@ -180,7 +180,7 @@ namespace Services.SessionsManagement
         #endregion
 
         #region Loan Session
-        public async Task<LoanApplication> GetLoanApplicationSessionAsync(UserSession? userSession = null)
+        public async Task<LoanViewSession> GetLoanApplicationSessionAsync(UserSession? userSession = null)
         {
             if (userSession is null)
                 userSession = await _userSessionService.GetUserSession();
@@ -193,7 +193,7 @@ namespace Services.SessionsManagement
         }
         public async Task ClearLoanApplicationSessionAsync(UserSession? userSession = null) =>
             await SetLoanApplicationSessionAsync(null, userSession);
-        public async Task SetLoanApplicationSessionAsync(LoanApplication? loanApplication, UserSession? userSession = null)
+        public async Task SetLoanApplicationSessionAsync(LoanViewSession? loanApplication, UserSession? userSession = null)
         {
             if (userSession is null)
                 userSession = await _userSessionService.GetUserSession();
@@ -219,7 +219,7 @@ namespace Services.SessionsManagement
             _ => string.Empty
         };
 
-        private LinkedAccount SetAccountPermissions(LinkedAccount activeAccountSession)
+        private AccountViewSession SetAccountPermissions(AccountViewSession activeAccountSession)
         {
             activeAccountSession.AccountCanTransact = activeAccountSession.AccountStatusId switch
             {

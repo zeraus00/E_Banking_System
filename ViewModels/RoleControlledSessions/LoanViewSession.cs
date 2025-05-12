@@ -1,8 +1,9 @@
 ﻿namespace ViewModels.RoleControlledSessions
 {
-    public class LoanApplication : RoleControlledSession
+    public class LoanViewSession : RoleControlledSession
     {
         public int LoanId { get; set; }
         public int UserInfoId { get; set; }
+        public int AccountId { get; set; }
     }
 }

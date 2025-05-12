@@ -125,7 +125,7 @@
 {
 
     private UserSession userSession { get; set; } = default!;
-    private LinkedAccount activeAccountSession { get; set; } = default!;
+    private AccountViewSession activeAccountSession { get; set; } = default!;
     private TransactionSession transactionSession { get; set; } = default!;
 
     private int accountId;
@@ -137,7 +137,7 @@
 
     // New State Variables
     private string transferType = "";
-    private List<LinkedAccount> linkedAccounts = new();
+    private List<AccountViewSession> linkedAccounts = new();
     private int selectedOwnAccountId = 0;
     private string otherAccountName = "";
     private string otherAccountNumber = "";

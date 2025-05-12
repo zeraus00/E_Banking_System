@@ -117,13 +117,13 @@ namespace Services.SessionsManagement
                 //  Get Accounts linked to the online account of the user.
                 List<UserInfoAccount> userAccountLinks = await _dataService
                     .GetUserAccountLinks(userInfoId, includeAccount: true, isLinkedToOnlineAccount: true);
-                List<LinkedAccount> userAccountList = new();
+                List<AccountViewSession> userAccountList = new();
                 //  Get LinkedAccount list.
                 if (userAccountLinks.Any())
                 {
                     foreach (var userAccountLink in userAccountLinks)
                     {
-                        LinkedAccount accountSession = new()
+                        AccountViewSession accountSession = new()
                         {
                             UserAccessRoleId = userAccountLink.AccessRoleId,
                             AccountId = userAccountLink.AccountId,
