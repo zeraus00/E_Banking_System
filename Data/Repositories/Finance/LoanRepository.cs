@@ -37,6 +37,8 @@ namespace Data.Repositories.Finance
                 );
             }
 
+            public LoanQuery HasUserInfoId(int userInfoId) =>
+                WhereCondition(l => l.UserInfoId == userInfoId);
             public LoanQuery(IQueryable<Loan> query) : base(query) { }
             public LoanQuery HasLoanId(int loanId) =>
                 WhereCondition(l => l.LoanId == loanId);
