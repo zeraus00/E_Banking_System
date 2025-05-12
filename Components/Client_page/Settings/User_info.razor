@@ -1,0 +1,1108 @@
+﻿@using Services
+@using Exceptions
+@using System.Text.Json;
+@using Data.Constants
+@using Microsoft.AspNetCore.Components.Forms
+@using System.Text.RegularExpressions;
+
+@page "/User_info"
+@rendermode InteractiveServer
+@inject ApiLoaderService apiLoaderService
+@inject NavigationManager NavigationManager
+@inject RegistrationService RegistrationService
+@inject HttpClient HttpClient
+@using Layout
+@layout PlainLayout
+
+<div class="page">
+	<main>
+
+		<!-- Registration Box -->
+		<div class="card registration mt-3 p-4 shadow-lg">
+			<div class="d-flex justify-content-between align-items-center">
+				<h3 class="fw-bold text-light">Online Account Opening</h3>
+
+				<!-- Close Button -->
+				<NavLink href="/">
+					<button class="btn-close" aria-label="Close"></button>
+				</NavLink>
+			</div>
+
+			<!--to show the error in the UI-->
+			@if (!string.IsNullOrEmpty(error))
+			{
+				<div class="alert alert-danger" role="alert">@error</div>
+			}
+
+			<!-- Account Holder Details Border -->
+			<div class="d-flex align-items-center my-3">
+				<span class="text-light me-2">Account Holder's Details</span>
+				<div class="flex-grow-1">
+					<hr class="m-0" style="border: 1px solid white; opacity: 100%;">
+				</div>
+			</div>
+
+
+			<div class="information_box">
+
+
+				<!-- Row 1 -->
+				<div class="row g-2 mt-2">
+
+					<!-- Account Sub Type -->
+					<div class="col-2">
+						<label class="text-light">Account Sub-Type</label>
+						<select class="form-select form-select-sm" @bind="selectedAccountTypeName">
+							<option value="" hidden>@subTypePlaceHolder</option>
+							@foreach (var accountType in accountTypeNames.AccountTypeNameList)
+							{
+								<option value="@accountType">@accountType</option>
+							}
+						</select>
+					</div>
+
+					<!-- Account Product Type -->
+					<div class="col-2">
+						<label class="text-light">Account Product Type</label>
+						<select class="form-select form-select-sm" @bind="selectedAccountProductTypeName">
+							<option value="" hidden>@productTypePlaceHolder</option>
+							@foreach (var productType in accountProductTypeNames.AccountProductTypeNameList)
+							{
+								<option value="@productType">@productType</option>
+							}
+						</select>
+					</div>
+				</div>
+
+
+				<!-- Row 2 -->
+				<div class="row g-2 mt-2">
+
+					<!-- Primary Accouunt Name -->
+					<label class="text-light">Primary Account Name</label>
+					<div class="row g-2">
+
+						<!-- First Name -->
+						<div class="col-3">
+							<input class="form-control form-control-sm" @bind="userFirstName" placeholder="First Name">
+						</div>
+
+						<!-- Middle Name -->
+						<div class="col-3">
+							<input class="form-control form-control-sm" @bind="userMiddleName" placeholder="Middle Name">
+						</div>
+
+						<!-- Last Name -->
+						<div class="col-3">
+							<input class="form-control form-control-sm" @bind="userLastName" placeholder="Last Name">
+						</div>
+
+						<!-- Suffix Name -->
+						<div class="col-1">
+							<input class="form-control form-control-sm" @bind="userSuffix" placeholder="Suffix">
+						</div>
+
+					</div>
+
+				</div>
+
+
+
+
+				<!-- Row 3 -->
+				<div class="row g-2 mt-2">
+
+					<!-- Age -->
+					<div class="col-1">
+						<label class="text-light">Age</label>
+						<input class="form-control form-control-sm" @bind="age" type="number" placeholder="Age" required>
+					</div>
+
+					<!-- Sex -->
+					<div class="col-1">
+						<label class="text-light">Sex</label>
+						<select class="form-select form-select-sm" @bind="selectedSex">
+							<option value="" disabled hidden>@sexPlaceHolder</option>
+							<option>Male</option>
+							<option>Female</option>
+						</select>
+					</div>
+
+					<!-- Civil  Status -->
+					<div class="col-2">
+						<label class="text-light">Civil Status</label>
+						<select class="form-select form-select-sm" @bind="selectedCivilStatus">
+							<option value="" hidden>@civilStatusPlaceHolder</option>
+							<option>Single</option>
+							<option>Married</option>
+							<option>Separated</option>
+							<option>Widowed</option>
+						</select>
+					</div>
+
+					<!-- Religion -->
+					<div class="col">
+						<label class="text-light">Religion</label>
+						<select class="form-select form-select-sm" @bind="selectedReligion">
+							<option value="" hidden>@religionPlaceHolder</option>
+							@foreach (var religion in religionOptions)
+							{
+								<option value="@religion">@religion</option>
+							}
+						</select>
+					</div>
+					@if (selectedReligion == "Others")
+					{
+						<div class="mt-2">
+							<label for="customReligion">Please specify your religon:</label>
+							<input type="text" @bind="customReligion" class="form-control" placeholder="Enter your religion"/>
+						</div>
+					}
+					<!-- Contact No -->
+					<div class="col">
+						<label class="text-light">Contact No.</label>
+						<input class="form-control form-control-sm" @bind="contactNumber" placeholder="Contact No." required>
+					</div>
+
+				<!-- Row 4 -->
+				<div class="row g-2 mt-3">
+
+					<!-- Full Address -->
+					<label class="text-light">Full Address</label>
+
+					<!-- Region -->
+					<div class="col">
+						<label class="text-light">Region</label>
+						<select class="form-select form-select-sm" @bind="selectedRegion" @bind:after="OnRegionChangeAsync" required>
+							<option value="" hidden>@regionPlaceHolder</option>
+							@foreach (var r in regions)
+							{
+								<option value="@r.code">@r.regionName</option>
+							}
+						</select>
+					</div>
+
+					<!-- Province -->
+					<div class="col">
+						<label class="text-light">Province</label>
+						<select class="form-select form-select-sm" @bind="selectedProvince" @bind:after="OnProvinceChangeAsync" required>
+							<option value="" hidden>@provincePlaceHolder</option>
+							@if (!provinces.Any())
+							{
+								<option value="@FieldPlaceHolders.PROVINCE_CODE_NOT_FOUND">No Province</option>
+							}
+							@foreach (var p in provinces)
+							{
+								<option value="@p.code">@p.name</option>
+							}
+						</select>
+					</div>
+
+
+
+					<!-- Municipality/City -->
+					<div class="col">
+						<label class="text-light">Municipality/City</label>
+						<select class="form-select form-select-sm" @bind="selectedCity" @bind:after="OnCityChangeAsync" required>
+							<option value="" hidden>@cityPlaceHolder</option>
+							@foreach (var c in cities)
+							{
+								<option value="@c.code">@c.name</option>
+							}
+						</select>
+					</div>
+
+					<!-- Barangay -->
+					<div class="col">
+						<label class="text-light">Barangay</label>
+						<select class="form-select form-select-sm" @bind="selectedBarangay" required>
+							<option value="" hidden>@barangayPlaceHolder</option>
+							@foreach (var b in barangays)
+							{
+								<option value="@b.code">@b.name</option>
+							}
+						</select>
+					</div>
+
+					<!-- Postal Code -->
+					<div class="col">
+						<label class="text-light">Postal Code</label>
+						<input class="form-control form-control-sm" @bind="postalCode" required>
+
+						</input>
+					</div>
+
+					<!-- Street No. -->
+					<div class="col">
+						<label class="text-light">Street No.</label>
+						<input class="form-control form-control-sm" @bind="street" placeholder="Street No." required>
+					</div>
+
+					<!-- House No. -->
+					<div class="col">
+						<label class="text-light">House No.</label>
+						<input class="form-control form-control-sm" @bind="houseNo" placeholder="House No." required>
+					</div>
+
+				</div>
+
+
+				<!-- Row 5 -->
+				<!--Birth Place address-->
+				<div class="row g-2 mt-3">
+
+					<label class="text-light">Birth Place</label>
+					<!-- Region -->
+					<div class="col">
+						<label class="text-light">Region</label>
+						<select class="form-select form-select-sm" @bind="selectedBirthRegion" @bind:after="OnBirthRegionChangeAsync" required>
+							<option value="" hidden>@regionPlaceHolder</option>
+							@foreach (var r in birthRegions)
+							{
+								<option value="@r.code">@r.regionName</option>
+							}
+						</select>
+					</div>
+
+					<!-- Province -->
+					<div class="col">
+						<label class="text-light">Province</label>
+						<select class="form-select form-select-sm" @bind="selectedBirthProvince" @bind:after="OnBirthProvinceChangeAsync" required>
+							<option value="" hidden>@provincePlaceHolder</option>
+							@if (!birthProvinces.Any())
+							{
+								<option value="@FieldPlaceHolders.PROVINCE_CODE_NOT_FOUND">No Province</option>
+							}
+							@foreach (var p in birthProvinces)
+							{
+								<option value="@p.code">@p.name</option>
+							}
+						</select>
+					</div>
+
+					<!-- City -->
+					<div class="col">
+						<label class="text-light" >Municipality/City</label>
+						<select class="form-select form-select-sm" @bind="selectedBirthCity" required>
+							<option value="" hidden>@cityPlaceHolder</option>
+							@foreach (var c in birthCities)
+							{
+								<option value="@c.code">@c.name</option>
+							}
+						</select>
+					</div>
+
+					<!-- Birth Date -->
+					<div class="col">
+						<label class="text-light">Birth Date</label>
+						<input class="form-control form-control-sm" @bind="birthDate" type="date" required>
+					</div>
+
+					<!-- Occupation -->
+					<div class="col">
+						<label class="text-light">Occupation</label>
+						<input class="form-control form-control-sm" @bind="Occupation" placeholder="Occupation" required>
+					</div>
+
+				</div>
+
+
+				<div class="row g-2 mt-2">
+
+
+					<!-- Row 6 (Father's Name)-->
+					<div class="col-12">
+
+						<label class="text-light">Father's Name</label>
+						<div class="row g-2">
+							<div class="col-3">
+								<input class="form-control form-control-sm" @bind="fatherFirstName" placeholder="First Name">
+							</div>
+							<div class="col-3">
+								<input class="form-control form-control-sm" @bind="fatherMiddleName" placeholder="Middle Name">
+							</div>
+							<div class="col-3">
+								<input class="form-control form-control-sm" @bind="fatherLastName" placeholder="Last Name">
+							</div>
+							<div class="col-1">
+								<input class="form-control form-control-sm" @bind="fatherSuffix" placeholder="Suffix">
+							</div>
+						</div>
+					</div>
+
+
+					<!-- Row 7 (Mother's Name)-->
+					<div class="col-12">
+						<label class="text-light">Mother's Maiden Name</label>
+						<div class="row g-2">
+							<div class="col-3">
+								<input class="form-control form-control-sm" @bind="motherFirstName" placeholder="First Name">
+							</div>
+							<div class="col-3">
+								<input class="form-control form-control-sm" @bind="motherMiddleName" placeholder="Middle Name">
+							</div>
+							<div class="col-3">
+								<input class="form-control form-control-sm" @bind="motherLastName" placeholder="Last Name">
+							</div>
+							<div class="col-1">
+								<input class="form-control form-control-sm" @bind="motherSuffix" placeholder="Suffix">
+							</div>
+						</div>
+					</div>
+
+
+					<!-- Row 8 (Beneficiary's Name) -->
+					<div class="col-12">
+						<label class="text-light">Beneficiary's Name</label>
+						<div class="row g-2">
+							<div class="col-3">
+								<input class="form-control form-control-sm" @bind="beneficiaryAccountName" @bind:event="oninput" placeholder="Full Name">
+							</div>
+							<div class="col-3">
+								<input class="form-control form-control-sm" @bind="beneficiaryAccountNumber" @bind:event="oninput" placeholder="Account Number">
+							</div>
+							<div class="col-2">
+								<button class="btn btn-sm btn-primary w-100" @onclick="CheckBeneficiaryAccount">
+									Check Account
+								</button>
+							</div>
+							@if (showBeneficiaryCheckResult)
+							{
+								<div class="mt-1 text-sm text-white">
+									@if (!string.IsNullOrEmpty(noBeneficiaryFound))
+									{
+										<span class="text-danger">@noBeneficiaryFound</span>
+									}
+									else
+									{
+										<span class="text-success">@beneficiaryCheckMessage</span>
+									}
+								</div>
+							}
+						</div>
+					</div>
+				</div>
+
+				<div class="row g-3 mt-3">
+					<!-- Upload Government ID -->
+					<div class="col-md-4">
+						<label class="text-light">Upload Government Valid ID (Front & Back)</label>
+
+						<!-- View Button -->
+						<div class="d-flex gap-2">
+							<InputFile OnChange="UploadGovernmentId" class="btn btn-light btn-sm w-75" required />
+							<button class="btn btn-outline-light">View</button>
+						</div>
+					</div>
+
+					<!-- Upload 1x1 Picture -->
+					<div class="col-md-4">
+						<label class="text-light">Upload 1x1 Picture</label>
+
+						<!-- View Button -->
+						<div class="d-flex gap-2">
+							<InputFile OnChange="UploadProfilePicture" class="btn btn-light btn-sm w-75" required />
+							<button class="btn btn-outline-light">View</button>
+						</div>
+					</div>
+
+					<!-- TIN -->
+					<div class="col-md-3">
+						<label class="text-light">Tax Identification Number</label>
+						<input class="form-control" @bind="taxIdentificationNumber" placeholder="Tax Identification Number" required>
+					</div>
+
+				</div>
+			</div>
+
+				<!-- Border -->
+				<div class="d-flex align-items-center mt-5 mb-3">
+					<span class="text-light me-2">Setup Sign In Credentials</span>
+					<div class="flex-grow-1">
+						<hr class="m-0" style="border: 1px solid white; opacity: 100%;" />
+					</div>
+				</div>
+
+				<!-- Terms and Conditions Checkbox -->
+				<div class="form-check d-flex justify-content-end mt-3">
+					<input class="form-check-input mx-2" type="checkbox" id="termsAndConditions" required>
+					<label class="form-check-label text-light" for="termsAndConditions">
+						I accept the terms and conditions
+					</label>
+				</div>
+
+				<!-- Register Button -->
+				<div class="text-end mt-3">
+					<button class="btn btn-primary btn-secondary" @onclick="RegisterUserAsync">Update</button>
+				</div>
+
+			</div>
+		</div>
+	</main>
+</div>
+
+
+
+@code {
+
+	private string error = string.Empty;
+	private string noBeneficiaryFound = string.Empty;
+
+	//drop down selection place holders
+	public const string subTypePlaceHolder = "--Select Sub-Type--";
+	public const string productTypePlaceHolder = "--Select Product Type--";
+	public const string sexPlaceHolder = "--Select Sex--";
+	public const string civilStatusPlaceHolder = "--Select Civil Status--";
+	public const string religionPlaceHolder = "--Select Religion--";
+
+	public const string regionPlaceHolder = "--Select Region--";
+	public const string provincePlaceHolder = "--Select Province--";
+	public const string cityPlaceHolder = "--Select City--";
+	public const string barangayPlaceHolder = "--Select Barangay--";
+
+
+	// user basic info
+	public string userFirstName = string.Empty;
+	public string userMiddleName = string.Empty;
+	public string userLastName = string.Empty;
+	public string userSuffix = string.Empty;
+	public string userName = string.Empty;
+	public string password = string.Empty;
+	public string email = string.Empty;
+	public string contactNumber = string.Empty;
+	public string Occupation = string.Empty;
+	public string taxIdentificationNumber = string.Empty;
+	public string selectedSex = string.Empty;
+	public string selectedCivilStatus = string.Empty;
+	public string selectedReligion = string.Empty;
+	public string customReligion = string.Empty;
+
+	// user profile picture and government id
+	private byte[]? profilePicture;
+	private byte[]? governmentId;
+
+	// Account
+	private AccountTypes accountTypeNames = new();
+	private AccountProductTypes accountProductTypeNames = new();
+	private string selectedAccountTypeName = string.Empty;
+	private string selectedAccountProductTypeName = string.Empty;
+	public int accountTypeId;
+	public int accountProductTypeId;
+
+
+
+	// user Birth Info
+	public int age;
+	public DateTime birthDate = new DateTime(1980, 1, 1);
+	public string selectedBirthCity = string.Empty;
+	public string selectedBirthProvince = string.Empty;
+	public string selectedBirthRegion = string.Empty;
+	public int birthCityId;
+	public int? birthProvinceId;
+	public int birthRegionId;
+
+
+	//address info
+	public string houseNo = string.Empty;
+	public string street = string.Empty;
+	public string selectedRegion = string.Empty;
+	public string selectedProvince = string.Empty;
+	public string selectedCity = string.Empty;
+	public string selectedBarangay = string.Empty;
+	public string userPostalCode = string.Empty;
+	public int postalCode;
+	public int regionId;
+	public int? provinceId;
+	public int cityId;
+	public int barangayId;
+
+	//Parents Name And Beneficiary
+	public string fatherFirstName = string.Empty;
+	public string fatherMiddleName = string.Empty;
+	public string fatherLastName = string.Empty;
+	public string fatherSuffix = string.Empty;
+
+	public string motherFirstName = string.Empty;
+	public string motherMiddleName = string.Empty;
+	public string motherLastName = string.Empty;
+	public string motherSuffix = string.Empty;
+
+	public string beneficiaryAccountName = string.Empty;
+	public string beneficiaryAccountNumber = string.Empty;
+	public string beneficiaryCheckMessage = string.Empty;
+	private bool showBeneficiaryCheckResult = false;
+	public int? beneficiaryAccountId = null;
+
+
+
+	<!--user birth info address--> 
+	private List<RegionViewModel> birthRegions = new();
+	private List<ProvinceViewModel> birthProvinces = new();
+	private List<CityViewModel> birthCities = new();
+	<!--user full address-->
+	private List<RegionViewModel> regions = new List<RegionViewModel>();
+	private List<ProvinceViewModel> provinces = new();	//	use this for the drop down selection
+	private List<CityViewModel> cities = new();
+	private List<BarangayViewModel> barangays = new();
+
+	private List<string> religionOptions = new List<string>
+	{
+		"Roman Catholic",
+		"Islam",
+		"Iglesia ni Cristo",
+		"Evangelical",
+		"Seventh-day Adventist",
+		"Born Again",
+		"Buddhism",
+		"Hinduism",
+		"Judaism",
+		"Orthodox",
+		"Others"
+	};
+
+
+	// method for getting user address
+	protected override async Task OnInitializedAsync()
+	{
+		try
+		{
+			await LoadRegionAsync();
+			await LoadBirthRegionsAsync();
+
+			dataSeeding();
+		}
+		catch (FieldMissingException ex)
+		{
+			error = "Error Loading Regions" + ex.Message;
+		}
+
+	}
+
+	private void dataSeeding()
+	{
+		// // user basic info
+		userFirstName = "BOGART";
+		userMiddleName = "RELAPSE";
+		userLastName = "GODS";
+		userSuffix = "X";
+		userName = "bogartrelapse";
+		password = "bogartRelapse123@";
+		email = "bogartrelapse@gmail.com";
+		contactNumber = "09669072782";
+		Occupation = "MACHO DANCER";
+		taxIdentificationNumber = "012345678910";
+		// selectedReligion = "Roman Catholic";
+
+		age = 69;
+
+		houseNo = "10";
+		street = "25";
+		postalCode = 4028;
+
+		// //Parents Name And Beneficiary
+		fatherFirstName = "BOGART";
+		fatherMiddleName = "RELAPSE";
+		fatherLastName = "GODS";
+		fatherSuffix = "IX";
+
+		motherFirstName = "MARIE";
+		motherMiddleName = "RIE";
+		motherLastName = "RELAPSE";
+		// public string motherSuffix = string.Empty;
+
+		// public string beneficiaryFirstName = string.Empty;
+		// public string beneficiaryMiddleName = string.Empty;
+		// public string beneficiaryLastName = string.Empty;
+		// public string beneficiarySuffix = string.Empty;
+	}
+
+	// For Full address of user
+	private async Task LoadRegionAsync()
+	{
+		try
+		{
+			regions = await apiLoaderService.GetRegionsAsync();
+		}
+		catch (ApiException ex)
+		{
+			error = ex.Message;
+		}
+		catch (InvalidOperationException ex)
+		{
+			error = ex.Message;
+		}
+		catch (FieldMissingException ex)
+		{
+			error = "Error loading Regions" + ex.Message;
+		}	
+	}
+
+	//	Pass the ChangeEventArgs instance ONLY FOR drop down selections that need updating.
+	private async Task OnRegionChangeAsync()
+	{
+		try
+		{
+			error = string.Empty; // reset previous error
+
+			provinces = await apiLoaderService.GetProvincesFromRegionAsync(selectedRegion);
+			if (!provinces.Any())
+			{
+				cities = await apiLoaderService.GetCitiesMunicipalitesFromRegionAsync(selectedRegion);
+				selectedProvince = FieldPlaceHolders.PROVINCE_CODE_NOT_FOUND;
+			}
+			else
+				cities = new();
+			barangays = new();
+			selectedProvince = string.Empty;
+			selectedCity = string.Empty;
+			selectedBarangay = string.Empty;
+		}
+		catch (ApiException ex)
+		{
+			error = ex.Message;
+		}
+		catch (FieldMissingException ex)
+		{
+			error = "Error loading Provinces" + ex.Message;
+		}
+	}
+
+	private async Task OnProvinceChangeAsync()
+	{
+		try
+		{
+			error = string.Empty; // reset previous error
+
+			if (selectedProvince.Equals(FieldPlaceHolders.PROVINCE_CODE_NOT_FOUND))
+				return;
+
+			cities = await apiLoaderService.GetCitiesMunicipalitiesFromProvinceAsync(selectedProvince);
+			barangays = new();
+			selectedCity = string.Empty;
+			selectedBarangay = string.Empty;
+		}
+		catch (ApiException ex)
+		{
+			error = ex.Message;
+		}
+		catch (FieldMissingException ex)
+		{
+			error = "Error loading cities" + ex.Message;
+		}
+	}
+
+	private async Task OnCityChangeAsync()
+	{
+		try
+		{
+			error = string.Empty; // reset previous error
+
+			barangays = await apiLoaderService.GetBarangaysFromCityAsync(selectedCity);
+			selectedBarangay = string.Empty;
+		}
+		catch (ApiException ex)
+		{
+			error = ex.Message;
+		}
+		catch (FieldMissingException ex)
+		{
+			error = "Error loading barangays" + ex.Message;
+		}
+	}
+
+	private async Task LoadBirthRegionsAsync()
+	{
+		try
+		{
+			birthRegions = await apiLoaderService.GetRegionsAsync();
+			selectedProvince = string.Empty;
+			selectedCity = string.Empty;
+			selectedBarangay = string.Empty;
+		}
+		catch (ApiException ex)
+		{
+			error = ex.Message;
+		}
+		catch (InvalidOperationException ex)
+		{
+			error = ex.Message;
+		}
+		catch (FieldMissingException ex)
+		{
+			error = "Error loading Regions" + ex.Message;
+		}
+	}
+
+	// method to get user birth place
+	private async Task OnBirthRegionChangeAsync()
+	{
+		try
+		{
+			error = string.Empty; // reset previous error
+
+			birthProvinces = await apiLoaderService.GetProvincesFromRegionAsync(selectedBirthRegion);
+			if (!birthProvinces.Any())
+			{
+				birthCities = await apiLoaderService.GetCitiesMunicipalitesFromRegionAsync(selectedBirthRegion);
+				selectedBirthProvince = FieldPlaceHolders.PROVINCE_CODE_NOT_FOUND;
+			}
+			else
+				birthCities = new();
+			selectedBirthProvince = string.Empty;
+			selectedBirthCity = string.Empty;
+		}
+		catch (ApiException ex)
+		{
+			error = ex.Message;
+		}
+		catch (FieldMissingException ex)
+		{
+			error = "Error loading Provinces" + ex.Message;
+		}
+	}
+
+	private async Task OnBirthProvinceChangeAsync()
+	{
+		try
+		{
+			error = string.Empty; // reset previous error
+
+			if (selectedBirthProvince.Equals(FieldPlaceHolders.PROVINCE_CODE_NOT_FOUND))
+				return;
+
+			birthCities = await apiLoaderService.GetCitiesMunicipalitiesFromProvinceAsync(selectedBirthProvince);
+			selectedBirthCity = string.Empty;
+		}
+		catch (FieldMissingException ex)
+		{
+			error = "Error Loading cities" + ex.Message;
+		}
+	}
+
+	private int GetIdFromSelected(string selectedCode, List<dynamic> options)
+	{
+		foreach (var item in options)
+		{
+			if (item?.Code == selectedCode)
+			{
+				return item?.Id ?? 0;
+			}
+		}
+
+		return 0;
+	}
+
+	// handling the uploaded picture
+	private async Task UploadGovernmentId(InputFileChangeEventArgs e)
+	{
+		try
+		{
+			var file = e.File;
+			if (file == null)
+			{
+				error = "Please upload a government Id.";
+			}
+			if (file != null)
+			{
+				using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); // allow up to 10 MB
+				using var ms = new MemoryStream();
+				await stream.CopyToAsync(ms);
+				governmentId = ms.ToArray();
+				error = "";
+			}
+		}
+		catch (FieldMissingException ex)
+		{
+			error = "Error uploading Government ID:" + ex.Message;
+		}
+	}
+
+	private async Task UploadProfilePicture(InputFileChangeEventArgs e)
+	{
+		try
+		{
+			var file = e.File;
+			if (file == null)
+			{
+				error = "Please upload a profile picture";
+			}
+			if (file != null)
+			{
+				using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); // allow u to 10 MB
+				using var ms = new MemoryStream();
+				await stream.CopyToAsync(ms);
+				profilePicture = ms.ToArray();
+				error = "";
+			}
+		}
+		catch (FieldMissingException ex)
+		{
+			error = "Error uploading profile Picture: " + ex.Message;
+		}
+	}
+
+	private async Task CheckBeneficiaryAccount()
+	{
+
+		var result = await RegistrationService.GetExistingBeneficiaryAccountAsycn(beneficiaryAccountName, beneficiaryAccountNumber);
+
+		if (result != null)
+		{
+			beneficiaryCheckMessage = "Account Exist.";
+			beneficiaryAccountId = result.AccountId;
+		}
+		else
+		{
+			beneficiaryCheckMessage = "Account not found. Please double-check the details.";
+			beneficiaryAccountId = null;
+		}
+
+		showBeneficiaryCheckResult = true;
+	}
+
+	private async Task RegisterUserAsync()
+	{
+		try
+		{
+			error = string.Empty;
+
+			if (string.IsNullOrWhiteSpace(selectedAccountTypeName))
+			{
+				error = "Account Type is required.";
+			}
+
+			if (string.IsNullOrWhiteSpace(selectedAccountProductTypeName))
+				error = "Account Product Type is required.";
+
+			if (string.IsNullOrWhiteSpace(userFirstName))
+			{
+				error = "First name is required.";
+
+			}
+
+
+			if (string.IsNullOrWhiteSpace(this.userName))
+			{
+				error = "Username is required.";
+
+			}
+			if (age < 18)
+			{
+				error = "Invalid age, at least 18 years old is required.";
+			}
+
+			if (string.IsNullOrWhiteSpace(password))
+			{
+				error = "Valid password is required.";
+			}
+			else
+			{
+				if (password.Length < 6)
+				{
+					error = "Password must be at least 6 characters long.";
+				}
+				if (!Regex.IsMatch(password, "[A-Z]"))
+				{
+					error = "Password must contain at least one capital letter.";
+				}
+				if (!Regex.IsMatch(password, @"\d"))
+				{
+					error = "Password must contain at least one number.";
+				}
+				if (!Regex.IsMatch(password, "[^a-zA-Z0-9]"))
+				{
+					error = "Password must contain at least one special character (symbols like ! @ # $ % ^ & * ( ) _ + etc.).";
+				}
+			}
+
+			if (string.IsNullOrWhiteSpace(email))
+			{
+				error = "Email is required.";
+			}
+			else
+			{
+				var gmailRegex = new Regex(@"^[a-zA-Z0-9._%+-]+@gmail\.com$", RegexOptions.IgnoreCase);
+				if (!gmailRegex.IsMatch(email))
+				{
+					error = "Invalid Gmail address format. Example: sample@gmail.com";
+				}
+			}
+			if (string.IsNullOrWhiteSpace(contactNumber))
+			{
+				error = "Contact number is required.";
+
+			}
+			if (string.IsNullOrWhiteSpace(Occupation))
+			{
+				error = "Occupation is required.";
+
+			}
+			if (string.IsNullOrWhiteSpace(taxIdentificationNumber))
+			{
+				error = "Tax Identification Number is required.";
+
+			}
+			if (string.IsNullOrWhiteSpace(selectedSex))
+			{
+				error = "Sex is required.";
+
+			}
+			if (string.IsNullOrWhiteSpace(selectedCivilStatus))
+			{
+				error = "Civil status is required.";
+
+			}
+
+			if (string.IsNullOrWhiteSpace(selectedRegion))
+			{
+				error = "Religion is required.";
+			}
+			if (selectedReligion == "Others" && string.IsNullOrWhiteSpace(customReligion))
+			{
+				error = "Please specify your religion.";
+			}
+
+			// // Validation for names
+			if (string.IsNullOrWhiteSpace(fatherFirstName) || string.IsNullOrWhiteSpace(fatherLastName))
+			{
+				error = "Father's full name is required.";
+
+			}
+			if (string.IsNullOrWhiteSpace(motherFirstName) || string.IsNullOrWhiteSpace(motherLastName))
+			{
+				error = "Mother's full name is required.";
+
+			}
+
+			// Validation for address
+			bool hasMissingFieldAddress = (
+				string.IsNullOrWhiteSpace(selectedRegion)
+				|| string.IsNullOrWhiteSpace(selectedProvince)
+				|| string.IsNullOrWhiteSpace(selectedCity)
+				|| string.IsNullOrWhiteSpace(selectedBarangay)
+			);
+			if (hasMissingFieldAddress)
+			{
+				error = "Full current address is required.";
+			}
+
+			if (string.IsNullOrWhiteSpace(houseNo))
+			{
+				error = "House number is required.";
+
+			}
+			if (string.IsNullOrWhiteSpace(street))
+			{
+				error = "Street name is required.";
+			}
+
+			bool hasMissingFieldBirthAddress = (
+				string.IsNullOrWhiteSpace(selectedBirthRegion)
+				|| string.IsNullOrWhiteSpace(selectedBirthProvince)
+				|| string.IsNullOrWhiteSpace(selectedBirthCity)
+			);
+
+			if (hasMissingFieldBirthAddress)
+			{
+				error = "Full birth address is required.";
+			}
+
+			if (postalCode == 0)
+			{
+				error = "Postal code is required.";
+
+			}
+
+			if (birthDate > DateTime.UtcNow.Date.AddYears(-18))
+			{
+				error = "You must be older than 18 years old to open an account.";
+
+			}
+
+			//	File uploads
+			if (profilePicture is null || !profilePicture.Any())
+			{
+				error = "Please upload a profile picture.";
+			}
+
+			if (governmentId is null || !governmentId.Any())
+			{
+				error = "Please upload a government id picture";
+			}
+
+			if (!string.IsNullOrWhiteSpace(error))
+				return;
+
+			Console.WriteLine("ERROR CHECKS PASSED.");
+
+			accountTypeId = accountTypeNames.AccountTypeNameList.IndexOf(selectedAccountTypeName) + 1;
+			accountProductTypeId = accountProductTypeNames.AccountProductTypeNameList.IndexOf(selectedAccountProductTypeName) + 1;
+			Console.WriteLine(accountTypeId + " " + accountProductTypeId);
+
+			Region addressRegion = await RegistrationService.GetOrRegisterRegion(selectedRegion, regions);
+			Province? addressProvince = await RegistrationService.GetOrRegisterProvince(selectedProvince, addressRegion.RegionId, provinces);
+			City addressCity = await RegistrationService.GetOrRegisterCity(selectedCity, addressProvince?.ProvinceId, addressRegion.RegionId, cities);
+			Barangay addressBarangay = await RegistrationService.GetOrRegisterBarangay(selectedBarangay, addressCity.CityId, barangays);
+
+			Region birthRegion = await RegistrationService.GetOrRegisterRegion(selectedBirthRegion, birthRegions);
+			Province? birthProvince = await RegistrationService.GetOrRegisterProvince(selectedBirthProvince, birthRegion.RegionId, birthProvinces);
+			City birthCity = await RegistrationService.GetOrRegisterCity(selectedBirthCity, birthProvince?.ProvinceId, birthRegion.RegionId, birthCities);
+
+
+			Name userName =  RegistrationService.CreateName(userFirstName, userMiddleName, userLastName, userSuffix);
+			Name fatherName = RegistrationService.CreateName(fatherFirstName, fatherMiddleName, fatherLastName, fatherSuffix);
+			Name motherName = RegistrationService.CreateName(motherFirstName, motherMiddleName, motherLastName, motherSuffix);
+			// Name BeneficiaryName = await RegistrationService.RegisterName(beneficiaryFirstName, benefi
+
+			BirthInfo userBirthInfo = RegistrationService.CreateBirthInfo(birthDate, birthCity, birthProvince, birthRegion);
+			Address userAddress = RegistrationService.CreateAddress(houseNo, street, addressBarangay, addressCity, addressProvince, addressRegion, postalCode);
+
+
+			string religionToSave = selectedRegion == "others" ? customReligion : selectedReligion;
+			Religion userReligion = await RegistrationService.GetOrRegisterReligion(religionToSave);
+
+
+			Account userAccount = RegistrationService
+			.CreateAccount(
+				accountTypeId, 
+				accountProductTypeId, 
+				contactNumber, 
+				beneficiaryAccountId
+			);
+			UserAuth userAuth = await RegistrationService.CreateUserAuth(this.userName, email, password);
+			UserInfo userInfo = RegistrationService.CreateUserInfo(
+				age,
+				selectedSex,
+				contactNumber,
+				Occupation,
+				taxIdentificationNumber,
+				selectedCivilStatus,
+				profilePicture!,
+				governmentId!
+			);
+
+			await RegistrationService.InitiateRegistraiton(
+				userName,
+				fatherName,
+				motherName,
+				userBirthInfo,
+				userAddress,
+				userReligion,
+				userAccount,
+				userAuth,
+				userInfo
+			);
+
+			NavigationManager.NavigateTo("/PendingApproval");
+		}
+		catch (MissingFieldException ex)
+		{
+			error = ex.Message;
+		}
+		catch (Exception ex)
+		{
+			error = "Registration failed: " + ex.Message;
+		}
+	}
+
+}

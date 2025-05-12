@@ -1,0 +1,172 @@
+﻿@using Helpers;
+
+@page "/Pay_loan_confirmation"
+@attribute [Authorize(Roles = "User")]
+@rendermode InteractiveServer
+
+@inject PageRedirectService redirectService
+@inject UserDataService userDataService
+@inject TransactionService transactionService
+@inject SessionStorageService sessionStorageService
+@inject UserSessionService userSessionService
+@inject UserControlledSessionService userControlledSessionService
+
+<div class="page">
+    <main>
+        <header class="custom-card-clientpage clientheader py-4 align-items-start">
+            <div class="px-5">
+                <div class="d-flex align-items-center my-4">
+                    <h2>Pay Loan</h2>
+                </div>
+            </div>
+            <section class="d-flex justify-content-end align-items-end mx-5 gap-2">
+                <p class="fs-6 fw-lighter align-text-bottom">Current Balance: </p>
+                <div class="custom-card-clientpage current-balance d-flex align-items-center justify-content-center">
+                    @FormatHelper.BalanceFormatter(currentBalance)
+                </div>
+            </section>
+        </header>
+
+        <div class="container">
+
+            <section class="card registration shadow-lg d-flex flex-column my-4 p-3">
+                <div class="mx-auto text-center p-4">
+                    <h5>Loan Payment Amount</h5>
+                    <h1 class="fw-bolder py-3 mb-2">@FormatHelper.BalanceFormatter(withdrawAmount)</h1>
+
+                    <h6 class="mx-3 mb-4">
+                        <strong>Loan Number: </strong>_loanNumber
+                    </h6>
+
+                    <h6 class="mx-3 mb-4">
+                        <strong>Current Balance: </strong>@FormatHelper.BalanceFormatter(currentBalance)
+                    </h6>
+                </div>
+
+                <div class="d-flex justify-content-between mx-5">
+
+                    <div class="d-flex flex-column text-start text-light mb-0">
+                        <h5 class="mb-1 fw-bold">@clientName</h5>
+                        <p class="m-0"><strong>Account No.:</strong> @FormatHelper.AccountNumberFormatter(accountNumber)</p>
+                        <p class="m-0"><strong>Card/Account Destination:</strong> @cardDestination</p>
+                        <p class="m-0"><strong>Date:</strong> @(date?.ToShortDateString() ?? "") @(time?.ToString(@"hh\:mm") ?? "")</p>
+                        <p class="m-0"><strong>Transaction No.:</strong> @transactionNumber</p>
+                    </div>
+
+                    <section class="d-flex flex-column form-check d-flex justify-content-end mt-3 w-25">
+                        <div class="text-end mt-3 w-100">
+                            <div>
+                                <button class="btn btn-primary btn-lg w-100 mb-2" @onclick="ConfirmWithdraw" disabled="@(isConfirmed == false)">Confirm</button>
+                            </div>
+                            <div>
+                                <button class="btn btn-warning btn-lg w-100 mb-3" @onclick="CancelWithdraw">Go Back</button>
+                            </div>
+                        </div>
+                    </section>
+
+                </div>
+
+                <div class="d-flex justify-content-end pb-2 mx-5">
+                    <input class="form-check-input mx-2" type="checkbox" id="termsAndConditions" @bind="isConfirmed" required>
+                    <label class="form-check-label text-light mb-2" for="withdrawAmountVerification">
+                        Confirm the details are correct.
+                    </label>
+                </div>
+
+            </section>
+        </div>
+    </main>
+</div>
+
+@code 
+{
+    private bool isConfirmed = false;
+    private UserSession userSession { get; set; } = default!;
+    private AccountViewSession activeAccountSession { get; set; } = default!;
+    private TransactionSession transactionSession { get; set; } = default!;
+
+    private string accountNumber = "Loading...";
+    private string cardDestination = "Loading...";
+    private string clientName = "Loading...";
+    private decimal currentBalance = 0.00m;
+    private decimal withdrawAmount = 0.00m;
+    private string transactionNumber = "Loading...";
+    private DateTime? date;
+    private TimeSpan? time;
+
+    private string error = string.Empty;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender) 
+    {
+        if (firstRender) 
+        {
+            try 
+            {
+                //  Fetch user and transaction session from storage.
+                //  Throws SessionNotFoundException if session is not found.
+                //  Throws ControlledSessionNotFound if transaction session is not found.
+                userSession = await userSessionService.GetUserSession();
+                activeAccountSession = await userControlledSessionService.GetActiveAccountSessionAsync(userSession);
+                transactionSession = await userControlledSessionService.GetTransactionSessionAsync(userSession);
+
+                //  Set display data.
+                accountNumber = activeAccountSession.AccountNumber;
+                cardDestination = ExternalVendors.AS_STRING_LIST[transactionSession.ExternalVendorId!.Value - 1];
+                clientName = activeAccountSession.AccountName;
+                currentBalance = await userDataService.GetAccountBalanceAsync(activeAccountSession.AccountId);
+                withdrawAmount = transactionSession.Amount;
+                transactionNumber = transactionSession.TransactionNumber;
+                date = transactionSession.TransactionDate.Date;
+                time = transactionSession.TransactionTime;
+
+                //  Reload component.
+                StateHasChanged();
+            } 
+            catch (ControlledSessionNotFound) 
+            {
+                //  Redirect to CLIENT_HOME if users try to access the page without an ongoing transaction session.
+                redirectService.redirectWithNavigationManager(PageRoutes.CLIENT_HOME);
+            }
+        }
+    }
+
+    private async Task ConfirmWithdraw()
+    {
+        try 
+        {
+            //  Process withdraw transaction.
+            transactionSession = await transactionService.ProcessTransactionAsync(transactionSession);
+
+            //  Store updated transactionSession to session storage
+            await userControlledSessionService.SetTransactionSessionAsync(
+                (int)TransactionTypeIDs.Withdrawal,
+                transactionSession,
+                userSession
+            );
+
+            //  Redirect to WITHDRAW_RECEIPT page.
+            redirectService.redirectWithNavigationManager(PageRoutes.PAY_LOAN_RECEIPT);
+        } 
+        catch (AccountNotFoundException)
+        {
+            error = "Error resolving database. Please try again later";
+        }
+        catch (InsufficientBalanceException)
+        {
+            //  Remove transaction session from session storage.
+            await userControlledSessionService.ClearTransactionSessionAsync(userSession);
+            error = "You do not have sufficient balance";
+        }
+    }
+
+    private async Task CancelWithdraw()
+    {
+        //  Persist cancelled transaction to database and delete transaction details from session storage.
+        await transactionService.StoreFailedTransactionAsync(transactionSession, TransactionStatus.CANCELLED);
+
+        await userControlledSessionService.ClearTransactionSessionAsync(userSession);
+
+        //  Redirect to CLIENT_HOME.
+        redirectService.redirectWithNavigationManager(PageRoutes.CLIENT_HOME);
+    }
+}

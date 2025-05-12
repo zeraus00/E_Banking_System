@@ -18,6 +18,10 @@
         public const string APPLY_LOAN = "/Apply_loan";
         public const string LOAN_RECEIPT = "/Loan_receipt";
         public const string LOAN_BALANCE = "/Check_Loan_Balance";
+        public const string PAY_LOAN = "/Pay_loan";
+        public const string PAY_LOAN_AMOUNT = "/Pay_loan_amount";
+        public const string PAY_LOAN_CONFIRMATION = "/Pay_loan_confirmation";
+        public const string PAY_LOAN_RECEIPT = "/Pay_Loan_receipt";
 
         public const string ADMINSETTINGS_CHANGE_PASSWORD = "/AdminSettings_change_password";
         public const string ADMINSETTINGS_CHANGE_CONTACT = "/AdminSettings_change_contact";
