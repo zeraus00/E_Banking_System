@@ -78,6 +78,14 @@ namespace Services.SessionsManagement
             await _userSessionService.UpdateAdminSession(adminSession);
         }
         #endregion
+        public async Task ClearAdminControlledSessions(AdminSession? adminSession = null)
+        {
+            adminSession = await HandleNullAdminSession(adminSession);
+            adminSession.PendingAccountSession = null;
+            adminSession.AccountViewSession = null;
+            adminSession.LoanViewSession = null;
+            await _userSessionService.UpdateAdminSession(adminSession);
+        }
         public async Task<AdminSession> HandleNullAdminSession(AdminSession? adminSession = null)
             => adminSession is null ?
                 await _userSessionService.GetAdminSession() :
