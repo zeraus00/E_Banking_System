@@ -24,7 +24,7 @@
 
         <div class="d-flex align-items-center gap-3 m-3 flex-wrap">
             <div class="d-flex align-items-center gap-3">
-                <input class="form-control form-control-sm" @bind="searchAccount" placeholder="Search specific account" />
+                <input class="form-control form-control-sm" @bind="accountNumber" placeholder="Search specific account" />
             </div>
 
             <div class="d-flex align-items-center gap-3">
@@ -39,7 +39,7 @@
 
             <div class="d-flex align-items-center gap-3">
                 <label class="text-light mb-0" style="white-space: nowrap;">Account Type</label>
-                <select class="form-select form-select-sm" @bind="selectedType">
+                <select class="form-select form-select-sm" @bind="selectedAccountTypeId">
                     <option value="0">All</option>
                     <option value="1">Personal Account</option>
                     <option value="2">Joint Account</option>
@@ -142,46 +142,26 @@
 
     private DateTime? startDate ;
     private DateTime? endDate;
-    private int selectedType = 0;
-    private string searchAccount = "";
+    private int selectedAccountTypeId = 0;
+    private string accountNumber = "";
     private string cleanedAccountNumber = "";
 
     private List<Account> accountList = new();
-    private List<Account> mockAccounts = new();
 
     private int remainingAccountsCount;
+
+    //  Pagination
     private int pageSize = 5;
     private int pageNumber = 1;
     private int availablePages;
+
     private bool isNextDisabled = false;
     private bool isPreviousDisabled = false;
 
     protected override async Task OnInitializedAsync()
     {
-        mockAccounts = new List<Account>
-            {
-                new Account
-                {
-                    AccountNumber = "1234-5678",
-                    AccountName = "Sample Name 1",
-                    AccountType = new AccountType(){AccountTypeName="Personal Account"},
-                    AccountStatusType = new AccountStatusType() {AccountStatusTypeName = "Active"},
-                    DateOpened = DateTime.Today.AddDays(-1)
-                },
-                new Account
-                {
-                    AccountNumber = "0987-6543",
-                    AccountName = "Sample Name 2",
-                    AccountType = new AccountType(){AccountTypeName="Joint Account"},
-                    AccountStatusType = new AccountStatusType() {AccountStatusTypeName = "Deactivated"},
-                    DateOpened = DateTime.Today.AddDays(-1)
-                }
-            };
-        //  Disable the previous button at the start when the list is automatically at the first page.
         isPreviousDisabled = true;
         await LoadAccountsAsync();
-        if (!accountList.Any())
-            accountList = mockAccounts;
         StateHasChanged();
     }
     private async Task OnFilterAsync()
@@ -204,8 +184,9 @@
         //  Resets all filters and reloads the list.
         startDate = null;
         endDate = null;
-        selectedType = 0;
-        searchAccount = "";
+        selectedAccountTypeId = 0;
+        cleanedAccountNumber = "";
+        accountNumber = "";
         pageNumber = 1;
         await LoadAccountsAsync();
     }
@@ -255,7 +236,7 @@
                 cleanedAccountNumber,
                 startDate,
                 endDate,
-                selectedType,
+                selectedAccountTypeId,
                 pageNumber: pageNumber,
                 pageSize: pageSize
             );
@@ -266,7 +247,7 @@
                 cleanedAccountNumber,
                 startDate,
                 endDate,
-                selectedType,
+                selectedAccountTypeId,
                 pageNumber: pageNumber,
                 pageSize: pageSize
             );
@@ -285,9 +266,9 @@
     {
         //  If the account number length is greater than 12, remove the dashes and trim. Otherwise
         //  just trim the input.
-        cleanedAccountNumber = searchAccount.Length > 12 ?
-            searchAccount.Replace("-", "").Trim() :
-            searchAccount.Trim();
+        cleanedAccountNumber = accountNumber.Length > 12 ?
+            accountNumber.Replace("-", "").Trim() :
+            accountNumber.Trim();
         /*
         * Check if the account number input is empty. If not, validate it by checking whether it is:
         * 1. Has either 3 characters (last 3 digits only) or the full account number (12 characters).
