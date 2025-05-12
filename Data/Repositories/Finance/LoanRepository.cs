@@ -19,6 +19,24 @@ namespace Data.Repositories.Finance
 
         public class LoanQuery : CustomQuery<Loan, LoanQuery>
         {
+            public LoanQuery isFullyPaidLoan(DateTime currentDate) 
+            {
+                return WhereCondition(l => 
+                l.StartDate != null &&
+                l.LoanTermMonths > 0 &&
+                l.StartDate.Value.AddMonths(l.LoanTermMonths) <= currentDate
+                );
+            }
+
+            public LoanQuery isUnpaidLoan(DateTime currentDate) 
+            {
+                return WhereCondition(l =>
+                l.StartDate != null &&
+                l.LoanTermMonths > 0 &&
+                l.StartDate.Value.AddMonths(l.LoanTermMonths) > currentDate
+                );
+            }
+
             public LoanQuery(IQueryable<Loan> query) : base(query) { }
             public LoanQuery HasLoanId(int loanId) =>
                 WhereCondition(l => l.LoanId == loanId);
