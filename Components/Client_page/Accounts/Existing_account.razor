@@ -1,19 +1,33 @@
 ﻿@page "/Existing_account"
 @rendermode InteractiveServer
 @inject NavigationManager NavigationManager
-@using Layout
-@layout PlainLayout
 
 <div class="page">
 	<main>
 
+		<!-- Header -->
+		<header class="custom-card-clientpage clientheader py-4 align-items-start">
+			<div class="px-5">
+				<div class="d-flex align-items-center my-4">
+					<h2>Create Online Account for an Existing Account</h2>
+				</div>
+			</div>
+
+		</header>
+@* 		@if (message.Length > 0)
+		{
+			<div class="alert alert-danger alert-dismissible fade show" role="alert">
+				<strong>@message</strong>
+			</div>
+		} *@
+
 		<!-- Registration Box -->
-		<div class="card forget_password mt-3 p-4 shadow-lg">
+		<div class="card accounts mt-3 p-4 shadow-lg">
 			<div class="d-flex justify-content-between align-items-center">
-				<h3 class="fw-bold text-light">Create Online Account for an Existing Account</h3>
+				<h3 class="fw-bold text-light">Enter Account Details</h3>
 
 				<!-- Close Button -->
-				<NavLink href="/">
+				<NavLink href="/Accounts">
 					<button class="btn-close" aria-label="Close"></button>
 				</NavLink>
 			</div>
