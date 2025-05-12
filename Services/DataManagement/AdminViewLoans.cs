@@ -34,6 +34,7 @@ namespace Services.DataManagement
 
         }
 
+
         public async Task<List<Loan>> GetFilterLoanAccountApplying(
             int loanId,
             DateTime? startDate = null,
@@ -112,7 +113,7 @@ namespace Services.DataManagement
                 queryBuilder = queryBuilder.HasAccountId(accountId.Value);
 
             if (userInfoId.HasValue)
-                queryBuilder = queryBuilder.IncludeUserInfo(userInfoId.HasValue);
+                queryBuilder = queryBuilder.HasUserInfoId(userInfoId.Value);
 
             if (startDate.HasValue)
                 queryBuilder = queryBuilder.LoanApplicationOrOrAfter(startDate.Value);
@@ -160,7 +161,7 @@ namespace Services.DataManagement
 
 
             if (userInfoId.HasValue)
-                queryBuilder = queryBuilder.IncludeUserInfo(userInfoId.HasValue);
+                queryBuilder = queryBuilder.HasUserInfoId(userInfoId.Value);
 
             if (startDate.HasValue)
                 queryBuilder = queryBuilder.LoanApplicationOrOrAfter(startDate.Value);
