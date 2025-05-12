@@ -44,6 +44,7 @@ namespace Data.Repositories.User
             public UserInfoQuery IncludeReligion(bool include = true) => include ? Include(ui => ui.Religion) : this;
             public UserInfoQuery IncludeUserInfoAccounts(bool include = true) => include ? Include(ui => ui.UserInfoAccounts) : this;
             public async Task<Name?> SelectUserName() => await Select<Name>(ui => ui.UserName);
+            public async Task<UserAuth?> SelectUserAuth() => await Select<UserAuth>(ui => ui.UserAuth);
         }
 
         #endregion Read Methods

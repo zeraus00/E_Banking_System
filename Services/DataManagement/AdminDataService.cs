@@ -222,6 +222,21 @@ namespace Services.DataManagement
             }
         }
         #endregion
+        #region UserAuth Data Helper Methods
+        public async Task<string> GetUserEmailAsync(int userInfoId)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                UserAuth userAuth = await new UserInfoRepository(dbContext)
+                    .Query
+                    .IncludeUserAuth()
+                    .HasUserInfoId(userInfoId)
+                    .SelectUserAuth() ?? throw new UserNotFoundException();
+
+                return userAuth.Email;    
+            }
+        }
+        #endregion
         #region Account Data Helper Methods
         public async Task<int> GetAccountIdAsync(string accountNumber)
         {
