@@ -174,7 +174,7 @@
         selectedType = "";
         searchAccount = "";
         // accounts = allAccounts.ToList();
-        accountList = await adminDataService.FilterAccountsAsync(accountStatusTypeId: (int)AccountStatusTypeIDs.Pending);
+        accountList = await adminDataService.LoadAccountsListAsync(accountStatusTypeId: (int)AccountStatusTypeIDs.Pending);
     }
 
     private async Task ViewDetails(Account account)

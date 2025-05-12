@@ -236,7 +236,7 @@ namespace Services.DataManagement
         /// <returns>
         /// A list of <see cref="Transaction"/> objects associated with the given account.
         /// </returns>
-        public async Task<List<Transaction>> FilterAccountTransactionsAsync(
+        public async Task<List<Transaction>> LoadAccountTransactionsAsync(
             int accountId,
             int transactionTypeId = 0,
             int pageSize = 50,

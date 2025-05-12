@@ -128,14 +128,14 @@
 
     protected override async Task OnInitializedAsync()
     {
-        accountList = await adminDataService.FilterAccountsAsync(accountStatusTypeId: (int)AccountStatusTypeIDs.Closed);
+        accountList = await adminDataService.LoadAccountsListAsync(accountStatusTypeId: (int)AccountStatusTypeIDs.Closed);
     }
 
 
     private async Task FilterAsync()
     {
         accountList = await adminDataService
-            .FilterAccountsAsync(
+            .LoadAccountsListAsync(
             searchAccount,
             startDate,
             endDate,
@@ -150,7 +150,7 @@
         endDate = null;
         selectedType = "";
         searchAccount = "";
-        accountList = await adminDataService.FilterAccountsAsync(accountStatusTypeId: (int)AccountStatusTypeIDs.Closed);
+        accountList = await adminDataService.LoadAccountsListAsync(accountStatusTypeId: (int)AccountStatusTypeIDs.Closed);
     }
 
 }

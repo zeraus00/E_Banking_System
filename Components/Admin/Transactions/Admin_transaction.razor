@@ -46,8 +46,8 @@
             </select>
         </div>
 
-        <button class="btn btn-primary btn-sm shadow-sm" @onclick="FilterTransactionsAsync">Filter</button>
-        <button class="btn btn-danger btn-sm shadow-sm" @onclick="ClearFilterAsync">Clear Filter</button>
+        <button class="btn btn-primary btn-sm shadow-sm" @onclick="OnFilterAsync">Filter</button>
+        <button class="btn btn-danger btn-sm shadow-sm" @onclick="OnClearFilterAsync">Clear Filter</button>
     </div>
 
     <hr class="m-3" style="border: 1px solid white; opacity: 100%;" />
@@ -160,6 +160,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        isPreviousDisabled = true;
         transactionTypes = TransactionTypes.AS_STRING_LIST;
         await base.OnInitializedAsync();
     }
@@ -171,9 +172,10 @@
             try
             {
                 adminSession = await userSessionService.GetAdminSession();
-
+                //  Clear all admin controlled sessions.
+                await adminControlledSessionService.ClearAdminControlledSessions(adminSession);
                 //  Get transaction list from database.
-                await FilterTransactionsAsync();
+                await LoadTransactionsAsync();
                 StateHasChanged();
             }
             catch (SessionNotFoundException)
@@ -187,7 +189,7 @@
     {
         isPreviousDisabled = false;
         pageNumber++;
-        await FilterTransactionsAsync();
+        await LoadTransactionsAsync();
         StateHasChanged();
     }
 
@@ -199,33 +201,33 @@
             pageNumber--;
             if (pageNumber == 1)
                 isPreviousDisabled = true;
-            await FilterTransactionsAsync();
+            await LoadTransactionsAsync();
             StateHasChanged();
         }
     }
-    private async Task OnFilterClick()
-    {
-        pageNumber = 1;
-        await FilterTransactionsAsync();
-    }
-    private async Task ClearFilterAsync()
-    {
-        startDate = DateTime.Now.Date.AddDays(-DateTime.Now.Day + 1);
-        endDate = DateTime.Now.Date;
-        selectedTransactionTypeId = 0;
-        pageNumber = 1;
-        await FilterTransactionsAsync();
-    }
-    private async Task FilterTransactionsAsync()
+    private async Task OnFilterAsync()
     {
         if (startDate > endDate)
         {
             await DisplayMessage("Start date cannot be later than end date.");
             return;
         }
+        pageNumber = 1;
+        await LoadTransactionsAsync();
+    }
+    private async Task OnClearFilterAsync()
+    {
+        startDate = DateTime.Now.Date.AddDays(-DateTime.Now.Day + 1);
+        endDate = DateTime.Now.Date;
+        selectedTransactionTypeId = 0;
+        pageNumber = 1;
+        await LoadTransactionsAsync();
+    }
+    private async Task LoadTransactionsAsync()
+    {
         //  Load the filtered transaction list from the database.
         transactionList = await adminDataService
-            .AdminFilterTransactionsAsync(
+            .AdminLoadTransactionsListAsync(
                 pageSize: pageSize,
                 pageNumber: pageNumber,
                 transactionStartDate: startDate,
