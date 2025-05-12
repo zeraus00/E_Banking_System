@@ -104,7 +104,8 @@ namespace Services.DataManagement
                 .HasPostDisbursementStatus(true)
                 .IncludeAccount()
                 .IncludeUserInfo()
-                .OrderByDateDescending();
+                .OrderByDateDescending()
+                .isUnpaidLoan(currentDate);
 
 
             if (accountId.HasValue)
@@ -119,13 +120,14 @@ namespace Services.DataManagement
             if (endDate.HasValue)
                 queryBuilder = queryBuilder.LoanApplicationOnOrBefore(endDate.Value);
 
+            int skip = (pageNumber - 1) * pageSize;
+
             var unpaidAccounts = await queryBuilder
                 .GetQuery()
-                .Where(l => l.StartDate.HasValue &&
-                            l.LoanTermMonths > 0 &&
-                            l.StartDate.Value.AddMonths(l.LoanTermMonths) > currentDate) // Unpaid loans
                 .Select(l => l.Account)
                 .Distinct()
+                .Skip(skip)
+                .Take(pageSize)
                 .ToListAsync();
 
             return unpaidAccounts;
@@ -149,7 +151,8 @@ namespace Services.DataManagement
                 .HasPostDisbursementStatus(true)
                 .IncludeAccount()
                 .IncludeUserInfo()
-                .OrderByDateDescending();
+                .OrderByDateDescending()
+                .isFullyPaidLoan(currentDate);
 
 
             if (accountId.HasValue)
@@ -169,9 +172,6 @@ namespace Services.DataManagement
 
             var paidAccounts = await queryBuilder
                 .GetQuery()
-                .Where(l => l.StartDate != null&&
-                            l.LoanTermMonths > 0 &&
-                            l.StartDate.Value.AddMonths(l.LoanTermMonths) <= currentDate) // Fully paid loans
                 .Select(l => l.Account)
                 .Distinct()
                 .Skip(skip)
