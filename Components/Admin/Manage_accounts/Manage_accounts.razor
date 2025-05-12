@@ -1,5 +1,5 @@
 ﻿@using Layout
-
+@using System.Text.RegularExpressions;
 @page "/Manage_accounts"
 @rendermode InteractiveServer
 @attribute [Authorize(Roles = "Administrator")]
@@ -10,7 +10,12 @@
 
 <div class="main">
     <div class="dashboard-container">
-
+        @if (message.Length > 0)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>@message</strong>
+            </div>
+        }
         <div class="top-bar mx-3">
             <h2>Manage Accounts</h2>
         </div>
@@ -71,8 +76,8 @@
                                 <td>@a.AccountType.AccountTypeName</td>
                                 <td>
 
-                                    <button class="btn btn-info btn-secondary btn-sm rounded text-dark shadow-sm" style="border: 2px solid cyan" @onclick="async _ => await ViewAccount(a)">View</button>
-                                    
+                                    <button class="btn btn-info btn-secondary btn-sm rounded text-dark shadow-sm" style="border: 2px solid cyan" @onclick="async _ => await OnViewClick(a)">View</button>
+
                                     @* <button class="btn btn-danger btn-secondary btn-sm rounded text-light shadow-sm" style="border: 2px solid red" @onclick="_ => DeleteAccount(a)">Delete</button>
                                      *@
                                     @* <div>
@@ -116,68 +121,114 @@
             </table>
         </div>
         <div class="scroll-container gap-3 mx-5">
-            <button class="arrow-ud">
+            <button class="arrow-ud" disabled="@isPreviousDisabled" @onclick="PreviousPage">
                 <i class="bi bi-chevron-left text-light"></i>
             </button>
-            <button class="arrow-ud">
+            <button class="arrow-ud" disabled="@isNextDisabled" @onclick="NextPage">
                 <i class="bi bi-chevron-right text-light"></i>
             </button>
         </div>
-
-@*         <div class="page-container text-center text-light mt-2 mb-3 mx-5">
+        <div class="page-container text-center text-light mt-2 mb-3 mx-5">
+            Page @pageNumber of @availablePages
+        </div>
+        @*         <div class="page-container text-center text-light mt-2 mb-3 mx-5">
             Page @pageNumber of @masterListAvailablePages
         </div> *@
     </div>
 </div>
 
 @code {
+    private string message = "";
+
     private DateTime? startDate ;
     private DateTime? endDate;
     private int selectedType = 0;
     private string searchAccount = "";
+    private string cleanedAccountNumber = "";
 
     private List<Account> accountList = new();
     private List<Account> mockAccounts = new();
 
+    private int remainingAccountsCount;
+    private int pageNumber = 1;
+    private int availablePages;
+    private bool isNextDisabled = false;
+    private bool isPreviousDisabled = false;
+
     protected override async Task OnInitializedAsync()
     {
         mockAccounts = new List<Account>
-        {
-            new Account
             {
-                AccountNumber = "1234-5678",
-                AccountName = "Sample Name 1",
-                AccountType = new AccountType(){AccountTypeName="Personal Account"},
-                AccountStatusType = new AccountStatusType() {AccountStatusTypeName = "Active"},
-                DateOpened = DateTime.Today.AddDays(-1)
-            },
-            new Account
-            {
-                AccountNumber = "0987-6543",
-                AccountName = "Sample Name 2",
-                AccountType = new AccountType(){AccountTypeName="Joint Account"},
-                AccountStatusType = new AccountStatusType() {AccountStatusTypeName = "Deactivated"},
-                DateOpened = DateTime.Today.AddDays(-1)
-            }
-        };
-        accountList = await adminDataService.FilterAccountsAsync();
+                new Account
+                {
+                    AccountNumber = "1234-5678",
+                    AccountName = "Sample Name 1",
+                    AccountType = new AccountType(){AccountTypeName="Personal Account"},
+                    AccountStatusType = new AccountStatusType() {AccountStatusTypeName = "Active"},
+                    DateOpened = DateTime.Today.AddDays(-1)
+                },
+                new Account
+                {
+                    AccountNumber = "0987-6543",
+                    AccountName = "Sample Name 2",
+                    AccountType = new AccountType(){AccountTypeName="Joint Account"},
+                    AccountStatusType = new AccountStatusType() {AccountStatusTypeName = "Deactivated"},
+                    DateOpened = DateTime.Today.AddDays(-1)
+                }
+            };
+        //  Disable the previous button at the start when the list is automatically at the first page.
+        isPreviousDisabled = true;
+        await Filter();
         if (!accountList.Any())
             accountList = mockAccounts;
+        StateHasChanged();
     }
 
     private async Task Filter()
     {
+        if (startDate > endDate)
+        {
+            await DisplayMessage("Start date cannot be later than end date.");
+            return;
+        }
+        //  Validate the account number input if it is not empty.
+        bool isAccountNumberValid = await ValidateAccountNumberInput();
+        if (!isAccountNumberValid)
+            return;
+
+        //  Filter the accounts.
         accountList = await adminDataService
             .FilterAccountsAsync(
-                searchAccount,
+                cleanedAccountNumber,
                 startDate,
                 endDate,
-                selectedType
+                selectedType,
+                pageNumber: pageNumber
             );
-    }
 
+        //  Get the remaining accounts count after the current page.
+        remainingAccountsCount = await adminDataService
+            .CountRemainingAccountsAsync(
+                cleanedAccountNumber,
+                startDate,
+                endDate,
+                selectedType,
+                pageNumber: pageNumber
+            );
+
+        //  Calculate the number of available pages.
+        availablePages = remainingAccountsCount == 0 && pageNumber == 1 ?
+            1 :
+            pageNumber + ((int)Math.Ceiling((double)remainingAccountsCount / 10));
+
+        if (!accountList.Any())
+            //  Disable the next button if the list is empty if there are no more accounts 
+            //  after the current page.
+            isNextDisabled = true;
+    }
     private async Task ClearFilter()
     {
+        //  Resets all filters and reloads the list.
         startDate = null;
         endDate = null;
         selectedType = 0;
@@ -185,23 +236,78 @@
         accountList = await adminDataService.FilterAccountsAsync();
     }
 
-    private async Task ViewAccount(Account account)
+    private async Task OnViewClick(Account account)
     {
+        //  Create an AccountViewSession
         LinkedAccount accountViewSession = new()
-        {
-            AccountId = account.AccountId,
-            AccountNumber = account.AccountNumber,
-            AccountName = account.AccountName,
-            AccountContactNo = account.AccountContactNo,
-            AccountStatusId = account.AccountStatusTypeId
-        };
+            {
+                AccountId = account.AccountId,
+                AccountNumber = account.AccountNumber,
+                AccountName = account.AccountName,
+                AccountContactNo = account.AccountContactNo,
+                AccountStatusId = account.AccountStatusTypeId
+            };
 
+        //  Set the AccountViewSession in the current AdminSesssion.
         await adminControlledSessionService.SetAccountViewSession(accountViewSession);
-
+        //  Navigate to view account page.
         Navigation.NavigateTo(PageRoutes.VIEW_ACCOUNT);
     }
-
-    private void DeleteAccount(Account account)
+    private async Task NextPage()
     {
+        //  Enable the previous button
+        isPreviousDisabled = false;
+        pageNumber++;
+        await Filter();
+        StateHasChanged();
+    }
+
+    private async Task PreviousPage()
+    {
+        if (pageNumber > 1)
+        {
+            isNextDisabled = false;
+            pageNumber--;
+            if (pageNumber == 1)
+                isPreviousDisabled = true;
+            await Filter();
+            StateHasChanged();
+        }
+    }
+    private async Task<bool> ValidateAccountNumberInput()
+    {
+        //  If the account number length is greater than 12, remove the dashes and trim. Otherwise
+        //  just trim the input.
+        cleanedAccountNumber = searchAccount.Length > 12 ?
+            searchAccount.Replace("-", "").Trim() :
+            searchAccount.Trim();
+        /*
+        * Check if the account number input is empty. If not, validate it by checking whether it is:
+        * 1. Has either 3 characters (last 3 digits only) or the full account number (12 characters).
+        *  Any other partial search is not allowed.
+        * 2. If it has a non numeric character.
+        */
+        bool isInputInvalid = !string.IsNullOrWhiteSpace(cleanedAccountNumber) &&
+            (
+                (cleanedAccountNumber.Length != 3 && cleanedAccountNumber.Length != 12) ||
+                !Regex.IsMatch(cleanedAccountNumber, @"^\d+$")
+            );
+
+        //  If input is invalid, display a message notifying the user of the invalid input.
+        if (isInputInvalid)
+        {
+            await DisplayMessage("Please enter a valid account number.");
+            return false;
+        }
+        return true;
+    }
+
+    private async Task DisplayMessage(string msg)
+    {
+        message = msg;
+        StateHasChanged();
+        await Task.Delay(3000);
+        message = "";
+        StateHasChanged();
     }
 }

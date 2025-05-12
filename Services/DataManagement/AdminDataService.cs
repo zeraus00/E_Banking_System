@@ -32,7 +32,7 @@ namespace Services.DataManagement
             _userDataService = userDataService;
             _userSessionService = userSessionService;
         }
-        #region Account Helper Methods
+        #region Manage Account Helper Methods
         /// <summary>
         /// Asynchronously filters and retrieves a list of pending <see cref="Account"/> based on optional criteria.
         /// </summary>
@@ -46,7 +46,8 @@ namespace Services.DataManagement
             DateTime? startDate = null,
             DateTime? endDate = null,
             int accountTypeId = 0,
-            int accountStatusTypeId = 0
+            int accountStatusTypeId = 0,
+            int pageNumber = 1
             )
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
@@ -55,13 +56,18 @@ namespace Services.DataManagement
                 var accountRepo = new AccountRepository(dbContext);
 
                 //  Filter the accounts.
-                var queryBuilder = accountRepo.Query;
-                queryBuilder.IncludeAccountType();
-                queryBuilder.IncludeAccountStatusType();
-                queryBuilder.OrderByDateOpenedDescending();
+                var queryBuilder = accountRepo.Query
+                    .IncludeAccountType()
+                    .IncludeAccountStatusType()
+                    .OrderByDateOpenedDescending();
 
                 if (!string.IsNullOrWhiteSpace(accountNumber))
-                    queryBuilder.HasAccountNumber(accountNumber);
+                {
+                    if (accountNumber.Length == 12)
+                        queryBuilder.HasAccountNumber(accountNumber);
+                    else if (accountNumber.Length == 3)
+                        queryBuilder.AccountNumberEndsWith(accountNumber);
+                }
                 if (startDate is not null)
                     queryBuilder.HasOpenedOnOrAfter(startDate);
                 if (endDate is not null)
@@ -72,8 +78,7 @@ namespace Services.DataManagement
                     queryBuilder.HasAccountStatusTypeId(accountStatusTypeId);
 
                 //  Pagination
-                int pageNumber = 1;
-                int pageSize = 10;
+                int pageSize = 5;
                 List<Account> accountList = await queryBuilder
                     .GetQuery()
                     .Skip((pageNumber - 1) * pageSize)
@@ -88,6 +93,48 @@ namespace Services.DataManagement
 
                 //  Get the query as list
                 return accountList;
+            }
+        }
+        public async Task<int> CountRemainingAccountsAsync(
+            string accountNumber = "",
+            DateTime? startDate = null,
+            DateTime? endDate = null,
+            int accountTypeId = 0,
+            int accountStatusTypeId = 0,
+            int pageNumber = 1)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                var accountRepo = new AccountRepository(dbContext);
+
+                var queryBuilder = accountRepo
+                    .Query
+                    .IncludeAccountType()
+                    .IncludeAccountStatusType()
+                    .OrderByDateOpenedDescending();
+
+                if (!string.IsNullOrWhiteSpace(accountNumber))
+                {
+                    if (accountNumber.Length == 12)
+                        queryBuilder.HasAccountNumber(accountNumber);
+                    else if (accountNumber.Length == 3)
+                        queryBuilder.AccountNumberEndsWith(accountNumber);
+                }
+                if (startDate is not null)
+                    queryBuilder.HasOpenedOnOrAfter(startDate);
+                if (endDate is not null)
+                    queryBuilder.HasOpenedOnOrBefore(endDate);
+                if (accountTypeId > 0)
+                    queryBuilder.HasAccountTypeId(accountTypeId);
+                if (accountStatusTypeId > 0)
+                    queryBuilder.HasAccountStatusTypeId(accountStatusTypeId);
+
+                //  Pagination
+                int pageSize = 5;
+                return await queryBuilder
+                    .GetQuery()
+                    .Skip(pageNumber * pageSize)
+                    .CountAsync();
             }
         }
         /// <summary>
@@ -353,14 +400,16 @@ namespace Services.DataManagement
                     .IncludeMainAccount()
                     .ExceptTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer)
                     .HasStatusConfirmed()
-                    .OrderByAmountDescending()
-                    .TakeWithCount(count);
+                    .OrderByAmountDescending();
                 if (startDate is DateTime sDate)
                     queryBuilder.HasStartDate(sDate);
                 if (endDate is DateTime eDate)
                     queryBuilder.HasEndDate(eDate);
 
-                List<Transaction> largestTransactions = await queryBuilder.GetQuery().ToListAsync();
+                List<Transaction> largestTransactions = await queryBuilder
+                    .TakeWithCount(count)
+                    .GetQuery()
+                    .ToListAsync();
 
                 foreach (var transaction in largestTransactions)
                 {
@@ -386,12 +435,12 @@ namespace Services.DataManagement
         /// <remarks>
         /// Transactions are ordered such that the most recent ones appear first.
         /// </remarks>
-        public async Task<List<Transaction>> GetTransactionListAsync(
+        public async Task<List<Transaction>> AdminFilterTransactionsAsync(
             DateTime? transactionStartDate = null, 
             DateTime? transactionEndDate = null,
             int transactionTypeId = 0,
-            int pageSize = 0,
-            int pageNumber = 0)
+            int pageSize = 5,
+            int pageNumber = 1)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
@@ -406,23 +455,29 @@ namespace Services.DataManagement
                     .IncludeTransactionType()
                     .OrderByDateAndTimeDescending();
 
+                //  Apply the filters as needed.
                 if (transactionStartDate is DateTime startDate)
                     queryBuilder.HasStartDate(startDate);
                 if (transactionEndDate is DateTime endDate)
                     queryBuilder.HasEndDate(endDate);
                 if (transactionTypeId > 0)
                     queryBuilder.HasTransactionTypeId(transactionTypeId);
-                
-                if (pageSize > 0 && pageNumber > 0)
-                {
-                    int skipCount = (pageNumber - 1) * pageSize;
-                    int takeCount = pageSize;
-                    queryBuilder
-                        .SkipBy(skipCount)
-                        .TakeWithCount(takeCount);
-                }
 
-                List<Transaction> transactions = await queryBuilder.GetQuery().ToListAsync();
+
+                //  Count the number of transactions until the previous page.
+                int skipCount = (pageNumber - 1) * pageSize;
+                //  Specify the number of transactions in a page.
+                int takeCount = pageSize;
+                queryBuilder
+                    .SkipBy(skipCount)
+                    .TakeWithCount(takeCount);
+
+                //  Get the transaction list.
+                List<Transaction> transactions = await queryBuilder
+                    .GetQuery()
+                    .ToListAsync();
+
+                //  Mask the account numbers.
                 foreach (var transaction in transactions)
                 {
                     string accountNumber = transaction.MainAccount.AccountNumber;
@@ -430,6 +485,45 @@ namespace Services.DataManagement
                 }
 
                 return transactions;
+            }
+        }
+        public async Task<int> AdminCountRemainingTransactionsAsync(
+            DateTime? transactionStartDate = null,
+            DateTime? transactionEndDate = null,
+            int transactionTypeId = 0,
+            int pageSize = 5,
+            int pageNumber = 1)
+
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                //  Declare repository dependency.
+                var transactionRepo = new TransactionRepository(dbContext);
+
+                //  Compose Query
+                var queryBuilder = transactionRepo
+                    .Query
+                    .ExceptTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer)
+                    .IncludeMainAccount()
+                    .IncludeTransactionType()
+                    .OrderByDateAndTimeDescending();
+
+                //  Apply the filters as needed.
+                if (transactionStartDate is DateTime startDate)
+                    queryBuilder.HasStartDate(startDate);
+                if (transactionEndDate is DateTime endDate)
+                    queryBuilder.HasEndDate(endDate);
+                if (transactionTypeId > 0)
+                    queryBuilder.HasTransactionTypeId(transactionTypeId);
+
+
+                //  Count the number of transactions from the first page until the current page.
+                int skipCount = pageNumber * pageSize;
+                //  Return the count of the transactions from the current until the last page.
+                return await queryBuilder
+                    .GetQuery()
+                    .Skip(skipCount)
+                    .CountAsync();
             }
         }
         /// <summary>

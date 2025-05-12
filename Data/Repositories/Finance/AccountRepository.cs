@@ -49,6 +49,7 @@ namespace Data.Repositories.Finance
             public AccountQuery HasAccountTypeId(int? accountTypeId) => WhereCondition(a => a.AccountTypeId == accountTypeId);
             public AccountQuery HasAccountProductTypeId(int? accountProductTypeId) => WhereCondition(a => a.AccountProductTypeId == accountProductTypeId);
             public AccountQuery HasAccountNumber(string? accountNumber) => WhereCondition(a => a.AccountNumber == accountNumber);
+            public AccountQuery AccountNumberEndsWith(string accountNumber) => WhereCondition(a => a.AccountNumber.EndsWith(accountNumber));
             public AccountQuery HasAccountName(string? accountName) => WhereCondition(a => a.AccountName == accountName);
             public AccountQuery ContainsAccountName(string? accountName) => WhereCondition(a => a.AccountName.ToUpper().Contains(accountName!.ToUpper()));
             public AccountQuery HasAccountStatusTypeId(int? accountStatusTypeId) => WhereCondition(a => a.AccountStatusTypeId == accountStatusTypeId);

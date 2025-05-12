@@ -258,6 +258,13 @@
 
     private async Task HandleContinue()
     {
+        await ValidateInput();
+
+        await InitiateTransferProcess();
+    }
+
+    private async Task ValidateInput()
+    {
         error = "";
 
         if (string.IsNullOrWhiteSpace(transferType))
@@ -279,14 +286,12 @@
         else if (transferAmount > currentBalance)
             error = "Insufficient balance.";
 
-        if (error.Length>0)
+        if (error.Length > 0)
         {
             StateHasChanged();
             await RefreshError();
             return;
         }
-
-        await InitiateTransferProcess();
     }
 
     private async Task RefreshError()

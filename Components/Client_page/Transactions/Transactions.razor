@@ -39,7 +39,7 @@
 
         <div class="d-flex align-items-center gap-3">
             <label class="text-light mb-0" style="white-space: nowrap;">Transaction Type</label>
-            <select class="form-select" @bind="selectedTransactionType">
+            <select class="form-select" @bind="selectedTransactionTypeId">
                 <option value="0" disabled hidden>All</option>
                 <option value="0">All</option>
                 @foreach (var typeName in transactionTypes)
@@ -73,9 +73,9 @@
                 </tr>
             </thead>
             <tbody>
-                @if (transactionListPage.Any())
+                @if (transactionList.Any())
                 {
-                    @foreach (var transaction in transactionListPage)
+                    @foreach (var transaction in transactionList)
                     {
                         <tr class="bg-light">
                             <td>@transaction.TransactionDate.ToString("MM/dd/yyyy")</td>
@@ -135,18 +135,18 @@
 
     <div class="scroll-container gap-3 mx-5" >
         <!-- Left Arrow -->
-        <button class="arrow-ud" @onclick="PreviousPage">
-            <i class="bi bi-chevron-left text-light" ></i>
+        <button class="arrow-ud" @onclick="PreviousPage" disabled="@isPreviousDisabled">
+            <i class="bi bi-chevron-left text-light"></i>
         </button>
 
         <!-- Right Arrow -->
-        <button class="arrow-ud" @onclick="NextPage">
+        <button class="arrow-ud" @onclick="NextPage" disabled="@isNextDisabled">
             <i class="bi bi-chevron-right text-light" ></i>
         </button>
     </div>
 
     <div class="page-container text-center text-light mt-2 mb-3 mx-5">
-        Page @pageNumber of @masterListAvailablePages
+        Page @pageNumber of @availablePages
     </div>
 
 </div>
@@ -154,22 +154,28 @@
 @code {
     private UserSession userSession { get; set; } = default!;
     private LinkedAccount activeAccountSession { get; set; } = default!;
+    private List<string> transactionTypes { get; set; } = new();
+
     private string message = "";
 
+    //  Filters.
     private DateTime? startDate = DateTime.Now.Date.AddDays(-DateTime.Now.Date.Day + 1);
     private DateTime? endDate = DateTime.Now.Date;
 
-    private List<string> transactionTypes { get; set; } = new();
-    private string selectedTransactionType = "0";
+    private int selectedTransactionTypeId;
 
-    private List<Transaction> transactionMasterList = new();
-    private int masterListPageSize = 36;
-    private int masterListAvailablePages = 0;
-    private int masterListPageNumber = 1;
+    //  Transaction List.
+    private List<Transaction> transactionList = new();
 
-    private List<Transaction> transactionListPage = new();
-    private int pageSize = 6;
-    private int pageNumber = 0;
+    private int remainingTransactionsCount;
+
+    //  Pagination.
+    private int pageSize = 5;
+    private int pageNumber = 1;
+    private int availablePages;
+
+    private bool isNextDisabled = false;
+    private bool isPreviousDisabled = false;
 
     private int accountId { get; set; }
 
@@ -195,10 +201,6 @@
 
                 //  Get transaction list from database.
                 await FilterTransactionsAsync();
-
-                if (transactionListPage.Any())
-                    pageNumber = 1;
-
                 StateHasChanged();
             }
             catch (SessionNotFoundException)
@@ -211,58 +213,22 @@
 
     private async Task NextPage()
     {
-        if (pageNumber < masterListAvailablePages)
-        {
-            pageNumber++;
-            await LoadTransactionListPage(pageNumber);
-        }
-        else if (masterListPageNumber < masterListAvailablePages)
-        {
-            masterListPageNumber++;
-            await TemporaryListAsync();
-            if (tempTransactions.Any())
-            {
-                transactionMasterList = tempTransactions;
-                masterListAvailablePages = tempTransactionsAvailablePages;
-                transactionListPage = tempTransactionsPage;
-                pageNumber = 1;
-                return;
-            }
-            else
-            {
-                await InvokeMessage("You are at the last page.");
-                masterListPageNumber--;
-                return;
-            }
-        }
-        else if (masterListAvailablePages == 1)
-        {
-            await InvokeMessage("There are no other pages.");
-        }
-        else
-        {
-            await InvokeMessage("You are at the last page.");
-        }
-
-        //await FilterTransactionsAsync();
+        isPreviousDisabled = false;
+        pageNumber++;
+        await FilterTransactionsAsync();
+        StateHasChanged();
     }
 
     private async Task PreviousPage()
     {
         if (pageNumber > 1)
         {
+            isNextDisabled = false;
             pageNumber--;
-            await LoadTransactionListPage(pageNumber);
-        }
-        else if (masterListPageNumber > 1)
-        {
-            masterListPageNumber--;
-            pageNumber = masterListAvailablePages;
+            if (pageNumber == 1)
+                isPreviousDisabled = true;
             await FilterTransactionsAsync();
-        }
-        else
-        {
-            await InvokeMessage("You are at the first page.");
+            StateHasChanged();
         }
     }
 
@@ -270,9 +236,8 @@
     {
         startDate = null;
         endDate = null;
-        selectedTransactionType = "";
+        selectedTransactionTypeId = 0;
         pageNumber = 1;
-        masterListPageNumber = 1;
         await FilterTransactionsAsync();
     }
 
@@ -280,80 +245,49 @@
     {
         if (startDate > endDate)
         {
-            await InvokeMessage("Start date cannot be later than end date.");
+            await DisplayMessage("Start date cannot be later than end date.");
             return;
         }
         //  Load the filtered transaction list from the database.
-        int transactionType = !string.IsNullOrWhiteSpace(selectedTransactionType) 
-            ? Convert.ToInt32(selectedTransactionType)
-            : 0;
-        transactionMasterList = await userDataService.GetRecentAccountTransactionsAsync(
-            accountId,
-            transactionTypeId: transactionType,
-            pageSize: masterListPageSize,
-            pageNumber: masterListPageNumber,
-            transactionStartDate: startDate,
-            transactionEndDate: endDate
-        );
-        masterListAvailablePages = (int)Math.Ceiling((double)transactionMasterList.Count / pageSize);
-        await LoadTransactionListPage(pageNumber);
-    }
-    private async Task LoadTransactionListPage(int page = 1)
-    {
-        if (transactionMasterList.Any())
-        {
-            transactionListPage = userDataService
-                .GetTransactionListPage(
-                    transactionMasterList,
-                    pageNumber: page,
-                    pageSize: pageSize
-                );
-        }
-        else 
-        {
-            await InvokeMessage("No transactions found.");
-        }
-    }
+        transactionList = await userDataService
+            .FilterAccountTransactionsAsync(
+                accountId,
+                transactionTypeId: selectedTransactionTypeId,
+                pageSize: pageSize,
+                pageNumber: pageNumber,
+                transactionStartDate: startDate,
+                transactionEndDate: endDate
+            );
 
-    private List<Transaction> tempTransactions { get; set; } = new();
-    private int tempTransactionsAvailablePages { get; set; } = 0;
-    private List<Transaction> tempTransactionsPage { get; set; } = new();
+        //  Get the remaining transactions count after the current page.
+        remainingTransactionsCount = await userDataService
+            .CountRemainingTransactionsAsync(
+                accountId,
+                transactionTypeId: selectedTransactionTypeId,
+                pageSize: pageSize,
+                pageNumber: pageNumber,
+                transactionStartDate: startDate,
+                transactionEndDate: endDate
+            );
 
-    private async Task TemporaryListAsync()
-    {
-        int transactionType = !string.IsNullOrWhiteSpace(selectedTransactionType)
-            ? Convert.ToInt32(selectedTransactionType)
-            : 0;
-        tempTransactions = await userDataService.GetRecentAccountTransactionsAsync(
-            accountId,
-            transactionTypeId: transactionType,
-            pageSize: masterListPageSize,
-            pageNumber: masterListPageNumber,
-            transactionStartDate: startDate,
-            transactionEndDate: endDate
-        ); 
-        tempTransactionsAvailablePages = (int)Math.Ceiling((double)tempTransactions.Count / pageSize);
-        LoadTempTransactionsPage(1);
+        //  Calculate the number of remaining pages.
+        availablePages = remainingTransactionsCount == 0 && pageNumber == 1 ?
+            1 :
+            pageNumber + ((int)Math.Ceiling((double)remainingTransactionsCount / pageSize));
+
+        if (!transactionList.Any() || remainingTransactionsCount == 0)
+            //  Disable the next button if the list is empty or if there are no 
+            //  more transactions after the current page.
+            isNextDisabled = true;
+        else
+            isNextDisabled = false;
     }
 
-    private void LoadTempTransactionsPage(int page=1)
+    private async Task DisplayMessage(string msg)
     {
-        if (tempTransactions.Any())
-        {
-            tempTransactionsPage = userDataService
-                .GetTransactionListPage(
-                    tempTransactions,
-                    pageNumber: page,
-                    pageSize: pageSize
-                );
-        }
-    }
-
-    private async Task InvokeMessage(string errorMessage)
-    {
-        message = errorMessage;
+        message = msg;
         StateHasChanged();
-        await Task.Delay(5000);
+        await Task.Delay(3000);
         message = "";
         StateHasChanged();
     }

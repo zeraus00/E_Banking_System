@@ -236,7 +236,7 @@ namespace Services.DataManagement
         /// <returns>
         /// A list of <see cref="Transaction"/> objects associated with the given account.
         /// </returns>
-        public async Task<List<Transaction>> GetRecentAccountTransactionsAsync(
+        public async Task<List<Transaction>> FilterAccountTransactionsAsync(
             int accountId,
             int transactionTypeId = 0,
             int pageSize = 50,
@@ -250,10 +250,6 @@ namespace Services.DataManagement
                 //  Define repository requirements
                 var transactionRepository = new TransactionRepository(dbContext);
 
-                //  Return the list of transactions.
-                int skipCount = (pageNumber - 1) * pageSize;
-                int takeCount = pageSize;
-
                 var queryBuilder = transactionRepository
                     .Query
                     .IncludeMainAccount()
@@ -261,9 +257,7 @@ namespace Services.DataManagement
                     .IncludeTransactionType()
                     .IncludeExternalVendor()
                     .HasMainAccountId(accountId)
-                    .OrderByDateAndTimeDescending()
-                    .SkipBy(skipCount)
-                    .TakeWithCount(takeCount);
+                    .OrderByDateAndTimeDescending();
 
                 if (transactionTypeId > 0)
                     queryBuilder.HasTransactionTypeId(transactionTypeId);
@@ -272,9 +266,19 @@ namespace Services.DataManagement
                 if (transactionEndDate is DateTime endDate)
                     queryBuilder.HasEndDate(endDate);
 
+                //  Count the number of transactions until the previous page.
+                int skipCount = (pageNumber - 1) * pageSize;
+                //  Specify the number of transactions to display in a page.
+                int takeCount = pageSize;
 
-                var transactionList = await queryBuilder.GetQuery().ToListAsync();
+                //  Return the list of transactions.
+                var transactionList = await queryBuilder
+                    .SkipBy(skipCount)
+                    .TakeWithCount(takeCount)
+                    .GetQuery()
+                    .ToListAsync();
 
+                //  Mask the account numbers
                 if (transactionList.Any())
                 {
                     foreach (var transaction in transactionList)
@@ -287,26 +291,45 @@ namespace Services.DataManagement
                 return transactionList;
             }
         }
-
-        /// <summary>
-        /// Used in conjunction with <see cref="GetRecentAccountTransactionsAsync(int, int, int, int, DateTime?, DateTime?)"/>
-        /// Further divides the bulk list into pages to be shown in Transactions Page.
-        /// Retrieves a page (or sublist) of transactions from the main bulk list to be displayed in
-        /// smaller pages.
-        /// </summary>
-        /// <param name="transactionList">The full list of transactions retrieved from the database.</param>
-        /// <param name="pageNumber">The page number to retrieve from the full list. Starts at 1.</param>
-        /// <param name="pageSize">The number of transactions per page. Defaults to 10.</param>
-        /// <returns>
-        /// A sublist of <see cref="Transaction"/> objects representing a single page of transactions from the bulk list.
-        /// </returns>
-        public List<Transaction> GetTransactionListPage(List<Transaction> transactionList, int pageNumber, int pageSize = 10)
+        public async Task<int> CountRemainingTransactionsAsync(
+            int accountId,
+            int transactionTypeId = 0,
+            int pageSize = 50,
+            int pageNumber = 1,
+            DateTime? transactionStartDate = null,
+            DateTime? transactionEndDate = null)
         {
-            int skipCount = (pageNumber - 1) * pageSize;
-            int takeCount = pageSize;
-            return transactionList.Skip(skipCount).Take(takeCount).ToList();
-        }
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                //  Define repository requirements
+                var transactionRepository = new TransactionRepository(dbContext);
 
+                var queryBuilder = transactionRepository
+                    .Query
+                    .IncludeMainAccount()
+                    .IncludeCounterAccount()
+                    .IncludeTransactionType()
+                    .IncludeExternalVendor()
+                    .HasMainAccountId(accountId)
+                    .OrderByDateAndTimeDescending();
+
+                //  Apply the filters.
+                if (transactionTypeId > 0)
+                    queryBuilder.HasTransactionTypeId(transactionTypeId);
+                if (transactionStartDate is DateTime startDate)
+                    queryBuilder.HasStartDate(startDate);
+                if (transactionEndDate is DateTime endDate)
+                    queryBuilder.HasEndDate(endDate);
+
+                //  Count the number of transactions from the first page until the current page.
+                int skipCount = pageNumber * pageSize;
+                //  Return the count of the transactions from the current until the last page.
+                return await queryBuilder
+                    .SkipBy(skipCount)
+                    .GetQuery()
+                    .CountAsync();
+            }
+        }
         #endregion
 
         #region UserInfoAccount Helper Methods
