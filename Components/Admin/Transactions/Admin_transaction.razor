@@ -172,7 +172,8 @@
             try
             {
                 adminSession = await userSessionService.GetAdminSession();
-
+                //  Clear all admin controlled sessions.
+                await adminControlledSessionService.ClearAdminControlledSessions(adminSession);
                 //  Get transaction list from database.
                 await LoadTransactionsAsync();
                 StateHasChanged();

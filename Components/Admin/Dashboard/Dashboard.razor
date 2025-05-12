@@ -7,6 +7,7 @@
 @rendermode InteractiveServer
 @attribute [Authorize(Roles="Administrator")]
 
+@inject AdminControlledSessionService adminControlledSessionService
 @inject AdminDataService adminDataService
 @inject PageRedirectService redirectService
 @inject UserSessionService userSessionService
@@ -353,6 +354,15 @@
         //  Load data for dashboard view.
         await this.LoadDisplayData();
         await this.LoadChartData(selectedFilter);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            //  Clear all admin controlled sessions.
+            await adminControlledSessionService.ClearAdminControlledSessions();
+        }
     }
 
     private async Task FilterAsync()

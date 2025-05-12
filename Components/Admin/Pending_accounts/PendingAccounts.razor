@@ -147,6 +147,14 @@
         await LoadAccountsAsync();
         StateHasChanged();
     }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            //  Clear all admin controlled sessions.
+            await adminControlledSessionService.ClearAdminControlledSessions();
+        }
+    }
     private async Task OnFilterAsync()
     {
         if (startDate > endDate)
