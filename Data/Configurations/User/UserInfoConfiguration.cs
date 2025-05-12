@@ -63,6 +63,13 @@ namespace Data.Configurations.User
                 .IsRequired()
                 .HasMaxLength(50);
 
+            //  Gross Annual Income
+            UsersInfo
+                .Property(ui => ui.GrossAnnualIncome)
+                .IsRequired()
+                .HasColumnType("DECIMAL(18,2)")
+                .HasDefaultValue(0.0m);
+
             //  GovernmentId (Required but nullable for now;
             //  MaxSize:10MB but set to MAX due to SQL syntax limitations.)
             UsersInfo

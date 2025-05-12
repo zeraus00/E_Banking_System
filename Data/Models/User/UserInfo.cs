@@ -15,6 +15,7 @@
         public int MotherNameId { get; set; }                               // Foreign Key to Names
         public string ContactNumber { get; set; } = string.Empty;           // Required; Field Length : 11
         public string Occupation { get; set; } = string.Empty;              // Required; Field Length: 50
+        public decimal GrossAnnualIncome { get; set; } = 0.0m;              // To be set on loan application.
         public byte[]? GovernmentId { get; set; }                           // GovermentId Image; SizeLimit: 10mb
         public byte[]? PayslipPicture { get; set; }                         // Payslip Picture. To be uploaded on loan application; SizeLimit: 10 mb
         public string TaxIdentificationNumber { get; set; } = string.Empty; // Required; Max Length : 12

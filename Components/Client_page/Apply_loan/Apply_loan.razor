@@ -139,7 +139,7 @@
 					</div>
 					<div class="col-12 col-md-3">
 						<label class="text-light">Gross Annual Income (>= 250 000.00)</label>
-						<input class="form-control form-control-sm" @bind="minAnnualGross" placeholder="Minimum 250,000" required>
+						<input class="form-control form-control-sm" @bind="annualGrossIncome" placeholder="Minimum 250,000" required>
 					</div>
 					<div class="col-12 col-md-3">
 						<label class="text-light">Type of Loan</label>
@@ -241,7 +241,7 @@
 	private string contactNo = "";
 	private string civilStatus = "";
 	private string occupation = "";
-	private decimal minAnnualGross = 0.00m;
+	private decimal annualGrossIncome = 0.00m;
 
 	/*		Address		*/
 	private string province = "";
@@ -381,7 +381,7 @@
 			isSubmitting = true;
 
 			string gmailDomain = "@gmail.com";
-			bool isAnnualGrossInvalid = minAnnualGross < 250000.0m;
+			bool isAnnualGrossInvalid = annualGrossIncome < 250000.0m;
 			bool isEmailInvalid = string.IsNullOrWhiteSpace(email)
 				|| email.Length < 6
 				|| !email.EndsWith(gmailDomain, StringComparison.OrdinalIgnoreCase);
@@ -432,6 +432,7 @@
 					newLoan, 
 					activeAccountSession.AccountNumber, 
 					userSession.UserInfoId, 
+					annualGrossIncome,
 					govId, 
 					payslipPic
 				);
