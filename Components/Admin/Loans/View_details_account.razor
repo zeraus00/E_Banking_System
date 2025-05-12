@@ -306,7 +306,7 @@
 	{
 		try
 		{
-			await adminDataService.UpdateAccountStatus(accountId, (int)AccountStatusTypeIDs.Denied);
+			await adminDataService.UpdateLoanStatus(loanId, LoanStatusTypes.REJECTED);
 			await adminControlledSessionService.ClearLoanViewSession();
 			redirectService.redirectWithNavigationManager(PageRoutes.APPLLYING_LOAN);
 		}
@@ -324,7 +324,7 @@
 	{
 		try
 		{
-			await adminDataService.UpdateAccountStatus(accountId, (int)AccountStatusTypeIDs.Active);
+			await adminDataService.UpdateLoanStatus(loanId, LoanStatusTypes.APPROVED);
 			await adminControlledSessionService.ClearLoanViewSession();
 			redirectService.redirectWithNavigationManager(PageRoutes.APPLLYING_LOAN);
 		}
