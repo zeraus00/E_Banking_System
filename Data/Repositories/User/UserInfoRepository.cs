@@ -67,6 +67,7 @@ namespace Data.Repositories.User
         private int? _motherNameId;
         private string _contactNumber = string.Empty;
         private string _occupation = string.Empty;
+        private decimal _grossAnnualIncome = 0.0m;
         private byte[]? _governmentId; //nullable for now
         private byte[]? _payslipPicture;
         private string _taxIdentificationNumber = string.Empty;
@@ -138,6 +139,11 @@ namespace Data.Repositories.User
         public UserInfoBuilder WithOccupation(string occupation)
         {
             _occupation = occupation.Trim();
+            return this;
+        }
+        public UserInfoBuilder WithGrossAnnualIncome(decimal grossAnnualIncome)
+        {
+            _grossAnnualIncome = grossAnnualIncome;
             return this;
         }
         public UserInfoBuilder WithGovernmentId(byte[] governmentid)
@@ -218,6 +224,7 @@ namespace Data.Repositories.User
                 Sex = _sex,
                 ContactNumber = _contactNumber,
                 Occupation = _occupation,
+                GrossAnnualIncome = _grossAnnualIncome,
                 TaxIdentificationNumber = _taxIdentificationNumber,
                 GovernmentId = _governmentId,
                 PayslipPicture = _payslipPicture,
