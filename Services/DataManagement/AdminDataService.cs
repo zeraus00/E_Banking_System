@@ -3,6 +3,7 @@ using System.Linq;
 using Data;
 using Data.Constants;
 using Data.Enums;
+using Data.Models.Finance;
 using Data.Repositories.Auth;
 using Data.Repositories.Finance;
 using Data.Repositories.JointEntity;
@@ -80,9 +81,9 @@ namespace Services.DataManagement
                 //  Pagination
                 int pageSize = 5;
                 List<Account> accountList = await queryBuilder
+                    .SkipBy((pageNumber - 1) * pageSize)
+                    .TakeWithCount(pageSize)
                     .GetQuery()
-                    .Skip((pageNumber - 1) * pageSize)
-                    .Take(pageSize)
                     .ToListAsync();
 
                 //  Mask the user's account number.
@@ -132,8 +133,8 @@ namespace Services.DataManagement
                 //  Pagination
                 int pageSize = 5;
                 return await queryBuilder
+                    .SkipBy(pageNumber * pageSize)
                     .GetQuery()
-                    .Skip(pageNumber * pageSize)
                     .CountAsync();
             }
         }
@@ -218,7 +219,44 @@ namespace Services.DataManagement
             }
         }
         #endregion
-        #region Manage Accounts Helper Methods
+        #region Account Data Helper Methods
+        public async Task<int> GetAccountIdAsync(string accountNumber)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                var accountRepo = new AccountRepository(dbContext);
+
+                var queryBuilder = accountRepo.Query;
+
+                if (accountNumber.Length == 12)
+                    queryBuilder.HasAccountNumber(accountNumber);
+                else if (accountNumber.Length == 3)
+                    queryBuilder.AccountNumberEndsWith(accountNumber);
+                return await queryBuilder.SelectId();
+            }
+        }
+        public async Task<string> GetAccountNumberAsync(int accountId)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                string accountNumber = await new AccountRepository(dbContext)
+                    .Query
+                    .HasAccountId(accountId)
+                    .SelectAccountNumber();
+
+                return _dataMaskingService.MaskAccountNumber(accountNumber);
+            }
+        }
+        public async Task<string> GetAccountNameAsync(int accountId)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                return await new AccountRepository(dbContext)
+                    .Query
+                    .HasAccountId(accountId)
+                    .SelectAccountName();
+            }
+        }
         public async Task<decimal> GetAccountBalanceAsync(int accountId)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
@@ -227,6 +265,86 @@ namespace Services.DataManagement
                     .Query
                     .HasAccountId(accountId)
                     .SelectBalance();
+            }
+        }
+        #endregion
+        #region Loan Page Helper Methods
+        public async Task<List<Loan>> LoadLoansListAsync(
+            string accountNumber = "",
+            DateTime? startDate = null,
+            DateTime? endDate = null,
+            string loanStatus = "",
+            int pageSize = 5,
+            int pageNumber = 1)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                var loanRepo = new LoanRepository(dbContext);
+
+                var queryBuilder = loanRepo.Query;
+
+                //  Apply filters as needed.
+                if (!string.IsNullOrWhiteSpace(accountNumber))
+                {
+                    int accountId = await GetAccountIdAsync(accountNumber);
+                    queryBuilder.HasAccountId(accountId);
+                }
+                if (startDate is DateTime sDate)
+                    queryBuilder.LoanApplicationOrOrAfter(sDate);
+                if (endDate is DateTime eDate)
+                    queryBuilder.LoanApplicationOnOrBefore(eDate);
+                if (!string.IsNullOrWhiteSpace(loanStatus))
+                    queryBuilder.HasStatus(loanStatus);
+
+                //  Count the number of loans from the first page until the previous page.
+                int skipCount = (pageNumber - 1) * pageSize;
+                //  Specify the number of loans to be displayed in a page.
+                int takeCount = pageSize;
+
+                //  Get the list of loans.
+                List<Loan> loanList = await queryBuilder
+                    .SkipBy(skipCount)
+                    .TakeWithCount(takeCount)
+                    .GetQuery()
+                    .ToListAsync();
+
+                return loanList;
+            }
+        }
+        public async Task<int> CountRemainingLoansAsync(
+            string accountNumber = "",
+            DateTime? startDate = null,
+            DateTime? endDate = null,
+            string loanStatus = "",
+            int pageSize = 5,
+            int pageNumber = 1)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                var loanRepo = new LoanRepository(dbContext);
+
+                var queryBuilder = loanRepo.Query;
+
+                //  Apply filters as needed.
+                if (!string.IsNullOrWhiteSpace(accountNumber))
+                {
+                    int accountId = await GetAccountIdAsync(accountNumber);
+                    queryBuilder.HasAccountId(accountId);
+                }
+                if (startDate is DateTime sDate)
+                    queryBuilder.LoanApplicationOrOrAfter(sDate);
+                if (endDate is DateTime eDate)
+                    queryBuilder.LoanApplicationOnOrBefore(eDate);
+                if (!string.IsNullOrWhiteSpace(loanStatus))
+                    queryBuilder.HasStatus(loanStatus);
+
+                //  Count the number of loans from the first page until the current page.
+                int skipCount = pageNumber * pageSize;
+                //  Get count of the remaining loans in the list.
+                return await queryBuilder
+                    .SkipBy(skipCount)
+                    .GetQuery()
+                    .CountAsync();
             }
         }
         #endregion

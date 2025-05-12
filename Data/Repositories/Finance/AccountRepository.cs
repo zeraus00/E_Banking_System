@@ -75,7 +75,9 @@ namespace Data.Repositories.Finance
             public AccountQuery OrderByDateOpenedDescending() => OrderByDescending(a => a.DateOpened);
             //  Returns 0 if no account is found with the query.
             public async Task<int> SelectId() => await Select<int>(a => a.AccountId);
-            
+            public async Task<string> SelectAccountNumber() => await Select<string>(a => a.AccountNumber) ?? string.Empty;
+            public async Task<string> SelectAtmNumber() => await Select<string>(a => a.ATMNumber) ?? string.Empty;
+            public async Task<string> SelectAccountName() => await Select<string>(a => a.AccountName) ?? string.Empty;
             public async Task<decimal> SelectBalance() => await Select<decimal>(a => a.Balance);
         }
 
