@@ -365,6 +365,19 @@ namespace Services.DataManagement
                     .CountAsync();
             }
         }
+        public async Task UpdateLoanStatus(int loanId, string newStatus)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                var loanRepo = new LoanRepository(dbContext);
+
+                Loan loan = await loanRepo.GetLoanById(loanId) ?? throw new NullReferenceException();
+
+                loan.LoanStatus = newStatus;
+
+                await loanRepo.SaveChangesAsync();
+            }
+        }
         #endregion
         #region Dashboard Helper Methods
         #region Account Filtering
