@@ -44,6 +44,7 @@ namespace Data.Repositories.User
             public UserInfoQuery IncludeReligion(bool include = true) => include ? Include(ui => ui.Religion) : this;
             public UserInfoQuery IncludeUserInfoAccounts(bool include = true) => include ? Include(ui => ui.UserInfoAccounts) : this;
             public async Task<Name?> SelectUserName() => await Select<Name>(ui => ui.UserName);
+            public async Task<UserAuth?> SelectUserAuth() => await Select<UserAuth>(ui => ui.UserAuth);
         }
 
         #endregion Read Methods
@@ -67,6 +68,7 @@ namespace Data.Repositories.User
         private int? _motherNameId;
         private string _contactNumber = string.Empty;
         private string _occupation = string.Empty;
+        private decimal _grossAnnualIncome = 0.0m;
         private byte[]? _governmentId; //nullable for now
         private byte[]? _payslipPicture;
         private string _taxIdentificationNumber = string.Empty;
@@ -138,6 +140,11 @@ namespace Data.Repositories.User
         public UserInfoBuilder WithOccupation(string occupation)
         {
             _occupation = occupation.Trim();
+            return this;
+        }
+        public UserInfoBuilder WithGrossAnnualIncome(decimal grossAnnualIncome)
+        {
+            _grossAnnualIncome = grossAnnualIncome;
             return this;
         }
         public UserInfoBuilder WithGovernmentId(byte[] governmentid)
@@ -218,6 +225,7 @@ namespace Data.Repositories.User
                 Sex = _sex,
                 ContactNumber = _contactNumber,
                 Occupation = _occupation,
+                GrossAnnualIncome = _grossAnnualIncome,
                 TaxIdentificationNumber = _taxIdentificationNumber,
                 GovernmentId = _governmentId,
                 PayslipPicture = _payslipPicture,

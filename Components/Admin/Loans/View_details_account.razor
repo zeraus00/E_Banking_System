@@ -38,22 +38,22 @@
 				<div class="col-3">
 					<label class="text-light">First Name</label>
 					@* <input class="form-control" @bind="firstName" placeholder="First Name" required> *@
-					<div class="form-control form-control-sm">@firstName</div>
+					<div class="form-control form-control-sm">@(userInfo?.UserName?.FirstName ?? string.Empty)</div>
 				</div>
 				<div class="col-3">
 					<label class="text-light">Middle Name</label>@* 
 					<input class="form-control" @bind="middleName" placeholder="Middle Name"> *@
-					<div class="form-control form-control-sm">@middleName</div>
+					<div class="form-control form-control-sm">@(userInfo?.UserName?.MiddleName ?? string.Empty)</div>
 				</div>
 				<div class="col-3">
 					<label class="text-light">Last Name</label>@* 
 					<input class="form-control" @bind="lastName" placeholder="Last Name" required> *@
-					<div class="form-control form-control-sm">@lastName</div>
+					<div class="form-control form-control-sm">@(userInfo?.UserName?.LastName ?? string.Empty)</div>
 				</div>
 				<div class="col-3">
 					<label class="text-light">Suffix</label>@* 
 					<input class="form-control" @bind="suffix" placeholder="Suffix"> *@
-					<div class="form-control form-control-sm">@suffix</div>
+					<div class="form-control form-control-sm">@(userInfo?.UserName?.Suffix ?? string.Empty)</div>
 				</div>
 			</div>
 
@@ -62,17 +62,17 @@
 				<div class="col-4">
 					<label class="text-light">Province</label>@* 
 					<input class="form-control" @bind="province" placeholder="Province" required> *@
-					<div class="form-control form-control-sm">@province</div>
+					<div class="form-control form-control-sm">@(address?.Province?.ProvinceName ?? string.Empty)</div>
 				</div>
 				<div class="col-4">
 					<label class="text-light">Municipality</label>@* 
 					<input class="form-control" @bind="municipality" placeholder="Municipality" required> *@
-					<div class="form-control form-control-sm">@municipality</div>
+					<div class="form-control form-control-sm">@(address?.City?.CityName ?? string.Empty)</div>
 				</div>
 				<div class="col-4">
 					<label class="text-light">Barangay</label>@* 
 					<input class="form-control" @bind="barangay" placeholder="Barangay" required> *@
-					<div class="form-control form-control-sm">@barangay</div>
+					<div class="form-control form-control-sm">@(address?.Barangay?.BarangayName ?? string.Empty)</div>
 				</div>
 			</div>
 
@@ -81,12 +81,12 @@
 				<div class="col-6">
 					<label class="text-light">Street No.</label>@* 
 					<input class="form-control" @bind="street" placeholder="Street No." required> *@
-					<div class="form-control form-control-sm">@street</div>
+					<div class="form-control form-control-sm">@(address?.Street ?? string.Empty)</div>
 				</div>
 				<div class="col-6">
 					<label class="text-light">House No.</label>@* 
 					<input class="form-control" @bind="houseNumber" placeholder="House No." required> *@
-					<div class="form-control form-control-sm">@houseNumber</div>
+					<div class="form-control form-control-sm">@(address?.House ?? string.Empty)</div>
 				</div>
 			</div>
 
@@ -95,12 +95,12 @@
 				<div class="col-2">
 					<label class="text-light">Age</label>
 					@* <input class="form-control" type="number" @bind="age" placeholder="Age" required>> *@
-					<div class="form-control form-control-sm">@age</div>
+					<div class="form-control form-control-sm">@(userInfo?.Age ?? 0)</div>
 				</div>
 				<div class="col-2">
 					<label class="text-light">Birth Date</label>
 					@* <input class="form-control" type="date" @bind="birthDate" placeholder="mm/dd/yyyy" required> *@
-					<div class="form-control form-control-sm">@birthDate.ToShortDateString()</div>
+					<div class="form-control form-control-sm">@((birthInfo?.BirthDate ?? DateTime.UtcNow.Date).ToString("yyyy/MM/dd"))</div>
 				</div>
 				<div class="col-2">
 					<label class="text-light">Sex</label>
@@ -109,74 +109,56 @@
 						<option>Male</option>
 						<option>Female</option>
 					</select> *@
-					<div class="form-control form-control-sm">@sex</div>
+					<div class="form-control form-control-sm">@(userInfo?.Sex ?? string.Empty)</div>
 				</div>
 				<div class="col-3">
 					<label class="text-light">Contact No.</label>
-					<input class="form-control form-control-sm" @bind="contactNo" placeholder="Contact No." required>
+					<div class="form-control form-control-sm">@(userInfo?.ContactNumber ?? string.Empty)</div>
 				</div>
 				<div class="col-3">
 					<label class="text-light">Email</label>
-					<input class="form-control form-control-sm" @bind="email" placeholder="Sample@gmail.com" required>
+					<div class="form-control form-control-sm">@(userInfo?.UserAuth?.Email ?? string.Empty)</div>
 				</div>
 
 				<!-- Row 5 -->
 				<div class="col-3">
-					<label class="text-light">Civil Status</label>@* 
-					<select class="form-select" @bind="civilStatus" required>
-						<option value="" disabled hidden>--Select Civil Status--</option>
-						<option>Single</option>
-						<option>Married</option>
-						<option>Separated</option>
-						<option>Widowed</option>
-					</select> *@
-					<div class="form-control form-control-sm">@civilStatus</div>
+					<label class="text-light">Civil Status</label>
+					<div class="form-control form-control-sm">@(userInfo?.CivilStatus ?? string.Empty)</div>
 				</div>
 				<div class="col-3">
 					<label class="text-light">Occupation</label>@* 
 					<input class="form-control" @bind="occupation" placeholder="Occupation" required> *@
-					<div class="form-control form-control-sm">@occupation</div>
+					<div class="form-control form-control-sm">@(userInfo?.Occupation ?? string.Empty)</div>
 				</div>
 
 				<div class="col-3">
 					<label class="text-light">Gross Annual Income (>= 250 000.00)</label>
-					<input class="form-control form-control-sm" @bind="minAnnualGross" placeholder="Minimum 250,000" required>
+					<div class="form-control form-control-sm"></div>
 				</div>
 
 				<div class="col-3">
 					<label class="text-light">Type of Loan</label>
-					@* <select class="form-select form-select-sm" @bind="loanTypeId" @bind:after="OnLoanTypeChange" required>
-						<option value="-1" disabled hidden>--Select Loan Type--</option>
-						@foreach (var loanType in LoanTypes.AS_STRING_LIST)
-						{
-							<option value="@LoanTypes.AS_STRING_LIST.IndexOf(loanType)">@loanType</option>
-						}
-					</select> *@
+					<div class="form-control form-control-sm">@(accountLoan?.LoanType)</div>
 				</div>
 			</div>
 
 			<div class="row g-3 mt-2">
 				<!-- Row 6 -->
 				<div class="col-3">
-					<label class="text-light">@loanAmountLabel</label>
-					<input type="number" step="1" class="form-control form-control-sm" @bind="loanAmount" placeholder="Loan Amount" min="@minimumLoanAmount" required>
+					<label class="text-light">Loan Amount</label>
+					<div class="form-control form-control-sm">@(accountLoan?.LoanAmount)</div>
 				</div>
 				<div class="col-3">
 					<label class="text-light">Loan Purpose</label>
-					<input class="form-control form-control-sm" @bind="loanPurpose" placeholder="Home Purchase, Education, Debt Consolidation, etc" required>
+					<div class="form-control form-control-sm">@(accountLoan?.LoanPurpose ?? string.Empty)</div>
 				</div>
 				<div class="col-3">
-					<label class="text-light">@loanTermInMonthsLabel</label>
-					<input type="number" class="form-control form-control-sm" @bind="loanTermInMonths" placeholder="Months to Pay" min="@minimumLoanTerm" required>
+					<label class="text-light">Loan term in months</label>
+					<div class="form-control form-control-sm">@(accountLoan?.LoanTermMonths)</div>
 				</div>
 				<div class="col-3">
 					<label class="text-light">Preferred Payment Frequency</label>
-					<select class="form-select form-select-sm" @bind="paymentFrequency" required>
-						<option value="-1" disabled hidden>--Select Payment Frequency--</option>
-						<option value="12">Monthly</option>
-						<option value="6">Bi-Monthly</option>
-						<option value="4">Quarterly</option>
-					</select>
+					<div class="form-control form-control-sm">@(accountLoan?.PaymentFrequency)</div>
 				</div>
 			</div>
 
@@ -250,9 +232,9 @@
 
 			<!-- Register Button -->
 			<div class="d-flex justify-content-end gap-2 mt-3">
-				<button class="btn btn-danger btn-secondary fs-5 mx-2">Reject</button>
+				<button class="btn btn-danger btn-secondary fs-5 mx-2" @onclick="RejectAsync">Reject</button>
 				<button class="btn btn-warning btn-secondary fs-6 mx-2">Resubmission<br />Request</button>
-				<button class="btn btn-primary btn-secondary fs-5 mx-2">Approve</button>
+				<button class="btn btn-primary btn-secondary fs-5 mx-2" @onclick="ApproveAsync">Approve</button>
 			</div>
 		</div>
 	</main>
@@ -262,51 +244,13 @@
 @code {
 	private string error = "";
 
-	//display labels
-	private string loanAmountLabel = "Loan Amount";
-	private string loanTermInMonthsLabel = "Loan term in Months";
-	private decimal minimumLoanAmount = 0.00m;
-	private int minimumLoanTerm;
-
-	// personal information
-	private string firstName = "";
-	private string middleName = "";
-	private string lastName = "";
-	private string suffix = "";
-	private int age;
-	private DateTime birthDate;
-	private string sex = "";
-	private string contactNo = "";
-	private string civilStatus = "";
-	private string occupation = "";
-	private decimal minAnnualGross = 0.00m;
-
-	// address
-	private string province = "";
-	private string municipality = "";
-	private string barangay = "";
-	private string street = "";
-	private string houseNumber = "";
-
-	//authentication
-	private string email = "";
-
-	//loan details
-	private int loanTypeId = -1;
-	private decimal loanAmount;
-	private string loanPurpose = "";
-	private int loanTermInMonths;
-	private int paymentFrequency = -1;
-
-	//pictures
-	private byte[]? governmentId;
-	private byte[]? payslipPicture;
-
 	private int loanId { get; set; }
+	private Loan? accountLoan { get; set; }
 	private UserInfo? userInfo { get; set; }
 	private Address? address { get; set; }
 	private BirthInfo? birthInfo { get; set; }
 	private int accountId { get; set; }
+	private int userInfoId { get; set; }
 
 	private string? GovernmentId => userInfo?.GovernmentId != null
 	? $"data:image/jpeg;base64,{Convert.ToBase64String(userInfo.GovernmentId)}"
@@ -322,19 +266,75 @@
 		{
 			try
 			{
-				// var pendingLoanSession = await adminControlledSessionService.GetPendingLoanSession();
-				// accountId = pendingLoanSession.PendingAccountId;
-				// userInfo = await adminViewLoans;
+				var pendingLoanSession = await adminControlledSessionService.GetLoanViewSession();
+				userInfoId = pendingLoanSession.UserInfoId;
+				accountId = pendingLoanSession.LoanId;
 
+				userInfo = await userDataService.TryGetUserInfoAsync(
+				userInfoId,
+				includeUserAuth: true,
+				includeUserName: true,
+				includeBirthInfo: true,
+				includeAddress: true
+			);
+
+				if (userInfo.AddressId is int addressId)
+				{
+					address = await userDataService.TryGetAddressAsync(addressId);
+				}
+				if (userInfo.BirthInfoId is int birthInfoId)
+					birthInfo = await userDataService.TryGetBirthInfoAsync(birthInfoId);
+
+				StateHasChanged();
 			}
 			catch (SessionNotFoundException)
 			{
 				redirectService.redirectWithNavigationManager(PageRoutes.APPLLYING_LOAN);
 			}
+			catch (AccountNotFoundException ex)
+			{
+				error = ex.Message;
+			}
 			catch (ControlledSessionNotFound)
 			{
-				redirectService.redirectWithNavigationManager(PageRoutes.APPLLYING_LOAN);	
+				redirectService.redirectWithNavigationManager(PageRoutes.APPLLYING_LOAN);
 			}
+		}
+	}
+
+	private async Task RejectAsync()
+	{
+		try
+		{
+			await adminDataService.UpdateLoanStatus(loanId, LoanStatusTypes.REJECTED);
+			await adminControlledSessionService.ClearLoanViewSession();
+			redirectService.redirectWithNavigationManager(PageRoutes.APPLLYING_LOAN);
+		}
+		catch (AccountNotFoundException ex)
+		{
+			error = ex.Message;
+		}
+		catch (UserNotFoundException ex)
+		{
+			error = ex.Message;
+		}
+	}
+
+	private async Task ApproveAsync()
+	{
+		try
+		{
+			await adminDataService.UpdateLoanStatus(loanId, LoanStatusTypes.APPROVED);
+			await adminControlledSessionService.ClearLoanViewSession();
+			redirectService.redirectWithNavigationManager(PageRoutes.APPLLYING_LOAN);
+		}
+		catch (AccountNotFoundException ex)
+		{
+			error = ex.Message;
+		}
+		catch (UserNotFoundException ex)
+		{
+			error = ex.Message;	
 		}
 	}
 }

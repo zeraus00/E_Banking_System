@@ -39,6 +39,7 @@ namespace Services.ClientService
             Loan newLoan,
             string accountNumber,
             int userInfoId, 
+            decimal grossAnnualIncome,
             byte[] governmentIdPicture, 
             byte[] payslipPicture)
         {
@@ -68,6 +69,8 @@ namespace Services.ClientService
                             .GetUserInfoByIdAsync(userInfoId)
                             ?? throw new UserNotFoundException();
 
+                        //  Update Gross Annual Income
+                        userInfo.GrossAnnualIncome = grossAnnualIncome;
                         //  Update photos.
                         userInfo.GovernmentId = governmentIdPicture;
                         userInfo.PayslipPicture = payslipPicture;
