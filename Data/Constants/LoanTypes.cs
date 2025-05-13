@@ -23,7 +23,7 @@
         {
             LoanTypeName = PERSONAL_LOAN,
             MinimumLoanAmount = 30000.00m,
-            InterestRatePerAnnum = 0.10m,
+            InterestRate = 0.10m,
             LoanTermInMonths = 12
         };
 
@@ -31,7 +31,7 @@
         {
             LoanTypeName = HOME_LOAN,
             MinimumLoanAmount = 300000.00m,
-            InterestRatePerAnnum = 0.04m,
+            InterestRate = 0.04m,
             LoanTermInMonths = 120
         };
 
@@ -39,7 +39,7 @@
         {
             LoanTypeName = CAR_LOAN,
             MinimumLoanAmount = 150000.00m,
-            InterestRatePerAnnum = 0.06m,
+            InterestRate = 0.06m,
             LoanTermInMonths = 36
         };
 
@@ -47,21 +47,21 @@
         {
             LoanTypeName = SECURED_LOAN,
             MinimumLoanAmount = 150000.00m,
-            InterestRatePerAnnum = 0.05m,
+            InterestRate = 0.05m,
             LoanTermInMonths = 12
         };
         public static LoanType UNSECURED_LOAN_TYPE { get; } = new()
         {
             LoanTypeName = UNSECURED_LOAN,
             MinimumLoanAmount = 30000.00m,
-            InterestRatePerAnnum = 0.12m,
+            InterestRate = 0.12m,
             LoanTermInMonths = 12
         };
         public static LoanType MICROLOAN_TYPE { get; } = new()
         {
             LoanTypeName = MICROLOAN,
             MinimumLoanAmount = 2500.00m,
-            InterestRatePerAnnum = 0.15m,
+            InterestRate = 0.15m,
             LoanTermInMonths = 6
         };
 

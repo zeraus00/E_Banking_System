@@ -13,7 +13,12 @@
 
 <div class="main">
     <div class="dashboard-container">
-
+        @if (message.Length > 0)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>@message</strong>
+            </div>
+        }
         <div class="top-bar mx-3">
             <h2>Accounts Applying for Loan</h2>
         </div>
@@ -23,7 +28,7 @@
         <div class="d-flex align-items-center gap-3 m-3 flex-wrap">
 
             <div class="d-flex align-items-center gap-3">
-                <input class="form-control form-control-sm" @bind="searchAccount" placeholder="Search specific account">
+                <input class="form-control form-control-sm" @bind="accountNumber" placeholder="Search specific account">
             </div>
 
             <div class="d-flex align-items-center gap-3">
@@ -78,12 +83,12 @@
 
         <div class="scroll-container gap-3 mx-5">
             <!-- Up Arrow -->
-            <button class="arrow-ud">
+            <button class="arrow-ud" @onclick="NextPage">
                 <i class="bi bi-chevron-up text-light"></i>
             </button>
 
             <!-- Down Arrow -->
-            <button class="arrow-ud">
+            <button class="arrow-ud" @onclick="PreviousPage">
                 <i class="bi bi-chevron-down text-light"></i>
             </button>
         </div>
@@ -101,10 +106,8 @@
 
     private DateTime? startDate = DateTime.Now.AddDays(-DateTime.Now.Day + 1);
     private DateTime? endDate = DateTime.Now;
-    private int selectedLoanTypeId = 0;
     private string accountNumber = "";
     private string cleanedAccountNumber = "";
-    private string searchAccount = "";
     private string loanStatus = LoanStatusTypes.SUBMITTED;
     private List<Loan> loanAccountList = new();
 
@@ -152,6 +155,9 @@
             await displayMessage("Start date cannot be later than end date.");
             return;
         }
+        bool isAccountNumberValid = await ValidateAccountNumberInput();
+        if (!isAccountNumberValid)
+            return;
 
         pageNumber = 1;
         await LoadLoanAccountsAsync();
@@ -161,6 +167,8 @@
         startDate = DateTime.Now.AddDays(-DateTime.Now.Day + 1).Date;
         endDate = DateTime.Now.Date;
         pageNumber = 1;
+        cleanedAccountNumber = "";
+        accountNumber = "";
         await LoadLoanAccountsAsync();
     }
     private async Task OnViewLoan(Loan loan)
@@ -200,7 +208,7 @@
     {
 
         loanAccountList = await adminDataService.LoadLoansListAsync(
-        accountNumber: accountNumber,
+        cleanedAccountNumber,
         startDate: startDate,
         endDate: endDate,
         loanStatus: loanStatus,
@@ -217,7 +225,7 @@
         }
         remainingAccountsCount = await adminDataService
             .CountRemainingLoansAsync(
-                accountNumber: accountNumber,
+                cleanedAccountNumber,
                 startDate,
                 endDate,
                 loanStatus: loanStatus,
@@ -232,6 +240,25 @@
             isNextDisabled = true;
         else
             isNextDisabled = false;
+    }
+
+    private async Task<bool> ValidateAccountNumberInput()
+    {
+        cleanedAccountNumber = accountNumber.Length > 12 ? accountNumber.Replace("-", "").Trim() :
+        accountNumber.Trim();
+
+        bool isInputInvalid = !string.IsNullOrWhiteSpace(cleanedAccountNumber) &&
+            (
+                (cleanedAccountNumber.Length != 3 && cleanedAccountNumber.Length != 12) ||
+                !Regex.IsMatch(cleanedAccountNumber, @"^\d+$")
+            );
+
+        if (isInputInvalid)
+        {
+            await displayMessage("Please enter a valid account number.");
+            return false;
+        }
+        return true;
     }
 
     private async Task displayMessage(string msg)
