@@ -299,7 +299,9 @@ namespace Services.DataManagement
             {
                 var loanRepo = new LoanRepository(dbContext);
 
-                var queryBuilder = loanRepo.Query;
+                var queryBuilder = loanRepo
+                    .Query
+                    .OrderByDateDescending();
 
                 //  Apply filters as needed.
                 if (!string.IsNullOrWhiteSpace(accountNumber))
@@ -325,7 +327,6 @@ namespace Services.DataManagement
                     .TakeWithCount(takeCount)
                     .GetQuery()
                     .ToListAsync();
-
                 return loanList;
             }
         }
