@@ -15,6 +15,9 @@
 @inject UserSessionService userSessionService
 @inject HttpClient HttpClient
 
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <PageTitle>Open Another Account</PageTitle>
 
 <div class="page">
@@ -232,7 +235,7 @@
 						<!-- View Button -->
 						<div class="d-flex gap-2">
 							<InputFile OnChange="UploadGovernmentId" class="btn btn-light btn-sm w-75" required />
-							<button class="btn btn-outline-light">View</button>
+							<button class="btn btn-outline-light" @onclick="() => ShowImageModal(governmentIdPreview)">View</button>
 						</div>
 					</div>
 
@@ -243,9 +246,26 @@
 						<!-- View BUtton -->
 						<div class="d-flex gap-2">
 							<InputFile OnChange="UploadProfilePicture" class="btn btn-light btn-sm w-75" required />
-							<button class="btn btn-outline-light">View</button>
+							<button class="btn btn-outline-light" @onclick="() => ShowImageModal(profilePicturePreview)">View</button>
 						</div>
 					</div>
+
+					@if (isModalVisible && !string.IsNullOrEmpty(modalImage))
+					{
+						<div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+							<div class="modal-dialog modal-lg modal-dialog-centered">
+								<div class="modal-content bg-dark text-white">
+									<div class="modal-header">
+										<h5 class="modal-title">Preview</h5>
+										<button type="button" class="btn-close btn-close-white" @onclick="CloseModal"></button>
+									</div>
+									<div class="modal-body text-center">
+										<img src="@modalImage" class="img-fluid" />
+									</div>
+								</div>
+							</div>
+						</div>
+					}
 
 					<!-- TIN -->
 					<div class="col-md-3">
@@ -324,6 +344,10 @@
 	// user profile picture and government id
 	private byte[]? profilePicture;
 	private byte[]? governmentId;
+	private string? governmentIdPreview;
+	private string? profilePicturePreview;
+	private string? modalImage;
+	private bool isModalVisible = false;
 
 	// Account
 	private AccountTypes accountTypeNames = new();
@@ -421,6 +445,7 @@
 				using var ms = new MemoryStream();
 				await stream.CopyToAsync(ms);
 				governmentId = ms.ToArray();
+				governmentIdPreview = $"data:{file.ContentType};base64,{Convert.ToBase64String(governmentId)}";
 				error = "";
 			}
 		}
@@ -445,6 +470,7 @@
 				using var ms = new MemoryStream();
 				await stream.CopyToAsync(ms);
 				profilePicture = ms.ToArray();
+				profilePicturePreview = $"data:{file.ContentType};base64,{Convert.ToBase64String(profilePicture)}";
 				error = "";
 			}
 		}
@@ -452,6 +478,21 @@
 		{
 			error = "Error uploading profile Picture: " + ex.Message;
 		}
+	}
+
+	private void ShowImageModal(string? image)
+	{
+		if (!string.IsNullOrEmpty(image))
+		{
+			modalImage = image;
+			isModalVisible = true;
+		}
+	}
+
+	private void CloseModal()
+	{
+		modalImage = null;
+		isModalVisible = false;
 	}
 
 	private async Task CheckBeneficiaryAccount()
