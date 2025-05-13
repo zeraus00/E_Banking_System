@@ -21,7 +21,7 @@
 		<!-- Registration Box -->
 		<div class="card registration mt-3 p-4 shadow-lg">
 			<div class="d-flex justify-content-between align-items-center">
-				<h3 class="fw-bold text-light">Online Account Opening</h3>
+				<h3 class="fw-bold text-light">Update User Info</h3>
 
 				<!-- Close Button -->
 				<NavLink href="/">
@@ -45,63 +45,71 @@
 
 
 			<div class="information_box">
+
 				<!-- Row 2 -->
 				<div class="row g-2 mt-2">
 
 					<!-- Primary Accouunt Name -->
-					<label class="text-light">Primary Account Name</label>
+					<div class="d-flex align-items-center">
+						<label class="text-light mb-0">Primary Account Name</label>
+						<button class="@GetEditNameButtonClass()" @onclick="ToggleEditName">Edit</button>
+					</div>
+
 					<div class="row g-2">
 
 						<!-- First Name -->
 						<div class="col-3">
-							<input class="form-control form-control-sm" @bind="userFirstName" placeholder="First Name">
+							<input class="form-control form-control-sm" @bind="userFirstName" disabled="@(!isEditableName)" placeholder="First Name">
 						</div>
 
 						<!-- Middle Name -->
 						<div class="col-3">
-							<input class="form-control form-control-sm" @bind="userMiddleName" placeholder="Middle Name">
+							<input class="form-control form-control-sm" @bind="userMiddleName" disabled="@(!isEditableName)" placeholder="Middle Name">
 						</div>
 
 						<!-- Last Name -->
 						<div class="col-3">
-							<input class="form-control form-control-sm" @bind="userLastName" placeholder="Last Name">
+							<input class="form-control form-control-sm" @bind="userLastName" disabled="@(!isEditableName)" placeholder="Last Name">
 						</div>
 
 						<!-- Suffix Name -->
 						<div class="col-1">
-							<input class="form-control form-control-sm" @bind="userSuffix" placeholder="Suffix">
+							<input class="form-control form-control-sm" @bind="userSuffix" disabled="@(!isEditableName)" placeholder="Suffix">
 						</div>
 
 					</div>
 
 				</div>
 
-
-
-
 				<!-- Row 3 -->
-				<div class="row g-2 mt-2">
+				<div class="row g-2 mt-3">
+
+					<!-- Status -->
+					<div class="d-flex align-items-center">
+						<label class="text-light mb-0">Status</label>
+						<button class="@GetEditStatusButtonClass()" @onclick="ToggleEditStatus">Edit</button>
+					</div>
 
 					<!-- Age -->
 					<div class="col-1">
 						<label class="text-light">Age</label>
-						<input class="form-control form-control-sm" @bind="age" type="number" placeholder="Age" required>
+						<input class="form-control form-control-sm" @bind="age" type="number" disabled="@(!isEditableStatus)" placeholder="Age" required>
 					</div>
 
 					<!-- Sex -->
-					<div class="col-1">
+					<div class="col-2">
 						<label class="text-light">Sex</label>
-						<select class="form-select form-select-sm" @bind="selectedSex">
+						<select class="form-select form-select-sm" @bind="selectedSex" disabled="@(!isEditableStatus)">
 							<option value="" disabled hidden>@sexPlaceHolder</option>
 							<option>Male</option>
 							<option>Female</option>
 						</select>
 					</div>
 
-					<!-- Civil  Status -->
-					<div class="col-2">
+					<!-- Civil Status -->
+					<div class="col-3">
 						<label class="text-light">Civil Status</label>
-						<select class="form-select form-select-sm" @bind="selectedCivilStatus">
+						<select class="form-select form-select-sm" @bind="selectedCivilStatus" disabled="@(!isEditableStatus)">
 							<option value="" hidden>@civilStatusPlaceHolder</option>
 							<option>Single</option>
 							<option>Married</option>
@@ -111,21 +119,26 @@
 					</div>
 
 					<!-- Contact No -->
-					<div class="col">
+					<div class="col-3">
 						<label class="text-light">Contact No.</label>
-						<input class="form-control form-control-sm" @bind="contactNumber" placeholder="Contact No." required>
+						<input class="form-control form-control-sm" @bind="contactNumber" disabled="@(!isEditableStatus)" placeholder="Contact No." required>
 					</div>
+
+				</div>
 
 				<!-- Row 4 -->
 				<div class="row g-2 mt-3">
 
 					<!-- Full Address -->
-					<label class="text-light">Full Address</label>
+					<div class="d-flex align-items-center">
+						<label class="text-light mb-0">Full Address</label>
+						<button class="@GetEditFullAddressButtonClass()" @onclick="ToggleEditFullAddress">Edit</button>
+					</div>
 
 					<!-- Region -->
 					<div class="col">
 						<label class="text-light">Region</label>
-						<select class="form-select form-select-sm" @bind="selectedRegion" @bind:after="OnRegionChangeAsync" required>
+						<select class="form-select form-select-sm" @bind="selectedRegion" @bind:after="OnRegionChangeAsync" disabled="@(!isEditableFullAddress)" required>
 							<option value="" hidden>@regionPlaceHolder</option>
 							@foreach (var r in regions)
 							{
@@ -137,7 +150,7 @@
 					<!-- Province -->
 					<div class="col">
 						<label class="text-light">Province</label>
-						<select class="form-select form-select-sm" @bind="selectedProvince" @bind:after="OnProvinceChangeAsync" required>
+						<select class="form-select form-select-sm" @bind="selectedProvince" @bind:after="OnProvinceChangeAsync" disabled="@(!isEditableFullAddress)" required>
 							<option value="" hidden>@provincePlaceHolder</option>
 							@if (!provinces.Any())
 							{
@@ -150,12 +163,10 @@
 						</select>
 					</div>
 
-
-
 					<!-- Municipality/City -->
 					<div class="col">
 						<label class="text-light">Municipality/City</label>
-						<select class="form-select form-select-sm" @bind="selectedCity" @bind:after="OnCityChangeAsync" required>
+						<select class="form-select form-select-sm" @bind="selectedCity" @bind:after="OnCityChangeAsync" disabled="@(!isEditableFullAddress)" required>
 							<option value="" hidden>@cityPlaceHolder</option>
 							@foreach (var c in cities)
 							{
@@ -167,7 +178,7 @@
 					<!-- Barangay -->
 					<div class="col">
 						<label class="text-light">Barangay</label>
-						<select class="form-select form-select-sm" @bind="selectedBarangay" required>
+						<select class="form-select form-select-sm" @bind="selectedBarangay" disabled="@(!isEditableFullAddress)" required>
 							<option value="" hidden>@barangayPlaceHolder</option>
 							@foreach (var b in barangays)
 							{
@@ -179,7 +190,7 @@
 					<!-- Postal Code -->
 					<div class="col">
 						<label class="text-light">Postal Code</label>
-						<input class="form-control form-control-sm" @bind="postalCode" required>
+						<input class="form-control form-control-sm" @bind="postalCode" disabled="@(!isEditableFullAddress)" required>
 
 						</input>
 					</div>
@@ -187,27 +198,31 @@
 					<!-- Street No. -->
 					<div class="col">
 						<label class="text-light">Street No.</label>
-						<input class="form-control form-control-sm" @bind="street" placeholder="Street No." required>
+						<input class="form-control form-control-sm" @bind="street" placeholder="Street No." disabled="@(!isEditableFullAddress)" required>
 					</div>
 
 					<!-- House No. -->
 					<div class="col">
 						<label class="text-light">House No.</label>
-						<input class="form-control form-control-sm" @bind="houseNo" placeholder="House No." required>
+						<input class="form-control form-control-sm" @bind="houseNo" placeholder="House No." disabled="@(!isEditableFullAddress)" required>
 					</div>
 
 				</div>
 
 
 				<!-- Row 5 -->
-				<!--Birth Place address-->
 				<div class="row g-2 mt-3">
 
-					<label class="text-light">Birth Place</label>
+					<!--Birth Place Address-->
+					<div class="d-flex align-items-center">
+						<label class="text-light mb-0">Birth Details</label>
+						<button class="@GetEditBirthDetailsButtonClass()" @onclick="ToggleEditBirthDetails">Edit</button>
+					</div>
+
 					<!-- Region -->
 					<div class="col">
 						<label class="text-light">Region</label>
-						<select class="form-select form-select-sm" @bind="selectedBirthRegion" @bind:after="OnBirthRegionChangeAsync" required>
+						<select class="form-select form-select-sm" @bind="selectedBirthRegion" @bind:after="OnBirthRegionChangeAsync" disabled="@(!isEditableBirthDetails)" required>
 							<option value="" hidden>@regionPlaceHolder</option>
 							@foreach (var r in birthRegions)
 							{
@@ -219,7 +234,7 @@
 					<!-- Province -->
 					<div class="col">
 						<label class="text-light">Province</label>
-						<select class="form-select form-select-sm" @bind="selectedBirthProvince" @bind:after="OnBirthProvinceChangeAsync" required>
+						<select class="form-select form-select-sm" @bind="selectedBirthProvince" @bind:after="OnBirthProvinceChangeAsync" disabled="@(!isEditableBirthDetails)" required>
 							<option value="" hidden>@provincePlaceHolder</option>
 							@if (!birthProvinces.Any())
 							{
@@ -235,7 +250,7 @@
 					<!-- City -->
 					<div class="col">
 						<label class="text-light" >Municipality/City</label>
-						<select class="form-select form-select-sm" @bind="selectedBirthCity" required>
+						<select class="form-select form-select-sm" @bind="selectedBirthCity" disabled="@(!isEditableBirthDetails)" required>
 							<option value="" hidden>@cityPlaceHolder</option>
 							@foreach (var c in birthCities)
 							{
@@ -247,48 +262,61 @@
 					<!-- Birth Date -->
 					<div class="col">
 						<label class="text-light">Birth Date</label>
-						<input class="form-control form-control-sm" @bind="birthDate" type="date" required>
-					</div>
-
-					<!-- Occupation -->
-					<div class="col">
-						<label class="text-light">Occupation</label>
-						<input class="form-control form-control-sm" @bind="Occupation" placeholder="Occupation" required>
+						<input class="form-control form-control-sm" @bind="birthDate" type="date" disabled="@(!isEditableBirthDetails)" required>
 					</div>
 
 				</div>
 
 				<div class="row g-3 mt-3">
+
+					<!--Employment Details-->
+					<div class="d-flex align-items-center">
+						<label class="text-light mb-0">Employment Details</label>
+						<button class="@GetEditEmploymentDetailsButtonClass()" @onclick="ToggleEditEmploymentDetails">Edit</button>
+					</div>
+
 					<!-- Upload Government ID -->
-					<div class="col-md-4">
+					<div class="col-md-3">
 						<label class="text-light">Upload Government Valid ID (Front & Back)</label>
 
-						<!-- View Button -->
+						<!-- Conditional View / Upload -->
 						<div class="d-flex gap-2">
-							<InputFile OnChange="UploadGovernmentId" class="btn btn-light btn-sm w-75" required />
-							<button class="btn btn-outline-light">View</button>
+							@if (isEditableEmploymentDetails)
+							{
+								<InputFile OnChange="UploadGovernmentId" class="btn btn-light btn-sm w-75" />
+							}
+							<button class="btn btn-outline-light w-100">View</button>
 						</div>
 					</div>
 
 					<!-- Upload 1x1 Picture -->
-					<div class="col-md-4">
+					<div class="col-md-3">
 						<label class="text-light">Upload 1x1 Picture</label>
 
 						<!-- View Button -->
 						<div class="d-flex gap-2">
-							<InputFile OnChange="UploadProfilePicture" class="btn btn-light btn-sm w-75" required />
-							<button class="btn btn-outline-light">View</button>
+							@if (isEditableEmploymentDetails)
+							{
+								<InputFile OnChange="UploadProfilePicture" class="btn btn-light btn-sm w-75" required />
+							}
+							<button class="btn btn-outline-light w-100">View</button>
 						</div>
 					</div>
 
 					<!-- TIN -->
 					<div class="col-md-3">
 						<label class="text-light">Tax Identification Number</label>
-						<input class="form-control" @bind="taxIdentificationNumber" placeholder="Tax Identification Number" required>
+						<input class="form-control" @bind="taxIdentificationNumber" disabled="@(!isEditableEmploymentDetails)" placeholder="Tax Identification Number" required>
+					</div>
+
+					<!-- Occupation -->
+					<div class="col-3">
+						<label class="text-light">Occupation</label>
+						<input class="form-control" @bind="Occupation" disabled="@(!isEditableEmploymentDetails)" placeholder="Occupation" required>
 					</div>
 
 				</div>
-			</div>
+
 
 				<!-- Border -->
 				<div class="d-flex align-items-center mt-5 mb-3">
@@ -411,6 +439,78 @@
 	private List<ProvinceViewModel> provinces = new();	//	use this for the drop down selection
 	private List<CityViewModel> cities = new();
 	private List<BarangayViewModel> barangays = new();
+
+	private bool isEditableName = false;
+	private bool isEditableStatus = false;
+	private bool isEditableFullAddress = false;
+	private bool isEditableBirthDetails = false;
+	private bool isEditableEmploymentDetails = false;
+
+	private void ToggleEditName()
+	{
+		isEditableName = !isEditableName;
+	}
+
+	private void ToggleEditStatus()
+	{
+		isEditableStatus = !isEditableStatus;
+	}
+
+	private void ToggleEditFullAddress()
+	{
+		isEditableFullAddress = !isEditableFullAddress;
+	}
+
+	private void ToggleEditBirthDetails()
+	{
+		isEditableBirthDetails = !isEditableBirthDetails;
+	}
+
+	private void ToggleEditEmploymentDetails()
+	{
+		isEditableEmploymentDetails = !isEditableEmploymentDetails;
+	}
+
+	private string GetEditNameButtonClass()
+	{
+		if (isEditableName)
+			return "btn btn-sm btn-secondary mx-3 text-white";
+
+		return "btn btn-sm btn-primary mx-3";
+	}
+
+	private string GetEditStatusButtonClass()
+	{
+		if (isEditableStatus)
+			return "btn btn-sm btn-secondary mx-3 text-white";
+
+		return "btn btn-sm btn-primary mx-3";
+	}
+
+	private string GetEditFullAddressButtonClass()
+	{
+		if (isEditableFullAddress)
+			return "btn btn-sm btn-secondary mx-3 text-white";
+
+		return "btn btn-sm btn-primary mx-3";
+	}
+
+	private string GetEditBirthDetailsButtonClass()
+	{
+		if (isEditableBirthDetails)
+			return "btn btn-sm btn-secondary mx-3 text-white";
+
+		return "btn btn-sm btn-primary mx-3";
+	}
+
+
+	private string GetEditEmploymentDetailsButtonClass()
+	{
+		if (isEditableEmploymentDetails)
+			return "btn btn-sm btn-secondary mx-3 text-white";
+
+		return "btn btn-sm btn-primary mx-3";
+	}
 
 	// method for getting user address
 	protected override async Task OnInitializedAsync()
