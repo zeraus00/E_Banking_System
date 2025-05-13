@@ -119,7 +119,7 @@
 
 				<!-- Terms and Conditions Checkbox -->
 				<div class="form-check d-flex justify-content-end mt-3">
-					<input class="form-check-input mx-2" type="checkbox" id="termsAndConditions" required>
+					<input class="form-check-input mx-2" type="checkbox" id="termsAndConditions" @bind="isTermsAccepted" required>
 					<label class="form-check-label text-light" for="termsAndConditions">
 						I accept the terms and conditions
 					</label>
@@ -127,15 +127,15 @@
 
 				<!-- Data Privacy Consent Checkbox -->
 				<div class="form-check d-flex justify-content-end mt-3">
-					<input class="form-check-input mx-2" type="checkbox" id="dataPrivacyConset" required>
-					<label class="form-check-label text-light" for="dataPrivacyConset">
+					<input class="form-check-input mx-2" type="checkbox" id="dataPrivacyConsent" @bind="isPrivacyAccepted" required>
+					<label class="form-check-label text-light" for="dataPrivacyConsent">
 						I agree to the Data Privacy Consent
 					</label>
 				</div>
 
 				<!-- Register Button -->
 				<div class="text-end mt-3">
-					<button class="btn btn-primary btn-secondary">Submit Application</button>
+					<button class="btn btn-primary btn-secondary" disabled="@(IsSubmitDisabled)">Submit Application</button>
 				</div>
 
 			</div>
@@ -144,7 +144,9 @@
 </div>
 
 
-
 @code {
+	private bool isTermsAccepted = false;
+	private bool isPrivacyAccepted = false;
 
+	private bool IsSubmitDisabled => !(isTermsAccepted && isPrivacyAccepted);
 }

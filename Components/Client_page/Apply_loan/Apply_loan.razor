@@ -215,7 +215,7 @@
 
 				<!-- Terms and Conditions -->
 				<div class="form-check d-flex justify-content-end mt-3">
-					<input class="form-check-input mx-2" type="checkbox" id="termsAndConditions" required>
+					<input class="form-check-input mx-2" type="checkbox" id="termsAndConditions" @bind="isConfirmed" required>
 					<label class="form-check-label text-light" for="termsAndConditions">
 						I accept the terms and conditions
 					</label>
@@ -226,7 +226,7 @@
 					<NavLink href="@PageRoutes.CLIENT_HOME">
 						<button class="btn btn-danger">Cancel</button>
 					</NavLink>
-					<button class="btn btn-primary" @onclick="RegisterLoanAsync">Register</button>
+					<button class="btn btn-primary" @onclick="RegisterLoanAsync" disabled="@(isConfirmed == false)">Register</button>
 				</div>
 				@if (loanSubmittedMessage.Length > 0)
 				{
@@ -278,6 +278,8 @@
 	private string loanPurpose = "";
 	private int loanTermInMonths;
 	private int paymentFrequency = -1;
+
+	private bool isConfirmed = false;
 
 	private UserInfo userInfo { get; set; } = default!;
 	private Address address { get; set; } = default!;
