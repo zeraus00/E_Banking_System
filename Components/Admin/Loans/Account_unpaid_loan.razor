@@ -1,11 +1,16 @@
 ﻿@using Layout
 @using Microsoft.AspNetCore.Components.Routing
+@using Helpers
 @page "/Account_Unpaid_Loan"
 
 @layout MainLayout
 @attribute [Authorize(Roles = "Administrator")]
 @rendermode InteractiveServer
 
+@inject LoanService loanService
+@inject AdminDataService adminDataService
+@inject AdminControlledSessionService adminControlledSessionService
+@inject UserDataService userDataService
 
 <div class="page">
     <main>
@@ -20,61 +25,63 @@
         <section class="container py-4">
             <div class="card shadow-sm">
                 <div class="card-body">
-                    <div class="row border-bottom pb-3 mb-3">
-                        <!-- Account Info -->
-                        <div class="col-md-6">
-                            <h5 class="fw-bold">Account Information</h5>
-                            <table class="table table-sm table-borderless text-white">
-                                <tr><td>Account Number:</td><td>1231-21313</td></tr>
-                                <tr><td>Account Name:</td><td>Sample Name</td></tr>
-                                <tr><td>Statement Date:</td><td>06/21/2020</td></tr>
-                                <tr><td>Loan Amount:</td><td>20,000</td></tr>
-                                <tr><td>Loan Term:</td><td>6 Months</td></tr>
-                                <tr><td>Interest Rate:</td><td>8%</td></tr>
-                                <tr><td>Loan Status:</td><td>Active</td></tr>
-                            </table>
+                    @if (loan is not null)
+                    {
+                        <div class="row border-bottom pb-3 mb-3">
+                            <!-- Account Info -->
+                            <div class="col-md-6">
+                                <h5 class="fw-bold">Account Information</h5>
+                                <table class="table table-sm table-borderless text-white">
+                                    <tr><td>Account Number:</td><td>@accountNumber</td></tr>
+                                    <tr><td>Account Name:</td><td>@accountName</td></tr>
+                                    <tr><td>Statement Date:</td><td>@(loan?.ApplicationDate ?? DateTime.MinValue)</td></tr>
+                                    <tr><td>Loan Amount:</td><td>@FormatHelper.BalanceFormatter(loan?.LoanAmount ?? 0.00m)</td></tr>
+                                    <tr><td>Loan Term:</td><td>@(loan?.LoanTermMonths ?? 0)</td></tr>
+                                    <tr><td>Interest Rate:</td><td>@((loan?.InterestRate ?? 0.00m) * 100)%</td></tr>
+                                    <tr><td>Loan Status:</td><td>@(loan?.LoanStatus ?? "")</td></tr>
+                                </table>
+                            </div>
+
+                            <!-- Payment Overview -->
+                            <div class="col-md-6">
+                                <h5 class="fw-bold">Payment Overview</h5>
+                                <table class="table table-sm table-borderless text-white">
+                                    <tr><td>Next Payment:</td><td>@FormatHelper.BalanceFormatter(nextPayment)</td></tr>
+                                    <tr><td>Interest:</td><td>@FormatHelper.BalanceFormatter(nextInterest)</td></tr>
+                                </table>
+                                <h6 class="fw-semibold">Regular Monthly Payment</h6>
+                                <table class="table table-sm table-borderless text-white">
+                                    <tr><td>Overdue Fees:</td><td>@FormatHelper.BalanceFormatter(overdueFee)</td></tr>
+                                </table>
+                                <h6 class="fw-semibold">Total due: @(loanTransaction?.TransactionDate.ToShortDateString() ?? "")</h6>
+                                <p><strong>@FormatHelper.BalanceFormatter((loanTransaction?.Amount ?? 0.00m))</strong></p>
+                                <p><small>Next payment date: @(loan?.DueDate?.ToShortDateString() ?? "")</small></p>
+                            </div>
                         </div>
 
-                        <!-- Payment Overview -->
-                        <div class="col-md-6">
-                            <h5 class="fw-bold">Payment Overview</h5>
-                            <table class="table table-sm table-borderless text-white">
-                                <tr><td>Monthly Payment:</td><td>6,699</td></tr>
-                                <tr><td>Interest:</td><td>1,000</td></tr>
+                        <!-- Activity Log -->
+                        <div>
+                            <h5 class="fw-bold">Activity since last statement</h5>
+                            <table class="table table-bordered table-sm">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Transaction</th>
+                                        <th>Charge</th>
+                                        <th>Payment</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="text-white">
+                                        <td>@(loanTransaction?.TransactionDate.ToShortDateString() ?? "No transaction")</td>
+                                        <td>@(loanTransaction?.TransactionType.TransactionTypeName ?? "")</td>
+                                        <td>@(loanTransaction?.TransactionFee ?? 0.00m)</td>
+                                        <td>@FormatHelper.BalanceFormatter((loanTransaction?.Amount ?? 0.00m))</td>
+                                    </tr>
+                                </tbody>
                             </table>
-                            <h6 class="fw-semibold">Regular Monthly Payment</h6>
-                            <table class="table table-sm table-borderless text-white">
-                                <tr><td>Fees:</td><td>0.00</td></tr>
-                                <tr><td>Overdue Payments:</td><td>0.00</td></tr>
-                            </table>
-                            <h6 class="fw-semibold">Total due July 1, 2020</h6>
-                            <p><strong>₱7,699</strong></p>
-                            <p><small>Next payment date: 08/01/2020</small></p>
                         </div>
-                    </div>
-
-                    <!-- Activity Log -->
-                    <div>
-                        <h5 class="fw-bold">Activity since last statement</h5>
-                        <table class="table table-bordered table-sm">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Transaction</th>
-                                    <th>Charge</th>
-                                    <th>Payment</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr class="text-white">
-                                    <td>07/01/2020</td>
-                                    <td>Payment Received</td>
-                                    <td></td>
-                                    <td>7,699</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    }
                 </div>
             </div>
         </section>
@@ -82,4 +89,48 @@
 </div>
 
 @code {
+    private string error = "";
+    private DateTime now = DateTime.Now;
+
+    private LoanViewSession loanViewSession { get; set; } = default!;
+    private Loan? loan { get; set; }
+    private Account? account { get; set; }
+    private Transaction? loanTransaction { get; set; }
+
+    private string accountNumber { get; set; } = "";
+    private string accountName { get; set; } = "";
+    private decimal nextPayment = 0.00m;
+    private decimal nextInterest = 0.00m;
+    private decimal overdueFee = 0.00m;
+
+    bool isOverdue = false;
+
+    private bool isAccountCanCheckLoan = true;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            loanViewSession = await adminControlledSessionService.GetLoanViewSession();
+            loan = await adminDataService.GetLoanByIdAsync(loanViewSession.LoanId);
+            accountNumber = await adminDataService.GetAccountNumberAsync(loanViewSession.AccountId);
+            accountName = await adminDataService.GetAccountNameAsync(loanViewSession.AccountId);
+            StateHasChanged();
+            if (loan is not null)
+            {
+                if (loan!.LoanStatus.Equals(LoanStatusTypes.SUBMITTED))
+                    return;
+
+                if (loan!.DueDate!.Value.Date < now.Date)
+                {
+                    isOverdue = true;
+                    overdueFee = loanService.CalculateLateFee(loan, loan.DueDate.Value, now);
+                }
+                loanTransaction = await loanService.GetLastLoanTransaction(loan.LoanId);
+                nextPayment = await loanService.GetCurrentPaymentAmount(loan.LoanId, now);
+                nextInterest = loanService.calculatePaymentInterestAmount(loan.InterestRatePerPayment, loan.RemainingLoanBalance);
+            }
+            StateHasChanged();
+        }
+    }
 }

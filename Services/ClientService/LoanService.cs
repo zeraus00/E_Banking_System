@@ -4,6 +4,7 @@ using Data.Models.Finance;
 using Data.Repositories.Finance;
 using Data.Repositories.User;
 using Exceptions;
+using Microsoft.Identity.Client;
 using Services.DataManagement;
 
 namespace Services.ClientService
@@ -124,6 +125,20 @@ namespace Services.ClientService
                     .HasAccountId(accountId)
                     .GetQuery()
                     .FirstOrDefaultAsync();
+            }
+        }
+
+        public async Task<Transaction?> GetLastLoanTransaction(int loanId)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                return await new TransactionRepository(dbContext)
+                    .Query
+                    .HasLoanId(loanId)
+                    .OrderByDateAndTime()
+                    .IncludeTransactionType()
+                    .GetQuery()
+                    .LastOrDefaultAsync();
             }
         }
 

@@ -48,16 +48,15 @@
 								<h5 class="fw-bold">Payment Overview</h5>
 								<table class="table table-sm table-borderless text-white">
 									<tr><td>Next Payment:</td><td>@FormatHelper.BalanceFormatter(nextPayment)</td></tr>
-									<tr><td>Interest:</td><td>@nextInterest</td></tr>
+									<tr><td>Interest:</td><td>@FormatHelper.BalanceFormatter(nextInterest)</td></tr>
 								</table>
 								<h6 class="fw-semibold">Regular Monthly Payment</h6>
 								<table class="table table-sm table-borderless text-white">
-									<tr><td>Fees:</td><td>@overdueFee</td></tr>
-									<tr><td>Overdue Payments:</td><td>0.00</td></tr>
+									<tr><td>Overdue Fees:</td><td>@FormatHelper.BalanceFormatter(overdueFee)</td></tr>
 								</table>
 								<h6 class="fw-semibold">Total due: @(loanTransaction?.TransactionDate.ToShortDateString() ?? "")</h6>
 								<p><strong>@FormatHelper.BalanceFormatter((loanTransaction?.Amount ?? 0.00m))</strong></p>
-								<p><small>@loan.DueDate</small></p>
+								<p><small>Next payment date: @(loan.DueDate?.ToShortDateString() ?? "")</small></p>
 							</div>
 						</div>
 
@@ -76,8 +75,8 @@
 								<tbody>
 									<tr class="text-white">
 										<td>@(loanTransaction?.TransactionDate.ToShortDateString() ?? "No transaction")</td>
-										<td>Payment Received</td>
-										<td></td>
+										<td>@(loanTransaction?.TransactionType.TransactionTypeName ?? "")</td>
+										<td>@(loanTransaction?.TransactionFee ?? 0.00m)</td>
 										<td>@FormatHelper.BalanceFormatter((loanTransaction?.Amount ?? 0.00m))</td>
 									</tr>
 								</tbody>
@@ -144,7 +143,7 @@
 					isOverdue = true;
 					overdueFee = loanService.CalculateLateFee(loan, loan.DueDate.Value, now);
 				}
-
+				loanTransaction = await loanService.GetLastLoanTransaction(loan.LoanId);
 				nextPayment = await loanService.GetCurrentPaymentAmount(loan.LoanId, now);
 				nextInterest = loanService.calculatePaymentInterestAmount(loan.InterestRatePerPayment, loan.RemainingLoanBalance);
 			}
