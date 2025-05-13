@@ -119,7 +119,7 @@
 					</div>
 					<div class="col-12 col-md-3">
 						<label class="text-light">Email</label>
-						<input class="form-control form-control-sm" @bind="email" placeholder="Sample@gmail.com" required>
+						<input type="email" class="form-control form-control-sm" @bind="email" placeholder="Sample@gmail.com" required>
 					</div>
 
 					<!-- Row 5 -->
@@ -140,8 +140,9 @@
 						<div class="form-control form-control-sm">@occupation</div>
 					</div>
 					<div class="col-12 col-md-3">
-						<label class="text-light">Gross Annual Income (>= 250 000.00)</label>
-						<input class="form-control form-control-sm" @bind="annualGrossIncome" placeholder="Minimum 250,000" required>
+						<label class="text-light">Annual Gross Income</label>
+						<input type="number" class="form-control form-control-sm" @bind="annualGrossIncome" @onfocus="ClearDefaultValue"
+						@onblur="SetDefaultValue" placeholder="Minimum ₱250,000" required>
 					</div>
 					<div class="col-12 col-md-3">
 						<label class="text-light">Type of Loan</label>
@@ -260,7 +261,7 @@
 	private string contactNo = "";
 	private string civilStatus = "";
 	private string occupation = "";
-	private decimal annualGrossIncome = 0.00m;
+	private decimal? annualGrossIncome = null;
 
 	/*		Address		*/
 	private string province = "";
@@ -294,6 +295,22 @@
 	private bool isModalVisible = false;
 
 	private bool isSubmitting { get; set; } = false;
+
+	private void ClearDefaultValue()
+	{
+		if (!annualGrossIncome.HasValue)
+		{
+			annualGrossIncome = null;
+		}
+	}
+
+	private void SetDefaultValue()
+	{
+		if (!annualGrossIncome.HasValue || annualGrossIncome == 0.00m)
+		{
+			annualGrossIncome = null;
+		}
+	}
 
 	private async Task UploadGovernmentId(InputFileChangeEventArgs e)
 	{
@@ -476,10 +493,14 @@
 					newLoan, 
 					activeAccountSession.AccountNumber, 
 					userSession.UserInfoId, 
-					annualGrossIncome,
+					annualGrossIncome.Value,
 					govId, 
 					payslipPic
 				);
+			else
+			{
+				error = "Annual Gross Income must be at least ₱250,000";
+			}
 
 			//	Update user session.
 			//	Set loan application session.

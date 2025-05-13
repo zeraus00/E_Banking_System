@@ -26,19 +26,24 @@
             </div>
 
             <hr class="divider" />
-            <div class="d-flex align-items-center gap-3 flex-wrap">
+            <div class="d-flex justify-content-between">
+                <NavLink class="nav-link custom-nav-link" href="/Manage_accounts">
+                    ← Go Back
+                </NavLink>
+                <div class="d-flex align-items-center gap-3 flex-wrap justify-content-end mb-3">
+                        <label class="text-light mb-0" style="white-space: nowrap;">Filter: </label>
+                        <select class="form-select form-select-sm" style="max-width: 10%;" @bind="timeFilter" @bind:after="OnChartFilterChanged">
+                            @foreach (var chartFilter in AdminDashboardTimeFilters.AS_STRING_LIST)
+                        {
+                            <option value="@chartFilter">By @chartFilter</option>
+                        }
+                    </select>
                     <label class="text-light mb-0" style="white-space: nowrap;">Filter: </label>
-                    <select class="form-select form-select-sm w-25" @bind="timeFilter" @bind:after="OnChartFilterChanged">
-                        @foreach (var chartFilter in AdminDashboardTimeFilters.AS_STRING_LIST)
-                    {
-                        <option value="@chartFilter">By @chartFilter</option>
-                    }
-                </select>
-                <label class="text-light mb-0" style="white-space: nowrap;">Filter: </label>
-                <select class="form-select form-select-sm w-25" @bind="dataFilter" @bind:after="OnChartFilterChanged">
-                    <option value="@ChartDataTypes.TRANSACTION_VOLUME_OVER_TIME"> @ChartDataTypes.TRANSACTION_VOLUME_OVER_TIME</option>
-                    <option value="@ChartDataTypes.TRANSACTION_COUNT_OVER_TIME"> @ChartDataTypes.TRANSACTION_COUNT_OVER_TIME</option>
-                </select>
+                    <select class="form-select form-select-sm" style="max-width: 20%;" @bind="dataFilter" @bind:after="OnChartFilterChanged">
+                        <option value="@ChartDataTypes.TRANSACTION_VOLUME_OVER_TIME"> @ChartDataTypes.TRANSACTION_VOLUME_OVER_TIME</option>
+                        <option value="@ChartDataTypes.TRANSACTION_COUNT_OVER_TIME"> @ChartDataTypes.TRANSACTION_COUNT_OVER_TIME</option>
+                    </select>
+                </div>
             </div>
             <!-- Card Section -->
             <div class="card-section justify-content-between align-items-center mx-4">
