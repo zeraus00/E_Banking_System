@@ -1,7 +1,12 @@
 ﻿@using Layout
 @page "/PendingApprovalClient"
 @attribute [Authorize(Roles ="User")]
+@rendermode InteractiveServer
+
 @inject NavigationManager NavigationManager
+@inject ClaimsHelperService claimsHelperService
+@inject UserSessionService userSessionService
+@inject UserControlledSessionService userControlledSessionService
 
 <div class="page">
 	<main>
@@ -24,5 +29,29 @@
 
 @code
 {
+	[CascadingParameter]
+	private Task<AuthenticationState> authenticationState { get; set; } = default!;
 
+	private ClaimsPrincipal? user;
+
+	protected override async Task OnInitializedAsync()
+	{
+		AuthenticationState authState = await authenticationState;
+		user = authState.User;
+	}
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			if (user is not null)
+			{
+				//	Restart user session so that the new account is stored in session storage.
+				await userSessionService.StartSessionBasedOnRole(user);
+				//	Restart active account session.
+				if (claimsHelperService.GetRoleId(user) == (int)RoleTypeIDs.User)
+					await userControlledSessionService.SetActiveAccountSessionAsync();
+			}
+		}
+	}
 }
