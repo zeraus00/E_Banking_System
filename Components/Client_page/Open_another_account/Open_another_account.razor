@@ -6,10 +6,13 @@
 @using System.Text.RegularExpressions;
 
 @page "/Open_another_account"
+@attribute [Authorize(Roles ="User")]
 @rendermode InteractiveServer
 @inject ApiLoaderService apiLoaderService
 @inject NavigationManager NavigationManager
 @inject RegistrationService RegistrationService
+@inject UserDataService userDataService
+@inject UserSessionService userSessionService
 @inject HttpClient HttpClient
 
 <div class="page">
@@ -81,22 +84,22 @@
 
 						<!-- First Name -->
 						<div class="col-3">
-							<input class="form-control form-control-sm" @bind="userFirstName" placeholder="First Name">
+							<input class="form-control form-control-sm" @bind="userFirstName" placeholder="First Name" disabled>
 						</div>
 
 						<!-- Middle Name -->
 						<div class="col-3">
-							<input class="form-control form-control-sm" @bind="userMiddleName" placeholder="Middle Name">
+							<input class="form-control form-control-sm" @bind="userMiddleName" disabled>
 						</div>
 
 						<!-- Last Name -->
 						<div class="col-3">
-							<input class="form-control form-control-sm" @bind="userLastName" placeholder="Last Name">
+							<input class="form-control form-control-sm" @bind="userLastName" placeholder="Last Name" disabled>
 						</div>
 
 						<!-- Suffix Name -->
 						<div class="col-1">
-							<input class="form-control form-control-sm" @bind="userSuffix" placeholder="Suffix">
+							<input class="form-control form-control-sm" @bind="userSuffix" disabled>
 						</div>
 
 					</div>
@@ -108,63 +111,26 @@
 
 				<!-- Row 3 -->
 				<div class="row g-2 mt-2">
-
 					<!-- Age -->
-					<div class="col-1">
-						<label class="text-light">Age</label>
-						<input class="form-control form-control-sm" @bind="age" type="number" placeholder="Age" required>
-					</div>
-
-					<!-- Sex -->
-					<div class="col-1">
-						<label class="text-light">Sex</label>
-						<select class="form-select form-select-sm" @bind="selectedSex">
-							<option value="" disabled hidden>@sexPlaceHolder</option>
-							<option>Male</option>
-							<option>Female</option>
-						</select>
-					</div>
-
-					<!-- Civil  Status -->
-					<div class="col-2">
-						<label class="text-light">Civil Status</label>
-						<select class="form-select form-select-sm" @bind="selectedCivilStatus">
-							<option value="" hidden>@civilStatusPlaceHolder</option>
-							<option>Single</option>
-							<option>Married</option>
-							<option>Separated</option>
-							<option>Widowed</option>
-						</select>
-					</div>
-
-					<!-- Religion -->
 					<div class="col">
-						<label class="text-light">Religion</label>
-						<select class="form-select form-select-sm" @bind="selectedReligion">
-							<option value="" hidden>@religionPlaceHolder</option>
-							@foreach (var religion in religionOptions)
-							{
-								<option value="@religion">@religion</option>
-							}
-						</select>
+						<label class="text-light">Age</label>
+						<input class="form-control form-control-sm" @bind="age" disabled>
 					</div>
-					@if (selectedReligion == "Others")
-					{
-						<div class="mt-2">
-							<label for="customReligion">Please specify your religon:</label>
-							<input type="text" @bind="customReligion" class="form-control" placeholder="Enter your religion"/>
-						</div>
-					}
+					<!-- Birth Date -->
+					<div class="col">
+						<label class="text-light">Birth Date</label>
+						<input class="form-control form-control-sm" type="date" @bind="birthDate" disabled>
+					</div>
+
+					<!-- Occupation -->
+					<div class="col">
+						<label class="text-light">Occupation</label>
+						<input class="form-control form-control-sm" @bind="Occupation" placeholder="Occupation" required>
+					</div>
 					<!-- Contact No -->
 					<div class="col">
 						<label class="text-light">Contact No.</label>
 						<input class="form-control form-control-sm" @bind="contactNumber" placeholder="Contact No." required>
-					</div>
-
-					<!-- Email Address -->
-					<div class="col">
-						<label class="text-light">Email Address</label>
-						<input type="email" class="form-control form-control-sm" @bind="email" placeholder="Email" required>
 					</div>
 				</div>
 
@@ -178,29 +144,13 @@
 					<!-- Region -->
 					<div class="col">
 						<label class="text-light">Region</label>
-						<select class="form-select form-select-sm" @bind="selectedRegion" @bind:after="OnRegionChangeAsync" required>
-							<option value="" hidden>@regionPlaceHolder</option>
-							@foreach (var r in regions)
-							{
-								<option value="@r.code">@r.regionName</option>
-							}
-						</select>
+						<input class="form-control form-control-sm" @bind="selectedRegion" disabled>
 					</div>
 
 					<!-- Province -->
 					<div class="col">
 						<label class="text-light">Province</label>
-						<select class="form-select form-select-sm" @bind="selectedProvince" @bind:after="OnProvinceChangeAsync" required>
-							<option value="" hidden>@provincePlaceHolder</option>
-							@if (!provinces.Any())
-							{
-								<option value="@FieldPlaceHolders.PROVINCE_CODE_NOT_FOUND">No Province</option>
-							}
-							@foreach (var p in provinces)
-							{
-								<option value="@p.code">@p.name</option>
-							}
-						</select>
+						<input class="form-control form-control-sm" @bind="selectedProvince" disabled>
 					</div>
 
 
@@ -208,155 +158,38 @@
 					<!-- Municipality/City -->
 					<div class="col">
 						<label class="text-light">Municipality/City</label>
-						<select class="form-select form-select-sm" @bind="selectedCity" @bind:after="OnCityChangeAsync" required>
-							<option value="" hidden>@cityPlaceHolder</option>
-							@foreach (var c in cities)
-							{
-								<option value="@c.code">@c.name</option>
-							}
-						</select>
+						<input class="form-control form-control-sm" @bind="selectedCity" disabled>
 					</div>
 
 					<!-- Barangay -->
 					<div class="col">
 						<label class="text-light">Barangay</label>
-						<select class="form-select form-select-sm" @bind="selectedBarangay" required>
-							<option value="" hidden>@barangayPlaceHolder</option>
-							@foreach (var b in barangays)
-							{
-								<option value="@b.code">@b.name</option>
-							}
-						</select>
+						<input class="form-control form-control-sm" @bind="selectedBarangay" disabled>
 					</div>
 
 					<!-- Postal Code -->
 					<div class="col">
 						<label class="text-light">Postal Code</label>
-						<input class="form-control form-control-sm" @bind="postalCode" required>
-
-						</input>
+						<input class="form-control form-control-sm" @bind="postalCode" disabled>
 					</div>
 
 					<!-- Street No. -->
 					<div class="col">
 						<label class="text-light">Street No.</label>
-						<input class="form-control form-control-sm" @bind="street" placeholder="Street No." required>
+						<input class="form-control form-control-sm" @bind="street" placeholder="Street No." disabled>
 					</div>
 
 					<!-- House No. -->
 					<div class="col">
 						<label class="text-light">House No.</label>
-						<input class="form-control form-control-sm" @bind="houseNo" placeholder="House No." required>
+						<input class="form-control form-control-sm" @bind="houseNo" placeholder="House No." disabled>
 					</div>
 
 				</div>
-
-
-				<!-- Row 5 -->
-				<!--Birth Place address-->
-				<div class="row g-2 mt-3">
-
-					<label class="text-light">Birth Place</label>
-					<!-- Region -->
-					<div class="col">
-						<label class="text-light">Region</label>
-						<select class="form-select form-select-sm" @bind="selectedBirthRegion" @bind:after="OnBirthRegionChangeAsync" required>
-							<option value="" hidden>@regionPlaceHolder</option>
-							@foreach (var r in birthRegions)
-							{
-								<option value="@r.code">@r.regionName</option>
-							}
-						</select>
-					</div>
-
-					<!-- Province -->
-					<div class="col">
-						<label class="text-light">Province</label>
-						<select class="form-select form-select-sm" @bind="selectedBirthProvince" @bind:after="OnBirthProvinceChangeAsync" required>
-							<option value="" hidden>@provincePlaceHolder</option>
-							@if (!birthProvinces.Any())
-							{
-								<option value="@FieldPlaceHolders.PROVINCE_CODE_NOT_FOUND">No Province</option>
-							}
-							@foreach (var p in birthProvinces)
-							{
-								<option value="@p.code">@p.name</option>
-							}
-						</select>
-					</div>
-
-					<!-- City -->
-					<div class="col">
-						<label class="text-light" >Municipality/City</label>
-						<select class="form-select form-select-sm" @bind="selectedBirthCity" required>
-							<option value="" hidden>@cityPlaceHolder</option>
-							@foreach (var c in birthCities)
-							{
-								<option value="@c.code">@c.name</option>
-							}
-						</select>
-					</div>
-
-					<!-- Birth Date -->
-					<div class="col">
-						<label class="text-light">Birth Date</label>
-						<input class="form-control form-control-sm" @bind="birthDate" type="date" required>
-					</div>
-
-					<!-- Occupation -->
-					<div class="col">
-						<label class="text-light">Occupation</label>
-						<input class="form-control form-control-sm" @bind="Occupation" placeholder="Occupation" required>
-					</div>
-
-				</div>
-
 
 				<div class="row g-2 mt-2">
 
-
-					<!-- Row 6 (Father's Name)-->
-					<div class="col-12">
-
-						<label class="text-light">Father's Name</label>
-						<div class="row g-2">
-							<div class="col-3">
-								<input class="form-control form-control-sm" @bind="fatherFirstName" placeholder="First Name">
-							</div>
-							<div class="col-3">
-								<input class="form-control form-control-sm" @bind="fatherMiddleName" placeholder="Middle Name">
-							</div>
-							<div class="col-3">
-								<input class="form-control form-control-sm" @bind="fatherLastName" placeholder="Last Name">
-							</div>
-							<div class="col-1">
-								<input class="form-control form-control-sm" @bind="fatherSuffix" placeholder="Suffix">
-							</div>
-						</div>
-					</div>
-
-
-					<!-- Row 7 (Mother's Name)-->
-					<div class="col-12">
-						<label class="text-light">Mother's Maiden Name</label>
-						<div class="row g-2">
-							<div class="col-3">
-								<input class="form-control form-control-sm" @bind="motherFirstName" placeholder="First Name">
-							</div>
-							<div class="col-3">
-								<input class="form-control form-control-sm" @bind="motherMiddleName" placeholder="Middle Name">
-							</div>
-							<div class="col-3">
-								<input class="form-control form-control-sm" @bind="motherLastName" placeholder="Last Name">
-							</div>
-							<div class="col-1">
-								<input class="form-control form-control-sm" @bind="motherSuffix" placeholder="Suffix">
-							</div>
-						</div>
-					</div>
-
-
-					<!-- Row 8 (Beneficiary's Name) -->
+					<!-- Row 5 (Beneficiary's Name) -->
 					<div class="col-12">
 						<label class="text-light">Beneficiary's Name</label>
 						<div class="row g-2">
@@ -429,17 +262,15 @@
 
 				<!-- Credentials Inputs -->
 				<div class="row g-2 mb-3">
-
 					<!-- Username -->
 					<div class="col-3">
 						<label class="text-light">Username</label>
-						<input class="form-control form-control-sm" @bind="userName" placeholder="Username" required>
+						<input class="form-control form-control-sm" @bind="userName" placeholder="Username" disabled>
 					</div>
-
-					<!-- Password -->
+					<!-- Email Address -->
 					<div class="col-3">
-						<label class="text-light">Password</label>
-						<input @bind="password" type="password" class="form-control form-control-sm" placeholder="Password" required>
+						<label class="text-light">Email Address</label>
+						<input class="form-control form-control-sm" @bind="email" placeholder="Email" disabled>
 					</div>
 				</div>
 
@@ -464,6 +295,10 @@
 
 
 @code {
+	private UserSession userSession { get; set; } = default!;
+	private int userInfoId { get; set; }
+	private UserInfo userInfo { get; set; } = default!;
+	private Address address { get; set; } = default!;
 
 	private string error = string.Empty;
 	private string noBeneficiaryFound = string.Empty;
@@ -471,9 +306,6 @@
 	//drop down selection place holders
 	public const string subTypePlaceHolder = "--Select Sub-Type--";
 	public const string productTypePlaceHolder = "--Select Product Type--";
-	public const string sexPlaceHolder = "--Select Sex--";
-	public const string civilStatusPlaceHolder = "--Select Civil Status--";
-	public const string religionPlaceHolder = "--Select Religion--";
 
 	public const string regionPlaceHolder = "--Select Region--";
 	public const string provincePlaceHolder = "--Select Province--";
@@ -487,15 +319,10 @@
 	public string userLastName = string.Empty;
 	public string userSuffix = string.Empty;
 	public string userName = string.Empty;
-	public string password = string.Empty;
 	public string email = string.Empty;
 	public string contactNumber = string.Empty;
 	public string Occupation = string.Empty;
 	public string taxIdentificationNumber = string.Empty;
-	public string selectedSex = string.Empty;
-	public string selectedCivilStatus = string.Empty;
-	public string selectedReligion = string.Empty;
-	public string customReligion = string.Empty;
 
 	// user profile picture and government id
 	private byte[]? profilePicture;
@@ -514,13 +341,6 @@
 	// user Birth Info
 	public int age;
 	public DateTime birthDate = new DateTime(1980, 1, 1);
-	public string selectedBirthCity = string.Empty;
-	public string selectedBirthProvince = string.Empty;
-	public string selectedBirthRegion = string.Empty;
-	public int birthCityId;
-	public int? birthProvinceId;
-	public int birthRegionId;
-
 
 	//address info
 	public string houseNo = string.Empty;
@@ -536,31 +356,14 @@
 	public int cityId;
 	public int barangayId;
 
-	//Parents Name And Beneficiary
-	public string fatherFirstName = string.Empty;
-	public string fatherMiddleName = string.Empty;
-	public string fatherLastName = string.Empty;
-	public string fatherSuffix = string.Empty;
-
-	public string motherFirstName = string.Empty;
-	public string motherMiddleName = string.Empty;
-	public string motherLastName = string.Empty;
-	public string motherSuffix = string.Empty;
-
 	public string beneficiaryAccountName = string.Empty;
 	public string beneficiaryAccountNumber = string.Empty;
 	public string beneficiaryCheckMessage = string.Empty;
 	private bool showBeneficiaryCheckResult = false;
 	public int? beneficiaryAccountId = null;
 
-
-
-	<!--user birth info address--> 
-	private List<RegionViewModel> birthRegions = new();
-	private List<ProvinceViewModel> birthProvinces = new();
-	private List<CityViewModel> birthCities = new();
 	<!--user full address-->
-	private List<RegionViewModel> regions = new List<RegionViewModel>();
+	private List<RegionViewModel> regions = new();
 	private List<ProvinceViewModel> provinces = new();	//	use this for the drop down selection
 	private List<CityViewModel> cities = new();
 	private List<BarangayViewModel> barangays = new();
@@ -587,9 +390,7 @@
 		try
 		{
 			await LoadRegionAsync();
-			await LoadBirthRegionsAsync();
 
-			dataSeeding();
 		}
 		catch (FieldMissingException ex)
 		{
@@ -598,42 +399,51 @@
 
 	}
 
-	private void dataSeeding()
+	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
-		// // user basic info
-		userFirstName = "BOGART";
-		userMiddleName = "RELAPSE";
-		userLastName = "GODS";
-		userSuffix = "X";
-		userName = "bogartrelapse";
-		password = "bogartRelapse123@";
-		email = "bogartrelapse@gmail.com";
-		contactNumber = "09669072782";
-		Occupation = "MACHO DANCER";
-		taxIdentificationNumber = "012345678910";
-		// selectedReligion = "Roman Catholic";
+		if (firstRender)
+		{
+			userSession = await userSessionService.GetUserSession();
+			userInfoId = userSession.UserInfoId;
+			userInfo = await userDataService
+				.TryGetUserInfoAsync(
+					userInfoId,
+					includeUserName: true,
+					includeUserAuth: true,
+					includeBirthInfo: true
+				);
+			userFirstName = userInfo.UserName.FirstName;
+			userMiddleName = userInfo.UserName.MiddleName ?? string.Empty;
+			userLastName = userInfo.UserName.LastName;
+			userSuffix = userInfo.UserName.Suffix ?? string.Empty;
 
-		age = 69;
+			age = userInfo.Age;
+			birthDate = userInfo.BirthInfo?.BirthDate ?? DateTime.Now;
+			Occupation = userInfo.Occupation;
+			contactNumber = userInfo.ContactNumber;
 
-		houseNo = "10";
-		street = "25";
-		postalCode = 4028;
+			if (userInfo.AddressId is int addressId)
+			{
+				address = await userDataService.TryGetAddressAsync(addressId);
+				selectedRegion = address.Region?.RegionName ?? string.Empty;
+				StateHasChanged();
+				selectedProvince = address.Province?.ProvinceName ?? string.Empty;
+				StateHasChanged();
+				selectedCity = address.City?.CityName?? string.Empty;
+				StateHasChanged();
+				selectedBarangay = address.Barangay?.BarangayName ?? string.Empty;
+				StateHasChanged();
+				postalCode = address.PostalCode ?? 0;
+				street = address.Street ?? string.Empty;
+				houseNo = address.House ?? string.Empty;
+			}
 
-		// //Parents Name And Beneficiary
-		fatherFirstName = "BOGART";
-		fatherMiddleName = "RELAPSE";
-		fatherLastName = "GODS";
-		fatherSuffix = "IX";
+			taxIdentificationNumber = userInfo.TaxIdentificationNumber;
+			userName = userInfo.UserAuth.UserName;
+			email = userInfo.UserAuth.Email;
 
-		motherFirstName = "MARIE";
-		motherMiddleName = "RIE";
-		motherLastName = "RELAPSE";
-		// public string motherSuffix = string.Empty;
-
-		// public string beneficiaryFirstName = string.Empty;
-		// public string beneficiaryMiddleName = string.Empty;
-		// public string beneficiaryLastName = string.Empty;
-		// public string beneficiarySuffix = string.Empty;
+			StateHasChanged();
+		}
 	}
 
 	// For Full address of user
@@ -730,88 +540,6 @@
 		}
 	}
 
-	private async Task LoadBirthRegionsAsync()
-	{
-		try
-		{
-			birthRegions = await apiLoaderService.GetRegionsAsync();
-			selectedProvince = string.Empty;
-			selectedCity = string.Empty;
-			selectedBarangay = string.Empty;
-		}
-		catch (ApiException ex)
-		{
-			error = ex.Message;
-		}
-		catch (InvalidOperationException ex)
-		{
-			error = ex.Message;
-		}
-		catch (FieldMissingException ex)
-		{
-			error = "Error loading Regions" + ex.Message;
-		}
-	}
-
-	// method to get user birth place
-	private async Task OnBirthRegionChangeAsync()
-	{
-		try
-		{
-			error = string.Empty; // reset previous error
-
-			birthProvinces = await apiLoaderService.GetProvincesFromRegionAsync(selectedBirthRegion);
-			if (!birthProvinces.Any())
-			{
-				birthCities = await apiLoaderService.GetCitiesMunicipalitesFromRegionAsync(selectedBirthRegion);
-				selectedBirthProvince = FieldPlaceHolders.PROVINCE_CODE_NOT_FOUND;
-			}
-			else
-				birthCities = new();
-			selectedBirthProvince = string.Empty;
-			selectedBirthCity = string.Empty;
-		}
-		catch (ApiException ex)
-		{
-			error = ex.Message;
-		}
-		catch (FieldMissingException ex)
-		{
-			error = "Error loading Provinces" + ex.Message;
-		}
-	}
-
-	private async Task OnBirthProvinceChangeAsync()
-	{
-		try
-		{
-			error = string.Empty; // reset previous error
-
-			if (selectedBirthProvince.Equals(FieldPlaceHolders.PROVINCE_CODE_NOT_FOUND))
-				return;
-
-			birthCities = await apiLoaderService.GetCitiesMunicipalitiesFromProvinceAsync(selectedBirthProvince);
-			selectedBirthCity = string.Empty;
-		}
-		catch (FieldMissingException ex)
-		{
-			error = "Error Loading cities" + ex.Message;
-		}
-	}
-
-	private int GetIdFromSelected(string selectedCode, List<dynamic> options)
-	{
-		foreach (var item in options)
-		{
-			if (item?.Code == selectedCode)
-			{
-				return item?.Id ?? 0;
-			}
-		}
-
-		return 0;
-	}
-
 	// handling the uploaded picture
 	private async Task UploadGovernmentId(InputFileChangeEventArgs e)
 	{
@@ -894,59 +622,6 @@
 			if (string.IsNullOrWhiteSpace(selectedAccountProductTypeName))
 				error = "Account Product Type is required.";
 
-			if (string.IsNullOrWhiteSpace(userFirstName))
-			{
-				error = "First name is required.";
-
-			}
-
-
-			if (string.IsNullOrWhiteSpace(this.userName))
-			{
-				error = "Username is required.";
-
-			}
-			if (age < 18)
-			{
-				error = "Invalid age, at least 18 years old is required.";
-			}
-
-			if (string.IsNullOrWhiteSpace(password))
-			{
-				error = "Valid password is required.";
-			}
-			else
-			{
-				if (password.Length < 6)
-				{
-					error = "Password must be at least 6 characters long.";
-				}
-				if (!Regex.IsMatch(password, "[A-Z]"))
-				{
-					error = "Password must contain at least one capital letter.";
-				}
-				if (!Regex.IsMatch(password, @"\d"))
-				{
-					error = "Password must contain at least one number.";
-				}
-				if (!Regex.IsMatch(password, "[^a-zA-Z0-9]"))
-				{
-					error = "Password must contain at least one special character (symbols like ! @ # $ % ^ & * ( ) _ + etc.).";
-				}
-			}
-
-			if (string.IsNullOrWhiteSpace(email))
-			{
-				error = "Email is required.";
-			}
-			else
-			{
-				var gmailRegex = new Regex(@"^[a-zA-Z0-9._%+-]+@gmail\.com$", RegexOptions.IgnoreCase);
-				if (!gmailRegex.IsMatch(email))
-				{
-					error = "Invalid Gmail address format. Example: sample@gmail.com";
-				}
-			}
 			if (string.IsNullOrWhiteSpace(contactNumber))
 			{
 				error = "Contact number is required.";
@@ -962,83 +637,6 @@
 				error = "Tax Identification Number is required.";
 
 			}
-			if (string.IsNullOrWhiteSpace(selectedSex))
-			{
-				error = "Sex is required.";
-
-			}
-			if (string.IsNullOrWhiteSpace(selectedCivilStatus))
-			{
-				error = "Civil status is required.";
-
-			}
-
-			if (string.IsNullOrWhiteSpace(selectedRegion))
-			{
-				error = "Religion is required.";
-			}
-			if (selectedReligion == "Others" && string.IsNullOrWhiteSpace(customReligion))
-			{
-				error = "Please specify your religion.";
-			}
-
-			// // Validation for names
-			if (string.IsNullOrWhiteSpace(fatherFirstName) || string.IsNullOrWhiteSpace(fatherLastName))
-			{
-				error = "Father's full name is required.";
-
-			}
-			if (string.IsNullOrWhiteSpace(motherFirstName) || string.IsNullOrWhiteSpace(motherLastName))
-			{
-				error = "Mother's full name is required.";
-
-			}
-
-			// Validation for address
-			bool hasMissingFieldAddress = (
-				string.IsNullOrWhiteSpace(selectedRegion)
-				|| string.IsNullOrWhiteSpace(selectedProvince)
-				|| string.IsNullOrWhiteSpace(selectedCity)
-				|| string.IsNullOrWhiteSpace(selectedBarangay)
-			);
-			if (hasMissingFieldAddress)
-			{
-				error = "Full current address is required.";
-			}
-
-			if (string.IsNullOrWhiteSpace(houseNo))
-			{
-				error = "House number is required.";
-
-			}
-			if (string.IsNullOrWhiteSpace(street))
-			{
-				error = "Street name is required.";
-			}
-
-			bool hasMissingFieldBirthAddress = (
-				string.IsNullOrWhiteSpace(selectedBirthRegion)
-				|| string.IsNullOrWhiteSpace(selectedBirthProvince)
-				|| string.IsNullOrWhiteSpace(selectedBirthCity)
-			);
-
-			if (hasMissingFieldBirthAddress)
-			{
-				error = "Full birth address is required.";
-			}
-
-			if (postalCode == 0)
-			{
-				error = "Postal code is required.";
-
-			}
-
-			if (birthDate > DateTime.UtcNow.Date.AddYears(-18))
-			{
-				error = "You must be older than 18 years old to open an account.";
-
-			}
-
 			//	File uploads
 			if (profilePicture is null || !profilePicture.Any())
 			{
@@ -1053,34 +651,9 @@
 			if (!string.IsNullOrWhiteSpace(error))
 				return;
 
-			Console.WriteLine("ERROR CHECKS PASSED.");
 
 			accountTypeId = accountTypeNames.AccountTypeNameList.IndexOf(selectedAccountTypeName) + 1;
 			accountProductTypeId = accountProductTypeNames.AccountProductTypeNameList.IndexOf(selectedAccountProductTypeName) + 1;
-			Console.WriteLine(accountTypeId + " " + accountProductTypeId);
-
-			Region addressRegion = await RegistrationService.GetOrRegisterRegion(selectedRegion, regions);
-			Province? addressProvince = await RegistrationService.GetOrRegisterProvince(selectedProvince, addressRegion.RegionId, provinces);
-			City addressCity = await RegistrationService.GetOrRegisterCity(selectedCity, addressProvince?.ProvinceId, addressRegion.RegionId, cities);
-			Barangay addressBarangay = await RegistrationService.GetOrRegisterBarangay(selectedBarangay, addressCity.CityId, barangays);
-
-			Region birthRegion = await RegistrationService.GetOrRegisterRegion(selectedBirthRegion, birthRegions);
-			Province? birthProvince = await RegistrationService.GetOrRegisterProvince(selectedBirthProvince, birthRegion.RegionId, birthProvinces);
-			City birthCity = await RegistrationService.GetOrRegisterCity(selectedBirthCity, birthProvince?.ProvinceId, birthRegion.RegionId, birthCities);
-
-
-			Name userName =  RegistrationService.CreateName(userFirstName, userMiddleName, userLastName, userSuffix);
-			Name fatherName = RegistrationService.CreateName(fatherFirstName, fatherMiddleName, fatherLastName, fatherSuffix);
-			Name motherName = RegistrationService.CreateName(motherFirstName, motherMiddleName, motherLastName, motherSuffix);
-			// Name BeneficiaryName = await RegistrationService.RegisterName(beneficiaryFirstName, benefi
-
-			BirthInfo userBirthInfo = RegistrationService.CreateBirthInfo(birthDate, birthCity, birthProvince, birthRegion);
-			Address userAddress = RegistrationService.CreateAddress(houseNo, street, addressBarangay, addressCity, addressProvince, addressRegion, postalCode);
-
-
-			string religionToSave = selectedRegion == "others" ? customReligion : selectedReligion;
-			Religion userReligion = await RegistrationService.GetOrRegisterReligion(religionToSave);
-
 
 			Account userAccount = RegistrationService
 			.CreateAccount(
@@ -1089,29 +662,8 @@
 				contactNumber, 
 				beneficiaryAccountId
 			);
-			UserAuth userAuth = await RegistrationService.CreateUserAuth(this.userName, email, password);
-			UserInfo userInfo = RegistrationService.CreateUserInfo(
-				age,
-				selectedSex,
-				contactNumber,
-				Occupation,
-				taxIdentificationNumber,
-				selectedCivilStatus,
-				profilePicture!,
-				governmentId!
-			);
 
-			await RegistrationService.InitiateRegistraiton(
-				userName,
-				fatherName,
-				motherName,
-				userBirthInfo,
-				userAddress,
-				userReligion,
-				userAccount,
-				userAuth,
-				userInfo
-			);
+			await RegistrationService.ExistingUserRegisterAccount(userSession.UserInfoId, userAccount);
 
 			NavigationManager.NavigateTo("/PendingApproval");
 		}
