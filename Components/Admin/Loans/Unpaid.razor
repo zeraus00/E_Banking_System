@@ -2,6 +2,8 @@
 @attribute [Authorize(Roles = "Administrator")]
 @rendermode InteractiveServer
 
+@using System.Text.RegularExpressions;
+
 @inject AdminControlledSessionService adminControlledSessionService
 @inject AdminDataService adminDataService
 @inject NavigationManager Navigation
@@ -11,7 +13,12 @@
 
 <div class="main">
     <div class="dashboard-container">
-
+        @if (message.Length > 0)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>@message</strong>
+            </div>
+        }
         <div class="top-bar mx-3">
             <h2>Accounts with Unpaid Loan</h2>
         </div>
@@ -21,7 +28,7 @@
         <div class="d-flex align-items-center gap-3 m-3 flex-wrap">
 
             <div class="d-flex align-items-center gap-3">
-                <input class="form-control form-control-sm" @bind="searchAccount" placeholder="Search specific account">
+                <input class="form-control form-control-sm" @bind="accountNumber" placeholder="Search specific account">
             </div>
 
             <div class="d-flex align-items-center gap-3">
@@ -119,7 +126,7 @@
 
     private DateTime? startDate = DateTime.Now.AddDays(-DateTime.Now.Day + 1);
     private DateTime? endDate = DateTime.Now;
-    private string searchAccount = "";
+    private string cleanedAccountNumber = "";
     private string accountNumber = "";
     private string loanStatus = LoanStatusTypes.ACTIVE;
     private List<Loan> loanAccountList = new();
@@ -165,6 +172,9 @@
             await displayMessage("Start date cannot be later than end date.");
             return;
         }
+        bool isAccountNumberValid = await ValidateAccountNumberInput();
+        if (!isAccountNumberValid)
+            return;
 
         pageNumber = 1;
         await LoadLoanUnpaidAsync();
@@ -202,7 +212,7 @@
     private async Task LoadLoanUnpaidAsync()
     {
         loanAccountList = await adminDataService.LoadLoansListAsync(
-            accountNumber: accountNumber,
+            cleanedAccountNumber,
             startDate: startDate,
             endDate: endDate,
             loanStatus: loanStatus,
@@ -222,7 +232,7 @@
 
         remainingAccountsCount = await adminDataService
             .CountRemainingLoansAsync(
-                accountNumber: accountNumber,
+                cleanedAccountNumber,
                 startDate,
                 endDate,
                 loanStatus: loanStatus,
@@ -238,6 +248,25 @@
         else
             isNextDisabled = false;
 
+    }
+
+    private async Task<bool> ValidateAccountNumberInput()
+    {
+        cleanedAccountNumber = accountNumber.Length > 12 ? accountNumber.Replace("-", "").Trim() :
+        accountNumber.Trim();
+
+        bool isInputInvalid = !string.IsNullOrWhiteSpace(cleanedAccountNumber) &&
+            (
+                (cleanedAccountNumber.Length != 3 && cleanedAccountNumber.Length != 12) ||
+                !Regex.IsMatch(cleanedAccountNumber, @"^\d+$")
+            );
+
+        if (isInputInvalid)
+        {
+            await displayMessage("Please enter a valid account number.");
+            return false;
+        }
+        return true;
     }
 
     private async Task displayMessage(string msg)

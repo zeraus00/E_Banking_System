@@ -463,7 +463,7 @@
 
 				<!-- Terms and Conditions Checkbox -->
 				<div class="form-check d-flex justify-content-end mt-3">
-					<input class="form-check-input mx-2" type="checkbox" id="termsAndConditions" required>
+					<input class="form-check-input mx-2" type="checkbox" id="termsAndConditions" @bind="isConfirmed" required>
 					<label class="form-check-label text-light" for="termsAndConditions">
 						I accept the terms and conditions
 					</label>
@@ -471,7 +471,7 @@
 
 				<!-- Register Button -->
 				<div class="text-end mt-3">
-					<button class="btn btn-primary btn-secondary" @onclick="RegisterUserAsync">Submit Application</button>
+					<button class="btn btn-primary btn-secondary" @onclick="RegisterUserAsync" disabled="@(isConfirmed == false)">Submit Application</button>
 				</div>
 
 			</div>
@@ -483,6 +483,7 @@
 
 @code {
 
+	private bool isConfirmed = false;
 	private string error = string.Empty;
 	private string noBeneficiaryFound = string.Empty;
 

@@ -221,14 +221,6 @@
 				</div>
 			</div>
 
-			<!-- Terms and Conditions -->
-			<div class="form-check d-flex justify-content-end mt-3">
-				<input class="form-check-input mx-2" type="checkbox" id="termsAndConditions" required>
-				<label class="form-check-label text-light" for="termsAndConditions">
-					I accept the terms and conditions
-				</label>
-			</div>
-
 			<!-- Register Button -->
 			<div class="d-flex justify-content-end gap-2 mt-3">
 				<button class="btn btn-danger btn-secondary fs-5 mx-2" @onclick="RejectAsync">Reject</button>
@@ -267,7 +259,7 @@
 			{
 				var loanViewSession = await adminControlledSessionService.GetLoanViewSession();
 				userInfoId = loanViewSession.UserInfoId;
-				accountId = loanViewSession.LoanId;
+				loanId = loanViewSession.LoanId;
 
 				userInfo = await userDataService.TryGetUserInfoAsync(
 					userInfoId,
