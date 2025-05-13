@@ -299,7 +299,7 @@
 	{
 		try
 		{
-			await adminDataService.UpdateLoanStatus(loanId, LoanStatusTypes.REJECTED);
+			await adminDataService.UpdateLoanStatus(loanId, LoanStatusTypes.REJECTED, DateTime.Now);
 			await adminControlledSessionService.ClearLoanViewSession();
 			redirectService.redirectWithNavigationManager(PageRoutes.APPLLYING_LOAN);
 		}
@@ -317,7 +317,7 @@
 	{
 		try
 		{
-			await adminDataService.UpdateLoanStatus(loanId, LoanStatusTypes.APPROVED);
+			await adminDataService.UpdateLoanStatus(loanId, LoanStatusTypes.ACTIVE, DateTime.Now);
 			await adminControlledSessionService.ClearLoanViewSession();
 			redirectService.redirectWithNavigationManager(PageRoutes.APPLLYING_LOAN);
 		}

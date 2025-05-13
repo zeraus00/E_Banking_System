@@ -63,7 +63,7 @@
                         @bind="paymentAmount"
                         @onfocus="ClearDefaultValue"
                         @onblur="SetDefaultValue" 
-                        disabled/>
+                        />
                     </div>
 
                     <h6 class="mx-3 mb-4">
@@ -185,11 +185,13 @@
         if (loan is null)
         {
             error = "This loan number does not exist or is not associated with your account.";
+            paymentAmount = 0.00m;
             return;
         }
         if (!HasPostDisbursementStatus(loan.LoanStatus))
         {
             error = "This loan is not active yet.";
+            paymentAmount = 0.00m;
             return;
         }
         var now = DateTime.Now;
@@ -198,6 +200,7 @@
             isOverdue = true;
         }
         paymentAmount = await loanService.GetCurrentPaymentAmount(loan.LoanId, now);
+        StateHasChanged();
     }
 
     public async ValueTask DisposeAsync()
@@ -260,7 +263,7 @@
                 .CreateTransactionAsync(
                     accountId,
                     (int)TransactionTypeIDs.Loan_Payment,
-                    amount: await loanService.GetCurrentPaymentAmount(loan.LoanId, now),
+                    amount: paymentAmount.Value,
                     transactionDate: now,
                     loanId: loan.LoanId
                 );

@@ -68,6 +68,14 @@ namespace Data.Repositories.Finance
                     l.LoanStatus == LoanStatusTypes.RESTRUCTURED
                 ) :
                 this;
+
+            public LoanQuery HasSubmittedOrActiveStatus(bool has = true) =>
+                has ?
+                WhereCondition(l =>
+                    l.LoanStatus == LoanStatusTypes.ACTIVE ||
+                    l.LoanStatus == LoanStatusTypes.SUBMITTED
+                ) :
+                this;
             public LoanQuery HasNoStatus(string status) =>
                 WhereCondition(l => l.LoanStatus != status);
             public LoanQuery IncludeAccount(bool include = true) => include ? Include(l => l.Account) : this;

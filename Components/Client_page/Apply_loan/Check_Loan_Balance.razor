@@ -36,6 +36,7 @@
 									<tr><td>Statement Date:</td><td>@(loan.StartDate?.ToShortDateString() ?? loan.ApplicationDate.ToShortDateString())</td></tr>
 									<tr><td>Loan Number:</td><td>@loan.LoanNumber</td></tr>
 									<tr><td>Loan Amount:</td><td>@FormatHelper.BalanceFormatter(loan.LoanAmount)</td></tr>
+									<tr><td>Loan Balance:</td><td>@FormatHelper.BalanceFormatter(loan.RemainingLoanBalance)</td></tr>
 									<tr><td>Loan Term:</td><td>@loan.LoanTermMonths</td></tr>
 									<tr><td>Interest Rate:</td><td>@(loan.InterestRate * 100)%</td></tr>
 									<tr><td>Loan Status:</td><td>@loan.LoanStatus</td></tr>
@@ -147,6 +148,7 @@
 				nextPayment = await loanService.GetCurrentPaymentAmount(loan.LoanId, now);
 				nextInterest = loanService.calculatePaymentInterestAmount(loan.InterestRatePerPayment, loan.RemainingLoanBalance);
 			}
+			StateHasChanged();
 		}
 	}
 

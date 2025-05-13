@@ -1,4 +1,5 @@
 ﻿using Data;
+using Data.Constants;
 using Data.Models.User;
 using Data.Repositories.Auth;
 using Data.Repositories.Finance;
@@ -596,9 +597,24 @@ namespace Services.DataManagement
 
                 return await loanRepo
                     .Query
+                    .HasNoStatus(LoanStatusTypes.PAID)
                     .HasAccountId(accountId)
                     .GetQuery()
                     .FirstOrDefaultAsync();
+            }
+        }
+
+        public async Task<bool> IsAccountHasActiveLoan(int accountId)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                var loanRepo = new LoanRepository(dbContext);
+
+                return await loanRepo
+                    .Query
+                    .HasSubmittedOrActiveStatus()
+                    .GetQuery()
+                    .AnyAsync();
             }
         }
         #endregion

@@ -379,7 +379,7 @@ namespace Services.DataManagement
                     .CountAsync();
             }
         }
-        public async Task UpdateLoanStatus(int loanId, string newStatus)
+        public async Task UpdateLoanStatus(int loanId, string newStatus, DateTime now)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
@@ -388,7 +388,13 @@ namespace Services.DataManagement
                 Loan loan = await loanRepo.GetLoanById(loanId) ?? throw new NullReferenceException();
 
                 loan.LoanStatus = newStatus;
-
+                if (newStatus.Equals(LoanStatusTypes.ACTIVE))
+                {
+                    loan.StartDate = now.Date;
+                    loan.UpdateDate = now.Date;
+                    loan.DueDate = now.AddMonths(12 / loan.PaymentFrequency);
+                    loan.EndDate = now.AddMonths(loan.LoanTermMonths);
+                }
                 await loanRepo.SaveChangesAsync();
             }
         }

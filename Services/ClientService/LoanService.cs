@@ -51,7 +51,7 @@ namespace Services.ClientService
             newLoan.InterestRate = loanType.InterestRate;
             newLoan.RemainingLoanBalance = newLoan.LoanAmount;
             newLoan.NumberOfPayments = calculateNumberOfPayments(newLoan.LoanTermMonths, newLoan.PaymentFrequency);
-            newLoan.InterestRatePerPayment = calculateInterestRatePerPayment(newLoan.InterestRate, newLoan.NumberOfPayments);
+            newLoan.InterestRatePerPayment = calculateInterestRatePerPayment(newLoan.InterestRate, newLoan.PaymentFrequency);
             newLoan.InterestAmount = calculatePaymentInterestAmount(newLoan.InterestRatePerPayment, newLoan.LoanAmount);
             newLoan.PaymentAmount = calculatePaymentAmount(newLoan.LoanAmount, newLoan.InterestRatePerPayment, newLoan.NumberOfPayments);
             newLoan.LoanStatus = LoanStatusTypes.SUBMITTED;
@@ -100,16 +100,18 @@ namespace Services.ClientService
         }
 
 
-        public async Task UpdateLoanPayment(LoanRepository loanRepo, int loanId, DateTime paymentDate)
+        public async Task UpdateLoanPayment(LoanRepository loanRepo, int loanId, DateTime paymentDate, decimal paymentAmount)
         {
             var loan = await loanRepo.GetLoanById(loanId);
             if (loan is not null)
             {
                 loan.UpdateDate = paymentDate;
-                loan.RemainingLoanBalance -= loan.PaymentAmount;
+                loan.RemainingLoanBalance -= paymentAmount;
                 loan.InterestAmount = calculatePaymentInterestAmount(loan.InterestRatePerPayment, loan.RemainingLoanBalance);
                 loan.PaymentAmount = calculatePaymentAmount(loan.RemainingLoanBalance, loan.InterestRatePerPayment, loan.NumberOfPayments);
                 loan.DueDate = loan.DueDate!.Value.AddMonths(12 / loan.PaymentFrequency);
+                if (loan.RemainingLoanBalance <= 0)
+                    loan.LoanStatus = LoanStatusTypes.PAID;
             }
         }
         public async Task<Loan?> TryGetLoanAsync(string loanNumber, int accountId)
@@ -179,8 +181,8 @@ namespace Services.ClientService
                     .SelectLoanNumber();
             }
         }
-        public int calculateNumberOfPayments(int loanTermMonths, int paymentFrequency) => loanTermMonths / paymentFrequency;
-        public decimal calculateInterestRatePerPayment(decimal interestRate, int numberOfPayments) => interestRate / numberOfPayments;
+        public int calculateNumberOfPayments(int loanTermMonths, int paymentFrequency) => (loanTermMonths / 12) * paymentFrequency;
+        public decimal calculateInterestRatePerPayment(decimal interestRate, int paymentFrequency) => interestRate / paymentFrequency;
         public decimal calculatePaymentInterestAmount(decimal interestRatePerPayment, decimal loanBalance) => interestRatePerPayment * loanBalance;
         public decimal calculatePaymentAmount(decimal loanBalance, decimal interestRatePerPayment, int numberOfPayments)
         {

@@ -225,7 +225,7 @@ namespace Services
                             mainTransactionBuilder.WithLoanId(loanId);
 
                             var loanRepo = new LoanRepository(dbContext);
-                            await _loanService.UpdateLoanPayment(loanRepo, loanId, transactionDate);
+                            await _loanService.UpdateLoanPayment(loanRepo, loanId, transactionDate, amount);
                             await loanRepo.SaveChangesAsync();
                         }
 
