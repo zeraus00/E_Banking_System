@@ -55,7 +55,7 @@ namespace Data.Repositories.Finance
             public LoanQuery LoanApplicationOrOrAfter(DateTime startDate) =>
                 WhereCondition(l => l.ApplicationDate >= startDate.Date);
             public LoanQuery LoanApplicationOnOrBefore(DateTime endDate) =>
-                WhereCondition(l => l.ApplicationDate <= endDate.Date);
+                WhereCondition(l => l.ApplicationDate <= endDate.Date.AddDays(1));
             public LoanQuery HasStatus(string status) =>
                 WhereCondition(l => l.LoanStatus == status);
             public LoanQuery HasPostDisbursementStatus(bool hasOngoingStatus = true) =>

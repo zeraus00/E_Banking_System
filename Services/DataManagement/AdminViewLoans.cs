@@ -36,7 +36,7 @@ namespace Services.DataManagement
 
 
         public async Task<List<Loan>> GetFilterLoanAccountApplying(
-            int loanId,
+            string loanNumber = "",
             DateTime? startDate = null,
             DateTime? endDate = null,
             int loanTypeId = 0,
@@ -50,14 +50,14 @@ namespace Services.DataManagement
                 var loanRepo = new LoanRepository(dbContext);
 
                 var queryBuilder = loanRepo.Query;
-                queryBuilder.HasLoanId(loanId);
+                queryBuilder.HasLoanNumber(loanNumber);
                 queryBuilder.HasStatus(LoanStatusTypes.SUBMITTED);
                 queryBuilder.IncludeAccount();
                 queryBuilder.IncludeUserInfo();
                 queryBuilder.OrderByDateDescending();
 
-                if (loanId < 0)
-                    queryBuilder = queryBuilder.HasLoanId(loanId);
+                if (string.IsNullOrWhiteSpace(loanNumber))
+                    queryBuilder = queryBuilder.HasLoanNumber(loanNumber);
 
                 if (startDate.HasValue)
                     queryBuilder = queryBuilder.LoanApplicationOrOrAfter(startDate.Value);
