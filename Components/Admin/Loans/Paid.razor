@@ -6,6 +6,8 @@
 @inject AdminDataService adminDataService
 @inject NavigationManager Navigation
 @inject PageRedirectService redirectService
+@inject UserSessionService userSessionService
+@inject UserDataService userDataService
 
 <div class="main">
     <div class="dashboard-container">
@@ -63,42 +65,21 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr class="bg-light">
-                        <td>05/10/2025</td>
-                        <td>1234567890</td>
-                        <td>Juan Dela Cruz</td>
-                        <td>juan.delacruz@example.com</td>
-                        <td>
-                            <a href="Account_paid_loan" class="btn btn-info btn-secondary btn-sm rounded text-dark shadow-sm" style="border: 2px solid cyan">View</a>
-                        </td>
-                    </tr>
-                    @foreach (var a in accountList)
+                    @if (loanAccountList.Any())
                     {
-
-                        @*<tr class="bg-light">
-                            <td>a.StatementDate.ToString("MM/dd/yyyy")</td>
-                            <td>@a.AccountNumber</td>
-                            <td>@a.AccountName</td>
-                            <td>a.LoanAmount</td>
-                            <td>a.LoanTerm</td>
-                            <td>
-                                <a href="Loan_status" class="btn btn-info btn-secondary btn-sm rounded text-dark shadow-sm" style="border: 2px solid cyan">View</a>
-                            </td>
-                        </tr>*@
+                        @foreach (var a in loanAccountList)
+                        {
+                            <tr class="bg-light">
+                                <td>@(a.EndDate)</td>
+                                <td>@(loanIdAccountDictionary[a.LoanId][0])</td>
+                                <td>@(loanIdAccountDictionary[a.LoanId][1])</td>
+                                <td>@(a.LoanAmount)</td>
+                                <td>@(a.LoanTermMonths)</td>
+                                <td>@(a.LoanStatus)</td>
+                            </tr>
+                        }
+                        
                     }
-                    @* @foreach (var a in accounts)
-                    {
-                        <tr class="bg-light">
-                            <td>@a.Date.ToString("MM/dd/yyyy")</td>
-                            <td>@a.Time.ToString(@"hh\:mm\:ss")</td>
-                            <td>@a.Name</td>
-                            <td>@a.AccountType</td>
-                            <td>
-                                <button class="btn btn-info btn-secondary btn-sm rounded text-dark shadow-sm" style="border: 2px solid cyan" @onclick="() => ViewDetails(a)">View</button>
-                            </td>
-                            <td class="text-secondary">@a.Status</td>
-                        </tr>
-                    } *@
                 </tbody>
             </table>
         </div>
@@ -119,14 +100,143 @@
 </div>
 
 @code {
+    private AdminSession? adminSession;
+
+    private string message = "";
 
     private List<string> accountTypeList = AccountTypes.AS_STRING_LIST;
+    private Dictionary<int, List<string>> loanIdAccountDictionary = new();
 
     private DateTime? startDate = DateTime.Now.AddDays(-DateTime.Now.Day + 1);
     private DateTime? endDate = DateTime.Now;
-    // private string selectedType = "";
     private string searchAccount = "";
+    private string accountNumber = "";
+    private string loanStatus = LoanStatusTypes.PAID;
+    private List<Loan> loanAccountList = new();
 
-    private List<Account> accountList = new();
+    private int remainingAccountsCount;
 
+    private int pageSize = 5;
+    private int pageNumber = 1;
+    private int availablePages;
+
+    private bool isNextDisabled = false;
+    private bool isPreviousDisabled = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isPreviousDisabled = true;
+        await LoadLoanPaidAsync();
+        StateHasChanged();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                adminSession = await userSessionService.GetAdminSession();
+
+                await adminControlledSessionService.ClearAdminControlledSessions();
+
+                await LoadLoanPaidAsync();
+                StateHasChanged();
+            }
+            catch (SessionNotFoundException)
+            {
+                redirectService.redirectWithNavigationManager(PageRoutes.DASHBOARD);    
+            }
+        }
+    }
+
+    private async Task OnFilterAsync()
+    {
+        if (startDate > endDate)
+        {
+            await displayMessage("Start date cannot be later than end date.");
+            return;
+        }
+
+        pageNumber = 1;
+        await LoadLoanPaidAsync();
+    }
+
+    private async Task OnclearFilterAsync()
+    {
+        startDate = DateTime.Now.AddDays(-DateTime.Now.Day + 1).Date;
+        endDate = DateTime.Now.Date;
+        pageNumber = 1;
+        await LoadLoanPaidAsync();
+    }
+
+    private async Task NextPage()
+    {
+        isPreviousDisabled = false;
+        pageNumber++;
+        await LoadLoanPaidAsync();
+        StateHasChanged();
+    }
+
+    private async Task PreviousPage()
+    {
+        if (pageNumber > 1)
+        {
+            isNextDisabled = false;
+            pageNumber--;
+            if (pageNumber == 1)
+                isPreviousDisabled = true;
+            await LoadLoanPaidAsync();
+            StateHasChanged();
+        }    
+    }
+
+    private async Task LoadLoanPaidAsync()
+    {
+        loanAccountList = await adminDataService.LoadLoansListAsync(
+        accountNumber: accountNumber,
+        startDate: startDate,
+        endDate: endDate,
+        loanStatus: loanStatus,
+        pageNumber: pageNumber,
+        pageSize: pageSize
+        );
+
+        foreach (var loan in loanAccountList)
+        {
+            var accountNumberAndName = new List<string>()
+            {
+                await adminDataService.GetAccountNumberAsync(loan.AccountId),
+                await adminDataService.GetAccountNameAsync(loan.AccountId)
+            };
+            loanIdAccountDictionary[loan.LoanId] = accountNumberAndName;
+        }
+
+        remainingAccountsCount = await adminDataService
+            .CountRemainingLoansAsync(
+                accountNumber: accountNumber,
+                startDate,
+                endDate,
+                loanStatus: loanStatus,
+                pageNumber: pageNumber,
+                pageSize: pageSize
+            );
+
+        availablePages = remainingAccountsCount == 0 && pageNumber == 1 ?
+        1 : pageNumber + ((int)Math.Ceiling((double)remainingAccountsCount / 10));
+
+        if (!loanAccountList.Any() || remainingAccountsCount == 0)
+            isNextDisabled = true;
+        else
+            isNextDisabled = false;
+    }
+
+    private async Task displayMessage(string msg)
+    {
+        message = msg;
+        StateHasChanged();
+        await Task.Delay(3000);
+        message = "";
+        StateHasChanged();
+    }
 }
