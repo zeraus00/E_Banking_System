@@ -1,9 +1,12 @@
-﻿@page "/Closed_accounts"
+﻿@using System.Text.RegularExpressions
+
+@page "/Closed_accounts"
 @attribute [Authorize(Roles = "Administrator")]
 @rendermode InteractiveServer
 
 @inject AdminControlledSessionService adminControlledSessionService
 @inject AdminDataService adminDataService
+@inject UserDataService userDataService
 @inject NavigationManager Navigation
 @inject PageRedirectService redirectService
 
@@ -19,7 +22,7 @@
         <div class="d-flex align-items-center gap-3 m-3 flex-wrap">
 
             <div class="d-flex align-items-center gap-3">
-                <input class="form-control form-control-sm" @bind="searchAccount" placeholder="Search specific account">
+                <input class="form-control form-control-sm" @bind="accountNumber" placeholder="Search specific account">
             </div>
 
             <div class="d-flex align-items-center gap-3">
@@ -34,17 +37,17 @@
 
             <div class="d-flex align-items-center gap-3">
                 <label class="text-light mb-0" style="white-space: nowrap;">Account Type</label>
-                <select class="form-select form-select-sm" @bind="selectedType">
+                <select class="form-select form-select-sm" @bind="selectedAccountTypeId">
                     <option value="">All</option>
-                    @foreach (var type in accountTypeList)
+                    @foreach (var type in AccountTypes.AS_STRING_LIST)
                     {
-                        <option value="@accountTypeList.IndexOf(type)">@type</option>
+                        <option value="@(AccountTypes.AS_STRING_LIST.IndexOf(type) + 1)">@type</option>
                     }
                 </select>
             </div>
 
-            <button class="btn btn-primary btn-sm shadow-sm" @onclick="FilterAsync">Filter</button>
-            <button class="btn btn-danger btn-sm shadow-sm" @onclick="ClearFilterAsync">Clear Filter</button>
+            <button class="btn btn-primary btn-sm shadow-sm" @onclick="OnFilterAsync">Filter</button>
+            <button class="btn btn-danger btn-sm shadow-sm" @onclick="OnClearFilterAsync">Clear Filter</button>
 
         </div>
 
@@ -72,12 +75,12 @@
                         <tr class="bg-light">
                             <td>@a.AccountNumber</td>
                             <td>@a.AccountName</td>
-                            <td>a.DateClosed.ToString("MM/dd/yyyy")</td>
+                            <td>@(a.DateClosed?.ToShortDateString() ?? "No date")</td>
                             <td>a.ClosedBy</td>
                             <td>a.ClosureReason</td>
-                            <td>a.LastTransactionDate.ToString("MM/dd/yyyy")</td>
-                            <td>a.LastTransactionType</td>
-                            <td>a.FinalBalance</td>
+                            <td>@(lastTransactionsDict[a.AccountId]?.TransactionDate.ToShortDateString() ?? "No recorded transaction.")</td>
+                            <td>@(lastTransactionsDict[a.AccountId]?.TransactionType.TransactionTypeName ?? "No recorded transaction.")</td>
+                            <td>@a.Balance</td>
                             <td>a.FraudInvestigationFlag</td>
                         </tr>
                     }
@@ -87,70 +90,194 @@
 
         <div class="scroll-container gap-3 mx-5">
             <!-- Left Arrow -->
-            <button class="arrow-ud">
+            <button class="arrow-ud" disabled="@isPreviousDisabled">
                 <i class="bi bi-chevron-left text-light"></i>
             </button>
 
             <!-- Right Arrow -->
             <button class="arrow-ud">
-                <i class="bi bi-chevron-right text-light"></i>
+                <i class="bi bi-chevron-right text-light" disabled="@isNextDisabled"></i>
             </button>
         </div>
 
         <div class="page-container text-center text-light mt-2 mb-3 mx-5">
-            Page @pageNumber of @masterListAvailablePages
+            Page @pageNumber of @availablePages
         </div>
 
     </div>
 </div>
 
 @code {
-    private List<string> accountTypeList = AccountTypes.AS_STRING_LIST;
+    private string message = "";
 
-    private DateTime? startDate = DateTime.Now.AddDays(-DateTime.Now.Day + 1);
-    private DateTime? endDate = DateTime.Now;
-    private string selectedType = "";
-    private string searchAccount = "";
+    private DateTime? startDate;
+    private DateTime? endDate;
+    private int selectedAccountTypeId = 0;
+    private string accountNumber = "";
+    private string cleanedAccountNumber = "";
 
     private List<Account> accountList = new();
+    private Dictionary<int, Transaction?> lastTransactionsDict = new();
 
-    private List<string> transactionTypes { get; set; } = new();
-    private string selectedTransactionType = "0";
+    private int remainingAccountsCount;
 
-    private List<Transaction> transactionMasterList = new();
-    private int masterListPageSize = 36;
-    private int masterListAvailablePages = 0;
-    private int masterListPageNumber = 1;
+    //  Pagination
+    private int pageSize = 5;
+    private int pageNumber = 1;
+    private int availablePages;
 
-    private List<Transaction> transactionListPage = new();
-    private int pageSize = 6;
-    private int pageNumber = 0;
+    private bool isNextDisabled = false;
+    private bool isPreviousDisabled = false;
 
     protected override async Task OnInitializedAsync()
     {
-        accountList = await adminDataService.LoadAccountsListAsync(accountStatusTypeId: (int)AccountStatusTypeIDs.Closed);
+        isPreviousDisabled = true;
+        await LoadAccountsAsync();
+        StateHasChanged();
     }
-
-
-    private async Task FilterAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        accountList = await adminDataService
-            .LoadAccountsListAsync(
-            searchAccount,
-            startDate,
-            endDate,
-            (int)AccountTypeIDs.PersonalAccount,
-            (int)AccountStatusTypeIDs.Closed
-        );
+        if (firstRender)
+        {
+            //  Clear all admin controlled sessions.
+            await adminControlledSessionService.ClearAdminControlledSessions();
+        }
     }
-
-    private async Task ClearFilterAsync()
+    private async Task OnFilterAsync()
     {
+        if (startDate > endDate)
+        {
+            await DisplayMessage("Start date cannot be later than end date.");
+            return;
+        }
+        //  Validate the account number input if it is not empty.
+        bool isAccountNumberValid = await ValidateAccountNumberInput();
+        if (!isAccountNumberValid)
+            return;
+        pageNumber = 1;
+        await LoadAccountsAsync();
+
+    }
+    private async Task OnClearFilterAsync()
+    {
+        //  Resets all filters and reloads the list.
         startDate = null;
         endDate = null;
-        selectedType = "";
-        searchAccount = "";
-        accountList = await adminDataService.LoadAccountsListAsync(accountStatusTypeId: (int)AccountStatusTypeIDs.Closed);
+        selectedAccountTypeId = 0;
+        cleanedAccountNumber = "";
+        accountNumber = "";
+        pageNumber = 1;
+        await LoadAccountsAsync();
+    }
+    private async Task OnViewClick(Account account)
+    {
+        //  Create an AccountViewSession
+        AccountViewSession accountViewSession = new()
+            {
+                AccountId = account.AccountId,
+                AccountNumber = account.AccountNumber,
+                AccountName = account.AccountName,
+                AccountContactNo = account.AccountContactNo,
+                AccountStatusId = account.AccountStatusTypeId
+            };
+
+        //  Set the AccountViewSession in the current AdminSesssion.
+        await adminControlledSessionService.SetAccountViewSession(accountViewSession);
+        //  Navigate to view account page.
+        Navigation.NavigateTo(PageRoutes.VIEW_ACCOUNT);
+    }
+    private async Task NextPage()
+    {
+        //  Enable the previous button
+        isPreviousDisabled = false;
+        pageNumber++;
+        await LoadAccountsAsync();
+        StateHasChanged();
     }
 
+    private async Task PreviousPage()
+    {
+        if (pageNumber > 1)
+        {
+            isNextDisabled = false;
+            pageNumber--;
+            if (pageNumber == 1)
+                isPreviousDisabled = true;
+            await LoadAccountsAsync();
+            StateHasChanged();
+        }
+    }
+    private async Task LoadAccountsAsync()
+    {
+        //  Filter the accounts.
+        accountList = await adminDataService
+            .LoadAccountsListAsync(
+                cleanedAccountNumber,
+                startDate,
+                endDate,
+                selectedAccountTypeId,
+                accountStatusTypeId: (int)AccountStatusTypeIDs.Closed,
+                pageNumber: pageNumber,
+                pageSize: pageSize
+            );
+        lastTransactionsDict = new();
+        foreach (var account in accountList)
+            lastTransactionsDict[account.AccountId] = await userDataService.GetAccountLastTransactionAsync(account.AccountId);
+        //  Get the remaining accounts count after the current page.
+        remainingAccountsCount = await adminDataService
+            .CountRemainingAccountsAsync(
+                cleanedAccountNumber,
+                startDate,
+                endDate,
+                selectedAccountTypeId,
+                pageNumber: pageNumber,
+                pageSize: pageSize
+            );
+
+        //  Calculate the number of available pages.
+        availablePages = remainingAccountsCount == 0 && pageNumber == 1 ?
+            1 :
+            pageNumber + ((int)Math.Ceiling((double)remainingAccountsCount / 10));
+
+        if (!accountList.Any())
+            //  Disable the next button if the list is empty if there are no more accounts
+            //  after the current page.
+            isNextDisabled = true;
+    }
+    private async Task<bool> ValidateAccountNumberInput()
+    {
+        //  If the account number length is greater than 12, remove the dashes and trim. Otherwise
+        //  just trim the input.
+        cleanedAccountNumber = accountNumber.Length > 12 ?
+            accountNumber.Replace("-", "").Trim() :
+            accountNumber.Trim();
+        /*
+        * Check if the account number input is empty. If not, validate it by checking whether it is:
+        * 1. Has either 3 characters (last 3 digits only) or the full account number (12 characters).
+        *  Any other partial search is not allowed.
+        * 2. If it has a non numeric character.
+        */
+        bool isInputInvalid = !string.IsNullOrWhiteSpace(cleanedAccountNumber) &&
+            (
+                (cleanedAccountNumber.Length != 3 && cleanedAccountNumber.Length != 12) ||
+                !Regex.IsMatch(cleanedAccountNumber, @"^\d+$")
+            );
+
+        //  If input is invalid, display a message notifying the user of the invalid input.
+        if (isInputInvalid)
+        {
+            await DisplayMessage("Please enter a valid account number.");
+            return false;
+        }
+        return true;
+    }
+
+    private async Task DisplayMessage(string msg)
+    {
+        message = msg;
+        StateHasChanged();
+        await Task.Delay(3000);
+        message = "";
+        StateHasChanged();
+    }
 }
