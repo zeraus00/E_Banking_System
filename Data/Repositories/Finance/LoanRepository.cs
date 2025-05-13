@@ -72,6 +72,7 @@ namespace Data.Repositories.Finance
                 WhereCondition(l => l.LoanStatus != status);
             public LoanQuery IncludeAccount(bool include = true) => include ? Include(l => l.Account) : this;
             public LoanQuery IncludeUserInfo(bool include = true) => include ? Include(l => l.UserInfo) : this;
+            public LoanQuery IncludeLoanType(bool include = true) => include ? Include(l => l.LoanType) : this;
             public LoanQuery OrderByDateDescending(bool isOrdered = true)
                 => OrderByDescending(l => l.ApplicationDate);
         }

@@ -1,0 +1,57 @@
+﻿@using Layout
+@page "/PendingApprovalClient"
+@attribute [Authorize(Roles ="User")]
+@rendermode InteractiveServer
+
+@inject NavigationManager NavigationManager
+@inject ClaimsHelperService claimsHelperService
+@inject UserSessionService userSessionService
+@inject UserControlledSessionService userControlledSessionService
+
+<div class="page">
+	<main>
+
+		<!-- Logout Box -->
+		<div class="card new_password p-4 shadow-lg">
+			<div class="m-4">
+				<h4 class="text-center fw-bold mb-4">Your registration has been submitted.</h4>
+				<h6>Your account is currently under review. We’ll notify you once the approval process is complete.</h6>
+
+			</div>
+			<!-- Sign In Button -->
+			<div class="mb-2 mx-auto px-4 w-100">
+				<NavLink class="btn btn-primary w-100" href="@PageRoutes.LOGGING_IN_PAGE">Back to Home Page.</NavLink>
+			</div>
+
+		</div>
+	</main>
+</div>
+
+@code
+{
+	[CascadingParameter]
+	private Task<AuthenticationState> authenticationState { get; set; } = default!;
+
+	private ClaimsPrincipal? user;
+
+	protected override async Task OnInitializedAsync()
+	{
+		AuthenticationState authState = await authenticationState;
+		user = authState.User;
+	}
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			if (user is not null)
+			{
+				//	Restart user session so that the new account is stored in session storage.
+				await userSessionService.StartSessionBasedOnRole(user);
+				//	Restart active account session.
+				if (claimsHelperService.GetRoleId(user) == (int)RoleTypeIDs.User)
+					await userControlledSessionService.SetActiveAccountSessionAsync();
+			}
+		}
+	}
+}
