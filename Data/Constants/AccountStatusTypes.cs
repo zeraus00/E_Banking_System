@@ -11,6 +11,7 @@
         public const string FROZEN = "FROZEN";
         public const string RESTRICTED = "RESTRICTED";
         public const string DENIED = "DENIED";
+        public const string FOR_RE_APPROVAL = "FOR RE-APPROVAL";
 
         public static List<string> AS_STRING_LIST { get; } = new()
         {
@@ -22,7 +23,8 @@
             SUSPENDED,
             FROZEN,
             RESTRICTED,
-            DENIED
+            DENIED,
+            FOR_RE_APPROVAL
         };
 
         public static List<AccountStatusType> AS_ACCOUNT_STATUS_TYPE_LIST { get; } = new()
@@ -35,7 +37,8 @@
             new AccountStatusType { AccountStatusTypeName = SUSPENDED },
             new AccountStatusType { AccountStatusTypeName = FROZEN },
             new AccountStatusType { AccountStatusTypeName = RESTRICTED },
-            new AccountStatusType { AccountStatusTypeName = DENIED }
+            new AccountStatusType { AccountStatusTypeName = DENIED },
+            new AccountStatusType { AccountStatusTypeName = FOR_RE_APPROVAL }
         };
     }
 }

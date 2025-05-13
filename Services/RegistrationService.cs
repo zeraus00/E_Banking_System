@@ -4,6 +4,7 @@ using Data.Constants;
 using Data.Enums;
 using Data.Repositories.User;
 using Data.Repositories.Auth;
+using Data.Repositories.JointEntity;
 using Data.Repositories.Place;
 using Data.Models.User;
 using Data.Repositories.Finance;
@@ -19,10 +20,81 @@ namespace Services
 {
     public class RegistrationService : Service
     {
-        public RegistrationService(IDbContextFactory<EBankingContext> contextFactory) : base(contextFactory) { }
+        private readonly UserDataService _userDataService;
+        public RegistrationService(IDbContextFactory<EBankingContext> contextFactory, UserDataService userDataService) : base(contextFactory) 
+        {
+            _userDataService = userDataService;
+        }
+
+        #region Existing Accout Registration
+
+        /// <summary>
+        /// Updates a user's contact and employment information then
+        /// opens another bank account by an already existing ebanking online account.
+        /// </summary>
+        /// <param name="userInfo">The UserInfo</param>
+        /// <param name="account">The Account</param>
+        /// <returns></returns>
+        public async Task ExistingUserRegisterBankAccount(UserInfo userInfo, Account account)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                await using (var transaction = await dbContext.Database.BeginTransactionAsync())
+                {
+                    try
+                    {
+                        var userInfoRepo = new UserInfoRepository(dbContext);
+
+                        userInfoRepo.AttachAndUpdate<UserInfo>(
+                            userInfo,
+                            u => u.ContactNumber,
+                            u => u.Occupation,
+                            u => u.TaxIdentificationNumber,
+                            u => u.ProfilePicture!,
+                            u => u.GovernmentId!);
+
+                        await dbContext.SaveChangesAsync();
+
+                        var accountRepo = new AccountRepository(dbContext);
+                        await accountRepo.AddAsync<Account>(account);
+
+                        await dbContext.SaveChangesAsync();
+
+                        userInfo
+                            .UserInfoAccounts
+                            .Add(
+                                new UserInfoAccount
+                                {
+                                    AccessRoleId = (int)AccessRoleIDs.PRIMARY_OWNER,
+                                    UserInfoId = userInfo.UserInfoId,
+                                    AccountId = account.AccountId,
+                                    IsLinkedToOnlineAccount = true
+                                }
+                            );
+
+                        await dbContext.SaveChangesAsync();
+
+                        await transaction.CommitAsync();
+                    }
+                    catch (Exception)
+                    {
+                        await transaction.RollbackAsync();
+                    }
+                }
+            }
+        }
+
+        public async Task ExistingBankAccountEBankingRegistration(int userInfoId, int accountId, string email, string password)
+        {
+            if (!await _userDataService.HasUserLinkedAccount(userInfoId, accountId))
+                throw new UserAccountLinkNotFoundException();
+
+            //  TO DO.
+        }
+        #endregion
 
         /*      Main Registration       */
-        public async Task InitiateRegistraiton(
+        public async Task InitiateRegistration(
             Name userName, 
             Name fatherName, 
             Name motherName,
@@ -61,6 +133,8 @@ namespace Services
                             address = existingAddress;
                             dbContext.Attach(address);
                         }
+
+
 
                         await dbContext.UsersAuth.AddAsync(userAuth);
 
@@ -102,7 +176,6 @@ namespace Services
             }
         }
         /*      Name Registration       */
-
         public Name CreateName(string userFirstName, string? userMiddleName, string userLastName, string? userSuffix)
         {
 
@@ -133,9 +206,7 @@ namespace Services
 
             return nameBuilder.Build();
         }
-
         /*      BirthInfo Registration      */
-
         public BirthInfo CreateBirthInfo(DateTime birthDate, City birthCity, Province? birthProvince, Region birthRegion) 
         {
             if (birthDate == default) 
@@ -156,8 +227,6 @@ namespace Services
             return userBirthInfo;
 
         }
-        
-
         /*      Address Registration        */
         public Address CreateAddress(string houseNo, string street, Barangay barangay, City city, Province? province, Region region, int postalCode) 
         {
@@ -190,9 +259,6 @@ namespace Services
 
             return userAddress;
         }
-
-        
-
         public async Task<Region> GetOrRegisterRegion(string selectedCode, List<RegionViewModel> regionList)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
@@ -245,7 +311,6 @@ namespace Services
                 return province;
             }
         }
-
         public async Task<City> GetOrRegisterCity(string selectedCode, int? provinceId, int? regionId, List<CityViewModel> cityList)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
@@ -276,7 +341,6 @@ namespace Services
                 return city;
             }
         }
-
         public async Task<Barangay> GetOrRegisterBarangay(string selectedCode, int cityId, List<BarangayViewModel> barangayList)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
@@ -449,7 +513,8 @@ namespace Services
                 .WithAccountName(accountName)
                 .WithAccountStatus((int)AccountStatusTypeIDs.Pending)
                 .WithBalance(0)
-                .WithAccountContactNo(contactNumber);
+                .WithAccountContactNo(contactNumber)
+                .WithDateOpened(creationDate);
 
             if (linkedBeneficiaryId is int beneficiaryId)
                 accountBuilder.WithLinkedBeneficiaryId(beneficiaryId);

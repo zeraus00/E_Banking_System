@@ -39,6 +39,7 @@
 
         public const string ACCOUNTS = "/Accounts";
         public const string ADD_ACCOUNT = "/Add_account";
+        public const string OPEN_NEW_ACCOUNT = "/Open_new_account";
         public const string CLIENT_HOME = "/Client_home";
         public const string DEPOSIT_AMOUNT = "/Deposit_amount";
         public const string DEPOSIT_CONFIRMATION = "/Deposit_confirmation";

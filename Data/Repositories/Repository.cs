@@ -63,6 +63,44 @@ namespace Data.Repositories
             return await finalQuery.FirstOrDefaultAsync(condition);
         }
 
+        /// <summary>
+        /// Attaches an entity to the context and updates specified properties with new values.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity being updated.</typeparam>
+        /// <param name="dbContext">The database context to which the entity is being attached.</param>
+        /// <param name="entity">The entity to
+        public void AttachAndUpdate<TEntity>(
+            TEntity entity,
+            Dictionary<Expression<Func<TEntity, object>>, object> propertiesAndValues) where TEntity : class
+        {
+            if (entity is null)
+                return;
+            _context.Attach(entity);
+            foreach (var propertyAndValue in propertiesAndValues)
+            {
+                var entryProperty = _context
+                    .Entry(entity)
+                    .Property(propertyAndValue.Key);
+
+                entryProperty.IsModified = true;
+                entryProperty.CurrentValue = propertyAndValue.Value;
+
+            }
+        }
+
+        public void AttachAndUpdate<TEntity>(
+            TEntity entity,
+            params Expression<Func<TEntity, object>>[] properties) where TEntity : class
+        {
+            if (entity is null)
+                return;
+            _context.Attach(entity);
+            foreach (var property in properties)
+                _context
+                    .Entry(entity)
+                    .Property(property)
+                    .IsModified = true;
+        }
         public abstract class CustomQuery<TEntity, TSelf> where TEntity : class where TSelf : CustomQuery<TEntity, TSelf>
         {
             protected IQueryable<TEntity> _query;
