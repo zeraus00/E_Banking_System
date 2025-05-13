@@ -53,6 +53,8 @@ namespace Services.DataManagement
         #endregion
 
         #region UserInfo Helper Methods
+
+        #region Read methods
         /// <summary>
         /// Get UserInfo through userInfoId asynchronously with specified includes.
         /// </summary>
@@ -218,7 +220,8 @@ namespace Services.DataManagement
 
             return fullName.Trim();
         }
-
+        #endregion
+        
         #endregion
 
         #region Transaction Helper Methods
@@ -568,5 +571,6 @@ namespace Services.DataManagement
         }
 
         #endregion
+
     }
 }

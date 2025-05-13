@@ -7,6 +7,7 @@
 
 @page "/User_info"
 @rendermode InteractiveServer
+@attribute [Authorize(Roles = "User")]
 @inject ApiLoaderService apiLoaderService
 @inject NavigationManager NavigationManager
 @inject RegistrationService RegistrationService
@@ -44,37 +45,6 @@
 
 
 			<div class="information_box">
-
-
-				<!-- Row 1 -->
-				<div class="row g-2 mt-2">
-
-					<!-- Account Sub Type -->
-					<div class="col-2">
-						<label class="text-light">Account Sub-Type</label>
-						<select class="form-select form-select-sm" @bind="selectedAccountTypeName">
-							<option value="" hidden>@subTypePlaceHolder</option>
-							@foreach (var accountType in accountTypeNames.AccountTypeNameList)
-							{
-								<option value="@accountType">@accountType</option>
-							}
-						</select>
-					</div>
-
-					<!-- Account Product Type -->
-					<div class="col-2">
-						<label class="text-light">Account Product Type</label>
-						<select class="form-select form-select-sm" @bind="selectedAccountProductTypeName">
-							<option value="" hidden>@productTypePlaceHolder</option>
-							@foreach (var productType in accountProductTypeNames.AccountProductTypeNameList)
-							{
-								<option value="@productType">@productType</option>
-							}
-						</select>
-					</div>
-				</div>
-
-
 				<!-- Row 2 -->
 				<div class="row g-2 mt-2">
 
@@ -140,24 +110,6 @@
 						</select>
 					</div>
 
-					<!-- Religion -->
-					<div class="col">
-						<label class="text-light">Religion</label>
-						<select class="form-select form-select-sm" @bind="selectedReligion">
-							<option value="" hidden>@religionPlaceHolder</option>
-							@foreach (var religion in religionOptions)
-							{
-								<option value="@religion">@religion</option>
-							}
-						</select>
-					</div>
-					@if (selectedReligion == "Others")
-					{
-						<div class="mt-2">
-							<label for="customReligion">Please specify your religon:</label>
-							<input type="text" @bind="customReligion" class="form-control" placeholder="Enter your religion"/>
-						</div>
-					}
 					<!-- Contact No -->
 					<div class="col">
 						<label class="text-light">Contact No.</label>
@@ -306,83 +258,6 @@
 
 				</div>
 
-
-				<div class="row g-2 mt-2">
-
-
-					<!-- Row 6 (Father's Name)-->
-					<div class="col-12">
-
-						<label class="text-light">Father's Name</label>
-						<div class="row g-2">
-							<div class="col-3">
-								<input class="form-control form-control-sm" @bind="fatherFirstName" placeholder="First Name">
-							</div>
-							<div class="col-3">
-								<input class="form-control form-control-sm" @bind="fatherMiddleName" placeholder="Middle Name">
-							</div>
-							<div class="col-3">
-								<input class="form-control form-control-sm" @bind="fatherLastName" placeholder="Last Name">
-							</div>
-							<div class="col-1">
-								<input class="form-control form-control-sm" @bind="fatherSuffix" placeholder="Suffix">
-							</div>
-						</div>
-					</div>
-
-
-					<!-- Row 7 (Mother's Name)-->
-					<div class="col-12">
-						<label class="text-light">Mother's Maiden Name</label>
-						<div class="row g-2">
-							<div class="col-3">
-								<input class="form-control form-control-sm" @bind="motherFirstName" placeholder="First Name">
-							</div>
-							<div class="col-3">
-								<input class="form-control form-control-sm" @bind="motherMiddleName" placeholder="Middle Name">
-							</div>
-							<div class="col-3">
-								<input class="form-control form-control-sm" @bind="motherLastName" placeholder="Last Name">
-							</div>
-							<div class="col-1">
-								<input class="form-control form-control-sm" @bind="motherSuffix" placeholder="Suffix">
-							</div>
-						</div>
-					</div>
-
-
-					<!-- Row 8 (Beneficiary's Name) -->
-					<div class="col-12">
-						<label class="text-light">Beneficiary's Name</label>
-						<div class="row g-2">
-							<div class="col-3">
-								<input class="form-control form-control-sm" @bind="beneficiaryAccountName" @bind:event="oninput" placeholder="Full Name">
-							</div>
-							<div class="col-3">
-								<input class="form-control form-control-sm" @bind="beneficiaryAccountNumber" @bind:event="oninput" placeholder="Account Number">
-							</div>
-							<div class="col-2">
-								<button class="btn btn-sm btn-primary w-100" @onclick="CheckBeneficiaryAccount">
-									Check Account
-								</button>
-							</div>
-							@if (showBeneficiaryCheckResult)
-							{
-								<div class="mt-1 text-sm text-white">
-									@if (!string.IsNullOrEmpty(noBeneficiaryFound))
-									{
-										<span class="text-danger">@noBeneficiaryFound</span>
-									}
-									else
-									{
-										<span class="text-success">@beneficiaryCheckMessage</span>
-									}
-								</div>
-							}
-						</div>
-					</div>
-				</div>
-
 				<div class="row g-3 mt-3">
 					<!-- Upload Government ID -->
 					<div class="col-md-4">
@@ -446,14 +321,10 @@
 @code {
 
 	private string error = string.Empty;
-	private string noBeneficiaryFound = string.Empty;
 
 	//drop down selection place holders
-	public const string subTypePlaceHolder = "--Select Sub-Type--";
-	public const string productTypePlaceHolder = "--Select Product Type--";
 	public const string sexPlaceHolder = "--Select Sex--";
 	public const string civilStatusPlaceHolder = "--Select Civil Status--";
-	public const string religionPlaceHolder = "--Select Religion--";
 
 	public const string regionPlaceHolder = "--Select Region--";
 	public const string provincePlaceHolder = "--Select Province--";
@@ -482,10 +353,6 @@
 	private byte[]? governmentId;
 
 	// Account
-	private AccountTypes accountTypeNames = new();
-	private AccountProductTypes accountProductTypeNames = new();
-	private string selectedAccountTypeName = string.Empty;
-	private string selectedAccountProductTypeName = string.Empty;
 	public int accountTypeId;
 	public int accountProductTypeId;
 
@@ -545,22 +412,6 @@
 	private List<CityViewModel> cities = new();
 	private List<BarangayViewModel> barangays = new();
 
-	private List<string> religionOptions = new List<string>
-	{
-		"Roman Catholic",
-		"Islam",
-		"Iglesia ni Cristo",
-		"Evangelical",
-		"Seventh-day Adventist",
-		"Born Again",
-		"Buddhism",
-		"Hinduism",
-		"Judaism",
-		"Orthodox",
-		"Others"
-	};
-
-
 	// method for getting user address
 	protected override async Task OnInitializedAsync()
 	{
@@ -568,52 +419,12 @@
 		{
 			await LoadRegionAsync();
 			await LoadBirthRegionsAsync();
-
-			dataSeeding();
 		}
 		catch (FieldMissingException ex)
 		{
 			error = "Error Loading Regions" + ex.Message;
 		}
 
-	}
-
-	private void dataSeeding()
-	{
-		// // user basic info
-		userFirstName = "BOGART";
-		userMiddleName = "RELAPSE";
-		userLastName = "GODS";
-		userSuffix = "X";
-		userName = "bogartrelapse";
-		password = "bogartRelapse123@";
-		email = "bogartrelapse@gmail.com";
-		contactNumber = "09669072782";
-		Occupation = "MACHO DANCER";
-		taxIdentificationNumber = "012345678910";
-		// selectedReligion = "Roman Catholic";
-
-		age = 69;
-
-		houseNo = "10";
-		street = "25";
-		postalCode = 4028;
-
-		// //Parents Name And Beneficiary
-		fatherFirstName = "BOGART";
-		fatherMiddleName = "RELAPSE";
-		fatherLastName = "GODS";
-		fatherSuffix = "IX";
-
-		motherFirstName = "MARIE";
-		motherMiddleName = "RIE";
-		motherLastName = "RELAPSE";
-		// public string motherSuffix = string.Empty;
-
-		// public string beneficiaryFirstName = string.Empty;
-		// public string beneficiaryMiddleName = string.Empty;
-		// public string beneficiaryLastName = string.Empty;
-		// public string beneficiarySuffix = string.Empty;
 	}
 
 	// For Full address of user
@@ -779,19 +590,6 @@
 		}
 	}
 
-	private int GetIdFromSelected(string selectedCode, List<dynamic> options)
-	{
-		foreach (var item in options)
-		{
-			if (item?.Code == selectedCode)
-			{
-				return item?.Id ?? 0;
-			}
-		}
-
-		return 0;
-	}
-
 	// handling the uploaded picture
 	private async Task UploadGovernmentId(InputFileChangeEventArgs e)
 	{
@@ -841,91 +639,19 @@
 		}
 	}
 
-	private async Task CheckBeneficiaryAccount()
-	{
-
-		var result = await RegistrationService.GetExistingBeneficiaryAccountAsycn(beneficiaryAccountName, beneficiaryAccountNumber);
-
-		if (result != null)
-		{
-			beneficiaryCheckMessage = "Account Exist.";
-			beneficiaryAccountId = result.AccountId;
-		}
-		else
-		{
-			beneficiaryCheckMessage = "Account not found. Please double-check the details.";
-			beneficiaryAccountId = null;
-		}
-
-		showBeneficiaryCheckResult = true;
-	}
-
 	private async Task RegisterUserAsync()
 	{
 		try
 		{
 			error = string.Empty;
-
-			if (string.IsNullOrWhiteSpace(selectedAccountTypeName))
-			{
-				error = "Account Type is required.";
-			}
-
-			if (string.IsNullOrWhiteSpace(selectedAccountProductTypeName))
-				error = "Account Product Type is required.";
-
 			if (string.IsNullOrWhiteSpace(userFirstName))
 			{
 				error = "First name is required.";
 
 			}
-
-
-			if (string.IsNullOrWhiteSpace(this.userName))
-			{
-				error = "Username is required.";
-
-			}
 			if (age < 18)
 			{
 				error = "Invalid age, at least 18 years old is required.";
-			}
-
-			if (string.IsNullOrWhiteSpace(password))
-			{
-				error = "Valid password is required.";
-			}
-			else
-			{
-				if (password.Length < 6)
-				{
-					error = "Password must be at least 6 characters long.";
-				}
-				if (!Regex.IsMatch(password, "[A-Z]"))
-				{
-					error = "Password must contain at least one capital letter.";
-				}
-				if (!Regex.IsMatch(password, @"\d"))
-				{
-					error = "Password must contain at least one number.";
-				}
-				if (!Regex.IsMatch(password, "[^a-zA-Z0-9]"))
-				{
-					error = "Password must contain at least one special character (symbols like ! @ # $ % ^ & * ( ) _ + etc.).";
-				}
-			}
-
-			if (string.IsNullOrWhiteSpace(email))
-			{
-				error = "Email is required.";
-			}
-			else
-			{
-				var gmailRegex = new Regex(@"^[a-zA-Z0-9._%+-]+@gmail\.com$", RegexOptions.IgnoreCase);
-				if (!gmailRegex.IsMatch(email))
-				{
-					error = "Invalid Gmail address format. Example: sample@gmail.com";
-				}
 			}
 			if (string.IsNullOrWhiteSpace(contactNumber))
 			{
@@ -940,7 +666,6 @@
 			if (string.IsNullOrWhiteSpace(taxIdentificationNumber))
 			{
 				error = "Tax Identification Number is required.";
-
 			}
 			if (string.IsNullOrWhiteSpace(selectedSex))
 			{
@@ -952,28 +677,6 @@
 				error = "Civil status is required.";
 
 			}
-
-			if (string.IsNullOrWhiteSpace(selectedRegion))
-			{
-				error = "Religion is required.";
-			}
-			if (selectedReligion == "Others" && string.IsNullOrWhiteSpace(customReligion))
-			{
-				error = "Please specify your religion.";
-			}
-
-			// // Validation for names
-			if (string.IsNullOrWhiteSpace(fatherFirstName) || string.IsNullOrWhiteSpace(fatherLastName))
-			{
-				error = "Father's full name is required.";
-
-			}
-			if (string.IsNullOrWhiteSpace(motherFirstName) || string.IsNullOrWhiteSpace(motherLastName))
-			{
-				error = "Mother's full name is required.";
-
-			}
-
 			// Validation for address
 			bool hasMissingFieldAddress = (
 				string.IsNullOrWhiteSpace(selectedRegion)
@@ -1033,12 +736,6 @@
 			if (!string.IsNullOrWhiteSpace(error))
 				return;
 
-			Console.WriteLine("ERROR CHECKS PASSED.");
-
-			accountTypeId = accountTypeNames.AccountTypeNameList.IndexOf(selectedAccountTypeName) + 1;
-			accountProductTypeId = accountProductTypeNames.AccountProductTypeNameList.IndexOf(selectedAccountProductTypeName) + 1;
-			Console.WriteLine(accountTypeId + " " + accountProductTypeId);
-
 			Region addressRegion = await RegistrationService.GetOrRegisterRegion(selectedRegion, regions);
 			Province? addressProvince = await RegistrationService.GetOrRegisterProvince(selectedProvince, addressRegion.RegionId, provinces);
 			City addressCity = await RegistrationService.GetOrRegisterCity(selectedCity, addressProvince?.ProvinceId, addressRegion.RegionId, cities);
@@ -1050,48 +747,10 @@
 
 
 			Name userName =  RegistrationService.CreateName(userFirstName, userMiddleName, userLastName, userSuffix);
-			Name fatherName = RegistrationService.CreateName(fatherFirstName, fatherMiddleName, fatherLastName, fatherSuffix);
-			Name motherName = RegistrationService.CreateName(motherFirstName, motherMiddleName, motherLastName, motherSuffix);
 			// Name BeneficiaryName = await RegistrationService.RegisterName(beneficiaryFirstName, benefi
 
 			BirthInfo userBirthInfo = RegistrationService.CreateBirthInfo(birthDate, birthCity, birthProvince, birthRegion);
 			Address userAddress = RegistrationService.CreateAddress(houseNo, street, addressBarangay, addressCity, addressProvince, addressRegion, postalCode);
-
-
-			string religionToSave = selectedRegion == "others" ? customReligion : selectedReligion;
-			Religion userReligion = await RegistrationService.GetOrRegisterReligion(religionToSave);
-
-
-			Account userAccount = RegistrationService
-			.CreateAccount(
-				accountTypeId, 
-				accountProductTypeId, 
-				contactNumber, 
-				beneficiaryAccountId
-			);
-			UserAuth userAuth = await RegistrationService.CreateUserAuth(this.userName, email, password);
-			UserInfo userInfo = RegistrationService.CreateUserInfo(
-				age,
-				selectedSex,
-				contactNumber,
-				Occupation,
-				taxIdentificationNumber,
-				selectedCivilStatus,
-				profilePicture!,
-				governmentId!
-			);
-
-			await RegistrationService.InitiateRegistraiton(
-				userName,
-				fatherName,
-				motherName,
-				userBirthInfo,
-				userAddress,
-				userReligion,
-				userAccount,
-				userAuth,
-				userInfo
-			);
 
 			NavigationManager.NavigateTo("/PendingApproval");
 		}

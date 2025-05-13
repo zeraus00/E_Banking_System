@@ -17,7 +17,7 @@
 		<main>
 
 			<!-- Login Box -->
-			<div class="card login p-4 shadow-lg">
+			<div class="card p-4 shadow-lg" style="margin-top: 5%; margin-left: 36%; margin-right: 36%;">
 				<div class="d-flex justify-content-end">
 
 					<!-- Close Button -->
@@ -54,12 +54,12 @@
 						class="form-control form-control-custom form-control-lg pe-5"
 						placeholder="Password" /> *@
 
-						<button type="button"
+						@* <button type="button"
 						class="btn position-absolute end-0 top-50 translate-middle-y me-3 p-0 border-0 bg-transparent"
 						style="z-index: 10;"
 						@onclick="TogglePasswordVisibility">
 							<i class="bi @eyeIconClass text-muted"></i>
-						</button>
+						</button> *@
 					</div>
 
 
@@ -89,11 +89,14 @@
 				</div>
 
 				<!-- Sign Up Link -->
-				<div class="rpw px-4">
-					<div class="col d-flex align-items-center">
-						<p class="mb-0">Do not have an account?</p>
-						<NavLink class="nav-link ms-auto" href="/Account_opening">
-							Register
+				<div class="d-flex justify-content-start text-start">
+					<div class="px-3 d-flex flex-column">
+						<p class="m-2">Do not have an account?</p>
+						<NavLink class="nav-link" href="/Account_opening">
+							I have no banking account
+						</NavLink>
+						<NavLink class="nav-link" href="/Existing_account">
+							I have neither a bank account nor an e-banking account
 						</NavLink>
 					</div>
 				</div>
