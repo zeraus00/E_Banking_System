@@ -5,6 +5,7 @@ using Data.Models.Finance;
 using Data.Repositories.Finance;
 using Exceptions;
 using Services.DataManagement;
+using Services.ClientService;
 using ViewModels.RoleControlledSessions;
 
 namespace Services
@@ -14,13 +15,17 @@ namespace Services
     /// </summary>
     public class TransactionService : Service
     {
+        private readonly LoanService _loanService;
         /// <summary>
         /// The constructor of the TransactionService.
         /// Injects an IDbContextFactory that generates a new dbContext connection
         /// for each method to avoid concurrency.
         /// </summary>
         /// <param name="contextFactory">The IDbContextFactory</param>
-        public TransactionService(IDbContextFactory<EBankingContext> contextFactory) : base(contextFactory) { }
+        public TransactionService(IDbContextFactory<EBankingContext> contextFactory, LoanService loanService) : base(contextFactory) 
+        {
+            _loanService = loanService;
+        }
 
         /// <summary>
         /// This should be called ON the *_amount pages or when the user is initiating the transaction.
@@ -59,7 +64,8 @@ namespace Services
             decimal amount,
             DateTime transactionDate,
             int? counterAccountId = null,
-            int? externalVendorId = null)
+            int? externalVendorId = null,
+            int? loanId = null)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
@@ -82,9 +88,9 @@ namespace Services
                     Amount = amount,
                     CurrentBalance = mainAccount.Balance,
                     CounterAccountId = counterAccountId,
-                    ExternalVendorId = externalVendorId
+                    ExternalVendorId = externalVendorId,
+                    LoanId = loanId
                 };
-
 
                 /*  Retrieve counter account from database as necessary */
                 if (counterAccountId is int counterId)
@@ -96,8 +102,10 @@ namespace Services
                     transactionSession.CounterAccountNumber = counterAccountNumber;
                 }
 
+                if (loanId is int l_id)
+                    transactionSession.LoanNumber = await _loanService.GetLoanNumber(l_id);
 
-                /*  For Withdrawal or Outgoing Transfer Transaction Types   */
+                /*  For Withdrawal or Outgoing Transfer or Loan Payment Transaction Types   */
                 try
                 {
                     //  Check for sufficient balance
@@ -137,130 +145,156 @@ namespace Services
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
 
-                /*  Define repository and builder requirements. */
-                var transactionRepository = new TransactionRepository(dbContext);
-
-                int transactionTypeId = transactionSession.TransactionTypeId;       //  TransactionTypeId
-                int mainAccountId = transactionSession.MainAccountId;               //  MainAccountId
-                string transactionNumber = transactionSession.TransactionNumber;    //  TransactionNumber
-                DateTime transactionDate = transactionSession.TransactionDate;      //  TransactionDate
-                TimeSpan transactionTime = transactionSession.TransactionTime;      //  TransactionTime
-                decimal amount = transactionSession.Amount;                         //  Amount
-                decimal currentBalance = transactionSession.CurrentBalance;         //  CurrentBalance
-
-                /*  Retrieve account from database  */
-                //  Throws AccountNotFoundException if account is not found.
-                Account mainAccount = await this.GetAccountAsync(dbContext, mainAccountId);
-
-                /*  For Withdrawal or Outgoing Transfer Transaction Types   */
-                //  Handle situations where account's balance is deducted in the background.
-                if (mainAccount.Balance != currentBalance)
+                await using (var dbTransation = await dbContext.Database.BeginTransactionAsync())
                 {
                     try
                     {
-                        //  Ensure sufficient balance.
-                        //  Throws InsufficientBalanceException if balance is insufficient.
-                        this.EnsureSufficientBalance(transactionTypeId, mainAccount.Balance, amount);
-                        //Assign the account's new balance to current balance.
-                        currentBalance = mainAccount.Balance;
-                    } catch (InsufficientBalanceException)
-                    {
-                        /*  Handle Denied Transaction   */
-                        await this.StoreFailedTransactionAsync(transactionSession, TransactionStatus.DENIED);
+                        /*  Define repository and builder requirements. */
+                        var transactionRepository = new TransactionRepository(dbContext);
 
-                        //  Rethrow exception
+                        int transactionTypeId = transactionSession.TransactionTypeId;       //  TransactionTypeId
+                        int mainAccountId = transactionSession.MainAccountId;               //  MainAccountId
+                        string transactionNumber = transactionSession.TransactionNumber;    //  TransactionNumber
+                        DateTime transactionDate = transactionSession.TransactionDate;      //  TransactionDate
+                        TimeSpan transactionTime = transactionSession.TransactionTime;      //  TransactionTime
+                        decimal amount = transactionSession.Amount;                         //  Amount
+                        decimal currentBalance = transactionSession.CurrentBalance;         //  CurrentBalance
+
+                        /*  Retrieve account from database  */
+                        //  Throws AccountNotFoundException if account is not found.
+                        Account mainAccount = await this.GetAccountAsync(dbContext, mainAccountId);
+
+                        /*  For Withdrawal or Outgoing Transfer Transaction Types   */
+                        //  Handle situations where account's balance is deducted in the background.
+                        if (mainAccount.Balance != currentBalance)
+                        {
+                            try
+                            {
+                                //  Ensure sufficient balance.
+                                //  Throws InsufficientBalanceException if balance is insufficient.
+                                this.EnsureSufficientBalance(transactionTypeId, mainAccount.Balance, amount);
+                                //Assign the account's new balance to current balance.
+                                currentBalance = mainAccount.Balance;
+                            }
+                            catch (InsufficientBalanceException)
+                            {
+                                /*  Handle Denied Transaction   */
+                                await this.StoreFailedTransactionAsync(transactionSession, TransactionStatus.DENIED);
+
+                                //  Rethrow exception
+                                throw;
+                            }
+                        }
+
+                        /*  Generate Confirmation Number    */
+                        string confirmationNumber = this.GenerateConfirmationNumber(transactionDate);
+
+
+                        /*  Balance operations   */
+                        decimal previousBalance = currentBalance;
+                        decimal newBalance = this
+                            .calculateBalanceByTransactionType(transactionTypeId, currentBalance, amount);
+                        this.UpdateAccountBalance(mainAccount, newBalance);
+
+                        /*  Build main transaction entry */
+                        TransactionBuilder mainTransactionBuilder = new TransactionBuilder();
+                        mainTransactionBuilder
+                            .WithTransactionTypeId(transactionTypeId)
+                            .WithTransactionNumber(transactionNumber)
+                            .WithStatus(TransactionStatus.CONFIRMED)
+                            .WithConfirmationNumber(confirmationNumber)
+                            .WithMainAccountId(mainAccountId)
+                            .WithAmount(amount)
+                            .WithPreviousBalance(previousBalance)
+                            .WithNewBalance(newBalance)
+                            .WithTransactionDate(transactionDate)
+                            .WithTransactionTime(transactionTime);
+
+                        /*  For Deposit or Withdraw Transaction Types   */
+                        int? externalVendorId = transactionSession.ExternalVendorId;
+
+                        if (externalVendorId is int vendorId)
+                            mainTransactionBuilder.WithExternalVendorId(vendorId);
+
+                        /*  For Loan Payment Transaction Types  */
+                        int? loanID = transactionSession.LoanId;
+                        bool isLoanPayment = transactionTypeId is (int)TransactionTypeIDs.Loan_Payment;
+
+                        if (loanID is int loanId && isLoanPayment)
+                        {
+                            mainTransactionBuilder.WithLoanId(loanId);
+
+                            var loanRepo = new LoanRepository(dbContext);
+                            await _loanService.UpdateLoanPayment(loanRepo, loanId, transactionDate);
+                            await loanRepo.SaveChangesAsync();
+                        }
+
+                        /*  For Outgoing Transfer Transaction Types    */
+                        //  Retrieve counterAccount as needed.
+                        int? counterAccountId = transactionSession.CounterAccountId;
+                        bool isOutgoingTransfer = transactionTypeId is (int)TransactionTypeIDs.Outgoing_Transfer;
+
+                        if (counterAccountId is int counterId && isOutgoingTransfer)
+                        {
+                            //  Add counter id to main transaction
+                            mainTransactionBuilder.WithCounterAccountId(counterId);
+                            /*  Retrieve counter account from the database  */
+                            //  Throws AccountNotFoundException if account not found.
+                            Account counterAccount = await this.GetAccountAsync(dbContext, counterId);
+
+                            decimal previousCounterBalance = counterAccount.Balance;
+                            decimal newCounterBalance = counterAccount.Balance + amount;
+                            this.UpdateAccountBalance(counterAccount, newCounterBalance);
+
+                            /*  Build the incoming transfer counter transaction */
+                            Transaction counterTransaction = new TransactionBuilder()
+                                .WithTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer)
+                                .WithTransactionNumber(transactionNumber)
+                                .WithStatus(TransactionStatus.CONFIRMED)
+                                .WithConfirmationNumber(confirmationNumber)
+                                .WithMainAccountId(counterId)
+                                .WithCounterAccountId(mainAccountId)
+                                .WithAmount(amount)
+                                .WithPreviousBalance(previousCounterBalance)
+                                .WithNewBalance(newCounterBalance)
+                                .WithTransactionDate(transactionDate)
+                                .WithTransactionTime(transactionTime)
+                                .Build();
+
+                            /*  Add counter transaction to database  */
+                            await transactionRepository.AddAsync(counterTransaction);
+                        }
+
+                        /*  Add main transaction to database  */
+                        Transaction mainTransaction = mainTransactionBuilder.Build();
+                        await transactionRepository.AddAsync(mainTransaction);
+
+                        /*  Save changes to account and transaction.    */
+                        await transactionRepository.SaveChangesAsync();
+
+                        TransactionSession updatedTransactionSession = new TransactionSession
+                        {
+                            TransactionTypeId = transactionTypeId,
+                            TransactionNumber = transactionNumber,
+                            TransactionDate = transactionDate,
+                            TransactionTime = transactionTime,
+                            MainAccountId = mainAccountId,
+                            Amount = amount,
+                            CurrentBalance = mainAccount.Balance,
+                            ConfirmationNumber = confirmationNumber,
+                            CounterAccountId = counterAccountId,
+                            ExternalVendorId = externalVendorId
+                        };
+                        await dbTransation.CommitAsync();
+                        return updatedTransactionSession;
+                    }
+                    catch
+                    {
+                        await dbTransation.RollbackAsync();
                         throw;
                     }
+                    
                 }
-
-                /*  Generate Confirmation Number    */
-                string confirmationNumber = this.GenerateConfirmationNumber(transactionDate);
-
-
-                /*  Balance operations   */
-                decimal previousBalance = currentBalance;       
-                decimal newBalance = this
-                    .calculateBalanceByTransactionType(transactionTypeId, currentBalance, amount);
-                this.UpdateAccountBalance(mainAccount, newBalance);
-
-                /*  Build main transaction entry */
-                TransactionBuilder mainTransactionBuilder = new TransactionBuilder();
-                mainTransactionBuilder
-                    .WithTransactionTypeId(transactionTypeId)
-                    .WithTransactionNumber(transactionNumber)
-                    .WithStatus(TransactionStatus.CONFIRMED)
-                    .WithConfirmationNumber(confirmationNumber)
-                    .WithMainAccountId(mainAccountId)
-                    .WithAmount(amount)
-                    .WithPreviousBalance(previousBalance)
-                    .WithNewBalance(newBalance)
-                    .WithTransactionDate(transactionDate)
-                    .WithTransactionTime(transactionTime);
-
-                /*  For Deposit or Withdraw Transaction Types   */
-                int? externalVendorId = transactionSession.ExternalVendorId;
-
-                if (externalVendorId is int vendorId)
-                    mainTransactionBuilder.WithExternalVendorId(vendorId);
-
-                /*  For Outgoing Transfer Transaction Types    */
-                //  Retrieve counterAccount as needed.
-                int? counterAccountId = transactionSession.CounterAccountId;
-                bool isOutgoingTransfer = transactionTypeId is (int) TransactionTypeIDs.Outgoing_Transfer;
-
-                if (counterAccountId is int counterId && isOutgoingTransfer)
-                {
-                    //  Add counter id to main transaction
-                    mainTransactionBuilder.WithCounterAccountId(counterId);
-                    /*  Retrieve counter account from the database  */
-                    //  Throws AccountNotFoundException if account not found.
-                    Account counterAccount = await this.GetAccountAsync(dbContext, counterId);
-
-                    decimal previousCounterBalance = counterAccount.Balance;
-                    decimal newCounterBalance = counterAccount.Balance + amount;
-                    this.UpdateAccountBalance(counterAccount, newCounterBalance);
-
-                    /*  Build the incoming transfer counter transaction */
-                    Transaction counterTransaction = new TransactionBuilder()
-                        .WithTransactionTypeId((int)TransactionTypeIDs.Incoming_Transfer)
-                        .WithTransactionNumber(transactionNumber)
-                        .WithStatus(TransactionStatus.CONFIRMED)
-                        .WithConfirmationNumber(confirmationNumber)
-                        .WithMainAccountId(counterId)
-                        .WithCounterAccountId(mainAccountId)
-                        .WithAmount(amount)
-                        .WithPreviousBalance(previousCounterBalance)
-                        .WithNewBalance(newCounterBalance)
-                        .WithTransactionDate(transactionDate)
-                        .WithTransactionTime(transactionTime)
-                        .Build();
-
-                    /*  Add counter transaction to database  */
-                    await transactionRepository.AddAsync(counterTransaction);
-                }
-
-                /*  Add main transaction to database  */
-                Transaction mainTransaction = mainTransactionBuilder.Build();
-                await transactionRepository.AddAsync(mainTransaction);
-                
-                /*  Save changes to account and transaction.    */
-                await transactionRepository.SaveChangesAsync();
-
-                TransactionSession updatedTransactionSession = new TransactionSession
-                {
-                    TransactionTypeId = transactionTypeId,
-                    TransactionNumber = transactionNumber,
-                    TransactionDate = transactionDate,
-                    TransactionTime = transactionTime,
-                    MainAccountId = mainAccountId,
-                    Amount = amount,
-                    CurrentBalance = mainAccount.Balance,
-                    ConfirmationNumber = confirmationNumber,
-                    CounterAccountId = counterAccountId,
-                    ExternalVendorId = externalVendorId
-                };
-
-                return updatedTransactionSession;
             }
         }
 
@@ -301,6 +335,10 @@ namespace Services
                 if (transactionSession.ExternalVendorId is int externalVendorId)
                     failedTransactionBuilder.WithExternalVendorId(externalVendorId);
 
+                //  Add the loan's id as necessary.
+                if (transactionSession.LoanId is int loanId)
+                    failedTransactionBuilder.WithLoanId(loanId);
+
                 Transaction failedTransaction = failedTransactionBuilder.Build();
 
                 //  Persist the transaction entity to the database.
@@ -319,7 +357,8 @@ namespace Services
         private void EnsureSufficientBalance(int transactionTypeId, decimal balance, decimal deductionAmount)
         {
             bool isDeducting = transactionTypeId is (int)TransactionTypeIDs.Withdrawal
-                    or (int)TransactionTypeIDs.Outgoing_Transfer;
+                    or (int)TransactionTypeIDs.Outgoing_Transfer
+                    or (int)TransactionTypeIDs.Loan_Payment;
 
             if (isDeducting && balance < deductionAmount)
             {
@@ -338,6 +377,7 @@ namespace Services
                 (int)TransactionTypeIDs.Deposit => balance + amount,
                 (int)TransactionTypeIDs.Incoming_Transfer => balance + amount,
                 (int)TransactionTypeIDs.Outgoing_Transfer => balance - amount,
+                (int)TransactionTypeIDs.Loan_Payment => balance - amount,
                 _ => throw new ArgumentException("INVALID TRANSACTION TYPE ID.")
             };
         }

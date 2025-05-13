@@ -32,10 +32,10 @@
             <section class="card registration shadow-lg d-flex flex-column my-4 p-3">
                 <div class="mx-auto text-center p-4">
                     <h5>Loan Payment Amount</h5>
-                    <h1 class="fw-bolder py-3 mb-2">@FormatHelper.BalanceFormatter(withdrawAmount)</h1>
+                    <h1 class="fw-bolder py-3 mb-2">@FormatHelper.BalanceFormatter(paymentAmount)</h1>
 
                     <h6 class="mx-3 mb-4">
-                        <strong>Loan Number: </strong>_loanNumber
+                        <strong>Loan Number: </strong>@loanNumber
                     </h6>
 
                     <h6 class="mx-3 mb-4">
@@ -48,7 +48,6 @@
                     <div class="d-flex flex-column text-start text-light mb-0">
                         <h5 class="mb-1 fw-bold">@clientName</h5>
                         <p class="m-0"><strong>Account No.:</strong> @FormatHelper.AccountNumberFormatter(accountNumber)</p>
-                        <p class="m-0"><strong>Card/Account Destination:</strong> @cardDestination</p>
                         <p class="m-0"><strong>Date:</strong> @(date?.ToShortDateString() ?? "") @(time?.ToString(@"hh\:mm") ?? "")</p>
                         <p class="m-0"><strong>Transaction No.:</strong> @transactionNumber</p>
                     </div>
@@ -56,10 +55,10 @@
                     <section class="d-flex flex-column form-check d-flex justify-content-end mt-3 w-25">
                         <div class="text-end mt-3 w-100">
                             <div>
-                                <button class="btn btn-primary btn-lg w-100 mb-2" @onclick="ConfirmWithdraw" disabled="@(isConfirmed == false)">Confirm</button>
+                                <button class="btn btn-primary btn-lg w-100 mb-2" @onclick="ConfirmLoanPayment" disabled="@(isConfirmed == false)">Confirm</button>
                             </div>
                             <div>
-                                <button class="btn btn-warning btn-lg w-100 mb-3" @onclick="CancelWithdraw">Go Back</button>
+                                <button class="btn btn-warning btn-lg w-100 mb-3" @onclick="CancelLoanPayment">Go Back</button>
                             </div>
                         </div>
                     </section>
@@ -85,12 +84,12 @@
     private AccountViewSession activeAccountSession { get; set; } = default!;
     private TransactionSession transactionSession { get; set; } = default!;
 
-    private string accountNumber = "Loading...";
-    private string cardDestination = "Loading...";
-    private string clientName = "Loading...";
+    private string accountNumber = "";
+    private string loanNumber = "";
+    private string clientName = "";
     private decimal currentBalance = 0.00m;
-    private decimal withdrawAmount = 0.00m;
-    private string transactionNumber = "Loading...";
+    private decimal paymentAmount = 0.00m;
+    private string transactionNumber = "";
     private DateTime? date;
     private TimeSpan? time;
 
@@ -111,10 +110,10 @@
 
                 //  Set display data.
                 accountNumber = activeAccountSession.AccountNumber;
-                cardDestination = ExternalVendors.AS_STRING_LIST[transactionSession.ExternalVendorId!.Value - 1];
+                loanNumber = transactionSession.LoanNumber;
                 clientName = activeAccountSession.AccountName;
                 currentBalance = await userDataService.GetAccountBalanceAsync(activeAccountSession.AccountId);
-                withdrawAmount = transactionSession.Amount;
+                paymentAmount = transactionSession.Amount;
                 transactionNumber = transactionSession.TransactionNumber;
                 date = transactionSession.TransactionDate.Date;
                 time = transactionSession.TransactionTime;
@@ -130,7 +129,7 @@
         }
     }
 
-    private async Task ConfirmWithdraw()
+    private async Task ConfirmLoanPayment()
     {
         try 
         {
@@ -139,7 +138,7 @@
 
             //  Store updated transactionSession to session storage
             await userControlledSessionService.SetTransactionSessionAsync(
-                (int)TransactionTypeIDs.Withdrawal,
+                (int)TransactionTypeIDs.Loan_Payment,
                 transactionSession,
                 userSession
             );
@@ -159,7 +158,7 @@
         }
     }
 
-    private async Task CancelWithdraw()
+    private async Task CancelLoanPayment()
     {
         //  Persist cancelled transaction to database and delete transaction details from session storage.
         await transactionService.StoreFailedTransactionAsync(transactionSession, TransactionStatus.CANCELLED);

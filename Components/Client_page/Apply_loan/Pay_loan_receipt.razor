@@ -31,8 +31,8 @@
         <div class="container">
             <section class="card registration shadow-lg my-5 p-3">
                 <div class="d-flex gap-2 text-start border-bottom w-100 align-items-center p-4">
-                    <h4>Total Amount Payed: </h4>
-                    <h2 class="fw-bolder mx-5">@FormatHelper.BalanceFormatter(withdrawAmount)</h2>
+                    <h4>Total Amount Paid: </h4>
+                    <h2 class="fw-bolder mx-5">@FormatHelper.BalanceFormatter(loanPaymentAmount)</h2>
                 </div>
 
                 <h6 class="mx-5 my-3">
@@ -43,7 +43,7 @@
                     <div class="d-flex flex-column text-start mb-0">
                         <h5 class="mb-1">@clientName</h5>
                         <p class="mb-0"><strong>Account No.:</strong> @FormatHelper.AccountNumberFormatter(accountNumber)</p>
-                        <p class="m-0"><strong>Card/Account Destination:</strong> @cardDestination</p>
+                        <p class="mb-0"><strong>Loan Number:</strong> @loanNumber</p>
                         <p class="m-0"><strong>Date:</strong> @(date?.ToShortDateString() ?? "") @(time?.ToString(@"hh\:mm") ?? "")</p>
                         <p class="mb-0"><strong>Confirmation No.:</strong> @confirmationNumber</p>
                     </div>
@@ -62,12 +62,12 @@
     private AccountViewSession activeAccountSession { get; set; } = default!;
     private TransactionSession transactionSession { get; set; } = default!;
 
-    private string accountNumber = "Loading...";
-    private string cardDestination = "Loading...";
-    private string clientName = "Loading...";
+    private string accountNumber = "";
+    private string loanNumber = "";
+    private string clientName = "";
     private decimal currentBalance = 0.00m;
-    private decimal withdrawAmount = 0.00m;
-    private string confirmationNumber = "Loading...";
+    private decimal loanPaymentAmount = 0.00m;
+    private string confirmationNumber = "";
     private DateTime? date;
     private TimeSpan? time;
 
@@ -87,10 +87,10 @@
 
                 //  Set display data.
                 accountNumber = activeAccountSession.AccountNumber;
-                cardDestination = ExternalVendors.AS_STRING_LIST[transactionSession.ExternalVendorId!.Value - 1];
+                loanNumber = transactionSession.LoanNumber;
                 clientName = activeAccountSession.AccountName;
                 currentBalance = await userDataService.GetAccountBalanceAsync(activeAccountSession.AccountId);
-                withdrawAmount = transactionSession.Amount;
+                loanPaymentAmount = transactionSession.Amount;
                 date = transactionSession.TransactionDate.Date;
                 time = transactionSession.TransactionTime;
                 confirmationNumber = transactionSession.ConfirmationNumber ?? "CONFIRMATION_NUMBER_MISSING";

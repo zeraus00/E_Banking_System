@@ -75,6 +75,8 @@ namespace Data.Repositories.Finance
             public LoanQuery IncludeLoanType(bool include = true) => include ? Include(l => l.LoanType) : this;
             public LoanQuery OrderByDateDescending(bool isOrdered = true)
                 => OrderByDescending(l => l.ApplicationDate);
+
+            public async Task<string> SelectLoanNumber() => await Select<string>(l => l.LoanNumber) ?? string.Empty;
         }
     }
 

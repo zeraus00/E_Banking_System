@@ -99,6 +99,64 @@ namespace Services.ClientService
             }
         }
 
+
+        public async Task UpdateLoanPayment(LoanRepository loanRepo, int loanId, DateTime paymentDate)
+        {
+            var loan = await loanRepo.GetLoanById(loanId);
+            if (loan is not null)
+            {
+                loan.UpdateDate = paymentDate;
+                loan.RemainingLoanBalance -= loan.PaymentAmount;
+                loan.InterestAmount = calculatePaymentInterestAmount(loan.InterestRatePerPayment, loan.RemainingLoanBalance);
+                loan.PaymentAmount = calculatePaymentAmount(loan.RemainingLoanBalance, loan.InterestRatePerPayment, loan.NumberOfPayments);
+                loan.DueDate = loan.DueDate!.Value.AddMonths(12 / loan.PaymentFrequency);
+            }
+        }
+        public async Task<Loan?> TryGetLoanAsync(string loanNumber, int accountId)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                return await new LoanRepository(dbContext)
+                    .Query
+                    .HasLoanNumber(loanNumber)
+                    .HasAccountId(accountId)
+                    .GetQuery()
+                    .FirstOrDefaultAsync();
+            }
+        }
+
+        public async Task<decimal> GetCurrentPaymentAmount(int loanId, DateTime paymentDate)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                var loanRepo = new LoanRepository(dbContext);
+                var loan = await loanRepo.GetLoanById(loanId);
+                if (loan is not null && loan.DueDate is DateTime dueDate)
+                {
+                    if (dueDate.Date < paymentDate.Date)
+                    {
+                        decimal lateFee = CalculateLateFee(loan, dueDate, paymentDate);
+                        loan.RemainingLoanBalance += lateFee;
+                        loan.PaymentAmount += lateFee;
+                        await dbContext.SaveChangesAsync();
+                    }
+                    return loan.PaymentAmount;
+                }
+                else
+                    throw new NullReferenceException();
+            }
+        }
+
+        public decimal CalculateLateFee(Loan loan, DateTime dueDate, DateTime paymentDate)
+        {
+            TimeSpan delay = dueDate.Date - paymentDate.Date;
+            int daysLate = delay.Days;
+            decimal lateFeeRate = 0.05m;
+            return daysLate > 0 ?
+                loan.PaymentAmount * lateFeeRate :
+                0;
+        }
+
         public async Task<Loan> TryGetLoanAsync(int loanId)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
@@ -110,11 +168,21 @@ namespace Services.ClientService
                     ?? throw new NullReferenceException();  // to be updated.
             }
         }
-
-        private int calculateNumberOfPayments(int loanTermMonths, int paymentFrequency) => loanTermMonths / paymentFrequency;
-        private decimal calculateInterestRatePerPayment(decimal interestRate, int numberOfPayments) => interestRate / numberOfPayments;
-        private decimal calculatePaymentInterestAmount(decimal interestRatePerPayment, decimal loanBalance) => interestRatePerPayment * loanBalance;
-        private decimal calculatePaymentAmount(decimal loanBalance, decimal interestRatePerPayment, int numberOfPayments)
+        public async Task<string> GetLoanNumber(int loanId)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                var loanRepo = new LoanRepository(dbContext);
+                return await loanRepo
+                    .Query
+                    .HasLoanId(loanId)
+                    .SelectLoanNumber();
+            }
+        }
+        public int calculateNumberOfPayments(int loanTermMonths, int paymentFrequency) => loanTermMonths / paymentFrequency;
+        public decimal calculateInterestRatePerPayment(decimal interestRate, int numberOfPayments) => interestRate / numberOfPayments;
+        public decimal calculatePaymentInterestAmount(decimal interestRatePerPayment, decimal loanBalance) => interestRatePerPayment * loanBalance;
+        public decimal calculatePaymentAmount(decimal loanBalance, decimal interestRatePerPayment, int numberOfPayments)
         {
             decimal compound_factor = (decimal)Math.Pow((double)(1 + interestRatePerPayment), numberOfPayments);
             decimal numerator = interestRatePerPayment * compound_factor;

@@ -15,6 +15,9 @@
         public int? ExternalVendorId { get; set; } = null;
         public string CounterAccountName { get; set; } = string.Empty;
         public string CounterAccountNumber { get; set; } = string.Empty;
+        //   For Loan Payments
+        public int? LoanId { get; set; } = null;
+        public string LoanNumber { get; set; } = string.Empty;
 
     }
 }

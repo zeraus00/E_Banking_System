@@ -9,6 +9,7 @@
 @inject UserControlledSessionService userControlledSessionService
 @inject UserDataService userDataService
 @inject PageRedirectService redirectService
+@inject LoanService loanService
 
 <div class="page">
 	<main>
@@ -31,6 +32,7 @@
 								<table class="table table-sm table-borderless text-white">
 									<tr><td>Account Number:</td><td>@activeAccountSession.AccountNumber</td></tr>
 									<tr><td>Account Name:</td><td>@activeAccountSession.AccountName</td></tr>
+									<tr><td>Loan Number:</td><td>@loan.LoanNumber</td></tr>
 									<tr><td>Statement Date:</td><td>@(loan.StartDate?.ToShortDateString() ?? loan.ApplicationDate.ToShortDateString())</td></tr>
 									<tr><td>Loan Amount:</td><td>@loan.LoanAmount</td></tr>
 									<tr><td>Loan Term:</td><td>@loan.LoanTermMonths</td></tr>
@@ -43,12 +45,12 @@
 							<div class="col-md-6">
 								<h5 class="fw-bold">Payment Overview</h5>
 								<table class="table table-sm table-borderless text-white">
-									<tr><td>Monthly Payment:</td><td>@loan.PaymentAmount</td></tr>
-									<tr><td>Interest:</td><td>1,000</td></tr>
+									<tr><td>Next Payment:</td><td>@nextPayment</td></tr>
+									<tr><td>Payment Interest:</td><td>@nextInterest</td></tr>
 								</table>
 								<h6 class="fw-semibold">Regular Monthly Payment</h6>
 								<table class="table table-sm table-borderless text-white">
-									<tr><td>Fees:</td><td>0.00</td></tr>
+									<tr><td>Fees:</td><td>@overdueFee</td></tr>
 									<tr><td>Overdue Payments:</td><td>0.00</td></tr>
 								</table>
 								<h6 class="fw-semibold">Total due: @(loanTransaction?.TransactionDate.ToShortDateString() ?? "")</h6>
@@ -94,10 +96,17 @@
 
 @code {
 	private string error = "";
+	private DateTime now = DateTime.Now;
 
 	private AccountViewSession activeAccountSession { get; set; } = default!;
 	private Loan? loan { get; set; }
 	private Transaction? loanTransaction { get; set; }
+
+	private decimal nextPayment = 0.00m;
+	private decimal nextInterest = 0.00m;
+	private decimal overdueFee = 0.00m;
+
+	bool isOverdue = false;
 
 	private bool isAccountCanCheckLoan = true;
 
@@ -121,6 +130,21 @@
 			{
 				await Task.Delay(3000);
 				redirectService.redirectWithNavigationManager(PageRoutes.CLIENT_HOME);
+			}
+
+			if (loan is not null)
+			{
+				if (loan!.LoanStatus.Equals(LoanStatusTypes.SUBMITTED))
+					return;
+
+				if (loan!.DueDate!.Value.Date < now.Date)
+				{
+					isOverdue = true;
+					overdueFee = loanService.CalculateLateFee(loan, loan.DueDate.Value, now);
+				}
+
+				nextPayment = await loanService.GetCurrentPaymentAmount(loan.LoanId, now);
+				nextInterest = loanService.calculatePaymentInterestAmount(loan.InterestRatePerPayment, loan.RemainingLoanBalance);
 			}
 		}
 	}

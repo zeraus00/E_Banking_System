@@ -5,6 +5,7 @@
 @attribute [Authorize(Roles="User")]
 @rendermode InteractiveServer
 
+@inject LoanService loanService
 @inject PageRedirectService redirectService
 @inject TransactionService transactionService
 @inject UserDataService userDataService
@@ -36,17 +37,22 @@
                         <strong>@error</strong>
                     </div>
                 }
-                @if (accountCanWithdraw)
+                @if (accountCanPayLoan)
                 {
                     <div class="input-group mb-3">
                         <h5 class="mx-3 my-3 ">Enter Loan Number:</h5>
-                        <input type="number"
-                               class="form-control form-control-custom"
-                               style="max-width: 30%"
-                               placeholder=""
-                               @onfocus="ClearDefaultValue"
-                               @onblur="SetDefaultValue" />
+                        <input class="form-control form-control-custom"
+                        style="max-width: 30%"
+                        @bind="loanNumber"
+                        placeholder=""
+                        @oninput="OnInput"
+                        @onfocus="ClearDefaultValue"
+                        @onblur="SetDefaultValue" />
                     </div>
+                    @if(isOverdue)
+                    {
+                        <h5 class="mx-3 my-3 ">Your payment is overdue.</h5>
+                    }
 
                     <h3 class="mx-3 my-3 ">Enter Loan Payment Amount</h3>
                     <div class="input-group px-4 mb-4">
@@ -54,20 +60,15 @@
                         <input type="number"
                         class="form-control form-control-custom form-control-lg fs-2"
                         placeholder="0.00"
-                        @bind="withdrawAmount"
+                        @bind="paymentAmount"
                         @onfocus="ClearDefaultValue"
-                        @onblur="SetDefaultValue" />
+                        @onblur="SetDefaultValue" 
+                        disabled/>
                     </div>
 
                     <h6 class="mx-3 mb-4">
                         <strong>Current Balance: </strong>@FormatHelper.BalanceFormatter(currentBalance)
                     </h6>
-
-                    <div class="mb-4 mt-2">
-                        <h5 class="text-light fs-5 mx-5">Payment Options:</h5>
-                        <TransactionMethod @ref="methodRef" />
-
-                    </div>
 
                     <div class="d-flex justify-content-between mx-5">
                         <div class="d-flex flex-column text-start mb-0">
@@ -77,7 +78,7 @@
 
                         <div class="text-end mt-3 w-25">
                             <div class="w-100">
-                                <button class="btn btn-primary btn-lg w-100 mb-2" @onclick="InitiateWithdrawProcess">Continue</button>
+                                <button class="btn btn-primary btn-lg w-100 mb-2" @onclick="InitiateLoanPaymentProcess">Continue</button>
                             </div>
                             <NavLink class="w-100" href="/Client_home">
                                 <button class="btn btn-danger btn-lg w-100">Cancel</button>
@@ -99,21 +100,17 @@
     private TransactionSession transactionSession { get; set; } = default!;
 
     private int accountId;
-    private string accountNumber = "Loading...";
-    private string clientName = "Loading...";
+    private string accountNumber = "";
+    private string clientName = "";
     private decimal currentBalance = 0.0m;
 
-    private decimal? withdrawAmount = null;
+    private string loanNumber = "";
+    private CancellationTokenSource _cancellationTokenSource = default!;
+    private decimal? paymentAmount = null;
+    private bool isOverdue = false;
 
-    private bool accountCanWithdraw { get; set; } = true;
+    private bool accountCanPayLoan { get; set; } = true;
     private string error = string.Empty;
-
-    private CardModel card = new CardModel
-        {
-            Id = "sample-id",
-            Name = "Sample Card",
-            LogoUrl = "/images/sample-logo.png"
-        };
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -134,12 +131,12 @@
                 currentBalance = await userDataService.GetAccountBalanceAsync(accountId);
 
                 //  Validate account transaction permissions.
-                accountCanWithdraw = IsAccountCanWithdraw();
+                accountCanPayLoan = isAccountCanPayLoan();
 
                 //  Reload component.
                 StateHasChanged();
 
-                if (!accountCanWithdraw)
+                if (!accountCanPayLoan)
                 {
                     await Task.Delay(3000);
                     redirectService.redirectWithNavigationManager(PageRoutes.CLIENT_HOME);
@@ -158,25 +155,75 @@
         }
     }
 
+    private async Task OnInput(ChangeEventArgs e)
+    {
+        error = "";
+        isOverdue = false;
+        if (_cancellationTokenSource != null)
+        {
+            _cancellationTokenSource.Cancel(); // Cancel the previous task
+        }
+
+        _cancellationTokenSource = new CancellationTokenSource();
+        var token = _cancellationTokenSource.Token;
+
+        await Task.Delay(500, token);
+
+        if (!token.IsCancellationRequested)
+        {
+            if (string.IsNullOrWhiteSpace(loanNumber))
+                return;
+            // Trigger event or call a method after user stops typing
+            await HandleStoppedTyping();
+        }
+    }
+
+    private async Task HandleStoppedTyping()
+    {
+        Loan? loan = await loanService.TryGetLoanAsync(loanNumber, accountId);
+
+        if (loan is null)
+        {
+            error = "This loan number does not exist or is not associated with your account.";
+            return;
+        }
+        if (!HasPostDisbursementStatus(loan.LoanStatus))
+        {
+            error = "This loan is not active yet.";
+            return;
+        }
+        var now = DateTime.Now;
+        if (now.Date > loan.DueDate)
+        {
+            isOverdue = true;
+        }
+        paymentAmount = await loanService.GetCurrentPaymentAmount(loan.LoanId, now);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _cancellationTokenSource?.Dispose();
+    }
+
     private void ClearDefaultValue()
     {
-        if (!withdrawAmount.HasValue)
+        if (!paymentAmount.HasValue)
         {
-            withdrawAmount = null;
+            paymentAmount = null;
         }
     }
 
     private void SetDefaultValue()
     {
-        if (!withdrawAmount.HasValue || withdrawAmount == 0.00m)
+        if (!paymentAmount.HasValue || paymentAmount == 0.00m)
         {
-            withdrawAmount = null;
+            paymentAmount = null;
         }
     }
 
-    private bool IsAccountCanWithdraw()
+    private bool isAccountCanPayLoan()
     {
-        if (activeAccountSession.AccountCanTransact)
+        if (activeAccountSession.AccountCanPayLoan)
             return true;
 
         error = "You are not allowed to initate any loan payment transaction.\n" +
@@ -184,27 +231,43 @@
         return false;
     }
 
-    private async Task InitiateWithdrawProcess()
+    private async Task InitiateLoanPaymentProcess()
     {
         try
         {
-            if (withdrawAmount is not > 0)
+            if (paymentAmount is not > 0)
                 throw new ArgumentException();
-            if (methodRef!.selectedCardId < 1 || methodRef!.selectedCardId > 3)
+
+            if (string.IsNullOrWhiteSpace(loanNumber))
                 throw new FieldMissingException();
+
+            Loan? loan = await loanService.TryGetLoanAsync(loanNumber, accountId);
+
+            if (loan is null)
+            {
+                await ShowMessage("This loan number does not exist or is not associated with your account.");
+                return;
+            }
+            if (!HasPostDisbursementStatus(loan.LoanStatus))
+            {
+                await ShowMessage("This loan is not active yet.");
+                return;
+            }
+
+            var now = DateTime.Now;
             //  Create transaction session
             transactionSession = await transactionService
                 .CreateTransactionAsync(
                     accountId,
-                    (int)TransactionTypeIDs.Withdrawal,
-                    withdrawAmount.Value,
-                    DateTime.Now,
-                    externalVendorId: methodRef!.selectedCardId
+                    (int)TransactionTypeIDs.Loan_Payment,
+                    amount: await loanService.GetCurrentPaymentAmount(loan.LoanId, now),
+                    transactionDate: now,
+                    loanId: loan.LoanId
                 );
 
             //  Save transaction session to sesion storage.
             await userControlledSessionService.SetTransactionSessionAsync(
-                (int)TransactionTypeIDs.Withdrawal,
+                (int)TransactionTypeIDs.Loan_Payment,
                 transactionSession,
                 userSession
             );
@@ -214,19 +277,33 @@
         }
         catch (ArgumentException)
         {
-            error = "Loan payment amount must be greater than 0.";
+            await ShowMessage("Loan payment amount must be greater than 0.");
         }
         catch (FieldMissingException)
         {
-            error = "Please choose a valid payment method.";
+            await ShowMessage("Please enter a valid loan number.");
         }
         catch (AccountNotFoundException) 
         {
-            error = "Error resolving database. Please try again later.";
+            await ShowMessage("Error resolving database. Please try again later.");
         }
         catch (InsufficientBalanceException)
         {
-            error = "You do not have sufficient balance.";
+            await ShowMessage("You do not have sufficient balance.");
         }
+    }
+
+    private bool HasPostDisbursementStatus(string status)
+    {
+        return status.Equals(LoanStatusTypes.ACTIVE) || status.Equals(LoanStatusTypes.DELINQUENT);
+    }
+
+    private async Task ShowMessage(string msg)
+    {
+        error = msg;
+        StateHasChanged();
+        await Task.Delay(3000);
+        error = "";
+        StateHasChanged();
     }
 }
