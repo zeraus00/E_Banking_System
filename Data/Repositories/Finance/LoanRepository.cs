@@ -95,6 +95,8 @@ namespace Data.Repositories.Finance
         private decimal _interestAmount;
         private int _loanTermMonths;
         private int _paymentFrequency;
+        private int _numberOfPayments;
+        private decimal _interestRatePerPayment;
         private decimal _paymentAmount;
         private decimal _remainingLoanBalance;
         private DateTime _applicationDate;
@@ -151,11 +153,6 @@ namespace Data.Repositories.Finance
             _interestRate = interestRate;
             return this;
         }
-        public LoanBuilder WithInterestAmount(decimal interestAmount)
-        {
-            _interestAmount = interestAmount;
-            return this;
-        }
         public LoanBuilder WithLoanTermMonths(int loanTermMonths)
         {
             _loanTermMonths = loanTermMonths;
@@ -166,14 +163,27 @@ namespace Data.Repositories.Finance
             _paymentFrequency = paymentFrequency;
             return this;
         }
-        public LoanBuilder WithMonthlyPayment(decimal paymentAmount)
+        public LoanBuilder CalculateNumberOfPayments()
         {
-            _paymentAmount = paymentAmount;
+            _numberOfPayments = _loanTermMonths / _paymentFrequency;
             return this;
         }
-        public LoanBuilder WithRemainingLoanBalance(decimal remainingLoanBalance)
+        public LoanBuilder CalculateInterestRatePerPayment()
         {
-            _remainingLoanBalance = remainingLoanBalance;
+            _interestRatePerPayment = _interestRate / _numberOfPayments;
+            return this;
+        }
+        public LoanBuilder CalculateFirstInterestAmount()
+        {
+            _interestAmount = _interestRatePerPayment * _loanAmount;
+            return this;
+        }
+        public LoanBuilder CalculateFirstPaymentAmount()
+        {
+            decimal compound_factor = (decimal)Math.Pow((double)(1 + _interestRatePerPayment), _numberOfPayments);
+            decimal numerator = _interestRatePerPayment * compound_factor;
+            decimal denominator = compound_factor - 1;
+            _paymentAmount = _loanAmount * (numerator / denominator);
             return this;
         }
         public LoanBuilder WithApplicationDate(DateTime applicationDate)
@@ -232,7 +242,7 @@ namespace Data.Repositories.Finance
                 LoanTermMonths = _loanTermMonths,
                 PaymentFrequency = _paymentFrequency,
                 PaymentAmount = _paymentAmount,
-                RemainingLoanBalance = _remainingLoanBalance,
+                RemainingLoanBalance = _loanAmount,
                 ApplicationDate = _applicationDate,
                 LoanStatus = _loanStatus,
                 StartDate = _startDate,

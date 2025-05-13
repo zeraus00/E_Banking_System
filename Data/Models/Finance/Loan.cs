@@ -13,9 +13,11 @@
         public string LoanPurpose { get; set; } = string.Empty; //  Required; Varchar(30)
         public decimal LoanAmount { get; set; }                 //  Required; Decimal(18,2)
         public decimal InterestRate { get; set; }               //  Required; Decimal(5,2)
-        public decimal InterestAmount { get; set; }             //  Required; Decimal(10, 2)
         public int LoanTermMonths { get; set; }                 //  Required; 3, 6, or 12 months
         public int PaymentFrequency { get; set; }               //  Required; In one year; Monthly: 12; Bi-monthly: 6; Quarterly: 3;
+        public int NumberOfPayments { get; set; }               //  Required; LoanTerm/PaymentFrequency
+        public decimal InterestRatePerPayment { get; set; }     //  Required: Decimal(5,2)
+        public decimal InterestAmount { get; set; }             //  Required; Decimal(10, 2)
         public decimal PaymentAmount { get; set; }              //  Required; Decimal(18,2)
         public decimal RemainingLoanBalance { get; set; }       //  Required; Decimal(18,2)
         public DateTime ApplicationDate { get; set; }           //  Required; Default: CURDATE()
