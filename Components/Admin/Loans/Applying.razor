@@ -8,7 +8,8 @@
 @inject AdminDataService adminDataService
 @inject NavigationManager Navigation
 @inject PageRedirectService redirectService
-@inject AdminViewLoans adminViewLoans
+@inject UserSessionService userSessionService
+@inject UserDataService userDataService
 
 <div class="main">
     <div class="dashboard-container">
@@ -34,8 +35,8 @@
                 <label class="text-light mb-0" style="white-space: nowrap;">End Date</label>
                 <InputDate class="form-control form-control-sm" @bind-Value="endDate" />
             </div>
-            <button class="btn btn-primary btn-sm shadow-sm">Filter</button>
-            <button class="btn btn-danger btn-sm shadow-sm">Clear Filter</button>
+            <button class="btn btn-primary btn-sm shadow-sm" @onclick="OnFilterAsync">Filter</button>
+            <button class="btn btn-danger btn-sm shadow-sm" @onclick="OnclearFilterAsync">Clear Filter</button>
 
         </div>
 
@@ -45,6 +46,7 @@
             <table class="table table-bordered text-center">
                 <thead class="table-info">
                     <tr>
+                        <th class="align-middle">Statement<br />Date</th>
                         <th class="align-middle">Account<br />Number</th>
                         <th class="align-middle">Name</th>
                         <th class="align-middle">Email Address</th>
@@ -52,18 +54,22 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var a in loanAccountList)
+                    @if (loanAccountList.Any())
                     {
+                        @foreach (var a in loanAccountList)
+                        {
 
-                        <tr class="bg-light">
-                            <td>a.StatementDate.ToString("MM/dd/yyyy")</td>
-                            <td>@(async _ => await adminDataService.GetAccountNumberAsync(a.AccountId))</td>
-                            <td>@(async _ => await adminDataService.GetAccountNameAsync(a.AccountId))</td>
-                            <td>@(async _ => await adminDataService.GetUserEmailAsync(a.UserInfoId))</td>
-                            <td>
-                                <a href="View_details_account" class="btn btn-info btn-secondary btn-sm rounded text-dark shadow-sm" style="border: 2px solid cyan">View</a>
-                            </td>
-                        </tr>
+                            <tr class="bg-light">
+                                <td>@(a.ApplicationDate.ToString("MM/dd/yyyy"))</td>
+                                <td>@(async _ => await adminDataService.GetAccountNumberAsync(a.AccountId))</td>
+                                <td>@(a.Account?.AccountName ?? string.Empty)</td>
+                                <td>@(a.Email)</td>
+                                <td>@(a.LoanStatus)</td>
+                                <td>
+                                    <a href="View_details_account" class="btn btn-info btn-secondary btn-sm rounded text-dark shadow-sm" style="border: 2px solid cyan">View</a>
+                                </td>
+                            </tr>
+                        }
                     }
                 </tbody>
             </table>
@@ -85,6 +91,7 @@
 </div>
 
 @code {
+    private AdminSession? adminSession;
 
     private string message = "";
 
@@ -96,8 +103,7 @@
     private string accountNumber = "";
     private string cleanedAccountNumber = "";
     private string searchAccount = "";
-    private string loanStatus = "";
-    private int loanId;
+    private string loanStatus = LoanStatusTypes.SUBMITTED;
     private List<Loan> loanAccountList = new();
 
     private int remainingAccountsCount;
@@ -121,7 +127,19 @@
     {
         if (firstRender)
         {
-            await adminControlledSessionService.ClearAdminControlledSessions();
+            try
+            {
+                adminSession = await userSessionService.GetAdminSession();
+
+                await adminControlledSessionService.ClearAdminControlledSessions();
+
+                await LoadLoanAccountsAsync();
+                StateHasChanged();
+            }
+            catch (SessionNotFoundException)
+            {
+                redirectService.redirectWithNavigationManager(PageRoutes.APPLLYING_LOAN);
+            }
         }
     }
 
@@ -133,31 +151,8 @@
             return;
         }
 
-        bool isAccountNumberValid = await ValidateAccountNumberInput();
-        if (!isAccountNumberValid)
-            return;
-
         pageNumber = 1;
         await LoadLoanAccountsAsync();
-    }
-
-    private async Task OnViewClick(Loan loan)
-    {
-        try
-        {
-            LoanViewSession pendingLoanSession = new LoanViewSession()
-                {
-                    LoanId = loan.AccountId
-                };
-
-            await adminControlledSessionService.SetLoanViewSession(pendingLoanSession);
-
-            redirectService.redirectWithNavigationManager(PageRoutes.APPLLYING_LOAN);
-        }
-        catch (SessionNotFoundException)
-        {
-            redirectService.redirectWithNavigationManager(PageRoutes.APPLLYING_LOAN);    
-        }
     }
 
     private async Task NextPage()
@@ -181,22 +176,28 @@
         }
     }
 
+    private async Task OnclearFilterAsync()
+    {
+        startDate = DateTime.Now.AddDays(-DateTime.Now.Day + 1).Date;
+        endDate = DateTime.Now.Date;
+        pageNumber = 1;
+        await LoadLoanAccountsAsync();
+    }
+
     private async Task LoadLoanAccountsAsync()
     {
 
-        loanAccountList = await adminViewLoans.GetFilterLoanAccountApplying(
-        loanId: loanId,
+        loanAccountList = await adminDataService.LoadLoansListAsync(
+        accountNumber: accountNumber,
         startDate: startDate,
         endDate: endDate,
-        loanTypeId: selectedLoanTypeId,
-        LoanStatus: loanStatus,
+        loanStatus: loanStatus,
         pageNumber: pageNumber,
         pageSize: pageSize
         );
-
         remainingAccountsCount = await adminDataService
             .CountRemainingLoansAsync(
-                cleanedAccountNumber,
+                accountNumber: accountNumber,
                 startDate,
                 endDate,
                 loanStatus: loanStatus,
@@ -207,28 +208,10 @@
         availablePages = remainingAccountsCount == 0 && pageNumber == 1 ? 
         1 : pageNumber + ((int)Math.Ceiling((double)remainingAccountsCount / 10));
 
-        if (!loanAccountList.Any())
+        if (!loanAccountList.Any() || remainingAccountsCount == 0)
             isNextDisabled = true;
-    }
-
-    private async Task<bool> ValidateAccountNumberInput()
-    {
-        cleanedAccountNumber = accountNumber.Length > 12 ?
-            accountNumber.Replace("-", "").Trim() :
-            accountNumber.Trim();
-
-        bool isInputInvalid = !string.IsNullOrWhiteSpace(cleanedAccountNumber) &&
-            (
-                (cleanedAccountNumber.Length != 3 && cleanedAccountNumber.Length != 12) ||
-                !Regex.IsMatch(cleanedAccountNumber, @"^\d+$")
-            );
-
-        if (isInputInvalid)
-        {
-            await displayMessage("Please enter a valid account number.");
-            return false;
-        }
-        return true;
+        else
+            isNextDisabled = false;
     }
 
     private async Task displayMessage(string msg)
