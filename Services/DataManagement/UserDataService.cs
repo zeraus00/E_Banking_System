@@ -333,6 +333,21 @@ namespace Services.DataManagement
                     .CountAsync();
             }
         }
+
+        public async Task<Transaction?> GetAccountLastTransactionAsync(int accountId)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                var transactionRepo = new TransactionRepository(dbContext);
+                return await transactionRepo
+                    .Query
+                    .IncludeTransactionType()
+                    .HasMainAccountId(accountId)
+                    .OrderByDateAndTime()
+                    .GetQuery()
+                    .LastOrDefaultAsync();
+            }
+        }
         #endregion
 
         #region UserInfoAccount Helper Methods
