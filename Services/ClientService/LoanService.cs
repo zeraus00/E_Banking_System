@@ -48,9 +48,12 @@ namespace Services.ClientService
 
             //  Set loan details.
             newLoan.LoanNumber = CredentialFactory.GenerateLoanNumber(newLoan.ApplicationDate, accountNumber);
-            newLoan.InterestRate = loanType.InterestRatePerAnnum;
-            newLoan.PaymentAmount = 0.0m;
-            newLoan.RemainingLoanBalance = newLoan.PaymentAmount;
+            newLoan.InterestRate = loanType.InterestRate;
+            newLoan.RemainingLoanBalance = newLoan.LoanAmount;
+            newLoan.NumberOfPayments = calculateNumberOfPayments(newLoan.LoanTermMonths, newLoan.PaymentFrequency);
+            newLoan.InterestRatePerPayment = calculateInterestRatePerPayment(newLoan.InterestRate, newLoan.NumberOfPayments);
+            newLoan.InterestAmount = calculatePaymentInterestAmount(newLoan.InterestRatePerPayment, newLoan.LoanAmount);
+            newLoan.PaymentAmount = calculatePaymentAmount(newLoan.LoanAmount, newLoan.InterestRatePerPayment, newLoan.NumberOfPayments);
             newLoan.LoanStatus = LoanStatusTypes.SUBMITTED;
             
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
@@ -106,6 +109,17 @@ namespace Services.ClientService
                     .GetLoanById(loanId)
                     ?? throw new NullReferenceException();  // to be updated.
             }
+        }
+
+        private int calculateNumberOfPayments(int loanTermMonths, int paymentFrequency) => loanTermMonths / paymentFrequency;
+        private decimal calculateInterestRatePerPayment(decimal interestRate, int numberOfPayments) => interestRate / numberOfPayments;
+        private decimal calculatePaymentInterestAmount(decimal interestRatePerPayment, decimal loanBalance) => interestRatePerPayment * loanBalance;
+        private decimal calculatePaymentAmount(decimal loanBalance, decimal interestRatePerPayment, int numberOfPayments)
+        {
+            decimal compound_factor = (decimal)Math.Pow((double)(1 + interestRatePerPayment), numberOfPayments);
+            decimal numerator = interestRatePerPayment * compound_factor;
+            decimal denominator = compound_factor - 1;
+            return loanBalance * (numerator / denominator);
         }
     }
 }
