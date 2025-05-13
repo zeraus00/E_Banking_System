@@ -55,7 +55,7 @@ namespace Data.Repositories.Finance
             public LoanQuery LoanApplicationOrOrAfter(DateTime startDate) =>
                 WhereCondition(l => l.ApplicationDate >= startDate.Date);
             public LoanQuery LoanApplicationOnOrBefore(DateTime endDate) =>
-                WhereCondition(l => l.ApplicationDate <= endDate.Date);
+                WhereCondition(l => l.ApplicationDate <= endDate.Date.AddDays(1));
             public LoanQuery HasStatus(string status) =>
                 WhereCondition(l => l.LoanStatus == status);
             public LoanQuery HasPostDisbursementStatus(bool hasOngoingStatus = true) =>
@@ -72,6 +72,7 @@ namespace Data.Repositories.Finance
                 WhereCondition(l => l.LoanStatus != status);
             public LoanQuery IncludeAccount(bool include = true) => include ? Include(l => l.Account) : this;
             public LoanQuery IncludeUserInfo(bool include = true) => include ? Include(l => l.UserInfo) : this;
+            public LoanQuery IncludeLoanType(bool include = true) => include ? Include(l => l.LoanType) : this;
             public LoanQuery OrderByDateDescending(bool isOrdered = true)
                 => OrderByDescending(l => l.ApplicationDate);
         }

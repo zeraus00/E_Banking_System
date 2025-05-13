@@ -11,6 +11,7 @@
         Suspended = 6,
         Frozen = 7,
         Restricted = 8,
-        Denied = 9
+        Denied = 9,
+        For_Re_Approval = 10
     }
 }

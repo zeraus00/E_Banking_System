@@ -532,7 +532,7 @@
 
 			await RegistrationService.ExistingUserRegisterBankAccount(userInfo, userAccount);
 
-			NavigationManager.NavigateTo("/PendingApproval");
+			NavigationManager.NavigateTo(PageRoutes.PENDING_APPROVAL_CLIENT);
 		}
 		catch (MissingFieldException ex)
 		{

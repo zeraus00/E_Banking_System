@@ -287,6 +287,19 @@ namespace Services.DataManagement
         }
         #endregion
         #region Loan Page Helper Methods
+        public async Task<Loan?> GetLoanByIdAsync(int loanId)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                var loanRepo = new LoanRepository(dbContext);
+                return await loanRepo
+                    .Query
+                    .IncludeLoanType()
+                    .HasLoanId(loanId)
+                    .GetQuery()
+                    .FirstOrDefaultAsync();
+            }
+        }
         public async Task<List<Loan>> LoadLoansListAsync(
             string accountNumber = "",
             DateTime? startDate = null,
@@ -299,7 +312,9 @@ namespace Services.DataManagement
             {
                 var loanRepo = new LoanRepository(dbContext);
 
-                var queryBuilder = loanRepo.Query;
+                var queryBuilder = loanRepo
+                    .Query
+                    .OrderByDateDescending();
 
                 //  Apply filters as needed.
                 if (!string.IsNullOrWhiteSpace(accountNumber))
@@ -325,7 +340,6 @@ namespace Services.DataManagement
                     .TakeWithCount(takeCount)
                     .GetQuery()
                     .ToListAsync();
-
                 return loanList;
             }
         }
