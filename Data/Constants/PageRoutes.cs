@@ -7,6 +7,7 @@
         public const string LOG_IN_PAGE = "/Login_page";
         public const string LOGGING_IN_PAGE = "/Logging_in";
         public const string LOG_OUT_PAGE = "/Logout_page";
+        public const string PENDING_APPROVAL = "/PendingApproval";
 
         public const string DASHBOARD = "/Dashboard";
         public const string PENDING_ACCOUNTS = "/PendingAccounts";
@@ -39,7 +40,8 @@
 
         public const string ACCOUNTS = "/Accounts";
         public const string ADD_ACCOUNT = "/Add_account";
-        public const string OPEN_NEW_ACCOUNT = "/Open_new_account";
+        public const string OPEN_ANOTHER_ACCOUNT = "/Open_another_account";
+        public const string PENDING_APPROVAL_CLIENT = "/PendingApprovalClient";
         public const string CLIENT_HOME = "/Client_home";
         public const string DEPOSIT_AMOUNT = "/Deposit_amount";
         public const string DEPOSIT_CONFIRMATION = "/Deposit_confirmation";
