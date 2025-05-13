@@ -48,7 +48,7 @@
                     <tr>
                         <th class="align-middle">Statement<br />Date</th>
                         <th class="align-middle">Account<br />Number</th>
-                        <th class="align-middle">Name</th>
+                        <th class="align-middle">Account<br /> Name</th>
                         <th class="align-middle">Email Address</th>
                         <th class="align-middle">Operation</th>
                     </tr>
@@ -61,12 +61,12 @@
 
                             <tr class="bg-light">
                                 <td>@(a.ApplicationDate.ToString("MM/dd/yyyy"))</td>
-                                <td>@(async _ => await adminDataService.GetAccountNumberAsync(a.AccountId))</td>
-                                <td>@(a.Account?.AccountName ?? string.Empty)</td>
+                                <td>@(loanIdAccountDictionary[a.LoanId][0])</td>
+                                <td>@(loanIdAccountDictionary[a.LoanId][1])</td>
                                 <td>@(a.Email)</td>
                                 <td>@(a.LoanStatus)</td>
                                 <td>
-                                    <a href="View_details_account" class="btn btn-info btn-secondary btn-sm rounded text-dark shadow-sm" style="border: 2px solid cyan">View</a>
+                                    <a href="View_details_account" class="btn btn-info btn-secondary btn-sm rounded text-dark shadow-sm" style="border: 2px solid cyan" @onclick="async _ => await OnViewLoan(a)">View</a>
                                 </td>
                             </tr>
                         }
@@ -96,6 +96,7 @@
     private string message = "";
 
     private List<string> accountTypeList = AccountTypes.AS_STRING_LIST;
+    private Dictionary<int, List<string>> loanIdAccountDictionary = new();
 
     private DateTime? startDate = DateTime.Now.AddDays(-DateTime.Now.Day + 1);
     private DateTime? endDate = DateTime.Now;
@@ -154,6 +155,23 @@
         pageNumber = 1;
         await LoadLoanAccountsAsync();
     }
+    private async Task OnclearFilterAsync()
+    {
+        startDate = DateTime.Now.AddDays(-DateTime.Now.Day + 1).Date;
+        endDate = DateTime.Now.Date;
+        pageNumber = 1;
+        await LoadLoanAccountsAsync();
+    }
+    private async Task OnViewLoan(Loan loan)
+    {
+        LoanViewSession loanViewSession = new()
+            {
+                LoanId = loan.LoanId,
+                AccountId = loan.AccountId,
+                UserInfoId = loan.UserInfoId
+            };
+        await adminControlledSessionService.SetLoanViewSession(loanViewSession);
+    }
 
     private async Task NextPage()
     {
@@ -176,13 +194,6 @@
         }
     }
 
-    private async Task OnclearFilterAsync()
-    {
-        startDate = DateTime.Now.AddDays(-DateTime.Now.Day + 1).Date;
-        endDate = DateTime.Now.Date;
-        pageNumber = 1;
-        await LoadLoanAccountsAsync();
-    }
 
     private async Task LoadLoanAccountsAsync()
     {
@@ -195,6 +206,14 @@
         pageNumber: pageNumber,
         pageSize: pageSize
         );
+        foreach (var loan in loanAccountList)
+        {
+            var accountNumberAndName = new List<string>(){
+                await adminDataService.GetAccountNumberAsync(loan.AccountId),
+                await adminDataService.GetAccountNameAsync(loan.AccountId)
+            };
+            loanIdAccountDictionary[loan.LoanId] = accountNumberAndName;
+        }
         remainingAccountsCount = await adminDataService
             .CountRemainingLoansAsync(
                 accountNumber: accountNumber,
