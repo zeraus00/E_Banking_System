@@ -307,12 +307,6 @@
 	public const string subTypePlaceHolder = "--Select Sub-Type--";
 	public const string productTypePlaceHolder = "--Select Product Type--";
 
-	public const string regionPlaceHolder = "--Select Region--";
-	public const string provincePlaceHolder = "--Select Province--";
-	public const string cityPlaceHolder = "--Select City--";
-	public const string barangayPlaceHolder = "--Select Barangay--";
-
-
 	// user basic info
 	public string userFirstName = string.Empty;
 	public string userMiddleName = string.Empty;
@@ -362,43 +356,6 @@
 	private bool showBeneficiaryCheckResult = false;
 	public int? beneficiaryAccountId = null;
 
-	<!--user full address-->
-	private List<RegionViewModel> regions = new();
-	private List<ProvinceViewModel> provinces = new();	//	use this for the drop down selection
-	private List<CityViewModel> cities = new();
-	private List<BarangayViewModel> barangays = new();
-
-	private List<string> religionOptions = new List<string>
-	{
-		"Roman Catholic",
-		"Islam",
-		"Iglesia ni Cristo",
-		"Evangelical",
-		"Seventh-day Adventist",
-		"Born Again",
-		"Buddhism",
-		"Hinduism",
-		"Judaism",
-		"Orthodox",
-		"Others"
-	};
-
-
-	// method for getting user address
-	protected override async Task OnInitializedAsync()
-	{
-		try
-		{
-			await LoadRegionAsync();
-
-		}
-		catch (FieldMissingException ex)
-		{
-			error = "Error Loading Regions" + ex.Message;
-		}
-
-	}
-
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
 		if (firstRender)
@@ -445,101 +402,6 @@
 			StateHasChanged();
 		}
 	}
-
-	// For Full address of user
-	private async Task LoadRegionAsync()
-	{
-		try
-		{
-			regions = await apiLoaderService.GetRegionsAsync();
-		}
-		catch (ApiException ex)
-		{
-			error = ex.Message;
-		}
-		catch (InvalidOperationException ex)
-		{
-			error = ex.Message;
-		}
-		catch (FieldMissingException ex)
-		{
-			error = "Error loading Regions" + ex.Message;
-		}	
-	}
-
-	//	Pass the ChangeEventArgs instance ONLY FOR drop down selections that need updating.
-	private async Task OnRegionChangeAsync()
-	{
-		try
-		{
-			error = string.Empty; // reset previous error
-
-			provinces = await apiLoaderService.GetProvincesFromRegionAsync(selectedRegion);
-			if (!provinces.Any())
-			{
-				cities = await apiLoaderService.GetCitiesMunicipalitesFromRegionAsync(selectedRegion);
-				selectedProvince = FieldPlaceHolders.PROVINCE_CODE_NOT_FOUND;
-			}
-			else
-				cities = new();
-			barangays = new();
-			selectedProvince = string.Empty;
-			selectedCity = string.Empty;
-			selectedBarangay = string.Empty;
-		}
-		catch (ApiException ex)
-		{
-			error = ex.Message;
-		}
-		catch (FieldMissingException ex)
-		{
-			error = "Error loading Provinces" + ex.Message;
-		}
-	}
-
-	private async Task OnProvinceChangeAsync()
-	{
-		try
-		{
-			error = string.Empty; // reset previous error
-
-			if (selectedProvince.Equals(FieldPlaceHolders.PROVINCE_CODE_NOT_FOUND))
-				return;
-
-			cities = await apiLoaderService.GetCitiesMunicipalitiesFromProvinceAsync(selectedProvince);
-			barangays = new();
-			selectedCity = string.Empty;
-			selectedBarangay = string.Empty;
-		}
-		catch (ApiException ex)
-		{
-			error = ex.Message;
-		}
-		catch (FieldMissingException ex)
-		{
-			error = "Error loading cities" + ex.Message;
-		}
-	}
-
-	private async Task OnCityChangeAsync()
-	{
-		try
-		{
-			error = string.Empty; // reset previous error
-
-			barangays = await apiLoaderService.GetBarangaysFromCityAsync(selectedCity);
-			selectedBarangay = string.Empty;
-		}
-		catch (ApiException ex)
-		{
-			error = ex.Message;
-		}
-		catch (FieldMissingException ex)
-		{
-			error = "Error loading barangays" + ex.Message;
-		}
-	}
-
 	// handling the uploaded picture
 	private async Task UploadGovernmentId(InputFileChangeEventArgs e)
 	{
@@ -618,42 +480,47 @@
 			{
 				error = "Account Type is required.";
 			}
-
-			if (string.IsNullOrWhiteSpace(selectedAccountProductTypeName))
+			else if (string.IsNullOrWhiteSpace(selectedAccountProductTypeName))
 				error = "Account Product Type is required.";
 
-			if (string.IsNullOrWhiteSpace(contactNumber))
+			else if (string.IsNullOrWhiteSpace(contactNumber))
 			{
 				error = "Contact number is required.";
 
 			}
-			if (string.IsNullOrWhiteSpace(Occupation))
+			else if (string.IsNullOrWhiteSpace(Occupation))
 			{
 				error = "Occupation is required.";
 
 			}
-			if (string.IsNullOrWhiteSpace(taxIdentificationNumber))
+			else if (string.IsNullOrWhiteSpace(taxIdentificationNumber))
 			{
 				error = "Tax Identification Number is required.";
 
 			}
 			//	File uploads
-			if (profilePicture is null || !profilePicture.Any())
+			else if (profilePicture is null || !profilePicture.Any())
 			{
 				error = "Please upload a profile picture.";
 			}
 
-			if (governmentId is null || !governmentId.Any())
+			else if (governmentId is null || !governmentId.Any())
 			{
 				error = "Please upload a government id picture";
 			}
 
-			if (!string.IsNullOrWhiteSpace(error))
+			else if (!string.IsNullOrWhiteSpace(error))
 				return;
 
 
 			accountTypeId = accountTypeNames.AccountTypeNameList.IndexOf(selectedAccountTypeName) + 1;
 			accountProductTypeId = accountProductTypeNames.AccountProductTypeNameList.IndexOf(selectedAccountProductTypeName) + 1;
+
+			userInfo.ContactNumber = contactNumber;
+			userInfo.Occupation = Occupation;
+			userInfo.TaxIdentificationNumber = taxIdentificationNumber;
+			userInfo.ProfilePicture = profilePicture;
+			userInfo.GovernmentId = governmentId;
 
 			Account userAccount = RegistrationService
 			.CreateAccount(
@@ -663,7 +530,7 @@
 				beneficiaryAccountId
 			);
 
-			await RegistrationService.ExistingUserRegisterAccount(userSession.UserInfoId, userAccount);
+			await RegistrationService.ExistingUserRegisterBankAccount(userInfo, userAccount);
 
 			NavigationManager.NavigateTo("/PendingApproval");
 		}

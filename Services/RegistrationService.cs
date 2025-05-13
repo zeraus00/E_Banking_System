@@ -20,11 +20,22 @@ namespace Services
 {
     public class RegistrationService : Service
     {
-        public RegistrationService(IDbContextFactory<EBankingContext> contextFactory) : base(contextFactory) { }
+        private readonly UserDataService _userDataService;
+        public RegistrationService(IDbContextFactory<EBankingContext> contextFactory, UserDataService userDataService) : base(contextFactory) 
+        {
+            _userDataService = userDataService;
+        }
 
-        #region Existing Accout registration
+        #region Existing Accout Registration
 
-        public async Task ExistingUserRegisterAccount(int userInfoId, Account account)
+        /// <summary>
+        /// Updates a user's contact and employment information then
+        /// opens another bank account by an already existing ebanking online account.
+        /// </summary>
+        /// <param name="userInfo">The UserInfo</param>
+        /// <param name="account">The Account</param>
+        /// <returns></returns>
+        public async Task ExistingUserRegisterBankAccount(UserInfo userInfo, Account account)
         {
             await using (var dbContext = await _contextFactory.CreateDbContextAsync())
             {
@@ -32,21 +43,35 @@ namespace Services
                 {
                     try
                     {
+                        var userInfoRepo = new UserInfoRepository(dbContext);
+
+                        userInfoRepo.AttachAndUpdate<UserInfo>(
+                            userInfo,
+                            u => u.ContactNumber,
+                            u => u.Occupation,
+                            u => u.TaxIdentificationNumber,
+                            u => u.ProfilePicture!,
+                            u => u.GovernmentId!);
+
+                        await dbContext.SaveChangesAsync();
+
                         var accountRepo = new AccountRepository(dbContext);
                         await accountRepo.AddAsync<Account>(account);
 
                         await dbContext.SaveChangesAsync();
 
-                        var userInfoAccountRepo = new UserInfoAccountRepository(dbContext);
-                        var userInfoAccount = new UserInfoAccount
-                        {
-                            AccessRoleId = (int)AccessRoleIDs.PRIMARY_OWNER,
-                            UserInfoId = userInfoId,
-                            AccountId = account.AccountId,
-                            IsLinkedToOnlineAccount = true
-                        };
+                        userInfo
+                            .UserInfoAccounts
+                            .Add(
+                                new UserInfoAccount
+                                {
+                                    AccessRoleId = (int)AccessRoleIDs.PRIMARY_OWNER,
+                                    UserInfoId = userInfo.UserInfoId,
+                                    AccountId = account.AccountId,
+                                    IsLinkedToOnlineAccount = true
+                                }
+                            );
 
-                        await userInfoAccountRepo.AddAsync(userInfoAccount);
                         await dbContext.SaveChangesAsync();
 
                         await transaction.CommitAsync();
@@ -57,6 +82,14 @@ namespace Services
                     }
                 }
             }
+        }
+
+        public async Task ExistingBankAccountEBankingRegistration(int userInfoId, int accountId, string email, string password)
+        {
+            if (!await _userDataService.HasUserLinkedAccount(userInfoId, accountId))
+                throw new UserAccountLinkNotFoundException();
+
+            //  TO DO.
         }
         #endregion
 
