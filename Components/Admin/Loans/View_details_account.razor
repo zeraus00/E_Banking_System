@@ -259,7 +259,7 @@
 			{
 				var loanViewSession = await adminControlledSessionService.GetLoanViewSession();
 				userInfoId = loanViewSession.UserInfoId;
-				accountId = loanViewSession.LoanId;
+				loanId = loanViewSession.LoanId;
 
 				userInfo = await userDataService.TryGetUserInfoAsync(
 					userInfoId,
