@@ -102,10 +102,10 @@
         </div>
 
         <div class="scroll-container gap-3 mx-5">
-            <button class="arrow-ud">
+            <button class="arrow-ud" disabled="@isPreviousDisabled">
                 <i class="bi bi-chevron-left text-light"></i>
             </button>
-            <button class="arrow-ud">
+            <button class="arrow-ud" disabled="@isNextDisabled">
                 <i class="bi bi-chevron-right text-light"></i>
             </button>
         </div>
@@ -229,6 +229,7 @@
                 startDate,
                 endDate,
                 selectedAccountTypeId,
+                accountStatusTypeId: (int)AccountStatusTypeIDs.Pending,
                 pageNumber: pageNumber,
                 pageSize: pageSize
             );
