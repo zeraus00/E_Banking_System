@@ -51,7 +51,7 @@
             {
                 LoanTypeName = _loanTypeName,
                 MinimumLoanAmount = _minimumLoanAmount,
-                InterestRatePerAnnum = _interestRatePerAnnum,
+                InterestRate = _interestRatePerAnnum,
                 LoanTermInMonths = _loanTermInMonths
             };
         }

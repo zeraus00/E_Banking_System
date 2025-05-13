@@ -31,7 +31,7 @@ namespace Data.Configurations.Finance
 
             //  InterestRatePerAnnum (Required; Decimal(5, 2))
             LoanTypes
-                .Property(lt => lt.InterestRatePerAnnum)
+                .Property(lt => lt.InterestRate)
                 .HasColumnType("DECIMAL (5, 2)")
                 .IsRequired();
 
