@@ -587,5 +587,20 @@ namespace Services.DataManagement
 
         #endregion
 
+        #region Loan Helper Methods
+        public async Task<Loan?> GetAccountLoan(int accountId)
+        {
+            await using (var dbContext = await _contextFactory.CreateDbContextAsync())
+            {
+                var loanRepo = new LoanRepository(dbContext);
+
+                return await loanRepo
+                    .Query
+                    .HasAccountId(accountId)
+                    .GetQuery()
+                    .FirstOrDefaultAsync();
+            }
+        }
+        #endregion
     }
 }
