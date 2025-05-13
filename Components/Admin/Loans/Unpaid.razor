@@ -72,31 +72,24 @@
                     </tr>
                 </thead>
                 <tbody>
-
-                    <tr class="bg-light">
-                        <td>05/10/2025</td>
-                        <td>1234567890</td>
-                        <td>Juan Dela Cruz</td>
-                        <td>juan.delacruz@example.com</td>
-                        <td>
-                            <a href="Account_unpaid_loan" class="btn btn-info btn-secondary btn-sm rounded text-dark shadow-sm" style="border: 2px solid cyan">View</a>
-                        </td>
-                    </tr>
-                     @*@foreach (var a in loanAccountList)
+                    @if (loanAccountList.Any())
                     {
-                        <tr class="bg-light">
-                            <td>@(a.StartDate)</td>
-                            <td>@(loanIdAccountDictionary[a.LoanId][0])</td>
-                            <td>@(loanIdAccountDictionary[a.LoanId][1])</td>
-                            <td>@a.LoanAmount</td>
-                            <td>@a.LoanTermMonths</td>
-                            <td>@a.LoanStatus</td>
-                            <td>
-                                <button class="btn btn-info btn-secondary btn-sm rounded text-dark shadow-sm" style="border: 2px solid cyan" @onclick="() => ViewDetails(a)">View</button>
-                            </td>
-                            <td class="text-secondary">@a.Status</td>
-                        </tr>
-                    } *@
+                        @foreach (var a in loanAccountList)
+                        {
+                            <tr class="bg-light">
+                                <td>@(a.StartDate)</td>
+                                <td>@(loanIdAccountDictionary[a.LoanId][0])</td>
+                                <td>@(loanIdAccountDictionary[a.LoanId][1])</td>
+                                <td>@a.LoanAmount</td>
+                                <td>@a.LoanTermMonths</td>
+                                <td>@a.LoanStatus</td>
+                                <td>
+                                    <a href="Account_unpaid_loan" class="btn btn-info btn-secondary btn-sm rounded text-dark shadow-sm" style="border: 2px solid cyan" @onclick="async _ => await OnViewLoan(a)">View</a>
+                                </td>
+                                <td class="text-secondary">@a.LoanStatus</td>
+                            </tr>
+                        }
+                    }
                 </tbody>
             </table>
         </div>
@@ -186,6 +179,17 @@
         endDate = DateTime.Now.Date;
         pageNumber = 1;
         await LoadLoanUnpaidAsync();
+    }
+
+    private async Task OnViewLoan(Loan loan)
+    {
+        LoanViewSession loanViewSession = new()
+            {
+                LoanId = loan.LoanId,
+                AccountId = loan.AccountId,
+                UserInfoId = loan.UserInfoId
+            };
+        await adminControlledSessionService.SetLoanViewSession(loanViewSession);
     }
 
     private async Task NextPage()
