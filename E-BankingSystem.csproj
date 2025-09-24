@@ -10,9 +10,13 @@
 
   <ItemGroup>
     <Compile Remove="Components\Client_page\Payment\**" />
+    <Compile Remove="Components\Employee\**" />
     <Content Remove="Components\Client_page\Payment\**" />
+    <Content Remove="Components\Employee\**" />
     <EmbeddedResource Remove="Components\Client_page\Payment\**" />
+    <EmbeddedResource Remove="Components\Employee\**" />
     <None Remove="Components\Client_page\Payment\**" />
+    <None Remove="Components\Employee\**" />
   </ItemGroup>
 
   <ItemGroup>
