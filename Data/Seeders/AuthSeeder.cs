@@ -46,7 +46,7 @@ namespace Data.Seeders
                 {
                     (1, "nexusAdmin", "nexusAdmin@gmail.com", "nexusAdmin123"),
                     (2, "bogartDelaMon", "bogartDelaMonJr@gmail.com", "bogartDelaMonJr123"),
-                    (3, "employee", "employee@gmail.com", "employee123")
+                    (3, "employee", "employee@gmail.com", "Employee123")
                 };
 
 
